@@ -1,0 +1,134 @@
+"lexer.uh" ⟪ import ⟫ ¿
+"parser.uh" ⟪ import ⟫ ¿
+"codegen_c.uh" ⟪ import ⟫ ¿
+"utils.uh" ⟪ import ⟫ ¿
+
+⍝ Compiler entry point using CLI args
+
+ƒ
+  inputFile ⟪ resolve_input ⟫ → path ¿
+  【】 → visited ¿
+  visited path ⟪ load_source ⟫ → source ¿
+  source "" ≡ ⤴ ↵
+    "empty input" ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  source ⟪ lex ⟫ → tokens ¿
+  tokens ⟪ parse_program ⟫ → ast ¿
+  ast ⟪ emit_c ⟫ → csrc ¿
+  outputFile ".c" ⊞⊞ → cpath ¿
+  cpath csrc ⟪ write_file ⟫ → ok ¿
+  ok 1 ≡ ¬ ⤴ ↵
+    "write failed" ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  "cc " cpath ⊞⊞ " runtime/rt.c -I. -lm -lcurl -lsqlite3 -lpthread -o " ⊞⊞ outputFile ⊞⊞ → cmd ¿
+  cmd ⟪ syscall ⟫ → _ ¿
+  "rm -f " cpath ⊞⊞ ⟪ syscall ⟫ → _ ¿
+  0 ⇄ ¿
+↦ outputFile ↦ inputFile ↦ main ¿
+
+⍝ Resolve input to a file path (supports src/main.uh).
+ƒ
+  input ⟪ read_file ⟫ → src ¿
+  src "" ≡ ⤴ ↵
+    input "/src/main.uh" ⊞⊞ → candidate ¿
+    candidate ⟪ read_file ⟫ → src2 ¿
+    src2 "" ≡ ⤴ ↵
+      "" ⇄ ¿
+    ⌫ ¿
+    candidate ⇄ ¿
+  ⌫ ¿
+  input ⇄ ¿
+↦ input ↦ resolve_input ¿
+
+⍝ Resolve an import path to a real file (path, path.uh, path/src/main.uh).
+ƒ
+  path ⟪ read_file ⟫ → src ¿
+  src "" ≡ ⤴ ↵
+    path ".uh" ⊞⊞ → p2 ¿
+    p2 ⟪ read_file ⟫ → src2 ¿
+    src2 "" ≡ ⤴ ↵
+      path "/src/main.uh" ⊞⊞ → p3 ¿
+      p3 ⟪ read_file ⟫ → src3 ¿
+      src3 "" ≡ ⤴ ↵ "" ⇄ ¿ ⌫ ¿
+      p3 ⇄ ¿
+    ⌫ ¿
+    p2 ⇄ ¿
+  ⌫ ¿
+  path ⇄ ¿
+↦ path ↦ resolve_module_path ¿
+
+⍝ Find directory name of a path.
+ƒ
+  path ⟪ len ⟫ 1 ⊟ → i ¿
+  ∅ → pos ¿
+  i 0 ≽ ⟲ ↵
+    path i ⟪ char_at ⟫ "/" ≡ ⤴ ↵
+      i → pos ¿
+      ⊗ ¿
+    ⌫ ¿
+    i 1 ⊟ → i ¿
+  ⌫ ¿
+  pos ∅ ≡ ⤴ ↵ "" ⇄ ¿ ⌫ ¿
+  path 0 pos ⟪ substr ⟫ ⇄ ¿
+↦ path ↦ dirname ¿
+
+⍝ Load source and inline imports.
+ƒ
+  visited ⟪ len ⟫ → _ ¿
+  path ⟪ resolve_module_path ⟫ → rpath ¿
+  rpath "" ≡ ⤴ ↵ "" ⇄ ¿ ⌫ ¿
+  rpath visited ∈ ⤴ ↵ "" ⇄ ¿ ⌫ ¿
+  visited rpath ⟪ append ⟫ → visited ¿
+
+  rpath ⟪ read_file ⟫ → src ¿
+  src "" ≡ ⤴ ↵ "" ⇄ ¿ ⌫ ¿
+
+  rpath ⟪ dirname ⟫ → dir ¿
+  src ⟪ lex ⟫ → toks ¿
+  "" → out ¿
+  0 → i ¿
+  toks ⟪ len ⟫ → n ¿
+  i 3 ⊞ n ≼ ⟲ ↵
+    toks i ⌈ ⌉ → t0 ¿
+    toks i 1 ⊞ ⌈ ⌉ → t1 ¿
+    toks i 2 ⊞ ⌈ ⌉ → t2 ¿
+    toks i 3 ⊞ ⌈ ⌉ → t3 ¿
+    t0 "kind" ⌈ ⌉ "string" ≡
+    t1 "text" ⌈ ⌉ "⟪" ≡ ∧
+    t2 "kind" ⌈ ⌉ "ident" ≡ ∧
+    t2 "text" ⌈ ⌉ "import" ≡ ∧
+    t3 "text" ⌈ ⌉ "⟫" ≡ ∧
+    ⤴ ↵
+      t0 "text" ⌈ ⌉ → rel ¿
+      rel 0 ⟪ char_at ⟫ "/" ≡ ⤴ ↵
+        rel → full ¿
+      ⌫ ⤵ ↵
+        dir "" ≡ ⤴ ↵
+          rel → full ¿
+        ⌫ ⤵ ↵
+          dir "/" ⊞⊞ rel ⊞⊞ → full ¿
+        ⌫ ¿
+      ⌫ ¿
+      full ⟪ resolve_module_path ⟫ → full2 ¿
+      full2 "" ≡ ⤴ ↵ "" → piece ¿ ⌫ ⤵ ↵
+        visited full2 ⟪ load_source ⟫ → piece ¿
+      ⌫ ¿
+      out piece ⊞⊞ → out ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out src ⊞⊞ ⇄ ¿
+↦ visited ↦ path ↦ load_source ¿
+
+⟪ args ⟫ → argv ¿
+argv ⟪ len ⟫ → argc ¿
+
+argc 3 ≺ ⤴ ↵
+  "usage: unhingedc <input.uh> <output>" ⊢ ¿
+⌫ ⤵ ↵
+  argv 1 ⌈ ⌉ → inputFile ¿
+  argv 2 ⌈ ⌉ → outputFile ¿
+  outputFile inputFile ⟪ main ⟫ ⊢ ¿
+⌫ ¿

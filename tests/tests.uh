@@ -1,0 +1,115 @@
+⎕ → sys ¿
+sys❴"env"❵⌈⌉ → env ¿
+env "UNHINGEDC" ⌈ ⌉ → unhingedc ¿
+unhingedc ∅ ≡ ⤴ ↵ "build/unhingedc" → unhingedc ¿ ⌫ ¿
+env "RUN_NET" ⌈ ⌉ → runNetStr ¿
+runNetStr "1" ≡ runNetStr "true" ≡ ∨ → runNet ¿
+env "RUN_SMTP" ⌈ ⌉ → runSmtpStr ¿
+runSmtpStr "1" ≡ runSmtpStr "true" ≡ ∨ → runSmtp ¿
+
+"output/data.txt" "Hello from data.txt\n" ⟪ write_file ⟫ → _ ¿
+"output/data.csv" "name,age,city\nAlice,30,Paris\nBob,20,Oslo\nCara,27,Berlin\n" ⟪ write_file ⟫ → _ ¿
+"output/config.json" "{\n  \"database\": {\"host\": \"localhost\", \"port\": 5432},\n  \"features\": {\"newFeature\": false},\n  \"users\": [\n    {\"name\": \"Alice\", \"active\": true},\n    {\"name\": \"Bob\", \"active\": false},\n    {\"name\": \"Cara\", \"active\": true}\n  ]\n}\n" ⟪ write_file ⟫ → _ ¿
+
+【
+  ❴"name": "Arrays", "src": "【1 2 3】→ a ¿\na 0 ⌈ ⌉ ⊢ ¿\na 1 ⌈ ⌉ ⊢ ¿\na 2 ⌈ ⌉ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Basic", "src": "0 → passed ¿\n0 → failed ¿\n\nƒ\n  ⍺ ⍵ ≡ ⇄ ¿\n↦ expected ↦ actual ↦ assert_eq ¿\n\n\"Running: add works\" ⊢ ¿\n7 3 4 ⊞ ⟪ assert_eq ⟫ → ok ¿\nok ⤴ ↵\n  \"  ✓ PASS\" ⊢ ¿\n  passed 1 ⊞ → passed ¿\n⌫ ⤵ ↵\n  \"  ✗ FAIL\" ⊢ ¿\n  failed 1 ⊞ → failed ¿\n⌫ ¿\n\n\"Running: len works\" ⊢ ¿\n3 【1 2 3】⟪ len ⟫ ⟪ assert_eq ⟫ → ok ¿\nok ⤴ ↵\n  \"  ✓ PASS\" ⊢ ¿\n  passed 1 ⊞ → passed ¿\n⌫ ⤵ ↵\n  \"  ✗ FAIL\" ⊢ ¿\n  failed 1 ⊞ → failed ¿\n⌫ ¿\n\n\"Running: dict index works\" ⊢ ¿\n❴\"a\": 1, \"b\": 2❵ → d ¿\n1 d \"a\" ⌈ ⌉ ⟪ assert_eq ⟫ → ok ¿\nok ⤴ ↵\n  \"  ✓ PASS\" ⊢ ¿\n  passed 1 ⊞ → passed ¿\n⌫ ⤵ ↵\n  \"  ✗ FAIL\" ⊢ ¿\n  failed 1 ⊞ → failed ¿\n⌫ ¿\n\n\"Running: contains works\" ⊢ ¿\n⊤ \"a\" ❴\"a\": 1, \"b\": 2❵ ∈ ⟪ assert_eq ⟫ → ok ¿\nok ⤴ ↵\n  \"  ✓ PASS\" ⊢ ¿\n  passed 1 ⊞ → passed ¿\n⌫ ⤵ ↵\n  \"  ✗ FAIL\" ⊢ ¿\n  failed 1 ⊞ → failed ¿\n⌫ ¿\n\n\"\\n\" ⊢ ¿\n\"Passed: \" passed ⍕ ⊞⊞ ⊢ ¿\n\"Failed: \" failed ⍕ ⊞⊞ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Binsearch", "src": "ƒ\n  0 → left ¿\n  ⍺ ⟪ len ⟫ 1 ⊟ → right ¿\n\n  left right ≼ ⟲ ↵\n    left right ⊞ 2 ⊘ ⟪ int ⟫ → mid ¿\n\n    ⍺ mid ⌈ ⌉ ⍵ ≡ ⤴ ↵\n      mid ⇄ ¿\n    ⌫ ¿\n\n    ⍺ mid ⌈ ⌉ ⍵ ≻ ⤴ ↵\n      mid 1 ⊟ → right ¿\n    ⌫ ⤵ ↵\n      mid 1 ⊞ → left ¿\n    ⌫ ¿\n  ⌫ ¿\n\n  1 ¬ ⇄ ¿\n↦ arr ↦ target ↦ binsearch ¿\n\n【1 3 5 7 9】 7 ⟪ binsearch ⟫ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Classes", "src": "⊙ Person ↵\n  \"\" → .name ∷ str ¿\n  0 → .age ∷ int ¿\n\n  ƒ\n    ⍵ → ⍹.name ¿\n    ⍺ → ⍹.age ¿\n  ↦ name ↦ age ↦ __init__ ¿\n\n  ƒ\n    ⍹.name \" is \" ⊞⊞ ⍹.age ⍕ ⊞⊞ \" years old\" ⊞⊞ ⇄ ¿\n  ↦ describe ¿\n⌫ ¿\n\n\"Alice\" 30 ⟪ Person ⟫ → p ¿\np ⟪ describe ⟫ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Cli", "src": "⎕❴\"args\"❵⌈⌉ → args ¿\n\nargs \"--help\" ∈ args \"-h\" ∈ ∨ ⤴ ↵\n  \"Usage: program <input> <output>\" ⊢ ¿\n⌫ ¿\n\nargs ⟪ .len ⟫ 3 ≺ ⤴ ↵\n  \"Error: Input and output files required\" ⊢ ¿\n⌫ ¿\n\nargs 1 ⌈ ⌉ → inputFile ¿\nargs 2 ⌈ ⌉ → outputFile ¿\n\n\"Processing: \" inputFile ⊞⊞ \" -> \" ⊞⊞ outputFile ⊞⊞ ⊢ ¿\n", "args": "input.txt output.txt"❵
+  ❴"name": "Config", "src": "⎕❴\"env\"❵⌈⌉ \"ENV\" ⌈ ⌉ → env ¿\nenv ∅ ≡ ⤴ ↵ \"development\" → env ¿ ⌫ ¿\n\n❴\n  \"development\": ❴\n    \"db\": ❴\"host\": \"localhost\", \"port\": 5432❵,\n    \"debug\": ⊤,\n    \"logLevel\": \"DEBUG\"\n  ❵,\n  \"production\": ❴\n    \"db\": ❴\"host\": \"prod-db.example.com\", \"port\": 5432❵,\n    \"debug\": ⊥,\n    \"logLevel\": \"INFO\"\n  ❵\n❵ → configs ¿\n\nconfigs env ⌈ ⌉ → config ¿\n\nconfig ⊢ ¿\n", "args": ""❵
+  ❴"name": "Crypto", "src": "\"crypto\" ⎕ → crypto ¿\n\n\"mySecretPassword123\" ⟪ crypto.sha256 ⟫ → hashed ¿\nhashed ⊢ ¿\n\n32 ⟪ crypto.randomBytes ⟫ ⟪ .hex ⟫ → token ¿\ntoken ⊢ ¿\n\n\"my secret key\" → key ¿\n\"Hello, World!\" → plaintext ¿\nplaintext key ⟪ crypto.encryptAES ⟫ → encrypted ¿\nencrypted key ⟪ crypto.decryptAES ⟫ → decrypted ¿\n\ndecrypted plaintext ≡ ⤴ ↵\n  \"Encryption/Decryption successful!\" ⊢ ¿\n⌫ ¿\n\n\"message\" \"secret\" ⟪ crypto.hmacSHA256 ⟫ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Csv Processing", "src": "\"output/data.csv\" \"r\" ⌸ → file ¿\nfile ⟪ .readall ⟫ → content ¿\nfile ⟪ .close ⟫ ¿\n\ncontent \"\\n\" ⟪ .split ⟫ → lines ¿\nlines 0 ⌈ ⌉ \",\" ⟪ .split ⟫ → headers ¿\n\n【】 → rows ¿\nlines ⟪ .len ⟫ → lineCount ¿\n1 → li ¿\nli lineCount ≺ ⟲ ↵\n  lines li ⌈ ⌉ → line ¿\n  line \"\" ≢ ⤴ ↵\n    line \",\" ⟪ .split ⟫ → values ¿\n    rows values ⟪ .append ⟫ ¿\n  ⌫ ¿\n  li 1 ⊞ → li ¿\n⌫ ¿\n\nrows ⊢ ¿\n", "args": ""❵
+  ❴"name": "Db Sqlite", "src": "❴\"database\": \":memory:\"❵ ⟪ db.connect ⟫ → conn ¿\n\n\"CREATE TABLE users (id INTEGER, name TEXT, email TEXT)\" conn ⟪ .exec ⟫ ¿\n\"INSERT INTO users (id, name, email) VALUES (1, 'Alice', 'alice@example.com')\" conn ⟪ .exec ⟫ ¿\n\n\"SELECT name, email FROM users\" conn ⟪ .query ⟫ → users ¿\nusers 0 ⌈ ⌉ \"name\" ⌈ ⌉ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Dicts", "src": "❴\"name\": \"unhinged\", \"v\": 3❵ → d ¿\nd \"name\" ⌈ ⌉ ⊢ ¿\n\"name\" d ∈ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Fibonacci", "src": "ƒ\n  ⍵ 2 ≺ ⤴ ↵\n    ⍵ ⇄ ¿\n  ⌫ ¿\n  ⍵ 1 ⊟ ⟪ fib ⟫ ⍵ 2 ⊟ ⟪ fib ⟫ ⊞ ⇄ ¿\n↦ n ↦ fib ¿\n\n10 ⟪ fib ⟫ ⊢ ¿\n", "args": ""❵
+  ❴"name": "File Io", "src": "\"output/data.txt\" \"r\" ⌸ → f ∷ file ¿\n\nf ∅ ≢ ⤴ ↵\n  f ⟪ .read ⟫ → content ¿\n  content ⊢ ¿\n  f ⟪ .close ⟫ ¿\n⌫ ⤵ ↵\n  \"File not found!\" ⊢ ¿\n⌫ ¿\n", "args": ""❵
+  ❴"name": "Fizzbuzz", "src": "1 101 ⥁ i ↵\n  i 15 ⊙ 0 ≡ ⤴ ↵\n    \"FizzBuzz\" ⊢ ¿\n  ⌫ ⤵ i 3 ⊙ 0 ≡ ⤴ ↵\n    \"Fizz\" ⊢ ¿\n  ⌫ ⤵ i 5 ⊙ 0 ≡ ⤴ ↵\n    \"Buzz\" ⊢ ¿\n  ⌫ ⤵ ↵\n    i ⊢ ¿\n  ⌫ ¿\n⌫ ¿\n", "args": ""❵
+  ❴"name": "Hello", "src": "\"Hello, World!\" ⊢ ¿\n", "args": ""❵
+  ❴"name": "Json Processing", "src": "\"output/config.json\" \"r\" ⌸ ⟪ .readall ⟫ ⟪ json.parse ⟫ → config ¿\n\nconfig❴\"database\"❵⌈⌉ ❴\"host\"❵⌈⌉ → dbHost ¿\nconfig❴\"database\"❵⌈⌉ ❴\"port\"❵⌈⌉ → dbPort ¿\n\nconfig❴\"features\"❵⌈⌉ ❴\"newFeature\"❵← ⊤ ¿\n\n【】 → activeUsers ¿\nconfig❴\"users\"❵⌈⌉ ⥁ u ↵\n  u❴\"active\"❵⌈⌉ ⤴ ↵\n    activeUsers u❴\"name\"❵⌈⌉ ⟪ .append ⟫ ¿\n  ⌫ ¿\n⌫ ¿\n\nactiveUsers ⊢ ¿\n", "args": ""❵
+  ❴"name": "Logging", "src": "⊙ Logger ↵\n  \"INFO\" → .level ∷ str ¿\n  ∅ → .file ¿\n\n  ƒ\n    ⍵ → ⍹.level ¿\n    ⍺ ∅ ≢ ⤴ ↵\n      ⍺ \"a\" ⌸ → ⍹.file ¿\n    ⌫ ¿\n  ↦ level ↦ logFile ↦ __init__ ¿\n\n  ƒ\n    ⟪ time.now ⟫ ⟪ .format ⟫ → timestamp ¿\n    \"[\" timestamp ⊞⊞ \"] [\" ⊞⊞ ⍺ ⊞⊞ \"] \" ⊞⊞ ⍵ ⊞⊞ → message ¿\n    message ⊢ ¿\n    ⍹.file ∅ ≢ ⤴ ↵\n      ⍹.file message \"\\n\" ⊞⊞ ⟪ .write ⟫ ¿\n    ⌫ ¿\n  ↦ level ↦ msg ↦ _log ¿\n\n  ƒ ⍵ \"DEBUG\" ⍹ ⟪ ._log ⟫ ↦ msg ↦ debug ¿\n  ƒ ⍵ \"INFO\" ⍹ ⟪ ._log ⟫ ↦ msg ↦ info ¿\n  ƒ ⍵ \"WARN\" ⍹ ⟪ ._log ⟫ ↦ msg ↦ warn ¿\n  ƒ ⍵ \"ERROR\" ⍹ ⟪ ._log ⟫ ↦ msg ↦ error ¿\n⌫ ¿\n\n\"INFO\" \"output/app.log\" ⟪ Logger ⟫ → log ¿\n\"Application started\" log ⟪ .info ⟫ ¿\n\"Something went wrong\" log ⟪ .error ⟫ ¿\n", "args": ""❵
+  ❴"name": "Matmul", "src": "ƒ\n  ⍺ ⟪ len ⟫ → rows ¿\n  ⍵ ⟪ len ⟫ → cols ¿\n  【】 → out ¿\n\n  0 → i ¿\n  i rows ≺ ⟲ ↵\n    ⍺ i ⌈ ⌉ → row ¿\n    【】 → outrow ¿\n    0 → j ¿\n    j cols ≺ ⟲ ↵\n      0 → sum ¿\n      0 → k ¿\n      k row ⟪ len ⟫ ≺ ⟲ ↵\n        row k ⌈ ⌉ ⍵ k ⌈ ⌉ j ⌈ ⌉ ⊠ sum ⊞ → sum ¿\n        k 1 ⊞ → k ¿\n      ⌫ ¿\n      outrow sum ⟪ .append ⟫ ¿\n      j 1 ⊞ → j ¿\n    ⌫ ¿\n    out outrow ⟪ .append ⟫ ¿\n    i 1 ⊞ → i ¿\n  ⌫ ¿\n\n  out ⇄ ¿\n↦ a ↦ b ↦ matmul ¿\n\n【【1 2】【3 4】】→ m1 ¿\n【【5 6】【7 8】】→ m2 ¿\nm1 m2 ⟪ matmul ⟫ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Nested Data", "src": "【【1 2 3】【4 5 6】【7 8 9】】→ data ¿\n\ndata λ ⍵ ⊞ ⌿ ⥁ → rowsums ¿\nrowsums ⊢ ¿\n\ndata λ ⍵ ⊞ ⌿ ⥁ ⊞ ⌿ → total ¿\n\ntotal ⊢ ¿\n", "args": ""❵
+  ❴"name": "Qsort", "src": "ƒ\n  ⍵ ⟪ len ⟫ 1 ≼ ⤴ ↵\n    ⍵ ⇄ ¿\n  ⌫ ¿\n\n  ⍵ ⍵ ⟪ len ⟫ 2 ⊘ ⌈ ⌉ → pivot ¿\n\n  ⍵ λ ⍵ pivot ≺ ⥁ → less ¿\n  ⍵ λ ⍵ pivot ≡ ⥁ → equal ¿\n  ⍵ λ ⍵ pivot ≻ ⥁ → greater ¿\n\n  less ⟪ qsort ⟫ equal ⊞⊞ greater ⟪ qsort ⟫ ⊞⊞ ⇄ ¿\n↦ arr ↦ qsort ¿\n\n【64 34 25 12 22 11 90】⟪ qsort ⟫ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Stdlib", "src": "0 → passed ¿\n0 → failed ¿\n\nƒ\n  ⍺ ⍵ ≡ ⇄ ¿\n↦ expected ↦ actual ↦ assert_eq ¿\n\n\"Running: sha256 works\" ⊢ ¿\n\"hello\" ⟪ crypto.sha256 ⟫ → hash ¿\n\"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\" hash ⟪ assert_eq ⟫ → ok ¿\nok ⤴ ↵\n  \"  ✓ PASS\" ⊢ ¿\n  passed 1 ⊞ → passed ¿\n⌫ ⤵ ↵\n  \"  ✗ FAIL\" ⊢ ¿\n  failed 1 ⊞ → failed ¿\n⌫ ¿\n\n\"Running: aes roundtrip works\" ⊢ ¿\n\"key\" → key ¿\n\"Hello\" → plaintext ¿\nplaintext key ⟪ crypto.encryptAES ⟫ → encrypted ¿\nencrypted key ⟪ crypto.decryptAES ⟫ → decrypted ¿\nplaintext decrypted ⟪ assert_eq ⟫ → ok ¿\nok ⤴ ↵\n  \"  ✓ PASS\" ⊢ ¿\n  passed 1 ⊞ → passed ¿\n⌫ ⤵ ↵\n  \"  ✗ FAIL\" ⊢ ¿\n  failed 1 ⊞ → failed ¿\n⌫ ¿\n\n\"Running: sqlite works\" ⊢ ¿\n❴\"database\": \":memory:\"❵ ⟪ db.connect ⟫ → conn ¿\n\"CREATE TABLE t (id INTEGER, name TEXT)\" conn ⟪ .exec ⟫ → ok ¿\nok 1 ≡ ⤴ ↵\n  \"INSERT INTO t (id, name) VALUES (1, 'Alice')\" conn ⟪ .exec ⟫ ¿\n  \"SELECT name FROM t\" conn ⟪ .query ⟫ → rows ¿\n  \"Alice\" rows 0 ⌈ ⌉ \"name\" ⌈ ⌉ ⟪ assert_eq ⟫ → ok ¿\n⌫ ¿\nok ⤴ ↵\n  \"  ✓ PASS\" ⊢ ¿\n  passed 1 ⊞ → passed ¿\n⌫ ⤵ ↵\n  \"  ✗ FAIL\" ⊢ ¿\n  failed 1 ⊞ → failed ¿\n⌫ ¿\n\n\"\\n\" ⊢ ¿\n\"Passed: \" passed ⍕ ⊞⊞ ⊢ ¿\n\"Failed: \" failed ⍕ ⊞⊞ ⊢ ¿\n", "args": ""❵
+  ❴"name": "String Processing", "src": "\"hello world\" → text ¿\ntext \" \" ⟪ split ⟫ → words ¿\nwords λ ⍵ ⟪ upper ⟫ ⥁ → uppered ¿\nuppered \" \" ⟪ join ⟫ → result ¿\nresult ⊢ ¿\n", "args": ""❵
+  ❴"name": "Syscall", "src": "\"echo hi\" ⟪ syscall ⟫ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Testing", "src": "ƒ\n  ⍺ ⍵ ≡ ⤴ ↵\n    \"PASS\" ⊢ ¿\n  ⌫ ⤵ ↵\n    \"FAIL\" ⊢ ¿\n  ⌫ ¿\n↦ expected ↦ actual ↦ assert_eq ¿\n\n\"Addition works\" ⊢ ¿\n2 3 ⊞ 5 ⟪ assert_eq ⟫ ¿\n\n\"Arrays concatenate\" ⊢ ¿\n【1 2】【3 4】⊞⊞ ⊢ ¿\n", "args": ""❵
+  ❴"name": "Threads", "src": "ƒ\n  ⍵ λ item ↵\n    item 2 ⊛ ⊢ ¿\n  ⌫ ⥁ ¿\n↦ items ↦ worker ¿\n\n【1 2 3 4 5 6 7 8】→ data ¿\ndata \"worker\" ⟪ .thread ⟫ → t ¿\nt ⟪ .join ⟫ ¿\n", "args": ""❵
+  ❴"name": "Validation", "src": "⊙ Validator ↵\n  ƒ\n    ⍵ ∅ ≡ ⍵ \"\" ≡ ∨ ⤴ ↵\n      ⊥ ⇄ ¿\n    ⌫ ¿\n    ⊤ ⇄ ¿\n  ↦ value ↦ required ¿\n\n  ƒ\n    ⍵ ⟪ type ⟫ \"str\" ≡ ⇄ ¿\n  ↦ value ↦ isString ¿\n\n  ƒ\n    ⍵ ⟪ type ⟫ \"int\" ≡ ⍵ ⟪ type ⟫ \"float\" ≡ ∨ ⇄ ¿\n  ↦ value ↦ isNumber ¿\n\n  ƒ\n    ⍵ ⍺ ≽ ⍵ ⍵ ≼ ∧ ⇄ ¿\n  ↦ value ↦ min ↦ max ↦ between ¿\n\n  ƒ\n    ⍵ ⟪ .match ⟫ ⍺ ∅ ≢ ⇄ ¿\n  ↦ value ↦ pattern ↦ matches ¿\n⌫ ¿\n\n❴\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\",\n  \"age\": 25\n❵ → userData ¿\n\n⟪ Validator ⟫ → v ¿\n\nuserData❴\"name\"❵⌈⌉ v ⟪ .required ⟫ ⤴ ↵\n  userData❴\"email\"❵⌈⌉ \"^[^@]+@[^@]+\\\\.[^@]+$\" v ⟪ .matches ⟫ ⤴ ↵\n    userData❴\"age\"❵⌈⌉ 0 120 v ⟪ .between ⟫ ⤴ ↵\n      \"Validation passed!\" ⊢ ¿\n    ⌫ ⤵ ↵\n      \"Invalid age\" ⊢ ¿\n    ⌫ ¿\n  ⌫ ⤵ ↵\n    \"Invalid email\" ⊢ ¿\n  ⌫ ¿\n⌫ ⤵ ↵\n  \"Name is required\" ⊢ ¿\n⌫ ¿\n", "args": ""❵
+】 → cases ¿
+
+"\"smtp\" ⎕ → smtp ¿\n\n⎕ → sys ¿\nsys❴\"env\"❵⌈⌉ → env ¿\n\nenv \"SMTP_HOST\" ⌈ ⌉ → host ¿\nhost ∅ ≡ ⤴ ↵ \"localhost\" → host ¿ ⌫ ¿\nenv \"SMTP_PORT\" ⌈ ⌉ → portStr ¿\nportStr ∅ ≡ ⤴ ↵ 2525 → port ¿ ⌫ ⤵ ↵ portStr ⟪ int ⟫ → port ¿ ⌫ ¿\nenv \"SMTP_USER\" ⌈ ⌉ → user ¿\nuser ∅ ≡ ⤴ ↵ \"\" → user ¿ ⌫ ¿\nenv \"SMTP_PASS\" ⌈ ⌉ → pass ¿\npass ∅ ≡ ⤴ ↵ \"\" → pass ¿ ⌫ ¿\nenv \"SMTP_TLS\" ⌈ ⌉ → tlsStr ¿\ntlsStr \"1\" ≡ tlsStr \"true\" ≡ ∨ → tls ¿\nenv \"SMTP_STARTTLS\" ⌈ ⌉ → stlsStr ¿\nstlsStr \"1\" ≡ stlsStr \"true\" ≡ ∨ → starttls ¿\nenv \"SMTP_FROM\" ⌈ ⌉ → from ¿\nfrom ∅ ≡ ⤴ ↵ \"sender@example.com\" → from ¿ ⌫ ¿\n\n❴\n  \"host\": host,\n  \"port\": port,\n  \"username\": user,\n  \"password\": pass,\n  \"tls\": tls,\n  \"starttls\": starttls\n❵ ⟪ smtp.connect ⟫ → client ¿\n\n❴\n  \"from\": from,\n  \"to\": 【\"alt.the.ai@gmail.com\"】,\n  \"subject\": \"Hello from UNHINGED!\",\n  \"body\": \"This is a test email.\",\n  \"html\": \"<h1>Hello from UNHINGED!</h1><p>This is a test email.</p>\"\n❵ client ⟪ .send ⟫ ¿\n\nclient ⟪ .disconnect ⟫ ¿\n" → email_uh ¿
+"\"net/http\" ⎕ → http ¿\n\nƒ\n  ⍺ ⟪ .method ⟫ \"GET\" ≡ ⤴ ↵\n    ❴\"status\": 200, \"body\": \"Hello from UNHINGED!\"❵ ⍵ ⟪ .json ⟫ ¿\n  ⌫ ⤵ ↵\n    ❴\"status\": 405, \"error\": \"Method not allowed\"❵ ⍵ ⟪ .json ⟫ ¿\n  ⌫ ¿\n↦ req ↦ res ↦ handler ¿\n\n\"/\" handler ⟪ http.handle ⟫ ¿\n\":8081\" ⟪ http.listen ⟫ ¿\n" → http_server_uh ¿
+"\"net/http\" ⎕ → http ¿\n\n❴\n  \"url\": \"http://127.0.0.1:8081/\",\n  \"headers\": ❴\"User-Agent\": \"UNHINGED/1.0\"❵\n❵ ⟪ http.get ⟫ → response ¿\n\nresponse❴\"status\"❵⌈⌉ 200 ≡ ⤴ ↵\n  response❴\"body\"❵⌈⌉ ⟪ json.parse ⟫ → data ¿\n  data❴\"body\"❵⌈⌉ ⊢ ¿\n⌫ ⤵ ↵\n  \"Request failed\" ⊢ ¿\n⌫ ¿\n" → rest_client_uh ¿
+"\"websocket\" ⎕ → ws ¿\n\n\"ws://127.0.0.1:8082/\" ⟪ ws.connect ⟫ → conn ¿\n\n❴\"type\": \"ping\"❵ ⟪ json.stringify ⟫ conn ⟪ .send ⟫ ¿\nconn ⟪ .receive ⟫ → msg ¿\n\nmsg ∅ ≢ ⤴ ↵\n  msg ⊢ ¿\n⌫ ¿\n" → websocket_client_uh ¿
+"\"websocket\" ⎕ → ws ¿\n\nƒ\n  \"Client connected\" ⊢ ¿\n  ⊤ ⟲ ↵\n    ⍵ ⟪ .receive ⟫ → msg ¿\n    msg ∅ ≡ msg \"\" ≡ ∨ ⤴ ↵\n      ⊗ ¿\n    ⌫ ¿\n    msg ⟪ json.parse ⟫ → data ¿\n    data❴\"type\"❵⌈⌉ \"ping\" ≡ ⤴ ↵\n      ❴\"type\": \"pong\", \"timestamp\": ⟪ time.now ⟫❵ ⟪ json.stringify ⟫ ⍵ ⟪ .send ⟫ ¿\n    ⌫ ⤵ data❴\"type\"❵⌈⌉ \"message\" ≡ ⤴ ↵\n      \"Received: \" data❴\"text\"❵⌈⌉ ⊞⊞ ⊢ ¿\n      data ⟪ json.stringify ⟫ ⍵ ⟪ .send ⟫ ¿\n    ⌫ ¿\n  ⌫ ¿\n↦ conn ↦ handleConnection ¿\n\n❴\"port\": 8082, \"handler\": handleConnection❵ ⟪ ws.serve ⟫ ¿\n" → websocket_server_uh ¿
+
+0 → i ¿
+cases ⟪ .len ⟫ → n ¿
+i n ≺ ⟲ ↵
+  cases i ⌈ ⌉ → c ¿
+  c❴"name"❵⌈⌉ → name ¿
+  c❴"src"❵⌈⌉ → src ¿
+  c❴"args"❵⌈⌉ → args ¿
+  "===== " name ⊞⊞ " =====" ⊞⊞ ⊢ ¿
+  "/tmp/uh_case_" i ⍕ ⊞⊞ ".uh" ⊞⊞ → path ¿
+  "/tmp/uh_case_" i ⍕ ⊞⊞ → bin ¿
+  path src ⟪ write_file ⟫ → ok ¿
+  ok 1 ≡ ¬ ⤴ ↵ "write failed" ⊢ ¿ ⌫ ¿
+  unhingedc " " ⊞⊞ path ⊞⊞ " " ⊞⊞ bin ⊞⊞ → cmd ¿
+  cmd ⟪ syscall ⟫ → out ¿
+  out "" ≢ ⤴ ↵ out ⊢ ¿ ⌫ ¿
+  args "" ≡ ⤴ ↵ bin → rcmd ¿ ⌫ ⤵ ↵ bin " " ⊞⊞ args ⊞⊞ → rcmd ¿ ⌫ ¿
+  rcmd ⟪ syscall ⟫ → rout ¿
+  rout "" ≢ ⤴ ↵ rout ⊢ ¿ ⌫ ¿
+  i 1 ⊞ → i ¿
+⌫ ¿
+
+runNet ⤴ ↵
+  "===== http_server + rest_client =====" ⊢ ¿
+  "/tmp/uh_http_server.uh" → hspath ¿
+  hspath http_server_uh ⟪ write_file ⟫ → _ ¿
+  "/tmp/uh_http_server" → hsbin ¿
+  unhingedc " " ⊞⊞ hspath ⊞⊞ " " ⊞⊞ hsbin ⊞⊞ ⟪ syscall ⟫ → _ ¿
+  "/tmp/uh_rest_client.uh" → rcpath ¿
+  rcpath rest_client_uh ⟪ write_file ⟫ → _ ¿
+  "/tmp/uh_rest_client" → rcbin ¿
+  unhingedc " " ⊞⊞ rcpath ⊞⊞ " " ⊞⊞ rcbin ⊞⊞ ⟪ syscall ⟫ → _ ¿
+  "sh -c "" ⊞⊞ hsbin ⊞⊞ " >/tmp/uh_http.log 2>&1 & echo $!"" ⟪ syscall ⟫ → pidStr ¿
+  pidStr ⟪ int ⟫ → pid ¿
+  "sleep 0.2" ⟪ syscall ⟫ → _ ¿
+  rcbin ⟪ syscall ⟫ → rout ¿
+  rout "" ≢ ⤴ ↵ rout ⊢ ¿ ⌫ ¿
+  "kill " pid ⍕ ⊞⊞ ⟪ syscall ⟫ → _ ¿
+
+  "===== websocket_server + websocket_client =====" ⊢ ¿
+  "/tmp/uh_ws_server.uh" → wspath ¿
+  wspath websocket_server_uh ⟪ write_file ⟫ → _ ¿
+  "/tmp/uh_ws_server" → wsbin ¿
+  unhingedc " " ⊞⊞ wspath ⊞⊞ " " ⊞⊞ wsbin ⊞⊞ ⟪ syscall ⟫ → _ ¿
+  "/tmp/uh_ws_client.uh" → wcpath ¿
+  wcpath websocket_client_uh ⟪ write_file ⟫ → _ ¿
+  "/tmp/uh_ws_client" → wcbin ¿
+  unhingedc " " ⊞⊞ wcpath ⊞⊞ " " ⊞⊞ wcbin ⊞⊞ ⟪ syscall ⟫ → _ ¿
+  "sh -c "" ⊞⊞ wsbin ⊞⊞ " >/tmp/uh_ws.log 2>&1 & echo $!"" ⟪ syscall ⟫ → wpidStr ¿
+  wpidStr ⟪ int ⟫ → wpid ¿
+  "sleep 0.2" ⟪ syscall ⟫ → _ ¿
+  wcbin ⟪ syscall ⟫ → wrout ¿
+  wrout "" ≢ ⤴ ↵ wrout ⊢ ¿ ⌫ ¿
+  "kill " wpid ⍕ ⊞⊞ ⟪ syscall ⟫ → _ ¿
+⌫ ⤵ ↵
+  "SKIP net tests (set RUN_NET=1)" ⊢ ¿
+⌫ ¿
+
+runSmtp ⤴ ↵
+  "===== smtp =====" ⊢ ¿
+  "/tmp/uh_email.uh" → ep ¿
+  ep email_uh ⟪ write_file ⟫ → _ ¿
+  "/tmp/uh_email" → eb ¿
+  unhingedc " " ⊞⊞ ep ⊞⊞ " " ⊞⊞ eb ⊞⊞ ⟪ syscall ⟫ → _ ¿
+  eb ⟪ syscall ⟫ → eout ¿
+  eout "" ≢ ⤴ ↵ eout ⊢ ¿ ⌫ ¿
+⌫ ⤵ ↵
+  "SKIP smtp test (set RUN_SMTP=1)" ⊢ ¿
+⌫ ¿

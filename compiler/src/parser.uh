@@ -1,0 +1,1645 @@
+"utils.uh" ⟪ import ⟫ ¿
+
+⍝ Parser producing a simple AST dict
+
+⍝ Token helpers
+ƒ
+  tok "kind" ⌈ ⌉ → k ¿
+  k kind ≡ ⇄ ¿
+↦ kind ↦ tok ↦ is_kind ¿
+
+ƒ
+  tok "text" ⌈ ⌉ → t ¿
+  t text ≡ ⇄ ¿
+↦ text ↦ tok ↦ is_text ¿
+
+ƒ
+  ❴"tokens": tokens, "pos": 0❵ ⇄ ¿
+↦ tokens ↦ new_state ¿
+
+ƒ
+  st "pos" ⌈ ⌉ → p ¿
+  st "tokens" ⌈ ⌉ → toks ¿
+  p toks ⟪ len ⟫ ≽ ⇄ ¿
+↦ st ↦ eof ¿
+
+ƒ
+  st "tokens" ⌈ ⌉ → toks ¿
+  st "pos" ⌈ ⌉ → p ¿
+  toks p ⌈ ⌉ ⇄ ¿
+↦ st ↦ peek ¿
+
+ƒ
+  st "tokens" ⌈ ⌉ → toks ¿
+  st "pos" ⌈ ⌉ → p ¿
+  toks p ⌈ ⌉ → tok ¿
+  p 1 ⊞ → p ¿
+  ❴"tokens": toks, "pos": p❵ → st2 ¿
+  ❴"tok": tok, "state": st2❵ ⇄ ¿
+↦ st ↦ next_tok ¿
+
+ƒ
+  tok sym ⟪ is_text ⟫ ⇄ ¿
+↦ sym ↦ tok ↦ is_sym ¿
+
+⍝ Parse array literal (simple tokens only)
+ƒ
+  【】 → items ¿
+  ⊥ → done ¿
+  done ⊥ ≡ ⟲ ↵
+    ⊥ → advanced ¿
+    st ⟪ eof ⟫ ⤴ ↵
+      ⊤ → done ¿
+      ⊕ ¿
+    ⌫ ¿
+    st ⟪ peek ⟫ → t ¿
+    t "text" ⌈ ⌉ "】" ≡ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ⊤ → done ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    t "kind" ⌈ ⌉ → k ¿
+    t "text" ⌈ ⌉ → v ¿
+    k "number" ≡ ⤴ ↵
+      ❴"kind": "number", "value": v❵ → node ¿
+    ⌫ ⤵ k "string" ≡ ⤴ ↵
+      ❴"kind": "string", "value": v❵ → node ¿
+    ⌫ ⤵ k "ident" ≡ ⤴ ↵
+      ❴"kind": "ident", "value": v❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "⊤" ≡ ∧ ⤴ ↵
+      ❴"kind": "bool", "value": "1"❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "⊥" ≡ ∧ ⤴ ↵
+      ❴"kind": "bool", "value": "0"❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "∅" ≡ ∧ ⤴ ↵
+      ❴"kind": "null"❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "【" ≡ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ parse_array ⟫ → res ¿
+      res "items" ⌈ ⌉ → nodeItems ¿
+      res "state" ⌈ ⌉ → st ¿
+      ❴"kind": "array", "items": nodeItems❵ → node ¿
+      ⊤ → advanced ¿
+    ⌫ ⤵ k "symbol" ≡ v "❴" ≡ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ parse_dict ⟫ → res ¿
+      res "pairs" ⌈ ⌉ → nodePairs ¿
+      res "state" ⌈ ⌉ → st ¿
+      ❴"kind": "dict", "pairs": nodePairs❵ → node ¿
+      ⊤ → advanced ¿
+    ⌫ ⤵ ↵
+      ❴"kind": "ident", "value": v❵ → node ¿
+    ⌫ ¿
+
+    advanced ⊥ ≡ ⤴ ↵ st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿ ⌫ ¿
+    items node ⟪ .append ⟫ → items ¿
+  ⌫ ¿
+  ❴"items": items, "state": st❵ ⇄ ¿
+↦ st ↦ parse_array ¿
+
+⍝ Parse dict literal (pairs as simple tokens)
+ƒ
+  【】 → pairs ¿
+  ∅ → keynode ¿
+  ⊥ → done ¿
+  done ⊥ ≡ ⟲ ↵
+    ⊥ → advanced ¿
+    st ⟪ eof ⟫ ⤴ ↵
+      ⊤ → done ¿
+      ⊕ ¿
+    ⌫ ¿
+    st ⟪ peek ⟫ → t ¿
+    t "text" ⌈ ⌉ "❵" ≡ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ⊤ → done ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    t "kind" ⌈ ⌉ → k ¿
+    t "text" ⌈ ⌉ → v ¿
+    k "number" ≡ ⤴ ↵
+      ❴"kind": "number", "value": v❵ → node ¿
+    ⌫ ⤵ k "string" ≡ ⤴ ↵
+      ❴"kind": "string", "value": v❵ → node ¿
+    ⌫ ⤵ k "ident" ≡ ⤴ ↵
+      ❴"kind": "ident", "value": v❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "⊤" ≡ ∧ ⤴ ↵
+      ❴"kind": "bool", "value": "1"❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "⊥" ≡ ∧ ⤴ ↵
+      ❴"kind": "bool", "value": "0"❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "∅" ≡ ∧ ⤴ ↵
+      ❴"kind": "null"❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "【" ≡ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ parse_array ⟫ → res ¿
+      res "items" ⌈ ⌉ → nodeItems ¿
+      res "state" ⌈ ⌉ → st ¿
+      ❴"kind": "array", "items": nodeItems❵ → node ¿
+      ⊤ → advanced ¿
+    ⌫ ⤵ k "symbol" ≡ v "❴" ≡ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ parse_dict ⟫ → res ¿
+      res "pairs" ⌈ ⌉ → nodePairs ¿
+      res "state" ⌈ ⌉ → st ¿
+      ❴"kind": "dict", "pairs": nodePairs❵ → node ¿
+      ⊤ → advanced ¿
+    ⌫ ⤵ ↵
+      ❴"kind": "ident", "value": v❵ → node ¿
+    ⌫ ¿
+
+    advanced ⊥ ≡ ⤴ ↵ st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿ ⌫ ¿
+    keynode ∅ ≡ ⤴ ↵
+      node → keynode ¿
+    ⌫ ⤵ ↵
+      ❴"key": keynode, "val": node❵ → pair ¿
+      pairs pair ⟪ .append ⟫ → pairs ¿
+      ∅ → keynode ¿
+    ⌫ ¿
+  ⌫ ¿
+  ∅ → single ¿
+  pairs ⟪ len ⟫ 0 ≡ keynode ∅ ≢ ∧ ⤴ ↵
+    keynode → single ¿
+  ⌫ ¿
+  ❴"pairs": pairs, "state": st, "single": single❵ ⇄ ¿
+↦ st ↦ parse_dict ¿
+
+⍝ Convert expression tokens to AST expression nodes
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  ⊥ → sawStore ¿
+  toks ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    toks i ⌈ ⌉ → t ¿
+    t "kind" ⌈ ⌉ → k ¿
+    t "text" ⌈ ⌉ → v ¿
+    k "number" ≡ ⤴ ↵
+      ❴"kind": "number", "value": v❵ → node ¿
+    ⌫ ⤵ k "string" ≡ ⤴ ↵
+      ❴"kind": "string", "value": v❵ → node ¿
+    ⌫ ⤵ k "ident" ≡ ⤴ ↵
+      out ⟪ len ⟫ → olen ¿
+      v "⎕" ≡ olen 0 ≻ ∧ ⤴ ↵
+        ❴"kind": "call", "value": "syscall"❵ → node ¿
+        out node ⟪ .append ⟫ → out ¿
+        i 1 ⊞ → i ¿
+        ⊕ ¿
+      ⌫ ¿
+      v "." ⟪ split ⟫ → parts ¿
+      parts ⟪ len ⟫ → plen ¿
+      plen 1 ≻ ⤴ ↵
+        parts 0 ⌈ ⌉ → base ¿
+        base "" ≢ ⤴ ↵
+          parts 1 plen ⟪ slice ⟫ "." ⟪ join ⟫ → field ¿
+          ❴"kind": "ident", "value": base❵ → nodeA ¿
+          ❴"kind": "string", "value": field❵ → nodeB ¿
+          ❴"kind": "op", "value": "⌈"❵ → nodeC ¿
+          out nodeA ⟪ .append ⟫ → out ¿
+          out nodeB ⟪ .append ⟫ → out ¿
+          out nodeC ⟪ .append ⟫ → out ¿
+          i 1 ⊞ → i ¿
+          ⊕ ¿
+        ⌫ ¿
+      ⌫ ¿
+      ❴"kind": "ident", "value": v❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "⊤" ≡ ∧ ⤴ ↵
+      ❴"kind": "bool", "value": "1"❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "⊥" ≡ ∧ ⤴ ↵
+      ❴"kind": "bool", "value": "0"❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "∅" ≡ ∧ ⤴ ↵
+      ❴"kind": "null"❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "【" ≡ ∧ ⤴ ↵
+      i 1 ⊞ → ip1 ¿
+      ❴"tokens": toks, "pos": ip1❵ → st2 ¿
+      st2 ⟪ parse_array ⟫ → res ¿
+      res "items" ⌈ ⌉ → nodeItems ¿
+      res "state" ⌈ ⌉ "pos" ⌈ ⌉ → i ¿
+      i 1 ⊟ → i ¿
+      ❴"kind": "array", "items": nodeItems❵ → node ¿
+    ⌫ ⤵ k "symbol" ≡ v "❴" ≡ ∧ ⤴ ↵
+      i 1 ⊞ → ip1 ¿
+      ❴"tokens": toks, "pos": ip1❵ → st2 ¿
+      st2 ⟪ parse_dict ⟫ → res ¿
+      res "pairs" ⌈ ⌉ → nodePairs ¿
+      res "single" ⌈ ⌉ → singleNode ¿
+      res "state" ⌈ ⌉ "pos" ⌈ ⌉ → i ¿
+      i 1 ⊟ → i ¿
+      singleNode ∅ ≢ ⤴ ↵
+        singleNode → node ¿
+      ⌫ ⤵ ↵
+        ❴"kind": "dict", "pairs": nodePairs❵ → node ¿
+      ⌫ ¿
+    ⌫ ⤵ k "symbol" ≡ ⤴ ↵
+      v "λ" ≡ ⤴ ↵
+        toks ⟪ len ⟫ → tn ¿
+        i 1 ⊞ → ip1 ¿
+        ip1 tn ≺ ⤴ ↵
+          toks ip1 ⌈ ⌉ "kind" ⌈ ⌉ → k1 ¿
+          toks ip1 ⌈ ⌉ "text" ⌈ ⌉ → t1 ¿
+          k1 "symbol" ≡ t1 "↵" ≡ ∧ ⤴ ↵
+            ip1 → j ¿
+            1 → depth ¿
+            j 1 ⊞ → j ¿
+            【】 → bodyToks ¿
+            j tn ≺ ⟲ ↵
+              toks j ⌈ ⌉ → tk ¿
+              tk "kind" ⌈ ⌉ → tkKind ¿
+              tk "text" ⌈ ⌉ → tv ¿
+              tkKind "symbol" ≡ tv "↵" ≡ ∧ ⤴ ↵ depth 1 ⊞ → depth ¿ ⌫ ¿
+              tkKind "symbol" ≡ tv "⌫" ≡ ∧ ⤴ ↵ depth 1 ⊟ → depth ¿ ⌫ ¿
+              depth 0 ≡ tkKind "symbol" ≡ ∧ tv "⌫" ≡ ∧ ⤴ ↵
+                ⊗ ¿
+              ⌫ ¿
+              bodyToks tk ⟪ .append ⟫ → bodyToks ¿
+              j 1 ⊞ → j ¿
+            ⌫ ¿
+            bodyToks ⟪ new_state ⟫ ⟪ parse_stmts ⟫ → bres ¿
+            bres "stmts" ⌈ ⌉ → bodyStmts ¿
+            ❴"kind": "lambda", "params": 【】, "body": bodyStmts❵ → node ¿
+            out node ⟪ .append ⟫ → out ¿
+            j 1 ⊞ → i ¿
+            ⊕ ¿
+          ⌫ ¿
+          k1 "ident" ≡ ip1 1 ⊞ tn ≺ ∧ ⤴ ↵
+            toks ip1 1 ⊞ ⌈ ⌉ "text" ⌈ ⌉ → t2 ¿
+            t2 "↵" ≡ ⤴ ↵
+              toks ip1 ⌈ ⌉ "text" ⌈ ⌉ → p1 ¿
+              ip1 1 ⊞ → j ¿
+              1 → depth ¿
+              j 1 ⊞ → j ¿
+              【】 → bodyToks ¿
+              j tn ≺ ⟲ ↵
+                toks j ⌈ ⌉ → tk ¿
+                tk "kind" ⌈ ⌉ → tkKind ¿
+                tk "text" ⌈ ⌉ → tv ¿
+                tkKind "symbol" ≡ tv "↵" ≡ ∧ ⤴ ↵ depth 1 ⊞ → depth ¿ ⌫ ¿
+                tkKind "symbol" ≡ tv "⌫" ≡ ∧ ⤴ ↵ depth 1 ⊟ → depth ¿ ⌫ ¿
+                depth 0 ≡ tkKind "symbol" ≡ ∧ tv "⌫" ≡ ∧ ⤴ ↵
+                  ⊗ ¿
+                ⌫ ¿
+                bodyToks tk ⟪ .append ⟫ → bodyToks ¿
+                j 1 ⊞ → j ¿
+              ⌫ ¿
+              bodyToks ⟪ new_state ⟫ ⟪ parse_stmts ⟫ → bres ¿
+              bres "stmts" ⌈ ⌉ → bodyStmts ¿
+              ❴"kind": "lambda", "params": 【p1】, "body": bodyStmts❵ → node ¿
+              out node ⟪ .append ⟫ → out ¿
+              j 1 ⊞ → i ¿
+              ⊕ ¿
+            ⌫ ¿
+          ⌫ ¿
+        ⌫ ¿
+
+        i 1 ⊞ → j ¿
+        ⊥ → foundEnd ¿
+        j tn ≺ ⟲ ↵
+          toks j ⌈ ⌉ "kind" ⌈ ⌉ "symbol" ≡ toks j ⌈ ⌉ "text" ⌈ ⌉ "⥁" ≡ ∧ ⤴ ↵
+            ⊤ → foundEnd ¿
+            ⊗ ¿
+          ⌫ ¿
+          j 1 ⊞ → j ¿
+        ⌫ ¿
+        foundEnd ⊥ ≡ ⤴ ↵
+          i 1 ⊞ → i ¿
+          ⊕ ¿
+        ⌫ ¿
+        toks i 1 ⊞ j ⟪ slice ⟫ → bodyToks ¿
+        "__lambda_arg" → param ¿
+        【】 → rewritten ¿
+        0 → bi ¿
+        bodyToks ⟪ len ⟫ → blen ¿
+        bi blen ≺ ⟲ ↵
+          bodyToks bi ⌈ ⌉ → tk ¿
+          tk "kind" ⌈ ⌉ → tkKind ¿
+          tk "text" ⌈ ⌉ → tv ¿
+          tkKind "ident" ≡ tv "⍵" ≡ ∧ ⤴ ↵
+            ❴"kind": "ident", "text": param❵ → tk2 ¿
+            rewritten tk2 ⟪ .append ⟫ → rewritten ¿
+            bi 1 ⊞ → bi ¿
+            ⊕ ¿
+          ⌫ ¿
+          rewritten tk ⟪ .append ⟫ → rewritten ¿
+          bi 1 ⊞ → bi ¿
+        ⌫ ¿
+        rewritten ⟪ expr_from_tokens ⟫ → bodyExpr ¿
+        ❴"kind": "lambda", "params": 【param】, "body_expr": bodyExpr❵ → node ¿
+        out node ⟪ .append ⟫ → out ¿
+        j → i ¿
+        ⊕ ¿
+      ⌫ ¿
+
+      v "⍬" ≡ ⤴ ↵
+        ❴"kind": "array", "items": 【】❵ → node ¿
+        out node ⟪ .append ⟫ → out ¿
+        i 1 ⊞ → i ¿
+        ⊕ ¿
+      ⌫ ¿
+
+      v "⎕" ≡ ⤴ ↵
+        ❴"kind": "call", "value": "syscall"❵ → node ¿
+        out node ⟪ .append ⟫ → out ¿
+        i 1 ⊞ → i ¿
+        ⊕ ¿
+      ⌫ ¿
+
+      v "⇄" ≡ ⤴ ↵
+        ❴"kind": "return_marker"❵ → node ¿
+        out node ⟪ .append ⟫ → out ¿
+        i 1 ⊞ → i ¿
+        ⊕ ¿
+      ⌫ ¿
+
+      v "⟪" ≡ ⤴ ↵
+        toks i 1 ⊞ ⌈ ⌉ → t1 ¿
+        toks i 2 ⊞ ⌈ ⌉ → t2 ¿
+        t1 "kind" ⌈ ⌉ "ident" ≡ t2 "text" ⌈ ⌉ "⟫" ≡ ∧ ⤴ ↵
+          t1 "text" ⌈ ⌉ → fname ¿
+          ❴"kind": "call", "value": fname❵ → node ¿
+          out node ⟪ .append ⟫ → out ¿
+          i 3 ⊞ → i ¿
+          ⊕ ¿
+        ⌫ ¿
+      ⌫ ¿
+
+      v "→" ≡ ⤴ ↵
+        toks i 1 ⊞ ⌈ ⌉ → t1 ¿
+        t1 "kind" ⌈ ⌉ "ident" ≡ ⤴ ↵
+          t1 "text" ⌈ ⌉ → name ¿
+          name "." ⟪ split ⟫ → nparts ¿
+          nparts ⟪ len ⟫ → nplen ¿
+          nplen 1 ≻ ⤴ ↵
+            nparts 0 ⌈ ⌉ → base ¿
+            base "" ≢ ⤴ ↵
+              nparts 1 nplen ⟪ slice ⟫ "." ⟪ join ⟫ → field ¿
+              ❴"kind": "assign_field", "base": base, "field": field❵ → node ¿
+              out node ⟪ .append ⟫ → out ¿
+              i 2 ⊞ → i ¿
+              ⊕ ¿
+            ⌫ ¿
+          ⌫ ¿
+          ❴"kind": "assign", "value": name❵ → node ¿
+          out node ⟪ .append ⟫ → out ¿
+          i 2 ⊞ → i ¿
+          ⊕ ¿
+        ⌫ ¿
+      ⌫ ¿
+
+      v "←" ≡ ⤴ ↵
+        ⊤ → sawStore ¿
+        i 1 ⊞ → i ¿
+        ⊕ ¿
+      ⌫ ¿
+
+      v "⌿" ≡ v "⍀" ≡ ∨ ⤴ ↵
+        out ⟪ len ⟫ → olen ¿
+        olen 0 ≻ ⤴ ↵
+          out olen 1 ⊟ ⌈ ⌉ → prev ¿
+          prev "kind" ⌈ ⌉ "op" ≡ ⤴ ↵
+            prev "value" ⌈ ⌉ → opv ¿
+            out 0 olen 1 ⊟ ⟪ slice ⟫ → out ¿
+            v "⌿" ≡ ⤴ ↵ ❴"kind": "reduce", "op": opv❵ → node ¿ ⌫ ¿
+            v "⍀" ≡ ⤴ ↵ ❴"kind": "scan", "op": opv❵ → node ¿ ⌫ ¿
+            out node ⟪ .append ⟫ → out ¿
+            i 1 ⊞ → i ¿
+            ⊕ ¿
+          ⌫ ¿
+        ⌫ ¿
+      ⌫ ¿
+
+      v "⥁" ≡ ⤴ ↵
+        out ⟪ len ⟫ → olen ¿
+        olen 0 ≻ ⤴ ↵
+          out olen 1 ⊟ ⌈ ⌉ → prev ¿
+          prev "kind" ⌈ ⌉ "lambda" ≡ ⤴ ↵
+            out 0 olen 1 ⊟ ⟪ slice ⟫ → out ¿
+            ❴"kind": "map_lambda", "lambda": prev❵ → node ¿
+            out node ⟪ .append ⟫ → out ¿
+            i 1 ⊞ → i ¿
+            ⊕ ¿
+          ⌫ ¿
+          prev "kind" ⌈ ⌉ "ident" ≡ ⤴ ↵
+            prev "value" ⌈ ⌉ → fname ¿
+            out 0 olen 1 ⊟ ⟪ slice ⟫ → out ¿
+            ❴"kind": "map", "func": fname❵ → node ¿
+            out node ⟪ .append ⟫ → out ¿
+            i 1 ⊞ → i ¿
+            ⊕ ¿
+          ⌫ ¿
+        ⌫ ¿
+      ⌫ ¿
+
+      v "⌉" ≡ ⤴ ↵
+        i 1 ⊞ → i ¿
+        ⊕ ¿
+      ⌫ ¿
+
+      ❴"kind": "op", "value": v❵ → node ¿
+    ⌫ ¿
+    out node ⟪ .append ⟫ → out ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  sawStore ⤴ ↵
+    【】 → cleaned ¿
+    0 → j ¿
+    out ⟪ len ⟫ → m ¿
+    j m ≺ ⟲ ↵
+      out j ⌈ ⌉ → t ¿
+      t "kind" ⌈ ⌉ "return_marker" ≡ ⤴ ↵
+        cleaned t ⟪ .append ⟫ → cleaned ¿
+        j 1 ⊞ → j ¿
+        ⊕ ¿
+      ⌫ ¿
+      cleaned t ⟪ .append ⟫ → cleaned ¿
+      j 1 ⊞ → j ¿
+    ⌫ ¿
+    cleaned ⟪ len ⟫ → clen ¿
+    clen 0 ≻ ⤴ ↵
+      cleaned clen 1 ⊟ ⌈ ⌉ → last ¿
+      last "kind" ⌈ ⌉ "op" ≡ last "value" ⌈ ⌉ "⌈" ≡ ∧ ⤴ ↵
+        cleaned 0 clen 1 ⊟ ⟪ slice ⟫ → cleaned ¿
+      ⌫ ¿
+    ⌫ ¿
+    ❴"kind": "op", "value": "store_index"❵ → si ¿
+    cleaned si ⟪ .append ⟫ → cleaned ¿
+    cleaned ⇄ ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ toks ↦ expr_from_tokens ¿
+
+⍝ Parse statements into AST
+ƒ
+  【】 → stmts ¿
+  【】 → cur ¿
+  0 → lambdaDepth ¿
+  0 → lambdaPending ¿
+  0 → sawLambda ¿
+  ⊥ → done ¿
+  done ⊥ ≡ ⟲ ↵
+    st ⟪ eof ⟫ ⤴ ↵
+      cur ⟪ len ⟫ 0 ≻ ⤴ ↵
+        cur ⟪ expr_from_tokens ⟫ → expr ¿
+        expr ⟪ len ⟫ → elen ¿
+        ∅ → retIdx ¿
+        0 → r ¿
+        r elen ≺ ⟲ ↵
+          expr r ⌈ ⌉ "kind" ⌈ ⌉ "return_marker" ≡ ⤴ ↵
+            r → retIdx ¿
+            ⊗ ¿
+          ⌫ ¿
+          r 1 ⊞ → r ¿
+        ⌫ ¿
+        retIdx ∅ ≢ ⤴ ↵
+          retIdx 0 ≡ ⤴ ↵
+            ❴"kind": "return", "expr": ∅❵ → s ¿
+          ⌫ ⤵ ↵
+            expr 0 retIdx ⟪ slice ⟫ → sub ¿
+            ❴"kind": "return", "expr": sub❵ → s ¿
+          ⌫ ¿
+          stmts s ⟪ .append ⟫ → stmts ¿
+        ⌫ ⤵ ↵
+          ❴"kind": "expr", "expr": expr❵ → s ¿
+          stmts s ⟪ .append ⟫ → stmts ¿
+        ⌫ ¿
+      ⌫ ¿
+      ⊤ → done ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    st ⟪ peek ⟫ → t ¿
+    t "text" ⌈ ⌉ → v ¿
+    t "kind" ⌈ ⌉ → tkKind ¿
+    st "pos" ⌈ ⌉ → pos0 ¿
+
+    tkKind "symbol" ≡ v "λ" ≡ ∧ ⤴ ↵
+      lambdaPending 1 ⊞ → lambdaPending ¿
+    ⌫ ¿
+    lambdaPending 0 ≻ tkKind "symbol" ≡ v "↵" ≡ ∧ ⤴ ↵
+      lambdaDepth 1 ⊞ → lambdaDepth ¿
+      0 → lambdaPending ¿
+    ⌫ ¿
+    lambdaPending 0 ≻ tkKind "ident" ≡ ¬ tkKind "symbol" ≡ v "↵" ≡ ¬ ∧ tkKind "symbol" ≡ v "λ" ≡ ¬ ∧ ∧ ⤴ ↵
+      0 → lambdaPending ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⌫" ≡ ∧ ⤴ ↵
+      cur ⟪ len ⟫ → clen ¿
+      0 → lcount ¿
+      0 → ccount ¿
+      0 → li ¿
+      li clen ≺ ⟲ ↵
+        cur li ⌈ ⌉ → tk ¿
+        tk "kind" ⌈ ⌉ → ck ¿
+        tk "text" ⌈ ⌉ → cv ¿
+        ck "symbol" ≡ cv "λ" ≡ ∧ ⤴ ↵ lcount 1 ⊞ → lcount ¿ ⌫ ¿
+        ck "symbol" ≡ cv "⌫" ≡ ∧ ⤴ ↵ ccount 1 ⊞ → ccount ¿ ⌫ ¿
+        li 1 ⊞ → li ¿
+      ⌫ ¿
+      lcount ccount ≻ ⤴ ↵
+        st ⟪ next_tok ⟫ → res ¿
+        res "tok" ⌈ ⌉ → t2 ¿
+        res "state" ⌈ ⌉ → st ¿
+        cur t2 ⟪ .append ⟫ → cur ¿
+        ⊕ ¿
+      ⌫ ¿
+      sawLambda 0 ≢ ⤴ ↵
+        st ⟪ next_tok ⟫ → res ¿
+        res "tok" ⌈ ⌉ → t2 ¿
+        res "state" ⌈ ⌉ → st ¿
+        cur t2 ⟪ .append ⟫ → cur ¿
+        t2 "kind" ⌈ ⌉ "symbol" ≡ t2 "text" ⌈ ⌉ "λ" ≡ ∧ ⤴ ↵
+          1 → sawLambda ¿
+        ⌫ ¿
+        ⊕ ¿
+      ⌫ ¿
+      lambdaDepth 0 ≻ ⤴ ↵
+        lambdaDepth 1 ⊟ → lambdaDepth ¿
+      ⌫ ⤵ ↵
+        clen 0 ≡ ⤴ ↵
+          ⊤ → done ¿
+          ⊕ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "¿" ≡ ∧ ⤴ ↵
+      cur ⟪ len ⟫ → clen ¿
+      0 → lcount ¿
+      0 → ccount ¿
+      0 → li ¿
+      li clen ≺ ⟲ ↵
+        cur li ⌈ ⌉ → tk ¿
+        tk "kind" ⌈ ⌉ → ck ¿
+        tk "text" ⌈ ⌉ → cv ¿
+        ck "symbol" ≡ cv "λ" ≡ ∧ ⤴ ↵ lcount 1 ⊞ → lcount ¿ ⌫ ¿
+        ck "symbol" ≡ cv "⌫" ≡ ∧ ⤴ ↵ ccount 1 ⊞ → ccount ¿ ⌫ ¿
+        li 1 ⊞ → li ¿
+      ⌫ ¿
+      lcount ccount ≻ ⤴ ↵
+        st ⟪ next_tok ⟫ → res ¿
+        res "tok" ⌈ ⌉ → t2 ¿
+        res "state" ⌈ ⌉ → st ¿
+        cur t2 ⟪ .append ⟫ → cur ¿
+        ⊕ ¿
+      ⌫ ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      cur ⟪ len ⟫ 0 ≻ ⤴ ↵
+        cur ⟪ expr_from_tokens ⟫ → expr ¿
+        expr ⟪ len ⟫ → elen ¿
+        ∅ → retIdx ¿
+        0 → r ¿
+        r elen ≺ ⟲ ↵
+          expr r ⌈ ⌉ "kind" ⌈ ⌉ "return_marker" ≡ ⤴ ↵
+            r → retIdx ¿
+            ⊗ ¿
+          ⌫ ¿
+          r 1 ⊞ → r ¿
+        ⌫ ¿
+        retIdx ∅ ≢ ⤴ ↵
+          retIdx 0 ≡ ⤴ ↵
+            ❴"kind": "return", "expr": ∅❵ → s ¿
+          ⌫ ⤵ ↵
+            expr 0 retIdx ⟪ slice ⟫ → sub ¿
+            ❴"kind": "return", "expr": sub❵ → s ¿
+          ⌫ ¿
+          stmts s ⟪ .append ⟫ → stmts ¿
+        ⌫ ⤵ ↵
+          ❴"kind": "expr", "expr": expr❵ → s ¿
+          stmts s ⟪ .append ⟫ → stmts ¿
+        ⌫ ¿
+      ⌫ ¿
+      【】 → cur ¿
+      0 → lambdaDepth ¿
+      0 → lambdaPending ¿
+      0 → sawLambda ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⤴" ≡ ∧ ⤴ ↵
+      cur ⟪ expr_from_tokens ⟫ → cond ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ parse_block ⟫ → thenRes ¿
+      thenRes "block" ⌈ ⌉ → thenBlk ¿
+      thenRes "state" ⌈ ⌉ → st ¿
+      ∅ → elseBlk ¿
+      st ⟪ peek ⟫ "text" ⌈ ⌉ "⤵" ≡ ⤴ ↵
+        st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+        st ⟪ peek ⟫ "text" ⌈ ⌉ → ev ¿
+        ev "↵" ≡ ⤴ ↵
+          st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+          st ⟪ parse_block ⟫ → elseRes ¿
+          elseRes "block" ⌈ ⌉ → elseBlk ¿
+          elseRes "state" ⌈ ⌉ → st ¿
+        ⌫ ⤵ ↵
+          st ⟪ parse_if_inline ⟫ → elseRes ¿
+          elseRes "stmt" ⌈ ⌉ → elseStmt ¿
+          elseRes "state" ⌈ ⌉ → st ¿
+          elseStmt ∅ ≢ ⤴ ↵
+            【elseStmt】 → elseBlk ¿
+          ⌫ ¿
+        ⌫ ¿
+      ⌫ ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ❴"kind": "if", "cond": cond, "then": thenBlk, "else": elseBlk❵ → s ¿
+      stmts s ⟪ .append ⟫ → stmts ¿
+      【】 → cur ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⟲" ≡ ∧ ⤴ ↵
+      cur ⟪ expr_from_tokens ⟫ → cond ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ parse_block ⟫ → bodyRes ¿
+      bodyRes "block" ⌈ ⌉ → bodyBlk ¿
+      bodyRes "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ❴"kind": "while", "cond": cond, "body": bodyBlk❵ → s ¿
+      stmts s ⟪ .append ⟫ → stmts ¿
+      【】 → cur ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⥁" ≡ ∧ ⤴ ↵
+      st "pos" ⌈ ⌉ → posf ¿
+      st "tokens" ⌈ ⌉ → ftoks ¿
+      ftoks ⟪ len ⟫ → flen ¿
+      ⊥ → isFor ¿
+      posf 2 ⊞ flen ≺ ⤴ ↵
+        ftoks posf 2 ⊞ ⌈ ⌉ "text" ⌈ ⌉ "↵" ≡ ⤴ ↵ ⊤ → isFor ¿ ⌫ ¿
+      ⌫ ¿
+      isFor ⤴ ↵
+        cur ⟪ expr_from_tokens ⟫ → seqExpr ¿
+        seqExpr ⟪ len ⟫ → elen ¿
+        ⊥ → isRange ¿
+        elen 2 ≡ ⤴ ↵
+          seqExpr 0 ⌈ ⌉ "kind" ⌈ ⌉ → k0 ¿
+          seqExpr 1 ⌈ ⌉ "kind" ⌈ ⌉ → k1 ¿
+          k0 "op" ≢ k1 "op" ≢ ∧ k0 "call" ≢ ∧ k1 "call" ≢ ∧ ⤴ ↵
+            ⊤ → isRange ¿
+          ⌫ ¿
+        ⌫ ¿
+
+        st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+        st ⟪ next_tok ⟫ → iterRes ¿
+        iterRes "tok" ⌈ ⌉ "text" ⌈ ⌉ → iterName ¿
+        iterRes "state" ⌈ ⌉ → st ¿
+        st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+        st ⟪ parse_block ⟫ → bodyRes ¿
+        bodyRes "block" ⌈ ⌉ → bodyBlk ¿
+        bodyRes "state" ⌈ ⌉ → st ¿
+        st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+
+        isRange ⤴ ↵
+          seqExpr 0 ⌈ ⌉ → startExpr ¿
+          seqExpr 1 ⌈ ⌉ → endExpr ¿
+          ❴"kind": "for", "iter": iterName, "range": 【startExpr endExpr】, "expr": ∅, "body": bodyBlk❵ → s ¿
+        ⌫ ⤵ ↵
+          ❴"kind": "for", "iter": iterName, "range": ∅, "expr": seqExpr, "body": bodyBlk❵ → s ¿
+        ⌫ ¿
+        stmts s ⟪ .append ⟫ → stmts ¿
+        【】 → cur ¿
+        ⊕ ¿
+      ⌫ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⊗" ≡ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ❴"kind": "break"❵ → s ¿
+      stmts s ⟪ .append ⟫ → stmts ¿
+      【】 → cur ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⊕" ≡ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ❴"kind": "continue"❵ → s ¿
+      stmts s ⟪ .append ⟫ → stmts ¿
+      【】 → cur ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    st ⟪ next_tok ⟫ → res ¿
+    res "tok" ⌈ ⌉ → t2 ¿
+    res "state" ⌈ ⌉ → st ¿
+    cur t2 ⟪ .append ⟫ → cur ¿
+    t2 "kind" ⌈ ⌉ "symbol" ≡ t2 "text" ⌈ ⌉ "λ" ≡ ∧ ⤴ ↵
+      1 → sawLambda ¿
+    ⌫ ¿
+    t2 "kind" ⌈ ⌉ "symbol" ≡ t2 "text" ⌈ ⌉ "λ" ≡ ∧ ⤴ ↵
+      1 → sawLambda ¿
+    ⌫ ¿
+
+    st "pos" ⌈ ⌉ → pos1 ¿
+    pos1 pos0 ≡ st ⟪ eof ⟫ ¬ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+    ⌫ ¿
+  ⌫ ¿
+
+  ❴"stmts": stmts, "state": st❵ ⇄ ¿
+↦ st ↦ parse_stmts ¿
+
+⍝ Parse inline if (used for else-if chains). Does not consume trailing ¿.
+ƒ
+  【】 → cur ¿
+  0 → lambdaDepth ¿
+  0 → lambdaPending ¿
+  0 → sawLambda ¿
+  ⊥ → done ¿
+  done ⊥ ≡ ⟲ ↵
+    st ⟪ peek ⟫ → t ¿
+    t "text" ⌈ ⌉ → v ¿
+    t "kind" ⌈ ⌉ → tkKind ¿
+
+    tkKind "symbol" ≡ v "⤴" ≡ ∧ ⤴ ↵
+      cur ⟪ expr_from_tokens ⟫ → cond ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ parse_block ⟫ → thenRes ¿
+      thenRes "block" ⌈ ⌉ → thenBlk ¿
+      thenRes "state" ⌈ ⌉ → st ¿
+      ∅ → elseBlk ¿
+      st ⟪ peek ⟫ "text" ⌈ ⌉ "⤵" ≡ ⤴ ↵
+        st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+        st ⟪ peek ⟫ "text" ⌈ ⌉ → ev ¿
+        ev "↵" ≡ ⤴ ↵
+          st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+          st ⟪ parse_block ⟫ → elseRes ¿
+          elseRes "block" ⌈ ⌉ → elseBlk ¿
+          elseRes "state" ⌈ ⌉ → st ¿
+        ⌫ ⤵ ↵
+          st ⟪ parse_if_inline ⟫ → elseRes ¿
+          elseRes "stmt" ⌈ ⌉ → elseStmt ¿
+          elseRes "state" ⌈ ⌉ → st ¿
+          elseStmt ∅ ≢ ⤴ ↵
+            【elseStmt】 → elseBlk ¿
+          ⌫ ¿
+        ⌫ ¿
+      ⌫ ¿
+      ❴"stmt": ❴"kind": "if", "cond": cond, "then": thenBlk, "else": elseBlk❵, "state": st❵ ⇄ ¿
+    ⌫ ¿
+
+    st ⟪ next_tok ⟫ → res ¿
+    res "tok" ⌈ ⌉ → t2 ¿
+    res "state" ⌈ ⌉ → st ¿
+    cur t2 ⟪ .append ⟫ → cur ¿
+  ⌫ ¿
+  ❴"stmt": ∅, "state": st❵ ⇄ ¿
+↦ st ↦ parse_if_inline ¿
+
+⍝ Parse a single statement
+ƒ
+  【】 → cur ¿
+  ⊥ → done ¿
+  done ⊥ ≡ ⟲ ↵
+    st ⟪ eof ⟫ ⤴ ↵
+      cur ⟪ len ⟫ 0 ≻ ⤴ ↵
+        cur ⟪ expr_from_tokens ⟫ → expr ¿
+        expr ⟪ len ⟫ → elen ¿
+        ∅ → retIdx ¿
+        0 → r ¿
+        r elen ≺ ⟲ ↵
+          expr r ⌈ ⌉ "kind" ⌈ ⌉ "return_marker" ≡ ⤴ ↵
+            r → retIdx ¿
+            ⊗ ¿
+          ⌫ ¿
+          r 1 ⊞ → r ¿
+        ⌫ ¿
+        retIdx ∅ ≢ ⤴ ↵
+          retIdx 0 ≡ ⤴ ↵
+            ❴"kind": "return", "expr": ∅❵ → s ¿
+          ⌫ ⤵ ↵
+            expr 0 retIdx ⟪ slice ⟫ → sub ¿
+            ❴"kind": "return", "expr": sub❵ → s ¿
+          ⌫ ¿
+        ⌫ ⤵ ↵
+          ❴"kind": "expr", "expr": expr❵ → s ¿
+        ⌫ ¿
+        ❴"stmt": s, "state": st❵ ⇄ ¿
+      ⌫ ¿
+      ❴"stmt": ∅, "state": st❵ ⇄ ¿
+    ⌫ ¿
+
+    st ⟪ peek ⟫ → t ¿
+    t "text" ⌈ ⌉ → v ¿
+    t "kind" ⌈ ⌉ → tkKind ¿
+
+    tkKind "symbol" ≡ v "λ" ≡ ∧ ⤴ ↵
+      lambdaPending 1 ⊞ → lambdaPending ¿
+    ⌫ ¿
+    lambdaPending 0 ≻ tkKind "symbol" ≡ v "↵" ≡ ∧ ⤴ ↵
+      lambdaDepth 1 ⊞ → lambdaDepth ¿
+      0 → lambdaPending ¿
+    ⌫ ¿
+    lambdaPending 0 ≻ tkKind "ident" ≡ ¬ tkKind "symbol" ≡ v "↵" ≡ ¬ ∧ tkKind "symbol" ≡ v "λ" ≡ ¬ ∧ ∧ ⤴ ↵
+      0 → lambdaPending ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⌫" ≡ ∧ ⤴ ↵
+      cur ⟪ len ⟫ → clen ¿
+      0 → lcount ¿
+      0 → ccount ¿
+      0 → li ¿
+      li clen ≺ ⟲ ↵
+        cur li ⌈ ⌉ → tk ¿
+        tk "kind" ⌈ ⌉ → ck ¿
+        tk "text" ⌈ ⌉ → cv ¿
+        ck "symbol" ≡ cv "λ" ≡ ∧ ⤴ ↵ lcount 1 ⊞ → lcount ¿ ⌫ ¿
+        ck "symbol" ≡ cv "⌫" ≡ ∧ ⤴ ↵ ccount 1 ⊞ → ccount ¿ ⌫ ¿
+        li 1 ⊞ → li ¿
+      ⌫ ¿
+      lcount ccount ≻ ⤴ ↵
+        st ⟪ next_tok ⟫ → res ¿
+        res "tok" ⌈ ⌉ → t2 ¿
+        res "state" ⌈ ⌉ → st ¿
+        cur t2 ⟪ .append ⟫ → cur ¿
+        ⊕ ¿
+      ⌫ ¿
+      sawLambda 0 ≢ ⤴ ↵
+        st ⟪ next_tok ⟫ → res ¿
+        res "tok" ⌈ ⌉ → t2 ¿
+        res "state" ⌈ ⌉ → st ¿
+        cur t2 ⟪ .append ⟫ → cur ¿
+        t2 "kind" ⌈ ⌉ "symbol" ≡ t2 "text" ⌈ ⌉ "λ" ≡ ∧ ⤴ ↵
+          1 → sawLambda ¿
+        ⌫ ¿
+        ⊕ ¿
+      ⌫ ¿
+      lambdaDepth 0 ≻ ⤴ ↵
+        lambdaDepth 1 ⊟ → lambdaDepth ¿
+      ⌫ ⤵ ↵
+        clen 0 ≡ ⤴ ↵
+          st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+          ❴"stmt": ∅, "state": st❵ ⇄ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "¿" ≡ ∧ ⤴ ↵
+      cur ⟪ len ⟫ → clen ¿
+      0 → lcount ¿
+      0 → ccount ¿
+      0 → li ¿
+      li clen ≺ ⟲ ↵
+        cur li ⌈ ⌉ → tk ¿
+        tk "kind" ⌈ ⌉ → ck ¿
+        tk "text" ⌈ ⌉ → cv ¿
+        ck "symbol" ≡ cv "λ" ≡ ∧ ⤴ ↵ lcount 1 ⊞ → lcount ¿ ⌫ ¿
+        ck "symbol" ≡ cv "⌫" ≡ ∧ ⤴ ↵ ccount 1 ⊞ → ccount ¿ ⌫ ¿
+        li 1 ⊞ → li ¿
+      ⌫ ¿
+      lcount ccount ≻ ⤴ ↵
+        st ⟪ next_tok ⟫ → res ¿
+        res "tok" ⌈ ⌉ → t2 ¿
+        res "state" ⌈ ⌉ → st ¿
+        cur t2 ⟪ .append ⟫ → cur ¿
+        ⊕ ¿
+      ⌫ ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      cur ⟪ expr_from_tokens ⟫ → expr ¿
+      expr ⟪ len ⟫ → elen ¿
+      ∅ → retIdx ¿
+      0 → r ¿
+      r elen ≺ ⟲ ↵
+        expr r ⌈ ⌉ "kind" ⌈ ⌉ "return_marker" ≡ ⤴ ↵
+          r → retIdx ¿
+          ⊗ ¿
+        ⌫ ¿
+        r 1 ⊞ → r ¿
+      ⌫ ¿
+      retIdx ∅ ≢ ⤴ ↵
+        retIdx 0 ≡ ⤴ ↵
+          ❴"kind": "return", "expr": ∅❵ → s ¿
+        ⌫ ⤵ ↵
+          expr 0 retIdx ⟪ slice ⟫ → sub ¿
+          ❴"kind": "return", "expr": sub❵ → s ¿
+        ⌫ ¿
+      ⌫ ⤵ ↵
+        ❴"kind": "expr", "expr": expr❵ → s ¿
+      ⌫ ¿
+      0 → lambdaDepth ¿
+      0 → lambdaPending ¿
+      0 → sawLambda ¿
+      ❴"stmt": s, "state": st❵ ⇄ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⤴" ≡ ∧ ⤴ ↵
+      cur ⟪ expr_from_tokens ⟫ → cond ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ parse_block ⟫ → thenRes ¿
+      thenRes "block" ⌈ ⌉ → thenBlk ¿
+      thenRes "state" ⌈ ⌉ → st ¿
+      ∅ → elseBlk ¿
+      st ⟪ peek ⟫ "text" ⌈ ⌉ "⤵" ≡ ⤴ ↵
+        st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+        st ⟪ peek ⟫ "text" ⌈ ⌉ → ev ¿
+        ev "↵" ≡ ⤴ ↵
+          st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+          st ⟪ parse_block ⟫ → elseRes ¿
+          elseRes "block" ⌈ ⌉ → elseBlk ¿
+          elseRes "state" ⌈ ⌉ → st ¿
+        ⌫ ⤵ ↵
+          st ⟪ parse_if_inline ⟫ → elseRes ¿
+          elseRes "stmt" ⌈ ⌉ → elseStmt ¿
+          elseRes "state" ⌈ ⌉ → st ¿
+          elseStmt ∅ ≢ ⤴ ↵
+            【elseStmt】 → elseBlk ¿
+          ⌫ ¿
+        ⌫ ¿
+      ⌫ ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ❴"kind": "if", "cond": cond, "then": thenBlk, "else": elseBlk❵ → s ¿
+      ❴"stmt": s, "state": st❵ ⇄ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⟲" ≡ ∧ ⤴ ↵
+      cur ⟪ expr_from_tokens ⟫ → cond ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ parse_block ⟫ → bodyRes ¿
+      bodyRes "block" ⌈ ⌉ → bodyBlk ¿
+      bodyRes "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ❴"kind": "while", "cond": cond, "body": bodyBlk❵ → s ¿
+      ❴"stmt": s, "state": st❵ ⇄ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⥁" ≡ ∧ ⤴ ↵
+      st "pos" ⌈ ⌉ → posf ¿
+      st "tokens" ⌈ ⌉ → ftoks ¿
+      ftoks ⟪ len ⟫ → flen ¿
+      ⊥ → isFor ¿
+      posf 2 ⊞ flen ≺ ⤴ ↵
+        ftoks posf 2 ⊞ ⌈ ⌉ "text" ⌈ ⌉ "↵" ≡ ⤴ ↵ ⊤ → isFor ¿ ⌫ ¿
+      ⌫ ¿
+      isFor ⤴ ↵
+        cur ⟪ expr_from_tokens ⟫ → seqExpr ¿
+        seqExpr ⟪ len ⟫ → elen ¿
+        ⊥ → isRange ¿
+        elen 2 ≡ ⤴ ↵
+          seqExpr 0 ⌈ ⌉ "kind" ⌈ ⌉ → k0 ¿
+          seqExpr 1 ⌈ ⌉ "kind" ⌈ ⌉ → k1 ¿
+          k0 "op" ≢ k1 "op" ≢ ∧ k0 "call" ≢ ∧ k1 "call" ≢ ∧ ⤴ ↵
+            ⊤ → isRange ¿
+          ⌫ ¿
+        ⌫ ¿
+
+        st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+        st ⟪ next_tok ⟫ → iterRes ¿
+        iterRes "tok" ⌈ ⌉ "text" ⌈ ⌉ → iterName ¿
+        iterRes "state" ⌈ ⌉ → st ¿
+        st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+        st ⟪ parse_block ⟫ → bodyRes ¿
+        bodyRes "block" ⌈ ⌉ → bodyBlk ¿
+        bodyRes "state" ⌈ ⌉ → st ¿
+        st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+
+        isRange ⤴ ↵
+          seqExpr 0 ⌈ ⌉ → startExpr ¿
+          seqExpr 1 ⌈ ⌉ → endExpr ¿
+          ❴"kind": "for", "iter": iterName, "range": 【startExpr endExpr】, "expr": ∅, "body": bodyBlk❵ → s ¿
+        ⌫ ⤵ ↵
+          ❴"kind": "for", "iter": iterName, "range": ∅, "expr": seqExpr, "body": bodyBlk❵ → s ¿
+        ⌫ ¿
+        ❴"stmt": s, "state": st❵ ⇄ ¿
+      ⌫ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⊗" ≡ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ❴"kind": "break"❵ → s ¿
+      ❴"stmt": s, "state": st❵ ⇄ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⊕" ≡ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+      ❴"kind": "continue"❵ → s ¿
+      ❴"stmt": s, "state": st❵ ⇄ ¿
+    ⌫ ¿
+
+    st ⟪ next_tok ⟫ → res ¿
+    res "tok" ⌈ ⌉ → t2 ¿
+    res "state" ⌈ ⌉ → st ¿
+    cur t2 ⟪ .append ⟫ → cur ¿
+  ⌫ ¿
+
+  ❴"stmt": ∅, "state": st❵ ⇄ ¿
+↦ st ↦ parse_stmt ¿
+
+⍝ Parse block: expects cursor at first token inside block, stops on ⌫
+ƒ
+  st ⟪ parse_stmts ⟫ → res ¿
+  res "stmts" ⌈ ⌉ → stmts ¿
+  res "state" ⌈ ⌉ → st ¿
+  st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+  ❴"block": stmts, "state": st❵ ⇄ ¿
+↦ st ↦ parse_block ¿
+
+⍝ Split function trailer
+ƒ
+  toks ⟪ len ⟫ → n ¿
+  n 1 ⊟ → i ¿
+  【】 → params ¿
+  ∅ → name ¿
+
+  i 1 ≽ ⟲ ↵
+    toks i ⌈ ⌉ → t1 ¿
+    toks i 1 ⊟ ⌈ ⌉ → t0 ¿
+    t0 "text" ⌈ ⌉ "↦" ≡ ⤴ ↵
+      t1 "text" ⌈ ⌉ → p ¿
+      params p ⟪ .append ⟫ → params ¿
+      i 2 ⊟ → i ¿
+      ⊕ ¿
+    ⌫ ¿
+    ⊗ ¿
+  ⌫ ¿
+
+  params ⟪ len ⟫ 0 ≡ ⤴ ↵
+    ❴"found": ⊥, "body": toks, "params": 【】, "name": ""❵ ⇄ ¿
+  ⌫ ¿
+
+  params 0 ⌈ ⌉ → name ¿
+  params 1 params ⟪ len ⟫ ⟪ slice ⟫ → params ¿
+  params ⟪ reverse ⟫ → params ¿
+  i 1 ⊞ → end ¿
+  toks 0 end ⟪ slice ⟫ → body ¿
+
+  ❴"found": ⊤, "body": body, "params": params, "name": name❵ ⇄ ¿
+↦ toks ↦ split_trailer ¿
+
+⍝ Rewrite ⍺/⍵ in function bodies, skipping lambdas.
+ƒ
+  node "kind" ⌈ ⌉ → k ¿
+  node → out ¿
+  k "ident" ≡ ⤴ ↵
+    node "value" ⌈ ⌉ → v ¿
+    v "⍵" ≡ ⤴ ↵
+      ❴"kind": "ident", "value": plast❵ → out ¿
+    ⌫ ⤵ hasLeft k "ident" ≡ ∧ v "⍺" ≡ ∧ ⤴ ↵
+      ❴"kind": "ident", "value": p0❵ → out ¿
+    ⌫ ¿
+  ⌫ ¿
+  k "array" ≡ ⤴ ↵
+    node "items" ⌈ ⌉ → items ¿
+    【】 → newItems ¿
+    0 → i ¿
+    items ⟪ len ⟫ → n ¿
+    i n ≺ ⟲ ↵
+      items i ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_node ⟫ → it2 ¿
+      newItems it2 ⟪ .append ⟫ → newItems ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    node "items" ← newItems ¿
+    node → out ¿
+  ⌫ ¿
+  k "dict" ≡ ⤴ ↵
+    node "pairs" ⌈ ⌉ → pairs ¿
+    【】 → newPairs ¿
+    0 → i ¿
+    pairs ⟪ len ⟫ → n ¿
+    i n ≺ ⟲ ↵
+      pairs i ⌈ ⌉ "key" ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_node ⟫ → k2 ¿
+      pairs i ⌈ ⌉ "val" ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_node ⟫ → v2 ¿
+      ❴"key": k2, "val": v2❵ → pair2 ¿
+      newPairs pair2 ⟪ .append ⟫ → newPairs ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    node "pairs" ← newPairs ¿
+    node → out ¿
+  ⌫ ¿
+  k "lambda" ≡ ⤴ ↵ node → out ¿ ⌫ ¿
+  k "map_lambda" ≡ ⤴ ↵ node → out ¿ ⌫ ¿
+  out ⇄ ¿
+↦ node ↦ p0 ↦ plast ↦ hasLeft ↦ rewrite_node ¿
+
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  expr ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    expr i ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_node ⟫ → n2 ¿
+    out n2 ⟪ .append ⟫ → out ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ expr ↦ p0 ↦ plast ↦ hasLeft ↦ rewrite_expr ¿
+
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  stmts ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    stmts i ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_stmt ⟫ → s2 ¿
+    out s2 ⟪ .append ⟫ → out ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ stmts ↦ p0 ↦ plast ↦ hasLeft ↦ rewrite_stmts ¿
+
+ƒ
+  stmt "kind" ⌈ ⌉ → k ¿
+  stmt → out ¿
+  k "expr" ≡ ⤴ ↵
+    stmt "expr" ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_expr ⟫ → e2 ¿
+    stmt "expr" ← e2 ¿
+    stmt → out ¿
+  ⌫ ¿
+  k "return" ≡ ⤴ ↵
+    stmt "expr" ⌈ ⌉ → expr ¿
+    expr ∅ ≢ ⤴ ↵
+      expr p0 plast hasLeft ⟪ rewrite_expr ⟫ → e2 ¿
+      stmt "expr" ← e2 ¿
+    ⌫ ¿
+    stmt → out ¿
+  ⌫ ¿
+  k "if" ≡ ⤴ ↵
+    stmt "cond" ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_expr ⟫ → c2 ¿
+    stmt "then" ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_stmts ⟫ → t2 ¿
+    stmt "else" ⌈ ⌉ → e0 ¿
+    e0 ∅ ≢ ⤴ ↵ e0 p0 plast hasLeft ⟪ rewrite_stmts ⟫ → e2 ¿ ⌫ ¿
+    stmt "cond" ← c2 ¿
+    stmt "then" ← t2 ¿
+    e0 ∅ ≢ ⤴ ↵ stmt "else" ← e2 ¿ ⌫ ¿
+    stmt → out ¿
+  ⌫ ¿
+  k "while" ≡ ⤴ ↵
+    stmt "cond" ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_expr ⟫ → c2 ¿
+    stmt "body" ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_stmts ⟫ → b2 ¿
+    stmt "cond" ← c2 ¿
+    stmt "body" ← b2 ¿
+    stmt → out ¿
+  ⌫ ¿
+  k "for" ≡ ⤴ ↵
+    stmt "range" ⌈ ⌉ → r0 ¿
+    stmt "expr" ⌈ ⌉ → e0 ¿
+    r0 ∅ ≢ ⤴ ↵
+      r0 0 ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_expr ⟫ → r1 ¿
+      r0 1 ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_expr ⟫ → r2 ¿
+      【r1 r2】 → r3 ¿
+      stmt "range" ← r3 ¿
+    ⌫ ¿
+    e0 ∅ ≢ ⤴ ↵
+      e0 p0 plast hasLeft ⟪ rewrite_expr ⟫ → e2 ¿
+      stmt "expr" ← e2 ¿
+    ⌫ ¿
+    stmt "body" ⌈ ⌉ p0 plast hasLeft ⟪ rewrite_stmts ⟫ → b2 ¿
+    stmt "body" ← b2 ¿
+    stmt → out ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ stmt ↦ p0 ↦ plast ↦ hasLeft ↦ rewrite_stmt ¿
+
+⍝ Parse a function definition starting at ƒ.
+ƒ
+  st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+  【】 → bodyTokens ¿
+  0 → depth ¿
+  ⊥ → doneFn ¿
+  doneFn ⊥ ≡ ⟲ ↵
+    st ⟪ eof ⟫ ⤴ ↵
+      ⊤ → doneFn ¿
+      ⊕ ¿
+    ⌫ ¿
+    st ⟪ next_tok ⟫ → res ¿
+    res "tok" ⌈ ⌉ → tk ¿
+    res "state" ⌈ ⌉ → st ¿
+    tk "text" ⌈ ⌉ → tv ¿
+    tk "kind" ⌈ ⌉ → tkKind ¿
+    tkKind "symbol" ≡ tv "↵" ≡ ∧ ⤴ ↵ depth 1 ⊞ → depth ¿ ⌫ ¿
+    tkKind "symbol" ≡ tv "⌫" ≡ ∧ ⤴ ↵ depth 1 ⊟ → depth ¿ ⌫ ¿
+    depth 0 ≡ tkKind "symbol" ≡ ∧ tv "¿" ≡ ∧ ⤴ ↵
+      bodyTokens ⟪ split_trailer ⟫ → split ¿
+      split "found" ⌈ ⌉ ⤴ ↵
+        split "body" ⌈ ⌉ → bodyTokens ¿
+        split "params" ⌈ ⌉ → params ¿
+        split "name" ⌈ ⌉ → name ¿
+        bodyTokens ⟪ new_state ⟫ ⟪ parse_stmts ⟫ → bodyRes ¿
+        bodyRes "stmts" ⌈ ⌉ → bodyStmts ¿
+        params ⟪ len ⟫ → pc ¿
+        pc 0 ≻ ⤴ ↵
+          params 0 ⌈ ⌉ → p0 ¿
+          params pc 1 ⊟ ⌈ ⌉ → plast ¿
+          pc 2 ≽ → hasLeft ¿
+          bodyStmts p0 plast hasLeft ⟪ rewrite_stmts ⟫ → bodyStmts ¿
+        ⌫ ¿
+        ❴"fn": ❴"name": name, "params": params, "body": bodyStmts❵, "state": st❵ ⇄ ¿
+      ⌫ ¿
+    ⌫ ¿
+    bodyTokens tk ⟪ .append ⟫ → bodyTokens ¿
+  ⌫ ¿
+  ❴"fn": ∅, "state": st❵ ⇄ ¿
+↦ st ↦ parse_function ¿
+
+⍝ Parse a class definition starting at ⊙.
+ƒ
+  st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+  st ⟪ next_tok ⟫ → res ¿
+  res "tok" ⌈ ⌉ "text" ⌈ ⌉ → cname ¿
+  res "state" ⌈ ⌉ → st ¿
+  st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+  【】 → bodyTokens ¿
+  1 → depth ¿
+  ⊥ → doneClass ¿
+  doneClass ⊥ ≡ ⟲ ↵
+    st ⟪ eof ⟫ ⤴ ↵
+      ⊤ → doneClass ¿
+      ⊕ ¿
+    ⌫ ¿
+    st ⟪ next_tok ⟫ → res ¿
+    res "tok" ⌈ ⌉ → tk ¿
+    res "state" ⌈ ⌉ → st ¿
+    tk "text" ⌈ ⌉ → tv ¿
+    tk "kind" ⌈ ⌉ → tkKind ¿
+    tkKind "symbol" ≡ tv "↵" ≡ ∧ ⤴ ↵ depth 1 ⊞ → depth ¿ ⌫ ¿
+    tkKind "symbol" ≡ tv "⌫" ≡ ∧ ⤴ ↵ depth 1 ⊟ → depth ¿ ⌫ ¿
+    depth 0 ≡ tkKind "symbol" ≡ ∧ tv "⌫" ≡ ∧ ⤴ ↵
+      ⊤ → doneClass ¿
+      ⊕ ¿
+    ⌫ ¿
+    bodyTokens tk ⟪ .append ⟫ → bodyTokens ¿
+  ⌫ ¿
+  bodyTokens ⟪ parse_program ⟫ → inner ¿
+  inner "functions" ⌈ ⌉ → methods ¿
+  inner "main" ⌈ ⌉ → stmts ¿
+  【】 → fields ¿
+  0 → i ¿
+  stmts ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    stmts i ⌈ ⌉ → s ¿
+    s "kind" ⌈ ⌉ "expr" ≡ ⤴ ↵
+      s "expr" ⌈ ⌉ → expr ¿
+      expr ⟪ len ⟫ → elen ¿
+      elen 2 ≽ ⤴ ↵
+        elen 1 ⊟ → ai ¿
+        ∅ → assignIdx ¿
+        ai 0 ≽ ⟲ ↵
+          expr ai ⌈ ⌉ → node ¿
+          node "kind" ⌈ ⌉ "assign" ≡ ⤴ ↵
+            ai → assignIdx ¿
+            ⊗ ¿
+          ⌫ ¿
+          ai 1 ⊟ → ai ¿
+        ⌫ ¿
+        assignIdx ∅ ≢ ⤴ ↵
+          expr assignIdx ⌈ ⌉ "value" ⌈ ⌉ → aname ¿
+          aname "." ⟪ split ⟫ → nparts ¿
+          nparts ⟪ len ⟫ → nplen ¿
+          nplen 1 ≻ nparts 0 ⌈ ⌉ "" ≡ ∧ ⤴ ↵
+            nparts 1 nplen ⟪ slice ⟫ "." ⟪ join ⟫ → fname ¿
+            expr 0 assignIdx ⟪ slice ⟫ → fexpr ¿
+            ❴"name": fname, "expr": fexpr❵ → field ¿
+            fields field ⟪ .append ⟫ → fields ¿
+          ⌫ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ❴"class": ❴"name": cname, "methods": methods, "fields": fields❵, "state": st❵ ⇄ ¿
+↦ st ↦ parse_class ¿
+
+⍝ Parse program
+ƒ
+  tokens ⟪ new_state ⟫ → st ¿
+  【】 → functions ¿
+  【】 → mainStmts ¿
+  ⊥ → done ¿
+
+  done ⊥ ≡ ⟲ ↵
+    st ⟪ eof ⟫ ⤴ ↵
+      ⊤ → done ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    st "pos" ⌈ ⌉ → pos0 ¿
+
+    st ⟪ peek ⟫ → t ¿
+    t "text" ⌈ ⌉ → v ¿
+    t "kind" ⌈ ⌉ → tkKind ¿
+    tkKind "symbol" ≡ v "ƒ" ≡ ∧ ⤴ ↵
+      st ⟪ parse_function ⟫ → res ¿
+      res "fn" ⌈ ⌉ → fn ¿
+      res "state" ⌈ ⌉ → st ¿
+      fn ∅ ≢ ⤴ ↵
+        functions fn ⟪ .append ⟫ → functions ¿
+      ⌫ ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    tkKind "symbol" ≡ v "⊙" ≡ ∧ ⤴ ↵
+      st ⟪ parse_class ⟫ → res ¿
+      res "class" ⌈ ⌉ → cls ¿
+      res "state" ⌈ ⌉ → st ¿
+      cls ∅ ≢ ⤴ ↵
+        cls "name" ⌈ ⌉ → cname ¿
+        cls "methods" ⌈ ⌉ → methods ¿
+        cls "fields" ⌈ ⌉ → fields ¿
+        ∅ → initParams ¿
+        0 → mi ¿
+        methods ⟪ len ⟫ → mlen ¿
+        mi mlen ≺ ⟲ ↵
+          methods mi ⌈ ⌉ → mf ¿
+          mf "name" ⌈ ⌉ "__init__" ≡ ⤴ ↵
+            mf "params" ⌈ ⌉ → initParams ¿
+          ⌫ ¿
+          mi 1 ⊞ → mi ¿
+        ⌫ ¿
+        0 → mi ¿
+        mi mlen ≺ ⟲ ↵
+          methods mi ⌈ ⌉ → mf ¿
+          mf "params" ⌈ ⌉ → mparams ¿
+          【"⍹"】 mparams ⊞⊞ → mparams2 ¿
+          mf "name" ⌈ ⌉ → mname ¿
+          mf "body" ⌈ ⌉ → mbody ¿
+          ❴"name": mname, "params": mparams2, "body": mbody❵ → mfn ¿
+          functions mfn ⟪ .append ⟫ → functions ¿
+          mi 1 ⊞ → mi ¿
+        ⌫ ¿
+        initParams ∅ ≡ ⤴ ↵
+          【】 → initParams ¿
+        ⌫ ¿
+        【】 → ctorBody ¿
+        ❴"kind": "dict", "pairs": 【】❵ → emptyDict ¿
+        ❴"kind": "assign", "value": "__self"❵ → selfAssign ¿
+        ❴"kind": "expr", "expr": 【emptyDict selfAssign】❵ → s0 ¿
+        ctorBody s0 ⟪ .append ⟫ → ctorBody ¿
+        0 → fi ¿
+        fields ⟪ len ⟫ → flen ¿
+        fi flen ≺ ⟲ ↵
+          fields fi ⌈ ⌉ → f ¿
+          f "name" ⌈ ⌉ → fname ¿
+          f "expr" ⌈ ⌉ → fexpr ¿
+          ❴"kind": "ident", "value": "__self"❵ → a0 ¿
+          ❴"kind": "string", "value": fname❵ → a1 ¿
+          fexpr ❴"kind": "op", "value": "store_index"❵ ⟪ append ⟫ → fexpr2 ¿
+          【a0 a1】 fexpr2 ⊞⊞ → exprs ¿
+          ❴"kind": "expr", "expr": exprs❵ → s1 ¿
+          ctorBody s1 ⟪ .append ⟫ → ctorBody ¿
+          fi 1 ⊞ → fi ¿
+        ⌫ ¿
+        initParams ⟪ len ⟫ → iplen ¿
+        iplen 0 ≻ ⤴ ↵
+          ❴"kind": "ident", "value": "__self"❵ → c0 ¿
+          【c0】 → callExpr ¿
+          iplen 1 ⊟ → pi ¿
+          pi 0 ≽ ⟲ ↵
+            initParams pi ⌈ ⌉ → pn ¿
+            ❴"kind": "ident", "value": pn❵ → pnNode ¿
+            callExpr pnNode ⟪ .append ⟫ → callExpr ¿
+            pi 1 ⊟ → pi ¿
+          ⌫ ¿
+          ❴"kind": "call", "value": "__init__"❵ → callNode ¿
+          callExpr callNode ⟪ .append ⟫ → callExpr ¿
+          ❴"kind": "expr", "expr": callExpr❵ → s2 ¿
+          ctorBody s2 ⟪ .append ⟫ → ctorBody ¿
+        ⌫ ¿
+        ❴"kind": "return", "expr": 【❴"kind": "ident", "value": "__self"❵】❵ → sret ¿
+        ctorBody sret ⟪ .append ⟫ → ctorBody ¿
+        ❴"name": cname, "params": initParams, "body": ctorBody❵ → ctorFn ¿
+        functions ctorFn ⟪ .append ⟫ → functions ¿
+      ⌫ ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    st ⟪ parse_stmt ⟫ → res ¿
+    res "stmt" ⌈ ⌉ → ss ¿
+    res "state" ⌈ ⌉ → st ¿
+    ss ∅ ≢ ⤴ ↵
+      mainStmts ss ⟪ .append ⟫ → mainStmts ¿
+    ⌫ ¿
+
+    st "pos" ⌈ ⌉ → pos1 ¿
+    pos1 pos0 ≡ st ⟪ eof ⟫ ¬ ∧ ⤴ ↵
+      st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
+    ⌫ ¿
+  ⌫ ¿
+
+  ❴"functions": functions, "main": mainStmts❵ ⟪ lower_program ⟫ ⇄ ¿
+↦ tokens ↦ parse_program ¿
+
+⍝ Generate a fresh lambda name.
+ƒ
+  state "funcs" ⌈ ⌉ → funcs ¿
+  state "counter" ⌈ ⌉ → c ¿
+  "__lambda_" c ⍕ ⊞⊞ → name ¿
+  c 1 ⊞ → c ¿
+  ❴"name": name, "state": ❴"funcs": funcs, "counter": c❵❵ ⇄ ¿
+↦ state ↦ fresh_lambda_name ¿
+
+⍝ Append a function to the state.
+ƒ
+  state "funcs" ⌈ ⌉ → funcs ¿
+  funcs fn ⟪ .append ⟫ → funcs2 ¿
+  state "counter" ⌈ ⌉ → c ¿
+  ❴"funcs": funcs2, "counter": c❵ ⇄ ¿
+↦ state ↦ fn ↦ add_func ¿
+
+⍝ Lower a single expression node, hoisting lambdas to named functions.
+ƒ
+  node "kind" ⌈ ⌉ → k ¿
+  k "lambda" ≡ ⤴ ↵
+    state ⟪ fresh_lambda_name ⟫ → fres ¿
+    fres "name" ⌈ ⌉ → lname ¿
+    fres "state" ⌈ ⌉ → state ¿
+    node "params" ⌈ ⌉ → params ¿
+    params ∅ ≡ ⤴ ↵
+      node "param" ⌈ ⌉ → p0 ¿
+      p0 ∅ ≢ ⤴ ↵ 【p0】 → params ¿ ⌫ ¿
+    ⌫ ¿
+    node "body" ⌈ ⌉ → bodyStmts ¿
+    bodyStmts ∅ ≡ ⤴ ↵
+      node "body_expr" ⌈ ⌉ → bodyExpr ¿
+      ❴"kind": "return", "expr": bodyExpr❵ → retStmt ¿
+      【retStmt】 → bodyStmts ¿
+    ⌫ ¿
+    ❴"name": lname, "params": params, "body": bodyStmts❵ → fn ¿
+    state fn ⟪ add_func ⟫ → state ¿
+    ❴"node": ❴"kind": "ident", "value": lname❵, "state": state❵ ⇄ ¿
+  ⌫ ¿
+  k "map_lambda" ≡ ⤴ ↵
+    node "lambda" ⌈ ⌉ → lnode ¿
+    lnode state ⟪ lower_expr ⟫ → lres ¿
+    lres "node" ⌈ ⌉ "value" ⌈ ⌉ → lname ¿
+    lres "state" ⌈ ⌉ → state ¿
+    ❴"node": ❴"kind": "map", "func": lname❵, "state": state❵ ⇄ ¿
+  ⌫ ¿
+  ❴"node": node, "state": state❵ ⇄ ¿
+↦ node ↦ state ↦ lower_expr ¿
+
+⍝ Lower a list of expression nodes.
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  exprs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    exprs i ⌈ ⌉ → node ¿
+    node "kind" ⌈ ⌉ → nk ¿
+    nk "lambda" ≡ i 1 ⊞ n ≺ ∧ ⤴ ↵
+      exprs i 1 ⊞ ⌈ ⌉ → nextNode ¿
+      nextNode "kind" ⌈ ⌉ "assign" ≡ ⤴ ↵
+        nextNode "value" ⌈ ⌉ → lname ¿
+        node "params" ⌈ ⌉ → params ¿
+        params ∅ ≡ ⤴ ↵
+          node "param" ⌈ ⌉ → p0 ¿
+          p0 ∅ ≢ ⤴ ↵ 【p0】 → params ¿ ⌫ ¿
+        ⌫ ¿
+        node "body" ⌈ ⌉ → bodyStmts ¿
+        bodyStmts ∅ ≡ ⤴ ↵
+          node "body_expr" ⌈ ⌉ → bodyExpr ¿
+          ❴"kind": "return", "expr": bodyExpr❵ → retStmt ¿
+          【retStmt】 → bodyStmts ¿
+        ⌫ ¿
+        ❴"name": lname, "params": params, "body": bodyStmts❵ → fn ¿
+        state fn ⟪ add_func ⟫ → state ¿
+        out ❴"kind": "ident", "value": lname❵ ⟪ .append ⟫ → out ¿
+        i 1 ⊞ → i ¿
+        ⊕ ¿
+      ⌫ ¿
+    ⌫ ¿
+
+    nk "op" ≡ node "value" ⌈ ⌉ "∘" ≡ ∧ i 1 ⊞ n ≺ ∧ ⤴ ↵
+      exprs i 1 ⊞ ⌈ ⌉ → nextNode ¿
+      nextNode "kind" ⌈ ⌉ "assign" ≡ ⤴ ↵
+        nextNode "value" ⌈ ⌉ → cname ¿
+        out ⟪ len ⟫ → olen ¿
+        olen 2 ≽ ⤴ ↵
+          out olen 2 ⊟ ⌈ ⌉ → fnode ¿
+          out olen 1 ⊟ ⌈ ⌉ → gnode ¿
+          fnode "kind" ⌈ ⌉ "ident" ≡ gnode "kind" ⌈ ⌉ "ident" ≡ ∧ ⤴ ↵
+            fnode "value" ⌈ ⌉ → fval ¿
+            gnode "value" ⌈ ⌉ → gval ¿
+            out 0 olen 2 ⊟ ⟪ slice ⟫ → out ¿
+            "x" → p0 ¿
+            ❴"kind": "ident", "value": p0❵ → n0 ¿
+            ❴"kind": "call", "value": fval❵ → n1 ¿
+            ❴"kind": "call", "value": gval❵ → n2 ¿
+            ❴"kind": "return", "expr": 【n0 n1 n2】❵ → retStmt ¿
+            ❴"name": cname, "params": 【p0】, "body": 【retStmt】❵ → fn ¿
+            state fn ⟪ add_func ⟫ → state ¿
+            out ❴"kind": "ident", "value": cname❵ ⟪ .append ⟫ → out ¿
+            i 1 ⊞ → i ¿
+            ⊕ ¿
+          ⌫ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+
+    node state ⟪ lower_expr ⟫ → res ¿
+    res "node" ⌈ ⌉ → node2 ¿
+    res "state" ⌈ ⌉ → state ¿
+    out node2 ⟪ .append ⟫ → out ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ❴"exprs": out, "state": state❵ ⇄ ¿
+↦ exprs ↦ state ↦ lower_exprs ¿
+
+⍝ Lower a single statement.
+ƒ
+  stmt "kind" ⌈ ⌉ → k ¿
+  k "expr" ≡ ⤴ ↵
+    stmt "expr" ⌈ ⌉ state ⟪ lower_exprs ⟫ → res ¿
+    res "exprs" ⌈ ⌉ → exprs2 ¿
+    res "state" ⌈ ⌉ → state ¿
+    ❴"stmt": ❴"kind": "expr", "expr": exprs2❵, "state": state❵ ⇄ ¿
+  ⌫ ¿
+  k "return" ≡ ⤴ ↵
+    stmt "expr" ⌈ ⌉ → exprs ¿
+    exprs ∅ ≢ ⤴ ↵
+      exprs state ⟪ lower_exprs ⟫ → res ¿
+      res "exprs" ⌈ ⌉ → exprs2 ¿
+      res "state" ⌈ ⌉ → state ¿
+      ❴"stmt": ❴"kind": "return", "expr": exprs2❵, "state": state❵ ⇄ ¿
+    ⌫ ¿
+    ❴"stmt": stmt, "state": state❵ ⇄ ¿
+  ⌫ ¿
+  k "if" ≡ ⤴ ↵
+    stmt "cond" ⌈ ⌉ state ⟪ lower_exprs ⟫ → cres ¿
+    cres "exprs" ⌈ ⌉ → cond2 ¿
+    cres "state" ⌈ ⌉ → state ¿
+    stmt "then" ⌈ ⌉ state ⟪ lower_block ⟫ → tres ¿
+    tres "block" ⌈ ⌉ → then2 ¿
+    tres "state" ⌈ ⌉ → state ¿
+    stmt "else" ⌈ ⌉ → elseBlk ¿
+    ∅ → else2 ¿
+    elseBlk ∅ ≢ ⤴ ↵
+      elseBlk state ⟪ lower_block ⟫ → eres ¿
+      eres "block" ⌈ ⌉ → else2 ¿
+      eres "state" ⌈ ⌉ → state ¿
+    ⌫ ¿
+    ❴"stmt": ❴"kind": "if", "cond": cond2, "then": then2, "else": else2❵, "state": state❵ ⇄ ¿
+  ⌫ ¿
+  k "while" ≡ ⤴ ↵
+    stmt "cond" ⌈ ⌉ state ⟪ lower_exprs ⟫ → cres ¿
+    cres "exprs" ⌈ ⌉ → cond2 ¿
+    cres "state" ⌈ ⌉ → state ¿
+    stmt "body" ⌈ ⌉ state ⟪ lower_block ⟫ → bres ¿
+    bres "block" ⌈ ⌉ → body2 ¿
+    bres "state" ⌈ ⌉ → state ¿
+    ❴"stmt": ❴"kind": "while", "cond": cond2, "body": body2❵, "state": state❵ ⇄ ¿
+  ⌫ ¿
+  k "for" ≡ ⤴ ↵
+    stmt "expr" ⌈ ⌉ → seqExpr ¿
+    stmt "range" ⌈ ⌉ → rangeSpec ¿
+    seqExpr → seqExpr2 ¿
+    seqExpr ∅ ≢ ⤴ ↵
+      seqExpr state ⟪ lower_exprs ⟫ → eres ¿
+      eres "exprs" ⌈ ⌉ → seqExpr2 ¿
+      eres "state" ⌈ ⌉ → state ¿
+    ⌫ ¿
+    stmt "body" ⌈ ⌉ state ⟪ lower_block ⟫ → bres ¿
+    bres "block" ⌈ ⌉ → body2 ¿
+    bres "state" ⌈ ⌉ → state ¿
+    stmt "iter" ⌈ ⌉ → iterName ¿
+    ❴"stmt": ❴"kind": "for", "iter": iterName, "range": rangeSpec, "expr": seqExpr2, "body": body2❵, "state": state❵ ⇄ ¿
+  ⌫ ¿
+  ❴"stmt": stmt, "state": state❵ ⇄ ¿
+↦ stmt ↦ state ↦ lower_stmt ¿
+
+⍝ Lower a block of statements.
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  stmts ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    stmts i ⌈ ⌉ → s ¿
+    s state ⟪ lower_stmt ⟫ → res ¿
+    res "stmt" ⌈ ⌉ → s2 ¿
+    res "state" ⌈ ⌉ → state ¿
+    out s2 ⟪ .append ⟫ → out ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ❴"block": out, "state": state❵ ⇄ ¿
+↦ stmts ↦ state ↦ lower_block ¿
+
+⍝ Lower lambdas across a program.
+ƒ
+  program "functions" ⌈ ⌉ → funcs ¿
+  program "main" ⌈ ⌉ → mainStmts ¿
+  ❴"funcs": 【】, "counter": 0❵ → state ¿
+
+  【】 → loweredFuncs ¿
+  0 → i ¿
+  funcs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    funcs i ⌈ ⌉ → fn ¿
+    fn "body" ⌈ ⌉ state ⟪ lower_block ⟫ → bres ¿
+    bres "block" ⌈ ⌉ → body2 ¿
+    bres "state" ⌈ ⌉ → state ¿
+    fn "name" ⌈ ⌉ → fname ¿
+    fn "params" ⌈ ⌉ → fparams ¿
+    ❴"name": fname, "params": fparams, "body": body2❵ → fn2 ¿
+    state fn2 ⟪ add_func ⟫ → state ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+
+  mainStmts state ⟪ lower_block ⟫ → mres ¿
+  mres "block" ⌈ ⌉ → main2 ¿
+  mres "state" ⌈ ⌉ → state ¿
+  state "funcs" ⌈ ⌉ → allFuncs ¿
+  ❴"functions": allFuncs, "main": main2❵ ⇄ ¿
+↦ program ↦ lower_program ¿

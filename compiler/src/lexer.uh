@@ -1,0 +1,129 @@
+⍝ Minimal lexer (token list: {kind, text})
+
+ƒ
+  【】 → tokens ¿
+  0 → i ¿
+  src ⟪ len ⟫ → n ¿
+
+  i n ≺ ⟲ ↵
+    src i ⟪ char_at ⟫ → ch ¿
+
+    ch " " ≡ ch "\n" ≡ ∨ ch "\t" ≡ ∨ ⤴ ↵
+      i 1 ⊞ → i ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    ch ":" ≡ ch "," ≡ ∨ ⤴ ↵
+      i 1 ⊞ → i ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    ch "⍝" ≡ ⤴ ↵
+      i 1 ⊞ → i ¿
+      i n ≺ ⟲ ↵
+        src i ⟪ char_at ⟫ → c2 ¿
+        c2 "\n" ≡ ⤴ ↵
+          i 1 ⊞ → i ¿
+          ⊗ ¿
+        ⌫ ¿
+        i 1 ⊞ → i ¿
+      ⌫ ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    ch "\"" ≡ ⤴ ↵
+      i 1 ⊞ → i ¿
+      "" → buf ¿
+      i n ≺ ⟲ ↵
+        src i ⟪ char_at ⟫ → c3 ¿
+        c3 "\"" ≡ ⤴ ↵
+          i 1 ⊞ → i ¿
+          ⊗ ¿
+        ⌫ ¿
+        c3 "\\" ≡ ⤴ ↵
+          i 1 ⊞ → i ¿
+          i n ≺ ⤴ ↵
+            src i ⟪ char_at ⟫ → esc ¿
+            esc "n" ≡ ⤴ ↵ "\n" → esc ¿ ⌫ ¿
+            esc "r" ≡ ⤴ ↵ "\r" → esc ¿ ⌫ ¿
+            esc "t" ≡ ⤴ ↵ "\t" → esc ¿ ⌫ ¿
+            esc "\"" ≡ ⤴ ↵ "\"" → esc ¿ ⌫ ¿
+            esc "\\" ≡ ⤴ ↵ "\\" → esc ¿ ⌫ ¿
+            buf esc ⊞⊞ → buf ¿
+            i 1 ⊞ → i ¿
+            ⊕ ¿
+          ⌫ ¿
+        ⌫ ¿
+        buf c3 ⊞⊞ → buf ¿
+        i 1 ⊞ → i ¿
+      ⌫ ¿
+      ❴"kind": "string", "text": buf❵ → tok ¿
+      tokens tok ⟪ .append ⟫ → tokens ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    ch "0" ≽ ch "9" ≼ ∧ ⤴ ↵
+      i → start ¿
+      ⊥ → sawDot ¿
+      i n ≺ ⟲ ↵
+        src i ⟪ char_at ⟫ → c4 ¿
+        c4 "0" ≽ c4 "9" ≼ ∧ ⤴ ↵
+          i 1 ⊞ → i ¿
+          ⊕ ¿
+        ⌫ ¿
+        c4 "." ≡ sawDot ⊥ ≡ ∧ ⤴ ↵
+          i 1 ⊞ → ip1 ¿
+          ip1 n ≺ ⤴ ↵
+            src ip1 ⟪ char_at ⟫ → c5 ¿
+            c5 "0" ≽ c5 "9" ≼ ∧ ⤴ ↵
+              ⊤ → sawDot ¿
+              i 1 ⊞ → i ¿
+              ⊕ ¿
+            ⌫ ¿
+          ⌫ ¿
+        ⌫ ¿
+        ⊗ ¿
+      ⌫ ¿
+      i start ⊟ → len ¿
+      src start len ⟪ substr ⟫ → buf ¿
+      ❴"kind": "number", "text": buf❵ → tok ¿
+      tokens tok ⟪ .append ⟫ → tokens ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    ch "_" ≡ ch "." ≡ ∨ ch "a" ≽ ch "z" ≼ ∧ ∨ ch "A" ≽ ch "Z" ≼ ∧ ∨ ch "⍺" ≡ ∨ ch "⍵" ≡ ∨ ch "⍹" ≡ ∨ ch "⎕" ≡ ∨ ⤴ ↵
+      i → start ¿
+      i n ≺ ⟲ ↵
+        src i ⟪ char_at ⟫ → c5 ¿
+        c5 "_" ≡ c5 "." ≡ ∨ c5 "a" ≽ c5 "z" ≼ ∧ ∨ c5 "A" ≽ c5 "Z" ≼ ∧ ∨ c5 "0" ≽ c5 "9" ≼ ∧ ∨ c5 "⍺" ≡ ∨ c5 "⍵" ≡ ∨ c5 "⍹" ≡ ∨ c5 "⎕" ≡ ∨ ⤴ ↵
+          i 1 ⊞ → i ¿
+          ⊕ ¿
+        ⌫ ¿
+        ⊗ ¿
+      ⌫ ¿
+      i start ⊟ → len ¿
+      src start len ⟪ substr ⟫ → buf ¿
+      ❴"kind": "ident", "text": buf❵ → tok ¿
+      tokens tok ⟪ .append ⟫ → tokens ¿
+      ⊕ ¿
+    ⌫ ¿
+
+    i 1 ⊞ → ip1 ¿
+    ip1 n ≺ ⤴ ↵
+      src ip1 ⟪ char_at ⟫ → ch2 ¿
+      ch ch2 ⊞⊞ → pair ¿
+      pair "⊞⊞" ≡ pair "⊟⊟" ≡ ∨ pair "⊕⊕" ≡ ∨ ⤴ ↵
+        ❴"kind": "symbol", "text": pair❵ → tok ¿
+        tokens tok ⟪ .append ⟫ → tokens ¿
+        i 2 ⊞ → i ¿
+        ⊕ ¿
+      ⌫ ¿
+    ⌫ ¿
+
+    ❴"kind": "symbol", "text": ch❵ → tok ¿
+    tokens tok ⟪ .append ⟫ → tokens ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+
+  tokens ⇄ ¿
+↦ src ↦ lex ¿

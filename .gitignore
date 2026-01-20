@@ -1,0 +1,6 @@
+build/
+output/
+*.o
+*.c
+*.log
+*.tmp

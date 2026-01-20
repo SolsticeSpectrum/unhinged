@@ -1,0 +1,33 @@
+⍝ Array helpers
+
+ƒ
+  x ⟪ len ⟫ ⇄ ¿
+↦ x ↦ len1 ¿
+
+ƒ
+  arr item ⟪ .append ⟫ ⇄ ¿
+↦ arr ↦ item ↦ push ¿
+
+ƒ
+  【】 → out ¿
+  start → i ¿
+  arr ⟪ len ⟫ → n ¿
+  end n ≻ ⤴ ↵ n → end ¿ ⌫ ¿
+  i end ≺ ⟲ ↵
+    arr i ⌈ ⌉ → v ¿
+    out v ⟪ .append ⟫ → out ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ arr ↦ start ↦ end ↦ slice ¿
+
+ƒ
+  【】 → out ¿
+  arr ⟪ len ⟫ 1 ⊟ → i ¿
+  i 0 ≽ ⟲ ↵
+    arr i ⌈ ⌉ → v ¿
+    out v ⟪ .append ⟫ → out ¿
+    i 1 ⊟ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ arr ↦ reverse ¿

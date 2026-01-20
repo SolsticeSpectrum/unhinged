@@ -1677,6 +1677,9 @@ static UhValue uh_http_build_res(void) {
     UhValue res = uh_dict_new();
     uh_dict_set(&res, uh_str("status"), uh_num(200));
     uh_dict_set(&res, uh_str("body"), uh_str(""));
+    UhValue headers = uh_dict_new();
+    uh_dict_set(&headers, uh_str("Content-Type"), uh_str("application/json"));
+    uh_dict_set(&res, uh_str("headers"), headers);
     return res;
 }
 
@@ -1747,13 +1750,21 @@ UhValue uh_http_listen(UhValue addr) {
 
         UhValue status_v = uh_dict_get_key(res, "status");
         UhValue body_v = uh_dict_get_key(res, "body");
+        UhValue headers_v = uh_dict_get_key(res, "headers");
+        const char *content_type = "application/json";
+        if (headers_v.tag == UH_DICT) {
+            UhValue ct = uh_dict_get_key(headers_v, "Content-Type");
+            if (ct.tag == UH_STR && ct.str) {
+                content_type = ct.str;
+            }
+        }
         long status = (status_v.tag == UH_NUM) ? (long)status_v.num : 200;
         char *body_str = uh_value_to_cstr(body_v);
         size_t resp_len = body_str ? strlen(body_str) : 0;
         char header[256];
         int hlen = snprintf(header, sizeof(header),
-                            "HTTP/1.1 %ld OK\r\nContent-Type: application/json\r\nContent-Length: %zu\r\nConnection: close\r\n\r\n",
-                            status, resp_len);
+                            "HTTP/1.1 %ld OK\r\nContent-Type: %s\r\nContent-Length: %zu\r\nConnection: close\r\n\r\n",
+                            status, content_type, resp_len);
         send(cfd, header, (size_t)hlen, 0);
         if (resp_len > 0 && body_str) {
             send(cfd, body_str, resp_len, 0);

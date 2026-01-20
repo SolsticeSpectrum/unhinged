@@ -28,7 +28,7 @@
   0 ⇄ ¿
 ↦ outputFile ↦ inputFile ↦ main ¿
 
-⍝ Resolve input to a file path (supports src/main.uh).
+⍝ Resolve input to a file path (supports src/main.uh)
 ƒ
   input ⟪ read_file ⟫ → src ¿
   src "" ≡ ⤴ ↵
@@ -42,7 +42,7 @@
   input ⇄ ¿
 ↦ input ↦ resolve_input ¿
 
-⍝ Resolve an import path to a real file (path, path.uh, path/src/main.uh).
+⍝ Resolve an import path to a real file (path, path.uh, path/src/main.uh)
 ƒ
   path ⟪ read_file ⟫ → src ¿
   src "" ≡ ⤴ ↵
@@ -59,7 +59,7 @@
   path ⇄ ¿
 ↦ path ↦ resolve_module_path ¿
 
-⍝ Find directory name of a path.
+⍝ Find directory name of a path
 ƒ
   path ⟪ len ⟫ 1 ⊟ → i ¿
   ∅ → pos ¿
@@ -74,7 +74,7 @@
   path 0 pos ⟪ substr ⟫ ⇄ ¿
 ↦ path ↦ dirname ¿
 
-⍝ Load source and inline imports.
+⍝ Load source and inline imports
 ƒ
   visited ⟪ len ⟫ → _ ¿
   path ⟪ resolve_module_path ⟫ → rpath ¿

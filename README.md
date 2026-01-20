@@ -82,3 +82,10 @@ Game of Life:
 ./build/unhingedc examples/life.uh output/life
 ./output/life
 ```
+
+HTTP demo site:
+
+```bash
+./build/unhingedc examples/website.uh output/website
+./output/website
+```

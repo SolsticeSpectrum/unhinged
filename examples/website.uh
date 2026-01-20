@@ -1,0 +1,20 @@
+⍝ Minimal HTTP website
+
+"net/http" ⎕ → http ¿
+
+ƒ
+  ⍺ ⟪ .method ⟫ "GET" ≡ ⤴ ↵
+    "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\" />\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n<title>UNHINGED Site</title>\n<style>\n:root {\n  --bg: #f4efe6;\n  --ink: #201a14;\n  --accent: #c65a1e;\n  --card: #fff8ee;\n}\n* { box-sizing: border-box; }\nbody {\n  margin: 0; font-family: \"Palatino Linotype\", \"Book Antiqua\", Palatino, serif;\n  color: var(--ink); background: radial-gradient(circle at 20% 0%, #fff6d9, var(--bg));\n}\n.hero {\n  padding: 4rem 7vw 3rem; border-bottom: 3px solid var(--ink);\n}\n.hero h1 { font-size: 3rem; margin: 0 0 0.5rem; letter-spacing: 0.02em; }\n.hero p { max-width: 44rem; line-height: 1.5; }\n.grid {\n  display: grid; gap: 1.5rem; padding: 2.5rem 7vw 4rem;\n  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n}\n.card {\n  background: var(--card); border: 2px solid var(--ink); border-radius: 18px;\n  padding: 1.2rem 1.4rem; box-shadow: 8px 8px 0 #0000001a;\n}\n.card h2 { margin: 0 0 0.4rem; font-size: 1.2rem; }\n.badge {\n  display: inline-block; padding: 0.2rem 0.6rem; border: 2px solid var(--ink);\n  border-radius: 999px; background: var(--accent); color: #fff; font-size: 0.75rem;\n}\nfooter { padding: 1.5rem 7vw 2.5rem; font-size: 0.9rem; }\n</style>\n</head>\n<body>\n<section class=\"hero\">\n  <span class=\"badge\">UNHINGED</span>\n  <h1>Postfix, sharp edges, and zero fluff.</h1>\n  <p>This page is served directly from a tiny UNHINGED HTTP server. It is minimal, fast, and unapologetically simple.</p>\n</section>\n<section class=\"grid\">\n  <div class=\"card\">\n    <h2>Single file</h2>\n    <p>No templates, no build step. Just a string and a handler.</p>\n  </div>\n
+  <div class=\"card\">\n    <h2>Portable</h2>\n    <p>Ships as one binary; works on any POSIX box with sockets.</p>\n  </div>\n</section>\n<footer>UNHINGED demo site</footer>\n</body>\n</html>\n" → html ¿
+    ❴"Content-Type": "text/html; charset=utf-8"❵ → headers ¿
+    ⍵ "headers" ← headers ¿
+    ⍵ "body" ← html ¿
+    ⍵ "status" ← 200 ¿
+  ⌫ ⤵ ↵
+    ⍵ "status" ← 405 ¿
+    ⍵ "body" ← "Method not allowed" ¿
+  ⌫ ¿
+↦ req ↦ res ↦ handler ¿
+
+"/" handler ⟪ http.handle ⟫ ¿
+":8080" ⟪ http.listen ⟫ ¿

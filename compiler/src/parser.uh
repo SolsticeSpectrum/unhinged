@@ -1072,7 +1072,7 @@
   ❴"found": ⊤, "body": body, "params": params, "name": name❵ ⇄ ¿
 ↦ toks ↦ split_trailer ¿
 
-⍝ Rewrite ⍺/⍵ in function bodies, skipping lambdas.
+⍝ Rewrite ⍺/⍵ in function bodies, skipping lambdas
 ƒ
   node "kind" ⌈ ⌉ → k ¿
   node → out ¿
@@ -1194,7 +1194,7 @@
   out ⇄ ¿
 ↦ stmt ↦ p0 ↦ plast ↦ hasLeft ↦ rewrite_stmt ¿
 
-⍝ Parse a function definition starting at ƒ.
+⍝ Parse a function definition starting at ƒ
 ƒ
   st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
   【】 → bodyTokens ¿
@@ -1235,7 +1235,7 @@
   ❴"fn": ∅, "state": st❵ ⇄ ¿
 ↦ st ↦ parse_function ¿
 
-⍝ Parse a class definition starting at ⊙.
+⍝ Parse a class definition starting at ⊙
 ƒ
   st ⟪ next_tok ⟫ "state" ⌈ ⌉ → st ¿
   st ⟪ next_tok ⟫ → res ¿
@@ -1422,7 +1422,7 @@
   ❴"functions": functions, "main": mainStmts❵ ⟪ lower_program ⟫ ⇄ ¿
 ↦ tokens ↦ parse_program ¿
 
-⍝ Generate a fresh lambda name.
+⍝ Generate a fresh lambda name
 ƒ
   state "funcs" ⌈ ⌉ → funcs ¿
   state "counter" ⌈ ⌉ → c ¿
@@ -1431,7 +1431,7 @@
   ❴"name": name, "state": ❴"funcs": funcs, "counter": c❵❵ ⇄ ¿
 ↦ state ↦ fresh_lambda_name ¿
 
-⍝ Append a function to the state.
+⍝ Append a function to the state
 ƒ
   state "funcs" ⌈ ⌉ → funcs ¿
   funcs fn ⟪ .append ⟫ → funcs2 ¿
@@ -1439,7 +1439,7 @@
   ❴"funcs": funcs2, "counter": c❵ ⇄ ¿
 ↦ state ↦ fn ↦ add_func ¿
 
-⍝ Lower a single expression node, hoisting lambdas to named functions.
+⍝ Lower a single expression node, hoisting lambdas to named functions
 ƒ
   node "kind" ⌈ ⌉ → k ¿
   k "lambda" ≡ ⤴ ↵
@@ -1471,7 +1471,7 @@
   ❴"node": node, "state": state❵ ⇄ ¿
 ↦ node ↦ state ↦ lower_expr ¿
 
-⍝ Lower a list of expression nodes.
+⍝ Lower a list of expression nodes
 ƒ
   【】 → out ¿
   0 → i ¿
@@ -1538,7 +1538,7 @@
   ❴"exprs": out, "state": state❵ ⇄ ¿
 ↦ exprs ↦ state ↦ lower_exprs ¿
 
-⍝ Lower a single statement.
+⍝ Lower a single statement
 ƒ
   stmt "kind" ⌈ ⌉ → k ¿
   k "expr" ≡ ⤴ ↵
@@ -1600,7 +1600,7 @@
   ❴"stmt": stmt, "state": state❵ ⇄ ¿
 ↦ stmt ↦ state ↦ lower_stmt ¿
 
-⍝ Lower a block of statements.
+⍝ Lower a block of statements
 ƒ
   【】 → out ¿
   0 → i ¿
@@ -1616,7 +1616,7 @@
   ❴"block": out, "state": state❵ ⇄ ¿
 ↦ stmts ↦ state ↦ lower_block ¿
 
-⍝ Lower lambdas across a program.
+⍝ Lower lambdas across a program
 ƒ
   program "functions" ⌈ ⌉ → funcs ¿
   program "main" ⌈ ⌉ → mainStmts ¿

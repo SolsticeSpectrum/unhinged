@@ -1,4 +1,4 @@
-⍝ Emit C code from AST (minimal, matches bootstrap runtime ABI)
+⍝ Emit C code from AST
 
 "runtime/rt.h" → RT_HEADER ¿
 

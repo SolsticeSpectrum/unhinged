@@ -1,0 +1,123 @@
+⍝ Conway's Game of Life
+
+ƒ
+  【】 → grid ¿
+  0 → r ¿
+  r h ≺ ⟲ ↵
+    【】 → row ¿
+    0 → c ¿
+    c w ≺ ⟲ ↵
+      row 0 ⟪ .append ⟫ ¿
+      c 1 ⊞ → c ¿
+    ⌫ ¿
+    grid row ⟪ .append ⟫ ¿
+    r 1 ⊞ → r ¿
+  ⌫ ¿
+  grid ⇄ ¿
+↦ h ↦ w ↦ new_grid ¿
+
+ƒ
+  grid r ⌈ ⌉ → row ¿
+  row c ← v ¿
+↦ grid ↦ r ↦ c ↦ v ↦ set_cell ¿
+
+ƒ
+  0 → count ¿
+  0 1 ⊟ → dr ¿
+  dr 1 ≼ ⟲ ↵
+    0 1 ⊟ → dc ¿
+    dc 1 ≼ ⟲ ↵
+      dr 0 ≡ dc 0 ≡ ∧ ⤴ ↵
+        dc 1 ⊞ → dc ¿
+        ⊕ ¿
+      ⌫ ¿
+      r dr ⊞ → rr ¿
+      c dc ⊞ → cc ¿
+      rr 0 ≽ rr h ≺ ∧ cc 0 ≽ ∧ cc w ≺ ∧ ⤴ ↵
+        grid rr ⌈ ⌉ cc ⌈ ⌉ 1 ≡ ⤴ ↵
+          count 1 ⊞ → count ¿
+        ⌫ ¿
+      ⌫ ¿
+      dc 1 ⊞ → dc ¿
+    ⌫ ¿
+    dr 1 ⊞ → dr ¿
+  ⌫ ¿
+  count ⇄ ¿
+↦ grid ↦ r ↦ c ↦ h ↦ w ↦ count_neighbors ¿
+
+ƒ
+  grid ⟪ len ⟫ → h ¿
+  h 0 ≡ ⤴ ↵ 【】 ⇄ ¿ ⌫ ¿
+  grid 0 ⌈ ⌉ ⟪ len ⟫ → w ¿
+  h w ⟪ new_grid ⟫ → next ¿
+  0 → r ¿
+  r h ≺ ⟲ ↵
+    0 → c ¿
+    c w ≺ ⟲ ↵
+      grid r ⌈ ⌉ c ⌈ ⌉ → cell ¿
+      grid r c h w ⟪ count_neighbors ⟫ → n ¿
+      0 → out ¿
+      cell 1 ≡ ⤴ ↵
+        n 2 ≡ n 3 ≡ ∨ ⤴ ↵ 1 → out ¿ ⌫ ¿
+      ⌫ ⤵ ↵
+        n 3 ≡ ⤴ ↵ 1 → out ¿ ⌫ ¿
+      ⌫ ¿
+      next r c out ⟪ set_cell ⟫ ¿
+      c 1 ⊞ → c ¿
+    ⌫ ¿
+    r 1 ⊞ → r ¿
+  ⌫ ¿
+  next ⇄ ¿
+↦ grid ↦ step_grid ¿
+
+ƒ
+  grid ⟪ len ⟫ → h ¿
+  h 0 ≡ ⤴ ↵ ⇄ ¿ ⌫ ¿
+  grid 0 ⌈ ⌉ ⟪ len ⟫ → w ¿
+  0 → r ¿
+  r h ≺ ⟲ ↵
+    "" → line ¿
+    0 → c ¿
+    c w ≺ ⟲ ↵
+      grid r ⌈ ⌉ c ⌈ ⌉ 1 ≡ ⤴ ↵
+        line "#" ⊞⊞ → line ¿
+      ⌫ ⤵ ↵
+        line " " ⊞⊞ → line ¿
+      ⌫ ¿
+      c 1 ⊞ → c ¿
+    ⌫ ¿
+    line ⊢ ¿
+    r 1 ⊞ → r ¿
+  ⌫ ¿
+  "" ⊢ ¿
+↦ grid ↦ print_grid ¿
+
+40 → width ¿
+20 → height ¿
+height width ⟪ new_grid ⟫ → grid ¿
+
+⍝ Glider 1
+grid 1 2 1 ⟪ set_cell ⟫ ¿
+grid 2 3 1 ⟪ set_cell ⟫ ¿
+grid 3 1 1 ⟪ set_cell ⟫ ¿
+grid 3 2 1 ⟪ set_cell ⟫ ¿
+grid 3 3 1 ⟪ set_cell ⟫ ¿
+
+⍝ Glider 2
+width 6 ⊟ → rightBase ¿
+rightBase 1 ⊞ → rb1 ¿
+rightBase 2 ⊞ → rb2 ¿
+grid 1 rb1 1 ⟪ set_cell ⟫ ¿
+grid 2 rightBase 1 ⟪ set_cell ⟫ ¿
+grid 3 rightBase 1 ⟪ set_cell ⟫ ¿
+grid 3 rb1 1 ⟪ set_cell ⟫ ¿
+grid 3 rb2 1 ⟪ set_cell ⟫ ¿
+
+0 → step ¿
+step 120 ≺ ⟲ ↵
+  "tput clear >/dev/tty 2>/dev/null || printf '\\033[2J\\033[H' >/dev/tty || clear" ⎕ → _ ¿
+  grid ⟪ print_grid ⟫ ¿
+  grid ⟪ step_grid ⟫ → grid ¿
+  "sleep 0.2" ⎕ → _ ¿
+  step 1 ⊞ → step ¿
+⌫ ¿

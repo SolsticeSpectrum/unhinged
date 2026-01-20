@@ -70,3 +70,15 @@ python tests/servers/mailhog_stop.py
 - `compiler/` UNHINGED compiler source.
 - `runtime/` C runtime.
 - `tests/` Embedded test runner and helpers.
+- `examples/` Example programs (compile outputs into `output/`).
+
+## Examples
+
+Keep generated binaries and artifacts in `output/` to avoid cluttering the repo.
+
+Game of Life:
+
+```bash
+./build/unhingedc examples/life.uh output/life
+./output/life
+```

@@ -1,6 +1,6 @@
 "lexer.uh" ⟪ import ⟫ ¿
 "parser.uh" ⟪ import ⟫ ¿
-"codegen_c.uh" ⟪ import ⟫ ¿
+"codegen_llvm.uh" ⟪ import ⟫ ¿
 "utils.uh" ⟪ import ⟫ ¿
 
 ⍝ Compiler entry point using CLI args
@@ -15,16 +15,22 @@
   ⌫ ¿
   source ⟪ lex ⟫ → tokens ¿
   tokens ⟪ parse_program ⟫ → ast ¿
-  ast ⟪ emit_c ⟫ → csrc ¿
-  outputFile ".c" ⊞⊞ → cpath ¿
-  cpath csrc ⟪ write_file ⟫ → ok ¿
+  ast ⟪ emit_llvm ⟫ → llsrc ¿
+  outputFile ".ll" ⊞⊞ → llpath ¿
+  llpath llsrc ⟪ write_file ⟫ → ok ¿
   ok 1 ≡ ¬ ⤴ ↵
     "write failed" ⊢ ¿
     1 ⇄ ¿
   ⌫ ¿
-  "cc " cpath ⊞⊞ " runtime/rt.c -I. -lm -lcurl -lsqlite3 -lpthread -o " ⊞⊞ outputFile ⊞⊞ → cmd ¿
-  cmd ⟪ syscall ⟫ → _ ¿
-  "rm -f " cpath ⊞⊞ ⟪ syscall ⟫ → _ ¿
+  outputFile ".o" ⊞⊞ → objpath ¿
+  outputFile ".rt.o" ⊞⊞ → rtobj ¿
+  "llc -filetype=obj -o " objpath ⊞⊞ " " ⊞⊞ llpath ⊞⊞ → cmd1 ¿
+  cmd1 ⟪ syscall ⟫ → _ ¿
+  "llc -filetype=obj -o " rtobj ⊞⊞ " runtime/rt.ll" ⊞⊞ → cmd2 ¿
+  cmd2 ⟪ syscall ⟫ → _ ¿
+  "cc -no-pie " objpath ⊞⊞ " " ⊞⊞ rtobj ⊞⊞ " -lm -lcurl -lsqlite3 -lpthread -o " ⊞⊞ outputFile ⊞⊞ → cmd3 ¿
+  cmd3 ⟪ syscall ⟫ → _ ¿
+  ⍝ keep LLVM artifacts for debugging
   0 ⇄ ¿
 ↦ outputFile ↦ inputFile ↦ main ¿
 

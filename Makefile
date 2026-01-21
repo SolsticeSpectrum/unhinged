@@ -17,4 +17,5 @@ test: build
 	$(TEST_BIN)
 
 clean:
-	rm -rf build
+	rm -rf build output bootstrap/target
+	rm -f runtime/*.o

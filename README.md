@@ -68,7 +68,7 @@ python tests/servers/mailhog_stop.py
 
 - `bootstrap/` Rust bootstrap compiler.
 - `compiler/` UNHINGED compiler source.
-- `runtime/` C runtime.
+- `runtime/` LLVM IR runtime.
 - `tests/` Embedded test runner and helpers.
 - `examples/` Example programs (compile outputs into `output/`).
 

@@ -1,5 +1,5 @@
 mod ast;
-mod codegen_c;
+mod codegen_llvm;
 mod lexer;
 mod loader;
 mod parser;
@@ -13,27 +13,27 @@ fn main() {
     let input = match args.next() {
         Some(a) => a,
         None => {
-            eprintln!("usage: unhingedc <input.uh|dir> -o <output> [--emit-c <path>]");
+            eprintln!("usage: unhingedc <input.uh|dir> -o <output> [--emit-llvm <path>]");
             std::process::exit(2);
         }
     };
 
     let mut output: Option<String> = None;
-    let mut emit_c: Option<String> = None;
+    let mut emit_llvm: Option<String> = None;
     while let Some(arg) = args.next() {
         if arg == "-o" {
             output = args.next();
             continue;
         }
-        if arg == "--emit-c" {
-            emit_c = args.next();
+        if arg == "--emit-llvm" {
+            emit_llvm = args.next();
             continue;
         }
     }
     let output = match output {
         Some(o) => o,
         None => {
-            eprintln!("error: missing -o <output.c>");
+            eprintln!("error: missing -o <output>");
             std::process::exit(2);
         }
     };
@@ -83,7 +83,7 @@ fn main() {
 
     let func_arity = parser::collect_functions(&programs);
 
-    let output_c = match codegen_c::emit_c(&merged, &func_arity) {
+    let output_llvm = match codegen_llvm::emit_llvm(&merged, &func_arity) {
         Ok(c) => c,
         Err(e) => {
             eprintln!("error: {e}");
@@ -91,52 +91,74 @@ fn main() {
         }
     };
 
-    let keep_c = emit_c.is_some();
-    let c_path = if let Some(path) = emit_c {
+    let keep_llvm = emit_llvm.is_some();
+    let ll_path = if let Some(path) = emit_llvm {
         PathBuf::from(path)
     } else {
-        temp_c_path(&output_path)
+        temp_ll_path(&output_path)
     };
 
-    if let Err(e) = std::fs::write(&c_path, output_c) {
-        eprintln!("error: failed to write {}: {e}", c_path.display());
+    if let Err(e) = std::fs::write(&ll_path, output_llvm) {
+        eprintln!("error: failed to write {}: {e}", ll_path.display());
         std::process::exit(1);
     }
 
-    if let Err(e) = compile_c(&c_path, &output_path) {
+    if let Err(e) = compile_llvm(&ll_path, &output_path) {
         eprintln!("error: {e}");
         std::process::exit(1);
     }
 
-    if !keep_c {
-        let _ = std::fs::remove_file(&c_path);
+    if !keep_llvm {
+        let _ = std::fs::remove_file(&ll_path);
     }
 }
 
-fn temp_c_path(output: &Path) -> PathBuf {
+fn temp_ll_path(output: &Path) -> PathBuf {
     let mut path = output.to_path_buf();
     let file = output
         .file_name()
         .and_then(|n| n.to_str())
         .unwrap_or("unhinged_out");
-    let tmp = format!("{file}.c");
+    let tmp = format!("{file}.ll");
     path.set_file_name(tmp);
     path
 }
 
-fn compile_c(c_path: &Path, output: &Path) -> Result<(), String> {
+fn compile_llvm(ll_path: &Path, output: &Path) -> Result<(), String> {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let root = manifest_dir
         .parent()
         .ok_or_else(|| "failed to locate repo root".to_string())?;
-    let runtime_c = root.join("runtime").join("rt.c");
-    let include_dir = root.to_path_buf();
+    let runtime_ll = root.join("runtime").join("rt.ll");
+    let runtime_obj = root.join("runtime").join("rt.o");
+    let obj_path = ll_path.with_extension("o");
+
+    let status = Command::new("llc")
+        .arg("-filetype=obj")
+        .arg(&runtime_ll)
+        .arg("-o")
+        .arg(&runtime_obj)
+        .status()
+        .map_err(|e| format!("failed to invoke llc for runtime: {e}"))?;
+    if !status.success() {
+        return Err(format!("llc runtime failed with status {status}"));
+    }
+
+    let status = Command::new("llc")
+        .arg("-filetype=obj")
+        .arg(ll_path)
+        .arg("-o")
+        .arg(&obj_path)
+        .status()
+        .map_err(|e| format!("failed to invoke llc for program: {e}"))?;
+    if !status.success() {
+        return Err(format!("llc program failed with status {status}"));
+    }
 
     let status = Command::new("cc")
-        .arg(c_path)
-        .arg(runtime_c)
-        .arg("-I")
-        .arg(include_dir)
+        .arg(&obj_path)
+        .arg(&runtime_obj)
+        .arg("-no-pie")
         .arg("-lm")
         .arg("-lcurl")
         .arg("-lsqlite3")
@@ -148,5 +170,6 @@ fn compile_c(c_path: &Path, output: &Path) -> Result<(), String> {
     if !status.success() {
         return Err(format!("cc failed with status {status}"));
     }
+    let _ = std::fs::remove_file(&obj_path);
     Ok(())
 }

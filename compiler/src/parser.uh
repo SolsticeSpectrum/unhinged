@@ -163,8 +163,69 @@
   ❴"pairs": pairs, "state": st, "single": single❵ ⇄ ¿
 ↦ st ↦ parse_dict ¿
 
+⍝ Rewrite infix string concat (a ⊞⊞ b) to postfix (a b ⊞⊞)
+ƒ
+  toks ⟪ len ⟫ → n ¿
+  【】 → out ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    toks i ⌈ ⌉ → t ¿
+    t "kind" ⌈ ⌉ → k ¿
+    t "text" ⌈ ⌉ → v ¿
+    k "symbol" ≡ v "⊞⊞" ≡ ∧ i 0 ≻ ∧ i 1 ⊞ n ≺ ∧ ⤴ ↵
+      toks i 1 ⊟ ⌈ ⌉ → tprev ¿
+      tprev "kind" ⌈ ⌉ → pk ¿
+      tprev "text" ⌈ ⌉ → pv ¿
+      toks i 1 ⊞ ⌈ ⌉ → tnext ¿
+      tnext "kind" ⌈ ⌉ → nk ¿
+      tnext "text" ⌈ ⌉ → nv ¿
+      pk "number" ≡ pk "string" ≡ pk "ident" ≡ ∨ pk "symbol" ≡ pv "⊤" ≡ ∧ ∨ pk "symbol" ≡ pv "⊥" ≡ ∧ ∨ pk "symbol" ≡ pv "∅" ≡ ∧ ∨ pk "symbol" ≡ pv "⍬" ≡ ∧ ∨ pk "symbol" ≡ pv "】" ≡ ∧ ∨ pk "symbol" ≡ pv "❵" ≡ ∧ ∨ pk "symbol" ≡ pv "⟫" ≡ ∧ ∨ pk "symbol" ≡ pv "⌉" ≡ ∧ ∨ → prevOk ¿
+      nk "number" ≡ nk "string" ≡ nk "ident" ≡ ∨ nk "symbol" ≡ nv "⊤" ≡ ∧ ∨ nk "symbol" ≡ nv "⊥" ≡ ∧ ∨ nk "symbol" ≡ nv "∅" ≡ ∧ ∨ nk "symbol" ≡ nv "⍬" ≡ ∧ ∨ nk "symbol" ≡ nv "【" ≡ ∧ ∨ nk "symbol" ≡ nv "❴" ≡ ∧ ∨ → nextOk ¿
+      prevOk nextOk ∧ ⤴ ↵
+        nk "symbol" ≡ nv "【" ≡ ∨ nk "symbol" ≡ nv "❴" ≡ ∨ ⤴ ↵
+          0 → depth ¿
+          i 1 ⊞ → j ¿
+          j n ≺ ⟲ ↵
+            toks j ⌈ ⌉ → tj ¿
+            tj "kind" ⌈ ⌉ → jk ¿
+            tj "text" ⌈ ⌉ → jv ¿
+            jk "symbol" ≡ jv "【" ≡ ∨ jk "symbol" ≡ jv "❴" ≡ ∨ ⤴ ↵
+              depth 1 ⊞ → depth ¿
+            ⌫ ⤵ jk "symbol" ≡ jv "】" ≡ ∨ jk "symbol" ≡ jv "❵" ≡ ∨ ⤴ ↵
+              depth 1 ⊟ → depth ¿
+              depth 0 ≡ ⤴ ↵
+                toks i 1 ⊞ j 1 ⊞ ⟪ slice ⟫ → seg ¿
+                0 → si ¿
+                seg ⟪ len ⟫ → sn ¿
+                si sn ≺ ⟲ ↵
+                  seg si ⌈ ⌉ → st ¿
+                  out st ⟪ .append ⟫ → out ¿
+                  si 1 ⊞ → si ¿
+                ⌫ ¿
+                out t ⟪ .append ⟫ → out ¿
+                j 1 ⊞ → i ¿
+                ⊕ ¿
+              ⌫ ¿
+            ⌫ ¿
+            j 1 ⊞ → j ¿
+          ⌫ ¿
+        ⌫ ⤵ ↵
+          out tnext ⟪ .append ⟫ → out ¿
+          out t ⟪ .append ⟫ → out ¿
+          i 2 ⊞ → i ¿
+          ⊕ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+    out t ⟪ .append ⟫ → out ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ toks ↦ rewrite_infix_concat ¿
+
 ⍝ Convert expression tokens to AST expression nodes
 ƒ
+  toks ⟪ rewrite_infix_concat ⟫ → toks ¿
   【】 → out ¿
   0 → i ¿
   ⊥ → sawStore ¿

@@ -129,9 +129,23 @@ fn compile_llvm(ll_path: &Path, output: &Path) -> Result<(), String> {
     let root = manifest_dir
         .parent()
         .ok_or_else(|| "failed to locate repo root".to_string())?;
-    let runtime_ll = root.join("runtime").join("rt.ll");
-    let runtime_obj = root.join("runtime").join("rt.o");
+    let runtime_src = root.join("runtime").join("rt.c");
+    let runtime_ll = ll_path.with_extension("rt.ll");
+    let runtime_obj = ll_path.with_extension("rt.o");
     let obj_path = ll_path.with_extension("o");
+
+    let status = Command::new("clang")
+        .arg("-S")
+        .arg("-emit-llvm")
+        .arg("-O2")
+        .arg("-o")
+        .arg(&runtime_ll)
+        .arg(&runtime_src)
+        .status()
+        .map_err(|e| format!("failed to invoke clang for runtime: {e}"))?;
+    if !status.success() {
+        return Err(format!("clang runtime failed with status {status}"));
+    }
 
     let status = Command::new("llc")
         .arg("-filetype=obj")

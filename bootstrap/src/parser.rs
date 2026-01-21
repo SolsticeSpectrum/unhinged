@@ -279,6 +279,7 @@ fn stmt_from_expr(tokens: Vec<Token>, file: &str) -> Result<Stmt, ParseError> {
 }
 
 fn expr_tokens_to_expr(tokens: Vec<Token>, file: &str) -> Result<Vec<LocalExprToken>, ParseError> {
+    let tokens = rewrite_infix_concat(&tokens);
     let mut out = Vec::new();
     let mut i = 0usize;
     while i < tokens.len() {
@@ -407,6 +408,61 @@ fn expr_tokens_to_expr(tokens: Vec<Token>, file: &str) -> Result<Vec<LocalExprTo
         out.push(LocalExprToken::StoreIndex);
     }
     Ok(out)
+}
+
+fn is_operand_end(tok: &Token) -> bool {
+    match &tok.kind {
+        TokenKind::Number(_) | TokenKind::String(_) | TokenKind::Ident(_) => true,
+        TokenKind::Symbol(sym) => matches!(sym.as_str(), "⊤" | "⊥" | "∅" | "⍬" | "】" | "❵" | "⟫" | "⌉"),
+    }
+}
+
+fn is_operand_start(tok: &Token) -> bool {
+    match &tok.kind {
+        TokenKind::Number(_) | TokenKind::String(_) | TokenKind::Ident(_) => true,
+        TokenKind::Symbol(sym) => matches!(sym.as_str(), "⊤" | "⊥" | "∅" | "⍬" | "【" | "❴"),
+    }
+}
+
+fn rewrite_infix_concat(tokens: &[Token]) -> Vec<Token> {
+    let mut out = Vec::new();
+    let mut i = 0usize;
+    'outer: while i < tokens.len() {
+        let tok = &tokens[i];
+        if is_symbol(tok, "⊞⊞")
+            && i > 0
+            && i + 1 < tokens.len()
+            && is_operand_end(&tokens[i - 1])
+            && is_operand_start(&tokens[i + 1])
+        {
+            if is_symbol(&tokens[i + 1], "【") || is_symbol(&tokens[i + 1], "❴") {
+                let mut depth = 0i32;
+                let mut j = i + 1;
+                while j < tokens.len() {
+                    let t = &tokens[j];
+                    if is_symbol(t, "【") || is_symbol(t, "❴") {
+                        depth += 1;
+                    } else if is_symbol(t, "】") || is_symbol(t, "❵") {
+                        depth -= 1;
+                        if depth == 0 {
+                            out.extend_from_slice(&tokens[i + 1..=j]);
+                            out.push(tok.clone());
+                            i = j + 1;
+                            continue 'outer;
+                        }
+                    }
+                    j += 1;
+                }
+            }
+            out.push(tokens[i + 1].clone());
+            out.push(tok.clone());
+            i += 2;
+            continue;
+        }
+        out.push(tok.clone());
+        i += 1;
+    }
+    out
 }
 
 fn map_expr(expr: Vec<LocalExprToken>) -> Vec<crate::ast::ExprToken> {

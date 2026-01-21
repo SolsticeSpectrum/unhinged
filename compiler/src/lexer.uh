@@ -3,7 +3,19 @@
 ƒ
   【】 → tokens ¿
   0 → i ¿
-  src ⟪ len ⟫ → n ¿
+  ⍝ Count Unicode codepoints for correct tokenization
+  0 → n ¿
+  0 → ti ¿
+  ⊥ → done ¿
+  done ⊥ ≡ ⟲ ↵
+    src ti ⟪ char_at ⟫ → tch ¿
+    tch "" ≡ ⤴ ↵
+      ⊤ → done ¿
+      ⊕ ¿
+    ⌫ ¿
+    ti 1 ⊞ → ti ¿
+  ⌫ ¿
+  ti → n ¿
 
   i n ≺ ⟲ ↵
     src i ⟪ char_at ⟫ → ch ¿

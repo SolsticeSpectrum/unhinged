@@ -1,6 +1,6 @@
 ⍝ Emit LLVM IR from AST
 
-⍝ Escape strings for LLVM IR string constants.
+⍝ Escape strings for LLVM IR string constants
 ƒ
   "" → out ¿
   s ⟪ len ⟫ → n ¿
@@ -18,7 +18,7 @@
   out ⇄ ¿
 ↦ s ↦ escape_llvm_string ¿
 
-⍝ Ensure numeric literal is valid LLVM double constant (add .0 when needed).
+⍝ Ensure numeric literal is valid LLVM double constant (add .0 when needed)
 ƒ
   s ⟪ len ⟫ → n ¿
   0 → i ¿
@@ -86,7 +86,7 @@
   st ⟪ next_tmp ⟫ → tmp ¿
   st "parts" ⌈ ⌉ → parts ¿
   "  " tmp ⊞⊞ " = getelementptr [" ⊞⊞ len ⍕ ⊞⊞ " x i8], ptr @.str." ⊞⊞ idx ⍕ ⊞⊞ ", i64 0, i64 0\n" ⊞⊞ → line ¿
-  parts line ⊞⊞ → parts ¿
+  parts line ⟪ .append ⟫ → parts ¿
   st "parts" ← parts ¿
   tmp ⇄ ¿
 ↦ st ↦ val ↦ emit_str_ptr ¿
@@ -99,20 +99,77 @@
   ⊤ ⇄ ¿
 ↦ st ↦ ptr ↦ ty ↦ emit_alloca ¿
 
+⍝ Return true if s starts with prefix
+ƒ
+  s ⟪ len ⟫ → slen ¿
+  prefix ⟪ len ⟫ → plen ¿
+  slen plen ≺ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  s 0 plen ⟪ substr ⟫ → head ¿
+  head prefix ≡ ⇄ ¿
+↦ s ↦ prefix ↦ starts_with ¿
+
+⍝ Normalize call arg fragments into full LLVM arg strings
+ƒ
+  【"ptr sret(%UhValue) " "ptr byval(%UhValue) " "ptr " "double " "i1 " "i8 " "i16 " "i32 " "i64 "】 → prefixes ¿
+  args ⟪ len ⟫ → n ¿
+  【】 → out ¿
+  "" → cur ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    args i ⌈ ⌉ → a ¿
+    ⊥ → isStart ¿
+    0 → pi ¿
+    prefixes ⟪ len ⟫ → pn ¿
+    pi pn ≺ ⟲ ↵
+      prefixes pi ⌈ ⌉ → p ¿
+      a p ⟪ starts_with ⟫ ⤴ ↵
+        ⊤ → isStart ¿
+        ⊗ ¿
+      ⌫ ¿
+      pi 1 ⊞ → pi ¿
+    ⌫ ¿
+    isStart ⤴ ↵
+      cur "" ≢ ⤴ ↵ out cur ⟪ .append ⟫ → out ¿ ⌫ ¿
+      a → cur ¿
+    ⌫ ⤵ ↵
+      cur "" ≡ ⤴ ↵
+        a → cur ¿
+      ⌫ ⤵ ↵
+        cur a ⊞⊞ → cur ¿
+      ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  cur "" ≢ ⤴ ↵ out cur ⟪ .append ⟫ → out ¿ ⌫ ¿
+  out ⇄ ¿
+↦ args ↦ normalize_call_args ¿
+
+⍝ Append all elements from src into dst and return dst
+ƒ
+  src ⟪ len ⟫ → n ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    dst src i ⌈ ⌉ ⟪ .append ⟫ → dst ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  dst ⇄ ¿
+↦ dst ↦ src ↦ parts_extend ¿
+
 ƒ
   st ⟪ next_tmp ⟫ → ptr ¿
   st ptr "%UhValue" ⟪ emit_alloca ⟫ → _ ¿
+  args ⟪ normalize_call_args ⟫ → args2 ¿
   st "parts" ⌈ ⌉ → parts ¿
   "  call void @" name ⊞⊞ "(ptr sret(%UhValue) " ⊞⊞ ptr ⊞⊞ → line2 ¿
   0 → i ¿
-  args ⟪ len ⟫ → n ¿
+  args2 ⟪ len ⟫ → n ¿
   i n ≺ ⟲ ↵
-    args i ⌈ ⌉ → a ¿
+    args2 i ⌈ ⌉ → a ¿
     line2 ", " ⊞⊞ a ⊞⊞ → line2 ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
   line2 ")\n" ⊞⊞ → line2 ¿
-  parts line2 ⊞⊞ → parts ¿
+  parts line2 ⟪ .append ⟫ → parts ¿
   st "parts" ← parts ¿
   ptr ⇄ ¿
 ↦ st ↦ name ↦ args ↦ emit_call_value ¿
@@ -121,135 +178,135 @@
   st ⟪ next_tmp ⟫ → val ¿
   st "parts" ⌈ ⌉ → parts ¿
   "  " val ⊞⊞ " = load %UhValue, ptr " ⊞⊞ ptr ⊞⊞ "\n" ⊞⊞ → line ¿
-  parts line ⊞⊞ → parts ¿
+  parts line ⟪ .append ⟫ → parts ¿
   st "parts" ← parts ¿
   val ⇄ ¿
 ↦ st ↦ ptr ↦ emit_load_value ¿
 
 ƒ
   st "parts" ⌈ ⌉ → parts ¿
-  parts "; ModuleID = 'unhinged'\n" ⊞⊞ → parts ¿
-  parts "target triple = \"x86_64-unknown-linux-gnu\"\n\n" ⊞⊞ → parts ¿
-  parts "%UhValue = type { i32, double, ptr, ptr, ptr }\n" ⊞⊞ → parts ¿
-  parts "%UhArray = type { ptr, i64, i64 }\n" ⊞⊞ → parts ¿
-  parts "%UhDictEntry = type { ptr, %UhValue }\n" ⊞⊞ → parts ¿
-  parts "%UhDict = type { ptr, i64, i64 }\n" ⊞⊞ → parts ¿
-  parts "%UhVar = type { ptr, %UhValue, ptr }\n" ⊞⊞ → parts ¿
-  parts "%UhEnv = type { ptr, ptr }\n" ⊞⊞ → parts ¿
-  parts "%UhStack = type { ptr, i64, i64 }\n\n" ⊞⊞ → parts ¿
+  parts "; ModuleID = 'unhinged'\n" ⟪ .append ⟫ → parts ¿
+  parts "target triple = \"x86_64-unknown-linux-gnu\"\n\n" ⟪ .append ⟫ → parts ¿
+  parts "%UhValue = type { i32, double, ptr, ptr, ptr }\n" ⟪ .append ⟫ → parts ¿
+  parts "%UhArray = type { ptr, i64, i64 }\n" ⟪ .append ⟫ → parts ¿
+  parts "%UhDictEntry = type { ptr, %UhValue }\n" ⟪ .append ⟫ → parts ¿
+  parts "%UhDict = type { ptr, i64, i64 }\n" ⟪ .append ⟫ → parts ¿
+  parts "%UhVar = type { ptr, %UhValue, ptr }\n" ⟪ .append ⟫ → parts ¿
+  parts "%UhEnv = type { ptr, ptr }\n" ⟪ .append ⟫ → parts ¿
+  parts "%UhStack = type { ptr, i64, i64 }\n\n" ⟪ .append ⟫ → parts ¿
 
   ⍝ Core runtime
-  parts "declare void @uh_env_init(ptr, ptr)\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_env_get(ptr sret(%UhValue), ptr, ptr)\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_env_set(ptr, ptr, ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_stack_init(ptr)\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_stack_push(ptr, ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_stack_pop(ptr sret(%UhValue), ptr)\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_stack_clear(ptr)\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_env_init(ptr, ptr)\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_env_get(ptr sret(%UhValue), ptr, ptr)\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_env_set(ptr, ptr, ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_stack_init(ptr)\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_stack_push(ptr, ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_stack_pop(ptr sret(%UhValue), ptr)\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_stack_clear(ptr)\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_num(ptr sret(%UhValue), double)\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_str(ptr sret(%UhValue), ptr)\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_null(ptr sret(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_arr_new(ptr sret(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_arr_push(ptr, ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_dict_new(ptr sret(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_dict_set(ptr, ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_num(ptr sret(%UhValue), double)\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_str(ptr sret(%UhValue), ptr)\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_null(ptr sret(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_arr_new(ptr sret(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_arr_push(ptr, ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_dict_new(ptr sret(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_dict_set(ptr, ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_concat(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_add(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_sub(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_mul(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_div(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_pow(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_concat(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_add(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_sub(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_mul(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_div(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_pow(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare i32 @uh_value_eq(ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare i32 @uh_cmp(ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare i32 @uh_is_true(ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare i32 @uh_contains(ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_index(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_store_index(ptr, ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_stringify(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_print(ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare i32 @uh_value_eq(ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare i32 @uh_cmp(ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare i32 @uh_is_true(ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare i32 @uh_contains(ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_index(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_store_index(ptr, ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_stringify(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_print(ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_len(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_append(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_split(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_join(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_substr(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_char_at(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_read_file(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_write_file(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_file_open(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_file_read(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_file_readall(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_file_readlines(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_file_write(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_file_close(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_syscall(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_len(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_append(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_split(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_join(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_substr(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_char_at(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_read_file(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_write_file(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_file_open(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_file_read(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_file_readall(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_file_readlines(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_file_write(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_file_close(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_syscall(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_type(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_int(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_float(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_upper(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_lower(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_index_of(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_starts_with(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_match(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_chunk(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_format(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_hex(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_time_now(ptr sret(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_type(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_int(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_float(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_upper(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_lower(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_index_of(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_starts_with(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_match(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_chunk(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_format(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_hex(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_time_now(ptr sret(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_take(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_drop(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_reverse(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_rotate(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_reshape(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_transpose(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare i32 @uh_subset(ptr byval(%UhValue), ptr byval(%UhValue), i32)\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_take(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_drop(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_reverse(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_rotate(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_reshape(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_transpose(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare i32 @uh_subset(ptr byval(%UhValue), ptr byval(%UhValue), i32)\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_import(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_args(ptr sret(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_sysobj(ptr sret(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_set_args(i32, ptr)\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_set_global_env(ptr)\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_import(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_args(ptr sret(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_sysobj(ptr sret(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_set_args(i32, ptr)\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_set_global_env(ptr)\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_json_parse(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_json_stringify(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_json_parse(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_json_stringify(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_http_get(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_http_request(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_http_handle(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_http_listen(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_http_method(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_http_json(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_http_get(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_http_request(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_http_handle(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_http_listen(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_http_method(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_http_json(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_db_connect(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_db_exec(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_db_query(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_db_begin(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_db_commit(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_db_connect(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_db_exec(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_db_query(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_db_begin(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_db_commit(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_thread_start(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_thread_join(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_mutex_lock(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_mutex_unlock(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_thread_start(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_thread_join(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_mutex_lock(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_mutex_unlock(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_ws_serve(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_ws_connect(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_ws_receive(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_send(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_ws_serve(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_ws_connect(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_ws_receive(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_send(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_smtp_connect(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_smtp_disconnect(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_smtp_connect(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_smtp_disconnect(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare void @uh_crypto_sha256(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_crypto_random_bytes(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_crypto_hmac_sha256(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_crypto_encrypt_aes(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
-  parts "declare void @uh_crypto_decrypt_aes(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⊞⊞ → parts ¿
+  parts "declare void @uh_crypto_sha256(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_crypto_random_bytes(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_crypto_hmac_sha256(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_crypto_encrypt_aes(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_crypto_decrypt_aes(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
 
-  parts "declare i32 @strcmp(ptr, ptr)\n\n" ⊞⊞ → parts ¿
+  parts "declare i32 @strcmp(ptr, ptr)\n\n" ⟪ .append ⟫ → parts ¿
 
   st "parts" ← parts ¿
 ↦ st ↦ emit_header ¿
@@ -259,14 +316,14 @@
   arr ⟪ len ⟫ → n ¿
   n 0 ≡ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
   st "parts" ⌈ ⌉ → parts ¿
-  parts "\n" ⊞⊞ → parts ¿
+  parts "\n" ⟪ .append ⟫ → parts ¿
   0 → i ¿
   i n ≺ ⟲ ↵
     arr i ⌈ ⌉ → s ¿
     s ⟪ escape_llvm_string ⟫ → esc ¿
     s ⟪ utf8_len_bytes ⟫ 1 ⊞ → len ¿
     "@.str." i ⍕ ⊞⊞ " = private unnamed_addr constant [" ⊞⊞ len ⍕ ⊞⊞ " x i8] c\"" ⊞⊞ esc ⊞⊞ "\\00\"\n" ⊞⊞ → line ¿
-    parts line ⊞⊞ → parts ¿
+    parts line ⟪ .append ⟫ → parts ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
   st "parts" ← parts ¿
@@ -275,18 +332,18 @@
 ⍝ Dispatcher for uh_call_named
 ƒ
   st "parts" ⌈ ⌉ → parts ¿
-  parts "define void @uh_call_named(ptr sret(%UhValue) %out, ptr %env, ptr %name, i32 %argc, ptr %args) {\nentry:\n" ⊞⊞ → parts ¿
-  parts "  %isnull = icmp eq ptr %name, null\n" ⊞⊞ → parts ¿
-  parts "  br i1 %isnull, label %ret0, label %check0\n" ⊞⊞ → parts ¿
-  parts "ret0:\n" ⊞⊞ → parts ¿
-  parts "  call void @uh_num(ptr sret(%UhValue) %out, double 0.0)\n" ⊞⊞ → parts ¿
-  parts "  ret void\n" ⊞⊞ → parts ¿
-  parts "check0:\n" ⊞⊞ → parts ¿
+  parts "define void @uh_call_named(ptr sret(%UhValue) %out, ptr %env, ptr %name, i32 %argc, ptr %args) {\nentry:\n" ⟪ .append ⟫ → parts ¿
+  parts "  %isnull = icmp eq ptr %name, null\n" ⟪ .append ⟫ → parts ¿
+  parts "  br i1 %isnull, label %ret0, label %check0\n" ⟪ .append ⟫ → parts ¿
+  parts "ret0:\n" ⟪ .append ⟫ → parts ¿
+  parts "  call void @uh_num(ptr sret(%UhValue) %out, double 0.0)\n" ⟪ .append ⟫ → parts ¿
+  parts "  ret void\n" ⟪ .append ⟫ → parts ¿
+  parts "check0:\n" ⟪ .append ⟫ → parts ¿
   st "parts" ← parts ¿
 
   program "functions" ⌈ ⌉ → funcs ¿
   funcs ⟪ len ⟫ → n ¿
-  n 0 ≡ ⤴ ↵ parts "  br label %ret0\n" ⊞⊞ → parts ¿ ⌫ ¿
+  n 0 ≡ ⤴ ↵ parts "  br label %ret0\n" ⟪ .append ⟫ → parts ¿ ⌫ ¿
   0 → i ¿
   i n ≺ ⟲ ↵
     funcs i ⌈ ⌉ "name" ⌈ ⌉ → fname ¿
@@ -298,27 +355,27 @@
     st "call" ⟪ next_label ⟫ → callLabel ¿
     st "next" ⟪ next_label ⟫ → nextLabel ¿
     "  " cmp ⊞⊞ " = call i32 @strcmp(ptr %name, ptr " ⊞⊞ fnamePtr ⊞⊞ ")\n" ⊞⊞ → line ¿
-    parts line ⊞⊞ → parts ¿
+    parts line ⟪ .append ⟫ → parts ¿
     "  " eq ⊞⊞ " = icmp eq i32 " ⊞⊞ cmp ⊞⊞ ", 0\n" ⊞⊞ → line2 ¿
-    parts line2 ⊞⊞ → parts ¿
+    parts line2 ⟪ .append ⟫ → parts ¿
     "  br i1 " eq ⊞⊞ ", label %" ⊞⊞ callLabel ⊞⊞ ", label %" ⊞⊞ nextLabel ⊞⊞ "\n" ⊞⊞ → line3 ¿
-    parts line3 ⊞⊞ → parts ¿
+    parts line3 ⟪ .append ⟫ → parts ¿
 
-    parts callLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts callLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → ok ¿
     "  " ok ⊞⊞ " = icmp eq i32 %argc, " ⊞⊞ argc ⍕ ⊞⊞ "\n" ⊞⊞ → line4 ¿
-    parts line4 ⊞⊞ → parts ¿
+    parts line4 ⟪ .append ⟫ → parts ¿
     st "argc_ok" ⟪ next_label ⟫ → okLabel ¿
     st "argc_bad" ⟪ next_label ⟫ → badLabel ¿
     "  br i1 " ok ⊞⊞ ", label %" ⊞⊞ okLabel ⊞⊞ ", label %" ⊞⊞ badLabel ⊞⊞ "\n" ⊞⊞ → line5 ¿
-    parts line5 ⊞⊞ → parts ¿
+    parts line5 ⟪ .append ⟫ → parts ¿
 
-    parts okLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts okLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     0 → j ¿
     j argc ≺ ⟲ ↵
       st ⟪ next_tmp ⟫ → aptr ¿
       "  " aptr ⊞⊞ " = getelementptr %UhValue, ptr %args, i64 " ⊞⊞ j ⍕ ⊞⊞ "\n" ⊞⊞ → line6 ¿
-      parts line6 ⊞⊞ → parts ¿
+      parts line6 ⟪ .append ⟫ → parts ¿
       j 1 ⊞ → j ¿
     ⌫ ¿
     ⍝ Build function call with args
@@ -327,22 +384,22 @@
     k argc ≺ ⟲ ↵
       st ⟪ next_tmp ⟫ → aptr2 ¿
       "  " aptr2 ⊞⊞ " = getelementptr %UhValue, ptr %args, i64 " ⊞⊞ k ⍕ ⊞⊞ "\n" ⊞⊞ → line7 ¿
-      parts line7 ⊞⊞ → parts ¿
+      parts line7 ⟪ .append ⟫ → parts ¿
       callLine ", ptr byval(%UhValue) " ⊞⊞ aptr2 ⊞⊞ → callLine ¿
       k 1 ⊞ → k ¿
     ⌫ ¿
     callLine ")\n" ⊞⊞ → callLine ¿
-    parts callLine ⊞⊞ → parts ¿
-    parts "  ret void\n" ⊞⊞ → parts ¿
+    parts callLine ⟪ .append ⟫ → parts ¿
+    parts "  ret void\n" ⟪ .append ⟫ → parts ¿
 
-    parts badLabel ⊞⊞ ":\n  br label %ret0\n" ⊞⊞ → parts ¿
-    parts nextLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
-    i n 1 ⊟ ≡ ⤴ ↵ parts "  br label %ret0\n" ⊞⊞ → parts ¿ ⌫ ¿
+    parts badLabel ⊞⊞ ":\n  br label %ret0\n" ⟪ .append ⟫ → parts ¿
+    parts nextLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
+    i n 1 ⊟ ≡ ⤴ ↵ parts "  br label %ret0\n" ⟪ .append ⟫ → parts ¿ ⌫ ¿
     st "parts" ← parts ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
 
-  parts "}\n" ⊞⊞ → parts ¿
+  parts "}\n" ⟪ .append ⟫ → parts ¿
   st "parts" ← parts ¿
 ↦ st ↦ program ↦ emit_dispatcher ¿
 
@@ -360,10 +417,10 @@
     i 1 ⊞ → i ¿
   ⌫ ¿
   head ") {\nentry:\n" ⊞⊞ → head ¿
-  parts head ⊞⊞ → parts ¿
-  parts "  %env = alloca %UhEnv\n  %st = alloca %UhStack\n" ⊞⊞ → parts ¿
-  parts "  call void @uh_env_init(ptr %env, ptr %parent)\n" ⊞⊞ → parts ¿
-  parts "  call void @uh_stack_init(ptr %st)\n" ⊞⊞ → parts ¿
+  parts head ⟪ .append ⟫ → parts ¿
+  parts "  %env = alloca %UhEnv\n  %st = alloca %UhStack\n" ⟪ .append ⟫ → parts ¿
+  parts "  call void @uh_env_init(ptr %env, ptr %parent)\n" ⟪ .append ⟫ → parts ¿
+  parts "  call void @uh_stack_init(ptr %st)\n" ⟪ .append ⟫ → parts ¿
   st "parts" ← parts ¿
   0 → i ¿
   i argc ≺ ⟲ ↵
@@ -371,17 +428,17 @@
     st p ⟪ emit_str_ptr ⟫ → namePtr ¿
     st "parts" ⌈ ⌉ → parts ¿
     "  call void @uh_env_set(ptr %env, ptr " namePtr ⊞⊞ ", ptr byval(%UhValue) %a" ⊞⊞ i ⍕ ⊞⊞ ")\n" ⊞⊞ → line ¿
-    parts line ⊞⊞ → parts ¿
+    parts line ⟪ .append ⟫ → parts ¿
     st "parts" ← parts ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
-  "" → bodyParts ¿
+  【】 → bodyParts ¿
   st "parts" ← bodyParts ¿
-  fn "body" ⌈ ⌉ st ⟪ emit_block ⟫ → _ ¿
+  st fn "body" ⌈ ⌉ ⟪ emit_block ⟫ → _ ¿
   st "uh_num" 【"double 0.0"】 ⟪ emit_call_value ⟫ → retPtr ¿
   st retPtr ⟪ emit_load_value ⟫ → retVal ¿
   st "parts" ⌈ ⌉ → bodyParts2 ¿
-  bodyParts2 "  store %UhValue " ⊞⊞ retVal ⊞⊞ ", ptr %out\n  ret void\n}\n" ⊞⊞ → bodyParts2 ¿
+  bodyParts2 "  store %UhValue " ⊞⊞ retVal ⊞⊞ ", ptr %out\n  ret void\n}\n" ⟪ .append ⟫ → bodyParts2 ¿
   st "parts" ← bodyParts2 ¿
 
   st "parts" ← parts ¿
@@ -390,10 +447,10 @@
   0 → ai ¿
   ai an ≺ ⟲ ↵
     allocas ai ⌈ ⌉ → lineA ¿
-    parts lineA ⊞⊞ → parts ¿
+    parts lineA ⟪ .append ⟫ → parts ¿
     ai 1 ⊞ → ai ¿
   ⌫ ¿
-  parts bodyParts2 ⊞⊞ → parts ¿
+  parts bodyParts2 ⟪ parts_extend ⟫ → parts ¿
   st "parts" ← parts ¿
   ⊤ ⇄ ¿
 ↦ st ↦ fn ↦ emit_function ¿
@@ -405,9 +462,9 @@
   i n ≺ ⟲ ↵
     stmts i ⌈ ⌉ → s ¿
     s "kind" ⌈ ⌉ "for" ≡ ⤴ ↵
-      s st ⟪ emit_for ⟫ → _ ¿
+      st s ⟪ emit_for ⟫ → _ ¿
     ⌫ ⤵ ↵
-      s st ⟪ emit_stmt ⟫ → _ ¿
+      st s ⟪ emit_stmt ⟫ → _ ¿
     ⌫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
@@ -425,119 +482,119 @@
   rangeSpec ∅ ≢ ⤴ ↵
     rangeSpec 0 ⌈ ⌉ → startExpr ¿
     rangeSpec 1 ⌈ ⌉ → endExpr ¿
-    【startExpr】 st ⟪ emit_expr ⟫ → _ ¿
-    【endExpr】 st ⟪ emit_expr ⟫ → _ ¿
+    st 【startExpr】 ⟪ emit_expr ⟫ → _ ¿
+    st 【endExpr】 ⟪ emit_expr ⟫ → _ ¿
     st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → endPtr ¿
     st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → startPtr ¿
     st endPtr ⟪ emit_load_value ⟫ → endVal ¿
     st startPtr ⟪ emit_load_value ⟫ → startVal ¿
     st ⟪ next_tmp ⟫ → startNum ¿
     st ⟪ next_tmp ⟫ → endNum ¿
-    parts "  " ⊞⊞ startNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ startVal ⊞⊞ ", 1\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  " ⊞⊞ endNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ endVal ⊞⊞ ", 1\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ startNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ startVal ⊞⊞ ", 1\n" ⟪ .append ⟫ → parts ¿
+    parts "  " ⊞⊞ endNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ endVal ⊞⊞ ", 1\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → startI ¿
     st ⟪ next_tmp ⟫ → endI ¿
-    parts "  " ⊞⊞ startI ⊞⊞ " = fptosi double " ⊞⊞ startNum ⊞⊞ " to i64\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  " ⊞⊞ endI ⊞⊞ " = fptosi double " ⊞⊞ endNum ⊞⊞ " to i64\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ startI ⊞⊞ " = fptosi double " ⊞⊞ startNum ⊞⊞ " to i64\n" ⟪ .append ⟫ → parts ¿
+    parts "  " ⊞⊞ endI ⊞⊞ " = fptosi double " ⊞⊞ endNum ⊞⊞ " to i64\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → iPtr ¿
     st iPtr "i64" ⟪ emit_alloca ⟫ → _ ¿
-    parts "  store i64 " ⊞⊞ startI ⊞⊞ ", ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  store i64 " ⊞⊞ startI ⊞⊞ ", ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
 
     st "for_cond" ⟪ next_label ⟫ → condLabel ¿
     st "for_body" ⟪ next_label ⟫ → bodyLabel ¿
     st "for_inc" ⟪ next_label ⟫ → incLabel ¿
     st "for_end" ⟪ next_label ⟫ → endLabel ¿
 
-    parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts condLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts condLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → curI ¿
-    parts "  " ⊞⊞ curI ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ curI ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → cmp ¿
-    parts "  " ⊞⊞ cmp ⊞⊞ " = icmp slt i64 " ⊞⊞ curI ⊞⊞ ", " ⊞⊞ endI ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  br i1 " ⊞⊞ cmp ⊞⊞ ", label %" ⊞⊞ bodyLabel ⊞⊞ ", label %" ⊞⊞ endLabel ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ cmp ⊞⊞ " = icmp slt i64 " ⊞⊞ curI ⊞⊞ ", " ⊞⊞ endI ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts "  br i1 " ⊞⊞ cmp ⊞⊞ ", label %" ⊞⊞ bodyLabel ⊞⊞ ", label %" ⊞⊞ endLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
 
-    parts bodyLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts bodyLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → curI2 ¿
-    parts "  " ⊞⊞ curI2 ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ curI2 ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → curD ¿
-    parts "  " ⊞⊞ curD ⊞⊞ " = sitofp i64 " ⊞⊞ curI2 ⊞⊞ " to double\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ curD ⊞⊞ " = sitofp i64 " ⊞⊞ curI2 ⊞⊞ " to double\n" ⟪ .append ⟫ → parts ¿
     st "uh_num" 【"double " curD】 ⟪ emit_call_value ⟫ → numPtr ¿
     st iterName ⟪ emit_str_ptr ⟫ → iterPtr ¿
-    parts "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ iterPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ numPtr ⊞⊞ ")\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ iterPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ numPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
 
     st "loop_stack" ⌈ ⌉ → stack ¿
     stack 【endLabel incLabel】 ⟪ .append ⟫ → stack ¿
     st "loop_stack" ← stack ¿
-    body st ⟪ emit_block ⟫ → _ ¿
+    st body ⟪ emit_block ⟫ → _ ¿
     st "loop_stack" ⌈ ⌉ → stack2 ¿
     stack2 0 stack2 ⟪ len ⟫ 1 ⊟ ⟪ slice ⟫ → stack2 ¿
     st "loop_stack" ← stack2 ¿
 
-    parts "  br label %" ⊞⊞ incLabel ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts incLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts "  br label %" ⊞⊞ incLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts incLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → curI3 ¿
     st ⟪ next_tmp ⟫ → nextI ¿
-    parts "  " ⊞⊞ curI3 ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  " ⊞⊞ nextI ⊞⊞ " = add i64 " ⊞⊞ curI3 ⊞⊞ ", 1\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  store i64 " ⊞⊞ nextI ⊞⊞ ", ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ curI3 ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts "  " ⊞⊞ nextI ⊞⊞ " = add i64 " ⊞⊞ curI3 ⊞⊞ ", 1\n" ⟪ .append ⟫ → parts ¿
+    parts "  store i64 " ⊞⊞ nextI ⊞⊞ ", ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
 
-    parts endLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts endLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
   ⌫ ⤵ ↵
     ⍝ Sequence for loop via uh_len + uh_index
-    【seqExpr】 st ⟪ emit_expr ⟫ → _ ¿
+    st 【seqExpr】 ⟪ emit_expr ⟫ → _ ¿
     st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → seqPtr ¿
     st "uh_len" 【"ptr byval(%UhValue) " seqPtr】 ⟪ emit_call_value ⟫ → lenPtr ¿
     st lenPtr ⟪ emit_load_value ⟫ → lenVal ¿
     st ⟪ next_tmp ⟫ → lenNum ¿
-    parts "  " ⊞⊞ lenNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ lenVal ⊞⊞ ", 1\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ lenNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ lenVal ⊞⊞ ", 1\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → lenI ¿
-    parts "  " ⊞⊞ lenI ⊞⊞ " = fptosi double " ⊞⊞ lenNum ⊞⊞ " to i64\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ lenI ⊞⊞ " = fptosi double " ⊞⊞ lenNum ⊞⊞ " to i64\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → iPtr ¿
     st iPtr "i64" ⟪ emit_alloca ⟫ → _ ¿
-    parts "  store i64 0, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  store i64 0, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
 
     st "for_cond" ⟪ next_label ⟫ → condLabel ¿
     st "for_body" ⟪ next_label ⟫ → bodyLabel ¿
     st "for_inc" ⟪ next_label ⟫ → incLabel ¿
     st "for_end" ⟪ next_label ⟫ → endLabel ¿
 
-    parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts condLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts condLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → curI ¿
     st ⟪ next_tmp ⟫ → cmp ¿
-    parts "  " ⊞⊞ curI ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  " ⊞⊞ cmp ⊞⊞ " = icmp slt i64 " ⊞⊞ curI ⊞⊞ ", " ⊞⊞ lenI ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  br i1 " ⊞⊞ cmp ⊞⊞ ", label %" ⊞⊞ bodyLabel ⊞⊞ ", label %" ⊞⊞ endLabel ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ curI ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts "  " ⊞⊞ cmp ⊞⊞ " = icmp slt i64 " ⊞⊞ curI ⊞⊞ ", " ⊞⊞ lenI ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts "  br i1 " ⊞⊞ cmp ⊞⊞ ", label %" ⊞⊞ bodyLabel ⊞⊞ ", label %" ⊞⊞ endLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
 
-    parts bodyLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts bodyLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → curI2 ¿
-    parts "  " ⊞⊞ curI2 ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ curI2 ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → curD ¿
-    parts "  " ⊞⊞ curD ⊞⊞ " = sitofp i64 " ⊞⊞ curI2 ⊞⊞ " to double\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ curD ⊞⊞ " = sitofp i64 " ⊞⊞ curI2 ⊞⊞ " to double\n" ⟪ .append ⟫ → parts ¿
     st "uh_num" 【"double " curD】 ⟪ emit_call_value ⟫ → idxPtr ¿
     st "uh_index" 【"ptr byval(%UhValue) " seqPtr "ptr byval(%UhValue) " idxPtr】 ⟪ emit_call_value ⟫ → itemPtr ¿
     st iterName ⟪ emit_str_ptr ⟫ → iterPtr ¿
-    parts "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ iterPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ itemPtr ⊞⊞ ")\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ iterPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ itemPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
 
     st "loop_stack" ⌈ ⌉ → stack ¿
     stack 【endLabel incLabel】 ⟪ .append ⟫ → stack ¿
     st "loop_stack" ← stack ¿
-    body st ⟪ emit_block ⟫ → _ ¿
+    st body ⟪ emit_block ⟫ → _ ¿
     st "loop_stack" ⌈ ⌉ → stack2 ¿
     stack2 0 stack2 ⟪ len ⟫ 1 ⊟ ⟪ slice ⟫ → stack2 ¿
     st "loop_stack" ← stack2 ¿
 
-    parts "  br label %" ⊞⊞ incLabel ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts incLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts "  br label %" ⊞⊞ incLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts incLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → curI3 ¿
     st ⟪ next_tmp ⟫ → nextI ¿
-    parts "  " ⊞⊞ curI3 ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  " ⊞⊞ nextI ⊞⊞ " = add i64 " ⊞⊞ curI3 ⊞⊞ ", 1\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  store i64 " ⊞⊞ nextI ⊞⊞ ", ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
-    parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⊞⊞ ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ curI3 ⊞⊞ " = load i64, ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts "  " ⊞⊞ nextI ⊞⊞ " = add i64 " ⊞⊞ curI3 ⊞⊞ ", 1\n" ⟪ .append ⟫ → parts ¿
+    parts "  store i64 " ⊞⊞ nextI ⊞⊞ ", ptr " ⊞⊞ iPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
 
-    parts endLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts endLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
   ⌫ ¿
 
   st "parts" ← parts ¿
@@ -548,9 +605,9 @@
 ƒ
   stmt "kind" ⌈ ⌉ → k ¿
   k "expr" ≡ ⤴ ↵
-    stmt "expr" ⌈ ⌉ st ⟪ emit_expr ⟫ → _ ¿
+    st stmt "expr" ⌈ ⌉ ⟪ emit_expr ⟫ → _ ¿
     st "parts" ⌈ ⌉ → parts ¿
-    parts "  call void @uh_stack_clear(ptr %st)\n" ⊞⊞ → parts ¿
+    parts "  call void @uh_stack_clear(ptr %st)\n" ⟪ .append ⟫ → parts ¿
     st "parts" ← parts ¿
   ⌫ ¿
 
@@ -560,19 +617,19 @@
     rexpr ∅ ≡ ⤴ ↵
       st "uh_num" 【"double 0.0"】 ⟪ emit_call_value ⟫ → retPtr ¿
       st retPtr ⟪ emit_load_value ⟫ → retVal ¿
-      parts "  store %UhValue " ⊞⊞ retVal ⊞⊞ ", ptr %out\n  ret void\n" ⊞⊞ → parts ¿
+      parts "  store %UhValue " ⊞⊞ retVal ⊞⊞ ", ptr %out\n  ret void\n" ⟪ .append ⟫ → parts ¿
       st "after_ret" ⟪ next_label ⟫ → afterLabel ¿
-      parts afterLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+      parts afterLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
       ⊤ ⇄ ¿
     ⌫ ¿
-    rexpr st ⟪ emit_expr ⟫ → _ ¿
+    st rexpr ⟪ emit_expr ⟫ → _ ¿
     st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → retPtr ¿
     st retPtr ⟪ emit_load_value ⟫ → retVal ¿
     st "parts" ⌈ ⌉ → parts2 ¿
-    parts2 "  store %UhValue " ⊞⊞ retVal ⊞⊞ ", ptr %out\n  ret void\n" ⊞⊞ → parts2 ¿
+    parts2 "  store %UhValue " ⊞⊞ retVal ⊞⊞ ", ptr %out\n  ret void\n" ⟪ .append ⟫ → parts2 ¿
     st "after_ret" ⟪ next_label ⟫ → afterLabel2 ¿
-    parts2 afterLabel2 ⊞⊞ ":\n" ⊞⊞ → parts2 ¿
+    parts2 afterLabel2 ⊞⊞ ":\n" ⟪ .append ⟫ → parts2 ¿
     st "parts" ← parts2 ¿
   ⌫ ¿
 
@@ -582,9 +639,9 @@
       stack stack ⟪ len ⟫ 1 ⊟ ⌈ ⌉ → entry ¿
       entry 0 ⌈ ⌉ → breakLabel ¿
       st "parts" ⌈ ⌉ → parts ¿
-      parts "  br label %" ⊞⊞ breakLabel ⊞⊞ "\n" ⊞⊞ → parts ¿
+      parts "  br label %" ⊞⊞ breakLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
       st "after_break" ⟪ next_label ⟫ → afterLabel ¿
-      parts afterLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+      parts afterLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
     ⌫ ¿
   ⌫ ¿
@@ -595,37 +652,37 @@
       stack stack ⟪ len ⟫ 1 ⊟ ⌈ ⌉ → entry ¿
       entry 1 ⌈ ⌉ → contLabel ¿
       st "parts" ⌈ ⌉ → parts ¿
-      parts "  br label %" ⊞⊞ contLabel ⊞⊞ "\n" ⊞⊞ → parts ¿
+      parts "  br label %" ⊞⊞ contLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
       st "after_cont" ⟪ next_label ⟫ → afterLabel2 ¿
-      parts afterLabel2 ⊞⊞ ":\n" ⊞⊞ → parts ¿
+      parts afterLabel2 ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
     ⌫ ¿
   ⌫ ¿
 
   k "if" ≡ ⤴ ↵
-    stmt "cond" ⌈ ⌉ st ⟪ emit_expr ⟫ → _ ¿
+    st stmt "cond" ⌈ ⌉ ⟪ emit_expr ⟫ → _ ¿
     st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → condPtr ¿
     st "parts" ⌈ ⌉ → parts ¿
     st ⟪ next_tmp ⟫ → condBool ¿
-    parts "  " ⊞⊞ condBool ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ condPtr ⊞⊞ ")\n" ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ condBool ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ condPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
     st ⟪ next_tmp ⟫ → condCmp ¿
-    parts "  " ⊞⊞ condCmp ⊞⊞ " = icmp ne i32 " ⊞⊞ condBool ⊞⊞ ", 0\n" ⊞⊞ → parts ¿
+    parts "  " ⊞⊞ condCmp ⊞⊞ " = icmp ne i32 " ⊞⊞ condBool ⊞⊞ ", 0\n" ⟪ .append ⟫ → parts ¿
     st "then" ⟪ next_label ⟫ → thenLabel ¿
     st "else" ⟪ next_label ⟫ → elseLabel ¿
     st "endif" ⟪ next_label ⟫ → endLabel ¿
-    parts "  br i1 " ⊞⊞ condCmp ⊞⊞ ", label %" ⊞⊞ thenLabel ⊞⊞ ", label %" ⊞⊞ elseLabel ⊞⊞ "\n" ⊞⊞ → parts ¿
-    parts thenLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts "  br i1 " ⊞⊞ condCmp ⊞⊞ ", label %" ⊞⊞ thenLabel ⊞⊞ ", label %" ⊞⊞ elseLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts thenLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     st "parts" ← parts ¿
-    stmt "then" ⌈ ⌉ st ⟪ emit_block ⟫ → _ ¿
+    st stmt "then" ⌈ ⌉ ⟪ emit_block ⟫ → _ ¿
     st "parts" ⌈ ⌉ → parts2 ¿
-    parts2 "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⊞⊞ → parts2 ¿
-    parts2 elseLabel ⊞⊞ ":\n" ⊞⊞ → parts2 ¿
+    parts2 "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts2 ¿
+    parts2 elseLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts2 ¿
     st "parts" ← parts2 ¿
     stmt "else" ⌈ ⌉ → elseBlk ¿
-    elseBlk ∅ ≢ ⤴ ↵ elseBlk st ⟪ emit_block ⟫ → _ ¿ ⌫ ¿
+    elseBlk ∅ ≢ ⤴ ↵ st elseBlk ⟪ emit_block ⟫ → _ ¿ ⌫ ¿
     st "parts" ⌈ ⌉ → parts3 ¿
-    parts3 "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⊞⊞ → parts3 ¿
-    parts3 endLabel ⊞⊞ ":\n" ⊞⊞ → parts3 ¿
+    parts3 "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts3 ¿
+    parts3 endLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts3 ¿
     st "parts" ← parts3 ¿
   ⌫ ¿
 
@@ -634,29 +691,29 @@
     st "body" ⟪ next_label ⟫ → bodyLabel ¿
     st "end" ⟪ next_label ⟫ → endLabel ¿
     st "parts" ⌈ ⌉ → parts ¿
-    parts "  br label %" ⊞⊞ loopLabel ⊞⊞ "\n" ⊞⊞ → parts ¿
-    parts loopLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+    parts "  br label %" ⊞⊞ loopLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+    parts loopLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
     st "parts" ← parts ¿
-    stmt "cond" ⌈ ⌉ st ⟪ emit_expr ⟫ → _ ¿
+    st stmt "cond" ⌈ ⌉ ⟪ emit_expr ⟫ → _ ¿
     st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → condPtr ¿
     st "parts" ⌈ ⌉ → parts2 ¿
     st ⟪ next_tmp ⟫ → condBool ¿
-    parts2 "  " ⊞⊞ condBool ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ condPtr ⊞⊞ ")\n" ⊞⊞ → parts2 ¿
+    parts2 "  " ⊞⊞ condBool ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ condPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts2 ¿
     st ⟪ next_tmp ⟫ → condCmp ¿
-    parts2 "  " ⊞⊞ condCmp ⊞⊞ " = icmp ne i32 " ⊞⊞ condBool ⊞⊞ ", 0\n" ⊞⊞ → parts2 ¿
-    parts2 "  br i1 " ⊞⊞ condCmp ⊞⊞ ", label %" ⊞⊞ bodyLabel ⊞⊞ ", label %" ⊞⊞ endLabel ⊞⊞ "\n" ⊞⊞ → parts2 ¿
-    parts2 bodyLabel ⊞⊞ ":\n" ⊞⊞ → parts2 ¿
+    parts2 "  " ⊞⊞ condCmp ⊞⊞ " = icmp ne i32 " ⊞⊞ condBool ⊞⊞ ", 0\n" ⟪ .append ⟫ → parts2 ¿
+    parts2 "  br i1 " ⊞⊞ condCmp ⊞⊞ ", label %" ⊞⊞ bodyLabel ⊞⊞ ", label %" ⊞⊞ endLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts2 ¿
+    parts2 bodyLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts2 ¿
     st "parts" ← parts2 ¿
     st "loop_stack" ⌈ ⌉ → stack ¿
     stack 【endLabel loopLabel】 ⟪ .append ⟫ → stack ¿
     st "loop_stack" ← stack ¿
-    stmt "body" ⌈ ⌉ st ⟪ emit_block ⟫ → _ ¿
+    st stmt "body" ⌈ ⌉ ⟪ emit_block ⟫ → _ ¿
     st "loop_stack" ⌈ ⌉ → stack2 ¿
     stack2 0 stack2 ⟪ len ⟫ 1 ⊟ ⟪ slice ⟫ → stack2 ¿
     st "loop_stack" ← stack2 ¿
     st "parts" ⌈ ⌉ → parts3 ¿
-    parts3 "  br label %" ⊞⊞ loopLabel ⊞⊞ "\n" ⊞⊞ → parts3 ¿
-    parts3 endLabel ⊞⊞ ":\n" ⊞⊞ → parts3 ¿
+    parts3 "  br label %" ⊞⊞ loopLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts3 ¿
+    parts3 endLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts3 ¿
     st "parts" ← parts3 ¿
   ⌫ ¿
 
@@ -677,7 +734,7 @@
       vstr ⟪ ensure_double_literal ⟫ → dv ¿
       st "uh_num" 【"double " dv】 ⟪ emit_call_value ⟫ → tmp ¿
       st "parts" ⌈ ⌉ → parts ¿
-      parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⊞⊞ → parts ¿
+      parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
     ⌫ ¿
 
@@ -685,14 +742,14 @@
       v "1" ≡ ⤴ ↵ "double 1.0" → argStr ¿ ⌫ ⤵ ↵ "double 0.0" → argStr ¿ ⌫ ¿
       st "uh_num" 【argStr】 ⟪ emit_call_value ⟫ → tmp ¿
       st "parts" ⌈ ⌉ → parts ¿
-      parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⊞⊞ → parts ¿
+      parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
     ⌫ ¿
 
     k "null" ≡ ⤴ ↵
       st "uh_null" 【】 ⟪ emit_call_value ⟫ → tmp ¿
       st "parts" ⌈ ⌉ → parts ¿
-      parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⊞⊞ → parts ¿
+      parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
     ⌫ ¿
 
@@ -700,7 +757,7 @@
       st v ⟪ emit_str_ptr ⟫ → sptr ¿
       st "uh_str" 【"ptr " sptr】 ⟪ emit_call_value ⟫ → tmp ¿
       st "parts" ⌈ ⌉ → parts ¿
-      parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⊞⊞ → parts ¿
+      parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
     ⌫ ¿
 
@@ -711,13 +768,13 @@
         st v ⟪ emit_str_ptr ⟫ → sptrFn ¿
         st "uh_str" 【"ptr " sptrFn】 ⟪ emit_call_value ⟫ → tmpFn ¿
         st "parts" ⌈ ⌉ → partsFn ¿
-        partsFn "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmpFn ⊞⊞ ")\n" ⊞⊞ → partsFn ¿
+        partsFn "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmpFn ⊞⊞ ")\n" ⟪ .append ⟫ → partsFn ¿
         st "parts" ← partsFn ¿
       ⌫ ⤵ ↵
         st v ⟪ emit_str_ptr ⟫ → sptr ¿
         st "uh_env_get" 【"ptr %env" "ptr " sptr】 ⟪ emit_call_value ⟫ → tmp ¿
         st "parts" ⌈ ⌉ → parts ¿
-        parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⊞⊞ → parts ¿
+        parts "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ tmp ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
         st "parts" ← parts ¿
       ⌫ ¿
     ⌫ ¿
@@ -729,15 +786,15 @@
       0 → j ¿
       j m ≺ ⟲ ↵
         items j ⌈ ⌉ → it ¿
-        【it】 st ⟪ emit_expr ⟫ → _ ¿
+        st 【it】 ⟪ emit_expr ⟫ → _ ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → itPtr ¿
         st "parts" ⌈ ⌉ → parts ¿
-        parts "  call void @uh_arr_push(ptr " ⊞⊞ arrPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ itPtr ⊞⊞ ")\n" ⊞⊞ → parts ¿
+        parts "  call void @uh_arr_push(ptr " ⊞⊞ arrPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ itPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
         st "parts" ← parts ¿
         j 1 ⊞ → j ¿
       ⌫ ¿
       st "parts" ⌈ ⌉ → parts2 ¿
-      parts2 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ arrPtr ⊞⊞ ")\n" ⊞⊞ → parts2 ¿
+      parts2 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ arrPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts2 ¿
       st "parts" ← parts2 ¿
     ⌫ ¿
 
@@ -749,17 +806,17 @@
       j m ≺ ⟲ ↵
         pairs j ⌈ ⌉ "key" ⌈ ⌉ → k1 ¿
         pairs j ⌈ ⌉ "val" ⌈ ⌉ → v1 ¿
-        【k1】 st ⟪ emit_expr ⟫ → _ ¿
+        st 【k1】 ⟪ emit_expr ⟫ → _ ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → kPtr ¿
-        【v1】 st ⟪ emit_expr ⟫ → _ ¿
+        st 【v1】 ⟪ emit_expr ⟫ → _ ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → vPtr ¿
         st "parts" ⌈ ⌉ → parts ¿
-        parts "  call void @uh_dict_set(ptr " ⊞⊞ dictPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ kPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ vPtr ⊞⊞ ")\n" ⊞⊞ → parts ¿
+        parts "  call void @uh_dict_set(ptr " ⊞⊞ dictPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ kPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ vPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
         st "parts" ← parts ¿
         j 1 ⊞ → j ¿
       ⌫ ¿
       st "parts" ⌈ ⌉ → parts2 ¿
-      parts2 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ dictPtr ⊞⊞ ")\n" ⊞⊞ → parts2 ¿
+      parts2 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ dictPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts2 ¿
       st "parts" ← parts2 ¿
     ⌫ ¿
 
@@ -772,8 +829,8 @@
       st field ⟪ emit_str_ptr ⟫ → keyPtrStr ¿
       st "uh_str" 【"ptr " keyPtrStr】 ⟪ emit_call_value ⟫ → keyPtr ¿
       st "parts" ⌈ ⌉ → parts ¿
-      parts "  call void @uh_store_index(ptr " ⊞⊞ objPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ keyPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ vPtr ⊞⊞ ")\n" ⊞⊞ → parts ¿
-      parts "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ basePtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ objPtr ⊞⊞ ")\n" ⊞⊞ → parts ¿
+      parts "  call void @uh_store_index(ptr " ⊞⊞ objPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ keyPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ vPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
+      parts "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ basePtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ objPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
     ⌫ ¿
 
@@ -781,7 +838,7 @@
       st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → vPtr ¿
       st v ⟪ emit_str_ptr ⟫ → namePtr ¿
       st "parts" ⌈ ⌉ → parts ¿
-      parts "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ namePtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ vPtr ⊞⊞ ")\n" ⊞⊞ → parts ¿
+      parts "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ namePtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ vPtr ⊞⊞ ")\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
     ⌫ ¿
 
@@ -791,72 +848,72 @@
       st seqPtr ⟪ emit_load_value ⟫ → seqVal ¿
       st ⟪ next_tmp ⟫ → tag ¿
       st "parts" ⌈ ⌉ → parts ¿
-      parts "  " ⊞⊞ tag ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 0\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ tag ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 0\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → isArr ¿
-      parts "  " ⊞⊞ isArr ⊞⊞ " = icmp eq i32 " ⊞⊞ tag ⊞⊞ ", 2\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ isArr ⊞⊞ " = icmp eq i32 " ⊞⊞ tag ⊞⊞ ", 2\n" ⟪ .append ⟫ → parts ¿
       st "reduce_arr" ⟪ next_label ⟫ → arrLabel ¿
       st "reduce_end" ⟪ next_label ⟫ → endLabel ¿
-      parts "  br i1 " ⊞⊞ isArr ⊞⊞ ", label %" ⊞⊞ arrLabel ⊞⊞ ", label %" ⊞⊞ endLabel ⊞⊞ "\n" ⊞⊞ → parts ¿
-      parts arrLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+      parts "  br i1 " ⊞⊞ isArr ⊞⊞ ", label %" ⊞⊞ arrLabel ⊞⊞ ", label %" ⊞⊞ endLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+      parts arrLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → arrPtr ¿
-      parts "  " ⊞⊞ arrPtr ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 3\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ arrPtr ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 3\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → lenPtr ¿
-      parts "  " ⊞⊞ lenPtr ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtr ⊞⊞ ", i32 0, i32 1\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ lenPtr ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtr ⊞⊞ ", i32 0, i32 1\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → lenVal ¿
-      parts "  " ⊞⊞ lenVal ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtr ⊞⊞ "\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ lenVal ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → hasAny ¿
-      parts "  " ⊞⊞ hasAny ⊞⊞ " = icmp sgt i64 " ⊞⊞ lenVal ⊞⊞ ", 0\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ hasAny ⊞⊞ " = icmp sgt i64 " ⊞⊞ lenVal ⊞⊞ ", 0\n" ⟪ .append ⟫ → parts ¿
       st "reduce_loop" ⟪ next_label ⟫ → loopLabel ¿
       st "reduce_done" ⟪ next_label ⟫ → doneLabel ¿
-      parts "  br i1 " ⊞⊞ hasAny ⊞⊞ ", label %" ⊞⊞ loopLabel ⊞⊞ ", label %" ⊞⊞ doneLabel ⊞⊞ "\n" ⊞⊞ → parts ¿
-      parts loopLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+      parts "  br i1 " ⊞⊞ hasAny ⊞⊞ ", label %" ⊞⊞ loopLabel ⊞⊞ ", label %" ⊞⊞ doneLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+      parts loopLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → itemsPtr ¿
-      parts "  " ⊞⊞ itemsPtr ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtr ⊞⊞ ", i32 0, i32 0\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ itemsPtr ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtr ⊞⊞ ", i32 0, i32 0\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → itemsVal ¿
-      parts "  " ⊞⊞ itemsVal ⊞⊞ " = load ptr, ptr " ⊞⊞ itemsPtr ⊞⊞ "\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ itemsVal ⊞⊞ " = load ptr, ptr " ⊞⊞ itemsPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → accPtr ¿
       st accPtr "%UhValue" ⟪ emit_alloca ⟫ → _ ¿
       st ⟪ next_tmp ⟫ → firstPtr ¿
-      parts "  " ⊞⊞ firstPtr ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsVal ⊞⊞ ", i64 0\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ firstPtr ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsVal ⊞⊞ ", i64 0\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → firstVal ¿
-      parts "  " ⊞⊞ firstVal ⊞⊞ " = load %UhValue, ptr " ⊞⊞ firstPtr ⊞⊞ "\n" ⊞⊞ → parts ¿
-      parts "  store %UhValue " ⊞⊞ firstVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ firstVal ⊞⊞ " = load %UhValue, ptr " ⊞⊞ firstPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+      parts "  store %UhValue " ⊞⊞ firstVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
 
       st ⟪ next_tmp ⟫ → idxPtr ¿
       st idxPtr "i64" ⟪ emit_alloca ⟫ → _ ¿
-      parts "  store i64 1, ptr " ⊞⊞ idxPtr ⊞⊞ "\n" ⊞⊞ → parts ¿
+      parts "  store i64 1, ptr " ⊞⊞ idxPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
       st "reduce_cond" ⟪ next_label ⟫ → condLabel ¿
       st "reduce_body" ⟪ next_label ⟫ → bodyLabel ¿
-      parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⊞⊞ → parts ¿
-      parts condLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+      parts "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+      parts condLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → curI ¿
-      parts "  " ⊞⊞ curI ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtr ⊞⊞ "\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ curI ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → cmp2 ¿
-      parts "  " ⊞⊞ cmp2 ⊞⊞ " = icmp slt i64 " ⊞⊞ curI ⊞⊞ ", " ⊞⊞ lenVal ⊞⊞ "\n" ⊞⊞ → parts ¿
-      parts "  br i1 " ⊞⊞ cmp2 ⊞⊞ ", label %" ⊞⊞ bodyLabel ⊞⊞ ", label %" ⊞⊞ doneLabel ⊞⊞ "\n" ⊞⊞ → parts ¿
-      parts bodyLabel ⊞⊞ ":\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ cmp2 ⊞⊞ " = icmp slt i64 " ⊞⊞ curI ⊞⊞ ", " ⊞⊞ lenVal ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+      parts "  br i1 " ⊞⊞ cmp2 ⊞⊞ ", label %" ⊞⊞ bodyLabel ⊞⊞ ", label %" ⊞⊞ doneLabel ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
+      parts bodyLabel ⊞⊞ ":\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → valPtr ¿
-      parts "  " ⊞⊞ valPtr ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsVal ⊞⊞ ", i64 " ⊞⊞ curI ⊞⊞ "\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ valPtr ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsVal ⊞⊞ ", i64 " ⊞⊞ curI ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
       st ⟪ next_tmp ⟫ → valLoaded ¿
-      parts "  " ⊞⊞ valLoaded ⊞⊞ " = load %UhValue, ptr " ⊞⊞ valPtr ⊞⊞ "\n" ⊞⊞ → parts ¿
+      parts "  " ⊞⊞ valLoaded ⊞⊞ " = load %UhValue, ptr " ⊞⊞ valPtr ⊞⊞ "\n" ⟪ .append ⟫ → parts ¿
       st "parts" ← parts ¿
 
-      opv "⊞" ≡ ⤴ ↵ st "uh_add" 【"ptr byval(%UhValue) " accPtr "ptr byval(%UhValue) " valPtr】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⊞⊞ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
-      opv "⊟" ≡ ⤴ ↵ st "uh_sub" 【"ptr byval(%UhValue) " accPtr "ptr byval(%UhValue) " valPtr】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⊞⊞ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
-      opv "⊠" ≡ ⤴ ↵ st "uh_mul" 【"ptr byval(%UhValue) " accPtr "ptr byval(%UhValue) " valPtr】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⊞⊞ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
-      opv "⊘" ≡ ⤴ ↵ st "uh_div" 【"ptr byval(%UhValue) " accPtr "ptr byval(%UhValue) " valPtr】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⊞⊞ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
+      opv "⊞" ≡ ⤴ ↵ st "uh_add" 【"ptr byval(%UhValue) " accPtr "ptr byval(%UhValue) " valPtr】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⟪ .append ⟫ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
+      opv "⊟" ≡ ⤴ ↵ st "uh_sub" 【"ptr byval(%UhValue) " accPtr "ptr byval(%UhValue) " valPtr】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⟪ .append ⟫ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
+      opv "⊠" ≡ ⤴ ↵ st "uh_mul" 【"ptr byval(%UhValue) " accPtr "ptr byval(%UhValue) " valPtr】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⟪ .append ⟫ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
+      opv "⊘" ≡ ⤴ ↵ st "uh_div" 【"ptr byval(%UhValue) " accPtr "ptr byval(%UhValue) " valPtr】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtr ⊞⊞ "\n" ⟪ .append ⟫ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
 
       st "parts" ⌈ ⌉ → partsY ¿
       st ⟪ next_tmp ⟫ → nextI ¿
-      partsY "  " ⊞⊞ nextI ⊞⊞ " = add i64 " ⊞⊞ curI ⊞⊞ ", 1\n" ⊞⊞ → partsY ¿
-      partsY "  store i64 " ⊞⊞ nextI ⊞⊞ ", ptr " ⊞⊞ idxPtr ⊞⊞ "\n" ⊞⊞ → partsY ¿
-      partsY "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⊞⊞ → partsY ¿
+      partsY "  " ⊞⊞ nextI ⊞⊞ " = add i64 " ⊞⊞ curI ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsY ¿
+      partsY "  store i64 " ⊞⊞ nextI ⊞⊞ ", ptr " ⊞⊞ idxPtr ⊞⊞ "\n" ⟪ .append ⟫ → partsY ¿
+      partsY "  br label %" ⊞⊞ condLabel ⊞⊞ "\n" ⟪ .append ⟫ → partsY ¿
       st "parts" ← partsY ¿
 
-      partsY doneLabel ⊞⊞ ":\n" ⊞⊞ → partsY ¿
-      partsY "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ accPtr ⊞⊞ ")\n" ⊞⊞ → partsY ¿
-      partsY "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⊞⊞ → partsY ¿
-      partsY endLabel ⊞⊞ ":\n" ⊞⊞ → partsY ¿
+      partsY doneLabel ⊞⊞ ":\n" ⟪ .append ⟫ → partsY ¿
+      partsY "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ accPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsY ¿
+      partsY "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⟪ .append ⟫ → partsY ¿
+      partsY endLabel ⊞⊞ ":\n" ⟪ .append ⟫ → partsY ¿
       st "parts" ← partsY ¿
     ⌫ ¿
 
@@ -867,68 +924,68 @@
       st seqPtr ⟪ emit_load_value ⟫ → seqVal ¿
       st "parts" ⌈ ⌉ → partsS ¿
       st ⟪ next_tmp ⟫ → tagS ¿
-      partsS "  " ⊞⊞ tagS ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 0\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ tagS ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → isArrS ¿
-      partsS "  " ⊞⊞ isArrS ⊞⊞ " = icmp eq i32 " ⊞⊞ tagS ⊞⊞ ", 2\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ isArrS ⊞⊞ " = icmp eq i32 " ⊞⊞ tagS ⊞⊞ ", 2\n" ⟪ .append ⟫ → partsS ¿
       st "scan_arr" ⟪ next_label ⟫ → arrLabelS ¿
       st "scan_end" ⟪ next_label ⟫ → endLabelS ¿
-      partsS "  br i1 " ⊞⊞ isArrS ⊞⊞ ", label %" ⊞⊞ arrLabelS ⊞⊞ ", label %" ⊞⊞ endLabelS ⊞⊞ "\n" ⊞⊞ → partsS ¿
-      partsS arrLabelS ⊞⊞ ":\n" ⊞⊞ → partsS ¿
+      partsS "  br i1 " ⊞⊞ isArrS ⊞⊞ ", label %" ⊞⊞ arrLabelS ⊞⊞ ", label %" ⊞⊞ endLabelS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
+      partsS arrLabelS ⊞⊞ ":\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → arrPtrS ¿
-      partsS "  " ⊞⊞ arrPtrS ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 3\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ arrPtrS ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 3\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → lenPtrS ¿
-      partsS "  " ⊞⊞ lenPtrS ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrS ⊞⊞ ", i32 0, i32 1\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ lenPtrS ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrS ⊞⊞ ", i32 0, i32 1\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → lenValS ¿
-      partsS "  " ⊞⊞ lenValS ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtrS ⊞⊞ "\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ lenValS ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → hasAnyS ¿
-      partsS "  " ⊞⊞ hasAnyS ⊞⊞ " = icmp sgt i64 " ⊞⊞ lenValS ⊞⊞ ", 0\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ hasAnyS ⊞⊞ " = icmp sgt i64 " ⊞⊞ lenValS ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsS ¿
       st "scan_loop" ⟪ next_label ⟫ → loopLabelS ¿
       st "scan_done" ⟪ next_label ⟫ → doneLabelS ¿
-      partsS "  br i1 " ⊞⊞ hasAnyS ⊞⊞ ", label %" ⊞⊞ loopLabelS ⊞⊞ ", label %" ⊞⊞ doneLabelS ⊞⊞ "\n" ⊞⊞ → partsS ¿
-      partsS loopLabelS ⊞⊞ ":\n" ⊞⊞ → partsS ¿
+      partsS "  br i1 " ⊞⊞ hasAnyS ⊞⊞ ", label %" ⊞⊞ loopLabelS ⊞⊞ ", label %" ⊞⊞ doneLabelS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
+      partsS loopLabelS ⊞⊞ ":\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → itemsPtrS ¿
-      partsS "  " ⊞⊞ itemsPtrS ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrS ⊞⊞ ", i32 0, i32 0\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ itemsPtrS ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrS ⊞⊞ ", i32 0, i32 0\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → itemsValS ¿
-      partsS "  " ⊞⊞ itemsValS ⊞⊞ " = load ptr, ptr " ⊞⊞ itemsPtrS ⊞⊞ "\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ itemsValS ⊞⊞ " = load ptr, ptr " ⊞⊞ itemsPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → accPtrS ¿
       st accPtrS "%UhValue" ⟪ emit_alloca ⟫ → _ ¿
       st ⟪ next_tmp ⟫ → firstPtrS ¿
-      partsS "  " ⊞⊞ firstPtrS ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsValS ⊞⊞ ", i64 0\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ firstPtrS ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsValS ⊞⊞ ", i64 0\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → firstValS ¿
-      partsS "  " ⊞⊞ firstValS ⊞⊞ " = load %UhValue, ptr " ⊞⊞ firstPtrS ⊞⊞ "\n" ⊞⊞ → partsS ¿
-      partsS "  store %UhValue " ⊞⊞ firstValS ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⊞⊞ → partsS ¿
-      partsS "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ accPtrS ⊞⊞ ")\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ firstValS ⊞⊞ " = load %UhValue, ptr " ⊞⊞ firstPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
+      partsS "  store %UhValue " ⊞⊞ firstValS ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
+      partsS "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ accPtrS ⊞⊞ ")\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → idxPtrS ¿
       st idxPtrS "i64" ⟪ emit_alloca ⟫ → _ ¿
-      partsS "  store i64 1, ptr " ⊞⊞ idxPtrS ⊞⊞ "\n" ⊞⊞ → partsS ¿
+      partsS "  store i64 1, ptr " ⊞⊞ idxPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
       st "scan_cond" ⟪ next_label ⟫ → condLabelS ¿
       st "scan_body" ⟪ next_label ⟫ → bodyLabelS ¿
-      partsS "  br label %" ⊞⊞ condLabelS ⊞⊞ "\n" ⊞⊞ → partsS ¿
-      partsS condLabelS ⊞⊞ ":\n" ⊞⊞ → partsS ¿
+      partsS "  br label %" ⊞⊞ condLabelS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
+      partsS condLabelS ⊞⊞ ":\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → curIS ¿
-      partsS "  " ⊞⊞ curIS ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrS ⊞⊞ "\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ curIS ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → cmpS ¿
-      partsS "  " ⊞⊞ cmpS ⊞⊞ " = icmp slt i64 " ⊞⊞ curIS ⊞⊞ ", " ⊞⊞ lenValS ⊞⊞ "\n" ⊞⊞ → partsS ¿
-      partsS "  br i1 " ⊞⊞ cmpS ⊞⊞ ", label %" ⊞⊞ bodyLabelS ⊞⊞ ", label %" ⊞⊞ doneLabelS ⊞⊞ "\n" ⊞⊞ → partsS ¿
-      partsS bodyLabelS ⊞⊞ ":\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ cmpS ⊞⊞ " = icmp slt i64 " ⊞⊞ curIS ⊞⊞ ", " ⊞⊞ lenValS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
+      partsS "  br i1 " ⊞⊞ cmpS ⊞⊞ ", label %" ⊞⊞ bodyLabelS ⊞⊞ ", label %" ⊞⊞ doneLabelS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
+      partsS bodyLabelS ⊞⊞ ":\n" ⟪ .append ⟫ → partsS ¿
       st ⟪ next_tmp ⟫ → valPtrS ¿
-      partsS "  " ⊞⊞ valPtrS ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsValS ⊞⊞ ", i64 " ⊞⊞ curIS ⊞⊞ "\n" ⊞⊞ → partsS ¿
+      partsS "  " ⊞⊞ valPtrS ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsValS ⊞⊞ ", i64 " ⊞⊞ curIS ⊞⊞ "\n" ⟪ .append ⟫ → partsS ¿
       st "parts" ← partsS ¿
-      opv "⊞" ≡ ⤴ ↵ st "uh_add" 【"ptr byval(%UhValue) " accPtrS "ptr byval(%UhValue) " valPtrS】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⊞⊞ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
-      opv "⊟" ≡ ⤴ ↵ st "uh_sub" 【"ptr byval(%UhValue) " accPtrS "ptr byval(%UhValue) " valPtrS】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⊞⊞ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
-      opv "⊠" ≡ ⤴ ↵ st "uh_mul" 【"ptr byval(%UhValue) " accPtrS "ptr byval(%UhValue) " valPtrS】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⊞⊞ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
-      opv "⊘" ≡ ⤴ ↵ st "uh_div" 【"ptr byval(%UhValue) " accPtrS "ptr byval(%UhValue) " valPtrS】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⊞⊞ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
+      opv "⊞" ≡ ⤴ ↵ st "uh_add" 【"ptr byval(%UhValue) " accPtrS "ptr byval(%UhValue) " valPtrS】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
+      opv "⊟" ≡ ⤴ ↵ st "uh_sub" 【"ptr byval(%UhValue) " accPtrS "ptr byval(%UhValue) " valPtrS】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
+      opv "⊠" ≡ ⤴ ↵ st "uh_mul" 【"ptr byval(%UhValue) " accPtrS "ptr byval(%UhValue) " valPtrS】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
+      opv "⊘" ≡ ⤴ ↵ st "uh_div" 【"ptr byval(%UhValue) " accPtrS "ptr byval(%UhValue) " valPtrS】 ⟪ emit_call_value ⟫ → accPtr2 ¿ st accPtr2 ⟪ emit_load_value ⟫ → accVal ¿ st "parts" ⌈ ⌉ → partsX ¿ partsX "  store %UhValue " ⊞⊞ accVal ⊞⊞ ", ptr " ⊞⊞ accPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsX ¿ st "parts" ← partsX ¿ ⌫ ¿
 
       st "parts" ⌈ ⌉ → partsY ¿
-      partsY "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ accPtrS ⊞⊞ ")\n" ⊞⊞ → partsY ¿
+      partsY "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ accPtrS ⊞⊞ ")\n" ⟪ .append ⟫ → partsY ¿
       st ⟪ next_tmp ⟫ → nextIS ¿
-      partsY "  " ⊞⊞ nextIS ⊞⊞ " = add i64 " ⊞⊞ curIS ⊞⊞ ", 1\n" ⊞⊞ → partsY ¿
-      partsY "  store i64 " ⊞⊞ nextIS ⊞⊞ ", ptr " ⊞⊞ idxPtrS ⊞⊞ "\n" ⊞⊞ → partsY ¿
-      partsY "  br label %" ⊞⊞ condLabelS ⊞⊞ "\n" ⊞⊞ → partsY ¿
-      partsY doneLabelS ⊞⊞ ":\n" ⊞⊞ → partsY ¿
-      partsY "  br label %" ⊞⊞ endLabelS ⊞⊞ "\n" ⊞⊞ → partsY ¿
-      partsY endLabelS ⊞⊞ ":\n" ⊞⊞ → partsY ¿
-      partsY "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ outPtr ⊞⊞ ")\n" ⊞⊞ → partsY ¿
+      partsY "  " ⊞⊞ nextIS ⊞⊞ " = add i64 " ⊞⊞ curIS ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsY ¿
+      partsY "  store i64 " ⊞⊞ nextIS ⊞⊞ ", ptr " ⊞⊞ idxPtrS ⊞⊞ "\n" ⟪ .append ⟫ → partsY ¿
+      partsY "  br label %" ⊞⊞ condLabelS ⊞⊞ "\n" ⟪ .append ⟫ → partsY ¿
+      partsY doneLabelS ⊞⊞ ":\n" ⟪ .append ⟫ → partsY ¿
+      partsY "  br label %" ⊞⊞ endLabelS ⊞⊞ "\n" ⟪ .append ⟫ → partsY ¿
+      partsY endLabelS ⊞⊞ ":\n" ⟪ .append ⟫ → partsY ¿
+      partsY "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ outPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsY ¿
       st "parts" ← partsY ¿
     ⌫ ¿
 
@@ -939,157 +996,157 @@
       st seqPtr ⟪ emit_load_value ⟫ → seqVal ¿
       st "parts" ⌈ ⌉ → partsM ¿
       st ⟪ next_tmp ⟫ → tagM ¿
-      partsM "  " ⊞⊞ tagM ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ tagM ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → isArrM ¿
-      partsM "  " ⊞⊞ isArrM ⊞⊞ " = icmp eq i32 " ⊞⊞ tagM ⊞⊞ ", 2\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ isArrM ⊞⊞ " = icmp eq i32 " ⊞⊞ tagM ⊞⊞ ", 2\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → isStrM ¿
-      partsM "  " ⊞⊞ isStrM ⊞⊞ " = icmp eq i32 " ⊞⊞ tagM ⊞⊞ ", 1\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ isStrM ⊞⊞ " = icmp eq i32 " ⊞⊞ tagM ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsM ¿
       st "map_arr" ⟪ next_label ⟫ → arrLabelM ¿
       st "map_str" ⟪ next_label ⟫ → strLabelM ¿
       st "map_end" ⟪ next_label ⟫ → endLabelM ¿
-      partsM "  br i1 " ⊞⊞ isArrM ⊞⊞ ", label %" ⊞⊞ arrLabelM ⊞⊞ ", label %" ⊞⊞ strLabelM ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  br i1 " ⊞⊞ isArrM ⊞⊞ ", label %" ⊞⊞ arrLabelM ⊞⊞ ", label %" ⊞⊞ strLabelM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
 
-      partsM arrLabelM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM arrLabelM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → arrPtrM ¿
-      partsM "  " ⊞⊞ arrPtrM ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 3\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ arrPtrM ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 3\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → lenPtrM ¿
-      partsM "  " ⊞⊞ lenPtrM ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrM ⊞⊞ ", i32 0, i32 1\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ lenPtrM ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrM ⊞⊞ ", i32 0, i32 1\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → lenValM ¿
-      partsM "  " ⊞⊞ lenValM ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtrM ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ lenValM ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtrM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → idxPtrM ¿
       st idxPtrM "i64" ⟪ emit_alloca ⟫ → _ ¿
-      partsM "  store i64 0, ptr " ⊞⊞ idxPtrM ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  store i64 0, ptr " ⊞⊞ idxPtrM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st "map_cond" ⟪ next_label ⟫ → condLabelM ¿
       st "map_body" ⟪ next_label ⟫ → bodyLabelM ¿
-      partsM "  br label %" ⊞⊞ condLabelM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM condLabelM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  br label %" ⊞⊞ condLabelM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM condLabelM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → curIM ¿
-      partsM "  " ⊞⊞ curIM ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrM ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ curIM ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → cmpM ¿
-      partsM "  " ⊞⊞ cmpM ⊞⊞ " = icmp slt i64 " ⊞⊞ curIM ⊞⊞ ", " ⊞⊞ lenValM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM "  br i1 " ⊞⊞ cmpM ⊞⊞ ", label %" ⊞⊞ bodyLabelM ⊞⊞ ", label %" ⊞⊞ endLabelM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM bodyLabelM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ cmpM ⊞⊞ " = icmp slt i64 " ⊞⊞ curIM ⊞⊞ ", " ⊞⊞ lenValM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  br i1 " ⊞⊞ cmpM ⊞⊞ ", label %" ⊞⊞ bodyLabelM ⊞⊞ ", label %" ⊞⊞ endLabelM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM bodyLabelM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → itemsPtrM ¿
-      partsM "  " ⊞⊞ itemsPtrM ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrM ⊞⊞ ", i32 0, i32 0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ itemsPtrM ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrM ⊞⊞ ", i32 0, i32 0\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → itemsValM ¿
-      partsM "  " ⊞⊞ itemsValM ⊞⊞ " = load ptr, ptr " ⊞⊞ itemsPtrM ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ itemsValM ⊞⊞ " = load ptr, ptr " ⊞⊞ itemsPtrM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → argPtrM ¿
-      partsM "  " ⊞⊞ argPtrM ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsValM ⊞⊞ ", i64 " ⊞⊞ curIM ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ argPtrM ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsValM ⊞⊞ ", i64 " ⊞⊞ curIM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → retPtrM ¿
       st retPtrM "%UhValue" ⟪ emit_alloca ⟫ → _ ¿
-      partsM "  call void @uh_fn_" ⊞⊞ fname ⊞⊞ "(ptr sret(%UhValue) " ⊞⊞ retPtrM ⊞⊞ ", ptr %env, ptr byval(%UhValue) " ⊞⊞ argPtrM ⊞⊞ ")\n" ⊞⊞ → partsM ¿
+      partsM "  call void @uh_fn_" ⊞⊞ fname ⊞⊞ "(ptr sret(%UhValue) " ⊞⊞ retPtrM ⊞⊞ ", ptr %env, ptr byval(%UhValue) " ⊞⊞ argPtrM ⊞⊞ ")\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → retValM ¿
-      partsM "  " ⊞⊞ retValM ⊞⊞ " = load %UhValue, ptr " ⊞⊞ retPtrM ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ retValM ⊞⊞ " = load %UhValue, ptr " ⊞⊞ retPtrM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → retTagM ¿
-      partsM "  " ⊞⊞ retTagM ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValM ⊞⊞ ", 0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ retTagM ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValM ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → isNumM ¿
-      partsM "  " ⊞⊞ isNumM ⊞⊞ " = icmp eq i32 " ⊞⊞ retTagM ⊞⊞ ", 0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ isNumM ⊞⊞ " = icmp eq i32 " ⊞⊞ retTagM ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsM ¿
       st "map_num" ⟪ next_label ⟫ → numLabelM ¿
       st "map_ret" ⟪ next_label ⟫ → pushRetM ¿
       st "map_next" ⟪ next_label ⟫ → nextLabelM ¿
-      partsM "  br i1 " ⊞⊞ isNumM ⊞⊞ ", label %" ⊞⊞ numLabelM ⊞⊞ ", label %" ⊞⊞ pushRetM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM numLabelM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  br i1 " ⊞⊞ isNumM ⊞⊞ ", label %" ⊞⊞ numLabelM ⊞⊞ ", label %" ⊞⊞ pushRetM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM numLabelM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → retNumM ¿
-      partsM "  " ⊞⊞ retNumM ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValM ⊞⊞ ", 1\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ retNumM ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValM ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → isZeroM ¿
       st ⟪ next_tmp ⟫ → isOneM ¿
-      partsM "  " ⊞⊞ isZeroM ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumM ⊞⊞ ", 0.0\n" ⊞⊞ → partsM ¿
-      partsM "  " ⊞⊞ isOneM ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumM ⊞⊞ ", 1.0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ isZeroM ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumM ⊞⊞ ", 0.0\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  " ⊞⊞ isOneM ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumM ⊞⊞ ", 1.0\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → predM ¿
-      partsM "  " ⊞⊞ predM ⊞⊞ " = or i1 " ⊞⊞ isZeroM ⊞⊞ ", " ⊞⊞ isOneM ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ predM ⊞⊞ " = or i1 " ⊞⊞ isZeroM ⊞⊞ ", " ⊞⊞ isOneM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st "map_bool" ⟪ next_label ⟫ → boolLabelM ¿
-      partsM "  br i1 " ⊞⊞ predM ⊞⊞ ", label %" ⊞⊞ boolLabelM ⊞⊞ ", label %" ⊞⊞ pushRetM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM boolLabelM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  br i1 " ⊞⊞ predM ⊞⊞ ", label %" ⊞⊞ boolLabelM ⊞⊞ ", label %" ⊞⊞ pushRetM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM boolLabelM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → truthM ¿
-      partsM "  " ⊞⊞ truthM ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ retPtrM ⊞⊞ ")\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ truthM ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ retPtrM ⊞⊞ ")\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → truthCmpM ¿
-      partsM "  " ⊞⊞ truthCmpM ⊞⊞ " = icmp ne i32 " ⊞⊞ truthM ⊞⊞ ", 0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ truthCmpM ⊞⊞ " = icmp ne i32 " ⊞⊞ truthM ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsM ¿
       st "map_keep" ⟪ next_label ⟫ → keepLabelM ¿
-      partsM "  br i1 " ⊞⊞ truthCmpM ⊞⊞ ", label %" ⊞⊞ keepLabelM ⊞⊞ ", label %" ⊞⊞ nextLabelM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM keepLabelM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
-      partsM "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrM ⊞⊞ ")\n" ⊞⊞ → partsM ¿
-      partsM "  br label %" ⊞⊞ nextLabelM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM pushRetM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
-      partsM "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ retPtrM ⊞⊞ ")\n" ⊞⊞ → partsM ¿
-      partsM "  br label %" ⊞⊞ nextLabelM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM nextLabelM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  br i1 " ⊞⊞ truthCmpM ⊞⊞ ", label %" ⊞⊞ keepLabelM ⊞⊞ ", label %" ⊞⊞ nextLabelM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM keepLabelM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrM ⊞⊞ ")\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  br label %" ⊞⊞ nextLabelM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM pushRetM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ retPtrM ⊞⊞ ")\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  br label %" ⊞⊞ nextLabelM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM nextLabelM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → nextIM ¿
-      partsM "  " ⊞⊞ nextIM ⊞⊞ " = add i64 " ⊞⊞ curIM ⊞⊞ ", 1\n" ⊞⊞ → partsM ¿
-      partsM "  store i64 " ⊞⊞ nextIM ⊞⊞ ", ptr " ⊞⊞ idxPtrM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM "  br label %" ⊞⊞ condLabelM ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ nextIM ⊞⊞ " = add i64 " ⊞⊞ curIM ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  store i64 " ⊞⊞ nextIM ⊞⊞ ", ptr " ⊞⊞ idxPtrM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  br label %" ⊞⊞ condLabelM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
 
-      partsM strLabelM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM strLabelM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st "map_str_body" ⟪ next_label ⟫ → strBodyM ¿
-      partsM "  br i1 " ⊞⊞ isStrM ⊞⊞ ", label %" ⊞⊞ strBodyM ⊞⊞ ", label %" ⊞⊞ endLabelM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM strBodyM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  br i1 " ⊞⊞ isStrM ⊞⊞ ", label %" ⊞⊞ strBodyM ⊞⊞ ", label %" ⊞⊞ endLabelM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM strBodyM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st "uh_len" 【"ptr byval(%UhValue) " seqPtr】 ⟪ emit_call_value ⟫ → lenPtrM ¿
       st lenPtrM ⟪ emit_load_value ⟫ → lenValM2 ¿
       st ⟪ next_tmp ⟫ → lenNumM2 ¿
-      partsM "  " ⊞⊞ lenNumM2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ lenValM2 ⊞⊞ ", 1\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ lenNumM2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ lenValM2 ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → lenIM2 ¿
-      partsM "  " ⊞⊞ lenIM2 ⊞⊞ " = fptosi double " ⊞⊞ lenNumM2 ⊞⊞ " to i64\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ lenIM2 ⊞⊞ " = fptosi double " ⊞⊞ lenNumM2 ⊞⊞ " to i64\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → idxPtrM2 ¿
       st idxPtrM2 "i64" ⟪ emit_alloca ⟫ → _ ¿
-      partsM "  store i64 0, ptr " ⊞⊞ idxPtrM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  store i64 0, ptr " ⊞⊞ idxPtrM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st "map_str_cond" ⟪ next_label ⟫ → condLabelM2 ¿
       st "map_str_body" ⟪ next_label ⟫ → bodyLabelM2 ¿
-      partsM "  br label %" ⊞⊞ condLabelM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM condLabelM2 ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  br label %" ⊞⊞ condLabelM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM condLabelM2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → curIM2 ¿
-      partsM "  " ⊞⊞ curIM2 ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ curIM2 ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → cmpM2 ¿
-      partsM "  " ⊞⊞ cmpM2 ⊞⊞ " = icmp slt i64 " ⊞⊞ curIM2 ⊞⊞ ", " ⊞⊞ lenIM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM "  br i1 " ⊞⊞ cmpM2 ⊞⊞ ", label %" ⊞⊞ bodyLabelM2 ⊞⊞ ", label %" ⊞⊞ endLabelM ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM bodyLabelM2 ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ cmpM2 ⊞⊞ " = icmp slt i64 " ⊞⊞ curIM2 ⊞⊞ ", " ⊞⊞ lenIM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  br i1 " ⊞⊞ cmpM2 ⊞⊞ ", label %" ⊞⊞ bodyLabelM2 ⊞⊞ ", label %" ⊞⊞ endLabelM ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM bodyLabelM2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → curDM2 ¿
-      partsM "  " ⊞⊞ curDM2 ⊞⊞ " = sitofp i64 " ⊞⊞ curIM2 ⊞⊞ " to double\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ curDM2 ⊞⊞ " = sitofp i64 " ⊞⊞ curIM2 ⊞⊞ " to double\n" ⟪ .append ⟫ → partsM ¿
       st "uh_num" 【"double " curDM2】 ⟪ emit_call_value ⟫ → idxValPtrM2 ¿
       st "uh_char_at" 【"ptr byval(%UhValue) " seqPtr "ptr byval(%UhValue) " idxValPtrM2】 ⟪ emit_call_value ⟫ → argPtrM2 ¿
       st ⟪ next_tmp ⟫ → retPtrM2 ¿
       st retPtrM2 "%UhValue" ⟪ emit_alloca ⟫ → _ ¿
-      partsM "  call void @uh_fn_" ⊞⊞ fname ⊞⊞ "(ptr sret(%UhValue) " ⊞⊞ retPtrM2 ⊞⊞ ", ptr %env, ptr byval(%UhValue) " ⊞⊞ argPtrM2 ⊞⊞ ")\n" ⊞⊞ → partsM ¿
+      partsM "  call void @uh_fn_" ⊞⊞ fname ⊞⊞ "(ptr sret(%UhValue) " ⊞⊞ retPtrM2 ⊞⊞ ", ptr %env, ptr byval(%UhValue) " ⊞⊞ argPtrM2 ⊞⊞ ")\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → retValM2 ¿
-      partsM "  " ⊞⊞ retValM2 ⊞⊞ " = load %UhValue, ptr " ⊞⊞ retPtrM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ retValM2 ⊞⊞ " = load %UhValue, ptr " ⊞⊞ retPtrM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → retTagM2 ¿
-      partsM "  " ⊞⊞ retTagM2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValM2 ⊞⊞ ", 0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ retTagM2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValM2 ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → isNumM2 ¿
-      partsM "  " ⊞⊞ isNumM2 ⊞⊞ " = icmp eq i32 " ⊞⊞ retTagM2 ⊞⊞ ", 0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ isNumM2 ⊞⊞ " = icmp eq i32 " ⊞⊞ retTagM2 ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsM ¿
       st "map_str_num" ⟪ next_label ⟫ → numLabelM2 ¿
       st "map_str_ret" ⟪ next_label ⟫ → pushRetM2 ¿
       st "map_str_next" ⟪ next_label ⟫ → nextLabelM2 ¿
-      partsM "  br i1 " ⊞⊞ isNumM2 ⊞⊞ ", label %" ⊞⊞ numLabelM2 ⊞⊞ ", label %" ⊞⊞ pushRetM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM numLabelM2 ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  br i1 " ⊞⊞ isNumM2 ⊞⊞ ", label %" ⊞⊞ numLabelM2 ⊞⊞ ", label %" ⊞⊞ pushRetM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM numLabelM2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → retNumM2 ¿
-      partsM "  " ⊞⊞ retNumM2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValM2 ⊞⊞ ", 1\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ retNumM2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValM2 ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → isZeroM2 ¿
       st ⟪ next_tmp ⟫ → isOneM2 ¿
-      partsM "  " ⊞⊞ isZeroM2 ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumM2 ⊞⊞ ", 0.0\n" ⊞⊞ → partsM ¿
-      partsM "  " ⊞⊞ isOneM2 ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumM2 ⊞⊞ ", 1.0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ isZeroM2 ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumM2 ⊞⊞ ", 0.0\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  " ⊞⊞ isOneM2 ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumM2 ⊞⊞ ", 1.0\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → predM2 ¿
-      partsM "  " ⊞⊞ predM2 ⊞⊞ " = or i1 " ⊞⊞ isZeroM2 ⊞⊞ ", " ⊞⊞ isOneM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ predM2 ⊞⊞ " = or i1 " ⊞⊞ isZeroM2 ⊞⊞ ", " ⊞⊞ isOneM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
       st "map_str_bool" ⟪ next_label ⟫ → boolLabelM2 ¿
-      partsM "  br i1 " ⊞⊞ predM2 ⊞⊞ ", label %" ⊞⊞ boolLabelM2 ⊞⊞ ", label %" ⊞⊞ pushRetM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM boolLabelM2 ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  br i1 " ⊞⊞ predM2 ⊞⊞ ", label %" ⊞⊞ boolLabelM2 ⊞⊞ ", label %" ⊞⊞ pushRetM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM boolLabelM2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → truthM2 ¿
-      partsM "  " ⊞⊞ truthM2 ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ retPtrM2 ⊞⊞ ")\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ truthM2 ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ retPtrM2 ⊞⊞ ")\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → truthCmpM2 ¿
-      partsM "  " ⊞⊞ truthCmpM2 ⊞⊞ " = icmp ne i32 " ⊞⊞ truthM2 ⊞⊞ ", 0\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ truthCmpM2 ⊞⊞ " = icmp ne i32 " ⊞⊞ truthM2 ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsM ¿
       st "map_str_keep" ⟪ next_label ⟫ → keepLabelM2 ¿
-      partsM "  br i1 " ⊞⊞ truthCmpM2 ⊞⊞ ", label %" ⊞⊞ keepLabelM2 ⊞⊞ ", label %" ⊞⊞ nextLabelM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM keepLabelM2 ⊞⊞ ":\n" ⊞⊞ → partsM ¿
-      partsM "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrM2 ⊞⊞ ")\n" ⊞⊞ → partsM ¿
-      partsM "  br label %" ⊞⊞ nextLabelM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM pushRetM2 ⊞⊞ ":\n" ⊞⊞ → partsM ¿
-      partsM "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ retPtrM2 ⊞⊞ ")\n" ⊞⊞ → partsM ¿
-      partsM "  br label %" ⊞⊞ nextLabelM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM nextLabelM2 ⊞⊞ ":\n" ⊞⊞ → partsM ¿
+      partsM "  br i1 " ⊞⊞ truthCmpM2 ⊞⊞ ", label %" ⊞⊞ keepLabelM2 ⊞⊞ ", label %" ⊞⊞ nextLabelM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM keepLabelM2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrM2 ⊞⊞ ")\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  br label %" ⊞⊞ nextLabelM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM pushRetM2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ retPtrM2 ⊞⊞ ")\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  br label %" ⊞⊞ nextLabelM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM nextLabelM2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
       st ⟪ next_tmp ⟫ → nextIM2 ¿
-      partsM "  " ⊞⊞ nextIM2 ⊞⊞ " = add i64 " ⊞⊞ curIM2 ⊞⊞ ", 1\n" ⊞⊞ → partsM ¿
-      partsM "  store i64 " ⊞⊞ nextIM2 ⊞⊞ ", ptr " ⊞⊞ idxPtrM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
-      partsM "  br label %" ⊞⊞ condLabelM2 ⊞⊞ "\n" ⊞⊞ → partsM ¿
+      partsM "  " ⊞⊞ nextIM2 ⊞⊞ " = add i64 " ⊞⊞ curIM2 ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  store i64 " ⊞⊞ nextIM2 ⊞⊞ ", ptr " ⊞⊞ idxPtrM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  br label %" ⊞⊞ condLabelM2 ⊞⊞ "\n" ⟪ .append ⟫ → partsM ¿
 
-      partsM endLabelM ⊞⊞ ":\n" ⊞⊞ → partsM ¿
-      partsM "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ outPtr ⊞⊞ ")\n" ⊞⊞ → partsM ¿
+      partsM endLabelM ⊞⊞ ":\n" ⟪ .append ⟫ → partsM ¿
+      partsM "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ outPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsM ¿
       st "parts" ← partsM ¿
     ⌫ ¿
 
@@ -1102,160 +1159,160 @@
       st seqPtr ⟪ emit_load_value ⟫ → seqVal ¿
       st "parts" ⌈ ⌉ → partsL ¿
       st ⟪ next_tmp ⟫ → tagL ¿
-      partsL "  " ⊞⊞ tagL ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 0\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ tagL ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → isArrL ¿
-      partsL "  " ⊞⊞ isArrL ⊞⊞ " = icmp eq i32 " ⊞⊞ tagL ⊞⊞ ", 2\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ isArrL ⊞⊞ " = icmp eq i32 " ⊞⊞ tagL ⊞⊞ ", 2\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → isStrL ¿
-      partsL "  " ⊞⊞ isStrL ⊞⊞ " = icmp eq i32 " ⊞⊞ tagL ⊞⊞ ", 1\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ isStrL ⊞⊞ " = icmp eq i32 " ⊞⊞ tagL ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsL ¿
       st "mapl_arr" ⟪ next_label ⟫ → arrLabelL ¿
       st "mapl_str" ⟪ next_label ⟫ → strLabelL ¿
       st "mapl_end" ⟪ next_label ⟫ → endLabelL ¿
-      partsL "  br i1 " ⊞⊞ isArrL ⊞⊞ ", label %" ⊞⊞ arrLabelL ⊞⊞ ", label %" ⊞⊞ strLabelL ⊞⊞ "\n" ⊞⊞ → partsL ¿
-      partsL arrLabelL ⊞⊞ ":\n" ⊞⊞ → partsL ¿
+      partsL "  br i1 " ⊞⊞ isArrL ⊞⊞ ", label %" ⊞⊞ arrLabelL ⊞⊞ ", label %" ⊞⊞ strLabelL ⊞⊞ "\n" ⟪ .append ⟫ → partsL ¿
+      partsL arrLabelL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → arrPtrL ¿
-      partsL "  " ⊞⊞ arrPtrL ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 3\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ arrPtrL ⊞⊞ " = extractvalue %UhValue " ⊞⊞ seqVal ⊞⊞ ", 3\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → lenPtrL ¿
-      partsL "  " ⊞⊞ lenPtrL ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrL ⊞⊞ ", i32 0, i32 1\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ lenPtrL ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrL ⊞⊞ ", i32 0, i32 1\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → lenValL ¿
-      partsL "  " ⊞⊞ lenValL ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtrL ⊞⊞ "\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ lenValL ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtrL ⊞⊞ "\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → idxPtrL ¿
       st idxPtrL "i64" ⟪ emit_alloca ⟫ → _ ¿
-      partsL "  store i64 0, ptr " ⊞⊞ idxPtrL ⊞⊞ "\n" ⊞⊞ → partsL ¿
+      partsL "  store i64 0, ptr " ⊞⊞ idxPtrL ⊞⊞ "\n" ⟪ .append ⟫ → partsL ¿
       st "mapl_cond" ⟪ next_label ⟫ → condLabelL ¿
       st "mapl_body" ⟪ next_label ⟫ → bodyLabelL ¿
-      partsL "  br label %" ⊞⊞ condLabelL ⊞⊞ "\n" ⊞⊞ → partsL ¿
-      partsL condLabelL ⊞⊞ ":\n" ⊞⊞ → partsL ¿
+      partsL "  br label %" ⊞⊞ condLabelL ⊞⊞ "\n" ⟪ .append ⟫ → partsL ¿
+      partsL condLabelL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → curIL ¿
-      partsL "  " ⊞⊞ curIL ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrL ⊞⊞ "\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ curIL ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrL ⊞⊞ "\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → cmpL ¿
-      partsL "  " ⊞⊞ cmpL ⊞⊞ " = icmp slt i64 " ⊞⊞ curIL ⊞⊞ ", " ⊞⊞ lenValL ⊞⊞ "\n" ⊞⊞ → partsL ¿
-      partsL "  br i1 " ⊞⊞ cmpL ⊞⊞ ", label %" ⊞⊞ bodyLabelL ⊞⊞ ", label %" ⊞⊞ endLabelL ⊞⊞ "\n" ⊞⊞ → partsL ¿
-      partsL bodyLabelL ⊞⊞ ":\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ cmpL ⊞⊞ " = icmp slt i64 " ⊞⊞ curIL ⊞⊞ ", " ⊞⊞ lenValL ⊞⊞ "\n" ⟪ .append ⟫ → partsL ¿
+      partsL "  br i1 " ⊞⊞ cmpL ⊞⊞ ", label %" ⊞⊞ bodyLabelL ⊞⊞ ", label %" ⊞⊞ endLabelL ⊞⊞ "\n" ⟪ .append ⟫ → partsL ¿
+      partsL bodyLabelL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → itemsPtrL ¿
-      partsL "  " ⊞⊞ itemsPtrL ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrL ⊞⊞ ", i32 0, i32 0\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ itemsPtrL ⊞⊞ " = getelementptr %UhArray, ptr " ⊞⊞ arrPtrL ⊞⊞ ", i32 0, i32 0\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → itemsValL ¿
-      partsL "  " ⊞⊞ itemsValL ⊞⊞ " = load ptr, ptr " ⊞⊞ itemsPtrL ⊞⊞ "\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ itemsValL ⊞⊞ " = load ptr, ptr " ⊞⊞ itemsPtrL ⊞⊞ "\n" ⟪ .append ⟫ → partsL ¿
       st ⟪ next_tmp ⟫ → argPtrL ¿
-      partsL "  " ⊞⊞ argPtrL ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsValL ⊞⊞ ", i64 " ⊞⊞ curIL ⊞⊞ "\n" ⊞⊞ → partsL ¿
+      partsL "  " ⊞⊞ argPtrL ⊞⊞ " = getelementptr %UhValue, ptr " ⊞⊞ itemsValL ⊞⊞ ", i64 " ⊞⊞ curIL ⊞⊞ "\n" ⟪ .append ⟫ → partsL ¿
       st lparam ⟪ emit_str_ptr ⟫ → lparamPtr ¿
-      partsL "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ lparamPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrL ⊞⊞ ")\n" ⊞⊞ → partsL ¿
+      partsL "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ lparamPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrL ⊞⊞ ")\n" ⟪ .append ⟫ → partsL ¿
       st "parts" ← partsL ¿
-      lbody st ⟪ emit_expr ⟫ → _ ¿
+      st lbody ⟪ emit_expr ⟫ → _ ¿
       st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → retPtrL ¿
       st retPtrL ⟪ emit_load_value ⟫ → retValL ¿
       st "parts" ⌈ ⌉ → partsL2 ¿
       st ⟪ next_tmp ⟫ → retTagL ¿
-      partsL2 "  " ⊞⊞ retTagL ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValL ⊞⊞ ", 0\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ retTagL ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValL ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → isNumL ¿
-      partsL2 "  " ⊞⊞ isNumL ⊞⊞ " = icmp eq i32 " ⊞⊞ retTagL ⊞⊞ ", 0\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ isNumL ⊞⊞ " = icmp eq i32 " ⊞⊞ retTagL ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsL2 ¿
       st "mapl_num" ⟪ next_label ⟫ → numLabelL ¿
       st "mapl_ret" ⟪ next_label ⟫ → pushRetL ¿
       st "mapl_next" ⟪ next_label ⟫ → nextLabelL ¿
-      partsL2 "  br i1 " ⊞⊞ isNumL ⊞⊞ ", label %" ⊞⊞ numLabelL ⊞⊞ ", label %" ⊞⊞ pushRetL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 numLabelL ⊞⊞ ":\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  br i1 " ⊞⊞ isNumL ⊞⊞ ", label %" ⊞⊞ numLabelL ⊞⊞ ", label %" ⊞⊞ pushRetL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 numLabelL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → retNumL ¿
-      partsL2 "  " ⊞⊞ retNumL ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValL ⊞⊞ ", 1\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ retNumL ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValL ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → isZeroL ¿
       st ⟪ next_tmp ⟫ → isOneL ¿
-      partsL2 "  " ⊞⊞ isZeroL ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumL ⊞⊞ ", 0.0\n" ⊞⊞ → partsL2 ¿
-      partsL2 "  " ⊞⊞ isOneL ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumL ⊞⊞ ", 1.0\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ isZeroL ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumL ⊞⊞ ", 0.0\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 "  " ⊞⊞ isOneL ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumL ⊞⊞ ", 1.0\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → predL ¿
-      partsL2 "  " ⊞⊞ predL ⊞⊞ " = or i1 " ⊞⊞ isZeroL ⊞⊞ ", " ⊞⊞ isOneL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ predL ⊞⊞ " = or i1 " ⊞⊞ isZeroL ⊞⊞ ", " ⊞⊞ isOneL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
       st "mapl_bool" ⟪ next_label ⟫ → boolLabelL ¿
-      partsL2 "  br i1 " ⊞⊞ predL ⊞⊞ ", label %" ⊞⊞ boolLabelL ⊞⊞ ", label %" ⊞⊞ pushRetL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 boolLabelL ⊞⊞ ":\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  br i1 " ⊞⊞ predL ⊞⊞ ", label %" ⊞⊞ boolLabelL ⊞⊞ ", label %" ⊞⊞ pushRetL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 boolLabelL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → truthL ¿
-      partsL2 "  " ⊞⊞ truthL ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ retPtrL ⊞⊞ ")\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ truthL ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ retPtrL ⊞⊞ ")\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → truthCmpL ¿
-      partsL2 "  " ⊞⊞ truthCmpL ⊞⊞ " = icmp ne i32 " ⊞⊞ truthL ⊞⊞ ", 0\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ truthCmpL ⊞⊞ " = icmp ne i32 " ⊞⊞ truthL ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsL2 ¿
       st "mapl_keep" ⟪ next_label ⟫ → keepLabelL ¿
-      partsL2 "  br i1 " ⊞⊞ truthCmpL ⊞⊞ ", label %" ⊞⊞ keepLabelL ⊞⊞ ", label %" ⊞⊞ nextLabelL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 keepLabelL ⊞⊞ ":\n" ⊞⊞ → partsL2 ¿
-      partsL2 "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrL ⊞⊞ ")\n" ⊞⊞ → partsL2 ¿
-      partsL2 "  br label %" ⊞⊞ nextLabelL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 pushRetL ⊞⊞ ":\n" ⊞⊞ → partsL2 ¿
-      partsL2 "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ retPtrL ⊞⊞ ")\n" ⊞⊞ → partsL2 ¿
-      partsL2 "  br label %" ⊞⊞ nextLabelL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 nextLabelL ⊞⊞ ":\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  br i1 " ⊞⊞ truthCmpL ⊞⊞ ", label %" ⊞⊞ keepLabelL ⊞⊞ ", label %" ⊞⊞ nextLabelL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 keepLabelL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrL ⊞⊞ ")\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 "  br label %" ⊞⊞ nextLabelL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 pushRetL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ retPtrL ⊞⊞ ")\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 "  br label %" ⊞⊞ nextLabelL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 nextLabelL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → nextIL ¿
-      partsL2 "  " ⊞⊞ nextIL ⊞⊞ " = add i64 " ⊞⊞ curIL ⊞⊞ ", 1\n" ⊞⊞ → partsL2 ¿
-      partsL2 "  store i64 " ⊞⊞ nextIL ⊞⊞ ", ptr " ⊞⊞ idxPtrL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 "  br label %" ⊞⊞ condLabelL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ nextIL ⊞⊞ " = add i64 " ⊞⊞ curIL ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 "  store i64 " ⊞⊞ nextIL ⊞⊞ ", ptr " ⊞⊞ idxPtrL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 "  br label %" ⊞⊞ condLabelL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
 
-      partsL2 strLabelL ⊞⊞ ":\n" ⊞⊞ → partsL2 ¿
+      partsL2 strLabelL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL2 ¿
       st "mapl_str_body" ⟪ next_label ⟫ → strBodyL ¿
-      partsL2 "  br i1 " ⊞⊞ isStrL ⊞⊞ ", label %" ⊞⊞ strBodyL ⊞⊞ ", label %" ⊞⊞ endLabelL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 strBodyL ⊞⊞ ":\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  br i1 " ⊞⊞ isStrL ⊞⊞ ", label %" ⊞⊞ strBodyL ⊞⊞ ", label %" ⊞⊞ endLabelL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 strBodyL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL2 ¿
       st "uh_len" 【"ptr byval(%UhValue) " seqPtr】 ⟪ emit_call_value ⟫ → lenPtrL2 ¿
       st lenPtrL2 ⟪ emit_load_value ⟫ → lenValL2 ¿
       st ⟪ next_tmp ⟫ → lenNumL2 ¿
-      partsL2 "  " ⊞⊞ lenNumL2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ lenValL2 ⊞⊞ ", 1\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ lenNumL2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ lenValL2 ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → lenIL2 ¿
-      partsL2 "  " ⊞⊞ lenIL2 ⊞⊞ " = fptosi double " ⊞⊞ lenNumL2 ⊞⊞ " to i64\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ lenIL2 ⊞⊞ " = fptosi double " ⊞⊞ lenNumL2 ⊞⊞ " to i64\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → idxPtrL2 ¿
       st idxPtrL2 "i64" ⟪ emit_alloca ⟫ → _ ¿
-      partsL2 "  store i64 0, ptr " ⊞⊞ idxPtrL2 ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  store i64 0, ptr " ⊞⊞ idxPtrL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
       st "mapl_str_cond" ⟪ next_label ⟫ → condLabelL2 ¿
       st "mapl_str_body" ⟪ next_label ⟫ → bodyLabelL2 ¿
-      partsL2 "  br label %" ⊞⊞ condLabelL2 ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 condLabelL2 ⊞⊞ ":\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  br label %" ⊞⊞ condLabelL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 condLabelL2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → curIL2 ¿
-      partsL2 "  " ⊞⊞ curIL2 ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrL2 ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ curIL2 ⊞⊞ " = load i64, ptr " ⊞⊞ idxPtrL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → cmpL2 ¿
-      partsL2 "  " ⊞⊞ cmpL2 ⊞⊞ " = icmp slt i64 " ⊞⊞ curIL2 ⊞⊞ ", " ⊞⊞ lenIL2 ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 "  br i1 " ⊞⊞ cmpL2 ⊞⊞ ", label %" ⊞⊞ bodyLabelL2 ⊞⊞ ", label %" ⊞⊞ endLabelL ⊞⊞ "\n" ⊞⊞ → partsL2 ¿
-      partsL2 bodyLabelL2 ⊞⊞ ":\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ cmpL2 ⊞⊞ " = icmp slt i64 " ⊞⊞ curIL2 ⊞⊞ ", " ⊞⊞ lenIL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 "  br i1 " ⊞⊞ cmpL2 ⊞⊞ ", label %" ⊞⊞ bodyLabelL2 ⊞⊞ ", label %" ⊞⊞ endLabelL ⊞⊞ "\n" ⟪ .append ⟫ → partsL2 ¿
+      partsL2 bodyLabelL2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsL2 ¿
       st ⟪ next_tmp ⟫ → curDL2 ¿
-      partsL2 "  " ⊞⊞ curDL2 ⊞⊞ " = sitofp i64 " ⊞⊞ curIL2 ⊞⊞ " to double\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  " ⊞⊞ curDL2 ⊞⊞ " = sitofp i64 " ⊞⊞ curIL2 ⊞⊞ " to double\n" ⟪ .append ⟫ → partsL2 ¿
       st "uh_num" 【"double " curDL2】 ⟪ emit_call_value ⟫ → idxValPtrL2 ¿
       st "uh_char_at" 【"ptr byval(%UhValue) " seqPtr "ptr byval(%UhValue) " idxValPtrL2】 ⟪ emit_call_value ⟫ → argPtrL2 ¿
       st lparam ⟪ emit_str_ptr ⟫ → lparamPtr2 ¿
-      partsL2 "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ lparamPtr2 ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrL2 ⊞⊞ ")\n" ⊞⊞ → partsL2 ¿
+      partsL2 "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ lparamPtr2 ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrL2 ⊞⊞ ")\n" ⟪ .append ⟫ → partsL2 ¿
       st "parts" ← partsL2 ¿
-      lbody st ⟪ emit_expr ⟫ → _ ¿
+      st lbody ⟪ emit_expr ⟫ → _ ¿
       st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → retPtrL2 ¿
       st retPtrL2 ⟪ emit_load_value ⟫ → retValL2 ¿
       st "parts" ⌈ ⌉ → partsL3 ¿
       st ⟪ next_tmp ⟫ → retTagL2 ¿
-      partsL3 "  " ⊞⊞ retTagL2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValL2 ⊞⊞ ", 0\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  " ⊞⊞ retTagL2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValL2 ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsL3 ¿
       st ⟪ next_tmp ⟫ → isNumL2 ¿
-      partsL3 "  " ⊞⊞ isNumL2 ⊞⊞ " = icmp eq i32 " ⊞⊞ retTagL2 ⊞⊞ ", 0\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  " ⊞⊞ isNumL2 ⊞⊞ " = icmp eq i32 " ⊞⊞ retTagL2 ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsL3 ¿
       st "mapl_str_num" ⟪ next_label ⟫ → numLabelL2 ¿
       st "mapl_str_ret" ⟪ next_label ⟫ → pushRetL2 ¿
       st "mapl_str_next" ⟪ next_label ⟫ → nextLabelL2 ¿
-      partsL3 "  br i1 " ⊞⊞ isNumL2 ⊞⊞ ", label %" ⊞⊞ numLabelL2 ⊞⊞ ", label %" ⊞⊞ pushRetL2 ⊞⊞ "\n" ⊞⊞ → partsL3 ¿
-      partsL3 numLabelL2 ⊞⊞ ":\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  br i1 " ⊞⊞ isNumL2 ⊞⊞ ", label %" ⊞⊞ numLabelL2 ⊞⊞ ", label %" ⊞⊞ pushRetL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 numLabelL2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsL3 ¿
       st ⟪ next_tmp ⟫ → retNumL2 ¿
-      partsL3 "  " ⊞⊞ retNumL2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValL2 ⊞⊞ ", 1\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  " ⊞⊞ retNumL2 ⊞⊞ " = extractvalue %UhValue " ⊞⊞ retValL2 ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsL3 ¿
       st ⟪ next_tmp ⟫ → isZeroL2 ¿
       st ⟪ next_tmp ⟫ → isOneL2 ¿
-      partsL3 "  " ⊞⊞ isZeroL2 ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumL2 ⊞⊞ ", 0.0\n" ⊞⊞ → partsL3 ¿
-      partsL3 "  " ⊞⊞ isOneL2 ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumL2 ⊞⊞ ", 1.0\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  " ⊞⊞ isZeroL2 ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumL2 ⊞⊞ ", 0.0\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 "  " ⊞⊞ isOneL2 ⊞⊞ " = fcmp oeq double " ⊞⊞ retNumL2 ⊞⊞ ", 1.0\n" ⟪ .append ⟫ → partsL3 ¿
       st ⟪ next_tmp ⟫ → predL2 ¿
-      partsL3 "  " ⊞⊞ predL2 ⊞⊞ " = or i1 " ⊞⊞ isZeroL2 ⊞⊞ ", " ⊞⊞ isOneL2 ⊞⊞ "\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  " ⊞⊞ predL2 ⊞⊞ " = or i1 " ⊞⊞ isZeroL2 ⊞⊞ ", " ⊞⊞ isOneL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL3 ¿
       st "mapl_str_bool" ⟪ next_label ⟫ → boolLabelL2 ¿
-      partsL3 "  br i1 " ⊞⊞ predL2 ⊞⊞ ", label %" ⊞⊞ boolLabelL2 ⊞⊞ ", label %" ⊞⊞ pushRetL2 ⊞⊞ "\n" ⊞⊞ → partsL3 ¿
-      partsL3 boolLabelL2 ⊞⊞ ":\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  br i1 " ⊞⊞ predL2 ⊞⊞ ", label %" ⊞⊞ boolLabelL2 ⊞⊞ ", label %" ⊞⊞ pushRetL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 boolLabelL2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsL3 ¿
       st ⟪ next_tmp ⟫ → truthL2 ¿
-      partsL3 "  " ⊞⊞ truthL2 ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ retPtrL2 ⊞⊞ ")\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  " ⊞⊞ truthL2 ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ retPtrL2 ⊞⊞ ")\n" ⟪ .append ⟫ → partsL3 ¿
       st ⟪ next_tmp ⟫ → truthCmpL2 ¿
-      partsL3 "  " ⊞⊞ truthCmpL2 ⊞⊞ " = icmp ne i32 " ⊞⊞ truthL2 ⊞⊞ ", 0\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  " ⊞⊞ truthCmpL2 ⊞⊞ " = icmp ne i32 " ⊞⊞ truthL2 ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsL3 ¿
       st "mapl_str_keep" ⟪ next_label ⟫ → keepLabelL2 ¿
-      partsL3 "  br i1 " ⊞⊞ truthCmpL2 ⊞⊞ ", label %" ⊞⊞ keepLabelL2 ⊞⊞ ", label %" ⊞⊞ nextLabelL2 ⊞⊞ "\n" ⊞⊞ → partsL3 ¿
-      partsL3 keepLabelL2 ⊞⊞ ":\n" ⊞⊞ → partsL3 ¿
-      partsL3 "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrL2 ⊞⊞ ")\n" ⊞⊞ → partsL3 ¿
-      partsL3 "  br label %" ⊞⊞ nextLabelL2 ⊞⊞ "\n" ⊞⊞ → partsL3 ¿
-      partsL3 pushRetL2 ⊞⊞ ":\n" ⊞⊞ → partsL3 ¿
-      partsL3 "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ retPtrL2 ⊞⊞ ")\n" ⊞⊞ → partsL3 ¿
-      partsL3 "  br label %" ⊞⊞ nextLabelL2 ⊞⊞ "\n" ⊞⊞ → partsL3 ¿
-      partsL3 nextLabelL2 ⊞⊞ ":\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  br i1 " ⊞⊞ truthCmpL2 ⊞⊞ ", label %" ⊞⊞ keepLabelL2 ⊞⊞ ", label %" ⊞⊞ nextLabelL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 keepLabelL2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ argPtrL2 ⊞⊞ ")\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 "  br label %" ⊞⊞ nextLabelL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 pushRetL2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 "  call void @uh_arr_push(ptr " ⊞⊞ outPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ retPtrL2 ⊞⊞ ")\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 "  br label %" ⊞⊞ nextLabelL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 nextLabelL2 ⊞⊞ ":\n" ⟪ .append ⟫ → partsL3 ¿
       st ⟪ next_tmp ⟫ → nextIL2 ¿
-      partsL3 "  " ⊞⊞ nextIL2 ⊞⊞ " = add i64 " ⊞⊞ curIL2 ⊞⊞ ", 1\n" ⊞⊞ → partsL3 ¿
-      partsL3 "  store i64 " ⊞⊞ nextIL2 ⊞⊞ ", ptr " ⊞⊞ idxPtrL2 ⊞⊞ "\n" ⊞⊞ → partsL3 ¿
-      partsL3 "  br label %" ⊞⊞ condLabelL2 ⊞⊞ "\n" ⊞⊞ → partsL3 ¿
+      partsL3 "  " ⊞⊞ nextIL2 ⊞⊞ " = add i64 " ⊞⊞ curIL2 ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 "  store i64 " ⊞⊞ nextIL2 ⊞⊞ ", ptr " ⊞⊞ idxPtrL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 "  br label %" ⊞⊞ condLabelL2 ⊞⊞ "\n" ⟪ .append ⟫ → partsL3 ¿
 
-      partsL3 endLabelL ⊞⊞ ":\n" ⊞⊞ → partsL3 ¿
-      partsL3 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ outPtr ⊞⊞ ")\n" ⊞⊞ → partsL3 ¿
+      partsL3 endLabelL ⊞⊞ ":\n" ⟪ .append ⟫ → partsL3 ¿
+      partsL3 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ outPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsL3 ¿
       st "parts" ← partsL3 ¿
     ⌫ ¿
 
@@ -1283,16 +1340,16 @@
         st fnPtr ⟪ emit_load_value ⟫ → fnVal ¿
         st "parts" ⌈ ⌉ → partsC ¿
         st ⟪ next_tmp ⟫ → tagC ¿
-        partsC "  " ⊞⊞ tagC ⊞⊞ " = extractvalue %UhValue " ⊞⊞ fnVal ⊞⊞ ", 0\n" ⊞⊞ → partsC ¿
+        partsC "  " ⊞⊞ tagC ⊞⊞ " = extractvalue %UhValue " ⊞⊞ fnVal ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsC ¿
         st ⟪ next_tmp ⟫ → isStr ¿
-        partsC "  " ⊞⊞ isStr ⊞⊞ " = icmp eq i32 " ⊞⊞ tagC ⊞⊞ ", 1\n" ⊞⊞ → partsC ¿
+        partsC "  " ⊞⊞ isStr ⊞⊞ " = icmp eq i32 " ⊞⊞ tagC ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsC ¿
         st "dyn_call" ⟪ next_label ⟫ → callLbl ¿
         st "dyn_skip" ⟪ next_label ⟫ → skipLbl ¿
         st "dyn_end" ⟪ next_label ⟫ → endLbl ¿
-        partsC "  br i1 " ⊞⊞ isStr ⊞⊞ ", label %" ⊞⊞ callLbl ⊞⊞ ", label %" ⊞⊞ skipLbl ⊞⊞ "\n" ⊞⊞ → partsC ¿
-        partsC callLbl ⊞⊞ ":\n" ⊞⊞ → partsC ¿
+        partsC "  br i1 " ⊞⊞ isStr ⊞⊞ ", label %" ⊞⊞ callLbl ⊞⊞ ", label %" ⊞⊞ skipLbl ⊞⊞ "\n" ⟪ .append ⟫ → partsC ¿
+        partsC callLbl ⊞⊞ ":\n" ⟪ .append ⟫ → partsC ¿
         st ⟪ next_tmp ⟫ → namePtr ¿
-        partsC "  " ⊞⊞ namePtr ⊞⊞ " = extractvalue %UhValue " ⊞⊞ fnVal ⊞⊞ ", 2\n" ⊞⊞ → partsC ¿
+        partsC "  " ⊞⊞ namePtr ⊞⊞ " = extractvalue %UhValue " ⊞⊞ fnVal ⊞⊞ ", 2\n" ⟪ .append ⟫ → partsC ¿
         "ptr " ⊞⊞ namePtr → nameArg ¿
         【】 → callArgs ¿
         callArgs "ptr %env" ⟪ .append ⟫ → callArgs ¿
@@ -1300,13 +1357,13 @@
         callArgs "i32 0" ⟪ .append ⟫ → callArgs ¿
         callArgs "ptr null" ⟪ .append ⟫ → callArgs ¿
         st "uh_call_named" callArgs ⟪ emit_call_value ⟫ → retPtr ¿
-        partsC "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ retPtr ⊞⊞ ")\n" ⊞⊞ → partsC ¿
-        partsC "  br label %" ⊞⊞ endLbl ⊞⊞ "\n" ⊞⊞ → partsC ¿
-        partsC skipLbl ⊞⊞ ":\n" ⊞⊞ → partsC ¿
+        partsC "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ retPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsC ¿
+        partsC "  br label %" ⊞⊞ endLbl ⊞⊞ "\n" ⟪ .append ⟫ → partsC ¿
+        partsC skipLbl ⊞⊞ ":\n" ⟪ .append ⟫ → partsC ¿
         st "uh_num" 【"double 0.0"】 ⟪ emit_call_value ⟫ → zeroPtr ¿
-        partsC "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ zeroPtr ⊞⊞ ")\n" ⊞⊞ → partsC ¿
-        partsC "  br label %" ⊞⊞ endLbl ⊞⊞ "\n" ⊞⊞ → partsC ¿
-        partsC endLbl ⊞⊞ ":\n" ⊞⊞ → partsC ¿
+        partsC "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ zeroPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsC ¿
+        partsC "  br label %" ⊞⊞ endLbl ⊞⊞ "\n" ⟪ .append ⟫ → partsC ¿
+        partsC endLbl ⊞⊞ ":\n" ⟪ .append ⟫ → partsC ¿
         st "parts" ← partsC ¿
       ⌫ ⤵ ↵
         【】 → args ¿
@@ -1323,12 +1380,12 @@
           argsRev ⟪ len ⟫ → m ¿
           k m ≺ ⟲ ↵
             argsRev k ⌈ ⌉ → ap ¿
-            callArgs "ptr byval(%UhValue) " ⊞⊞ ap ⊞⊞ ⟪ .append ⟫ → callArgs ¿
+            callArgs "ptr byval(%UhValue) " ap ⊞⊞ ⟪ .append ⟫ → callArgs ¿
             k 1 ⊞ → k ¿
           ⌫ ¿
           st callee callArgs ⟪ emit_call_value ⟫ → resPtr ¿
           st "parts" ⌈ ⌉ → partsCall ¿
-          partsCall "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsCall ¿
+          partsCall "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsCall ¿
           st "parts" ← partsCall ¿
         ⌫ ⤵ ↵
           【"ptr %env"】 → callArgs2 ¿
@@ -1336,22 +1393,22 @@
           argsRev ⟪ len ⟫ → m2 ¿
           k2 m2 ≺ ⟲ ↵
             argsRev k2 ⌈ ⌉ → ap2 ¿
-            callArgs2 "ptr byval(%UhValue) " ⊞⊞ ap2 ⊞⊞ ⟪ .append ⟫ → callArgs2 ¿
+            callArgs2 "ptr byval(%UhValue) " ap2 ⊞⊞ ⟪ .append ⟫ → callArgs2 ¿
             k2 1 ⊞ → k2 ¿
           ⌫ ¿
           st callee callArgs2 ⟪ emit_call_value ⟫ → resPtr2 ¿
           st "parts" ⌈ ⌉ → partsCall2 ¿
-          partsCall2 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr2 ⊞⊞ ")\n" ⊞⊞ → partsCall2 ¿
+          partsCall2 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr2 ⊞⊞ ")\n" ⟪ .append ⟫ → partsCall2 ¿
           st "parts" ← partsCall2 ¿
         ⌫ ¿
       ⌫ ¿
     ⌫ ¿
 
     k "op" ≡ ⤴ ↵
-      v "⊞" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_add" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⊟" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_sub" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⊠" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_mul" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⊘" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_div" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊞" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_add" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊟" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_sub" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊠" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_mul" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊘" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_div" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
       v "⊙" ≡ ⤴ ↵
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿
@@ -1360,50 +1417,50 @@
         st "parts" ⌈ ⌉ → partsOp ¿
         st ⟪ next_tmp ⟫ → aNum ¿
         st ⟪ next_tmp ⟫ → bNum ¿
-        partsOp "  " ⊞⊞ aNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ aVal ⊞⊞ ", 1\n" ⊞⊞ → partsOp ¿
-        partsOp "  " ⊞⊞ bNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ bVal ⊞⊞ ", 1\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ aNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ aVal ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsOp ¿
+        partsOp "  " ⊞⊞ bNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ bVal ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → aI ¿
         st ⟪ next_tmp ⟫ → bI ¿
-        partsOp "  " ⊞⊞ aI ⊞⊞ " = fptosi double " ⊞⊞ aNum ⊞⊞ " to i64\n" ⊞⊞ → partsOp ¿
-        partsOp "  " ⊞⊞ bI ⊞⊞ " = fptosi double " ⊞⊞ bNum ⊞⊞ " to i64\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ aI ⊞⊞ " = fptosi double " ⊞⊞ aNum ⊞⊞ " to i64\n" ⟪ .append ⟫ → partsOp ¿
+        partsOp "  " ⊞⊞ bI ⊞⊞ " = fptosi double " ⊞⊞ bNum ⊞⊞ " to i64\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → remI ¿
-        partsOp "  " ⊞⊞ remI ⊞⊞ " = srem i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ remI ⊞⊞ " = srem i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → remD ¿
-        partsOp "  " ⊞⊞ remD ⊞⊞ " = sitofp i64 " ⊞⊞ remI ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ remD ⊞⊞ " = sitofp i64 " ⊞⊞ remI ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿
         st "uh_num" 【"double " remD】 ⟪ emit_call_value ⟫ → resPtr ¿
-        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
       ⌫ ¿
-      v "⊞⊞" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_concat" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⊛" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_pow" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⊟⊟" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_drop" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⊡" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_take" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊞⊞" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_concat" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊛" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_pow" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊟⊟" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_drop" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊡" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_take" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
       v "⊚" ≡ ⤴ ↵
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → cPtr ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿
         st "uh_reshape" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr "ptr byval(%UhValue) " cPtr】 ⟪ emit_call_value ⟫ → resPtr ¿
         st "parts" ⌈ ⌉ → partsOp ¿
-        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
       ⌫ ¿
-      v "⌽" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_reverse" 【"ptr byval(%UhValue) " aPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⊖" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_rotate" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⍉" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_transpose" 【"ptr byval(%UhValue) " aPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⌈" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_index" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "store_index" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → vPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → kPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → cPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_store_index(ptr " ⊞⊞ cPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ kPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ vPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "∈" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ st ⟪ next_tmp ⟫ → cmpV ¿ partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_contains(ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st ⟪ next_tmp ⟫ → cmpD ¿ partsOp "  " ⊞⊞ cmpD ⊞⊞ " = sitofp i32 " ⊞⊞ cmpV ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿ st "uh_num" 【"double " cmpD】 ⟪ emit_call_value ⟫ → resPtr ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "∋" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ st ⟪ next_tmp ⟫ → cmpV ¿ partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_contains(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st ⟪ next_tmp ⟫ → cmpD ¿ partsOp "  " ⊞⊞ cmpD ⊞⊞ " = sitofp i32 " ⊞⊞ cmpV ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿ st "uh_num" 【"double " cmpD】 ⟪ emit_call_value ⟫ → resPtr ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⌽" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_reverse" 【"ptr byval(%UhValue) " aPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊖" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_rotate" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⍉" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_transpose" 【"ptr byval(%UhValue) " aPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⌈" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_index" 【"ptr byval(%UhValue) " aPtr "ptr byval(%UhValue) " bPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "store_index" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → vPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → kPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → cPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_store_index(ptr " ⊞⊞ cPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ kPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ vPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "∈" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ st ⟪ next_tmp ⟫ → cmpV ¿ partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_contains(ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st ⟪ next_tmp ⟫ → cmpD ¿ partsOp "  " ⊞⊞ cmpD ⊞⊞ " = sitofp i32 " ⊞⊞ cmpV ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿ st "uh_num" 【"double " cmpD】 ⟪ emit_call_value ⟫ → resPtr ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "∋" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ st ⟪ next_tmp ⟫ → cmpV ¿ partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_contains(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st ⟪ next_tmp ⟫ → cmpD ¿ partsOp "  " ⊞⊞ cmpD ⊞⊞ " = sitofp i32 " ⊞⊞ cmpV ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿ st "uh_num" 【"double " cmpD】 ⟪ emit_call_value ⟫ → resPtr ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
       v "⊂" ≡ ⤴ ↵
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿
         st "parts" ⌈ ⌉ → partsOp ¿
         st ⟪ next_tmp ⟫ → cmpV ¿
-        partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_subset(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ", i32 1)\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_subset(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ", i32 1)\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → cmpD ¿
-        partsOp "  " ⊞⊞ cmpD ⊞⊞ " = sitofp i32 " ⊞⊞ cmpV ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ cmpD ⊞⊞ " = sitofp i32 " ⊞⊞ cmpV ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿
         st "uh_num" 【"double " cmpD】 ⟪ emit_call_value ⟫ → resPtr ¿
-        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
       ⌫ ¿
       v "⊆" ≡ ⤴ ↵
@@ -1411,32 +1468,32 @@
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿
         st "parts" ⌈ ⌉ → partsOp ¿
         st ⟪ next_tmp ⟫ → cmpV ¿
-        partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_subset(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ", i32 0)\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_subset(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ", i32 0)\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → cmpD ¿
-        partsOp "  " ⊞⊞ cmpD ⊞⊞ " = sitofp i32 " ⊞⊞ cmpV ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ cmpD ⊞⊞ " = sitofp i32 " ⊞⊞ cmpV ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿
         st "uh_num" 【"double " cmpD】 ⟪ emit_call_value ⟫ → resPtr ¿
-        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
       ⌫ ¿
-      v "≡" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ st ⟪ next_tmp ⟫ → eqV ¿ partsOp "  " ⊞⊞ eqV ⊞⊞ " = call i32 @uh_value_eq(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st ⟪ next_tmp ⟫ → eqD ¿ partsOp "  " ⊞⊞ eqD ⊞⊞ " = sitofp i32 " ⊞⊞ eqV ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿ st "uh_num" 【"double " eqD】 ⟪ emit_call_value ⟫ → resPtr ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "≢" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ st ⟪ next_tmp ⟫ → eqV ¿ partsOp "  " ⊞⊞ eqV ⊞⊞ " = call i32 @uh_value_eq(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st ⟪ next_tmp ⟫ → neqV ¿ partsOp "  " ⊞⊞ neqV ⊞⊞ " = xor i32 " ⊞⊞ eqV ⊞⊞ ", 1\n" ⊞⊞ → partsOp ¿ st ⟪ next_tmp ⟫ → neqD ¿ partsOp "  " ⊞⊞ neqD ⊞⊞ " = sitofp i32 " ⊞⊞ neqV ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿ st "uh_num" 【"double " neqD】 ⟪ emit_call_value ⟫ → resPtr ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "≺" ≡ v "≻" ≡ v "≼" ≡ v "≽" ≡ ∨ ⤴ ↵
+      v "≡" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ st ⟪ next_tmp ⟫ → eqV ¿ partsOp "  " ⊞⊞ eqV ⊞⊞ " = call i32 @uh_value_eq(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st ⟪ next_tmp ⟫ → eqD ¿ partsOp "  " ⊞⊞ eqD ⊞⊞ " = sitofp i32 " ⊞⊞ eqV ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿ st "uh_num" 【"double " eqD】 ⟪ emit_call_value ⟫ → resPtr ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "≢" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ st ⟪ next_tmp ⟫ → eqV ¿ partsOp "  " ⊞⊞ eqV ⊞⊞ " = call i32 @uh_value_eq(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st ⟪ next_tmp ⟫ → neqV ¿ partsOp "  " ⊞⊞ neqV ⊞⊞ " = xor i32 " ⊞⊞ eqV ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsOp ¿ st ⟪ next_tmp ⟫ → neqD ¿ partsOp "  " ⊞⊞ neqD ⊞⊞ " = sitofp i32 " ⊞⊞ neqV ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿ st "uh_num" 【"double " neqD】 ⟪ emit_call_value ⟫ → resPtr ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "≺" ≡ v "≻" ≡ ∨ v "≼" ≡ ∨ v "≽" ≡ ∨ ⤴ ↵
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → bPtr ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿
         st "parts" ⌈ ⌉ → partsOp ¿
         st ⟪ next_tmp ⟫ → cmpV ¿
-        partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_cmp(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ cmpV ⊞⊞ " = call i32 @uh_cmp(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → pred ¿
-        v "≺" ≡ ⤴ ↵ partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp slt i32 " ⊞⊞ cmpV ⊞⊞ ", 0\n" ⊞⊞ → partsOp ¿ ⌫ ¿
-        v "≻" ≡ ⤴ ↵ partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp sgt i32 " ⊞⊞ cmpV ⊞⊞ ", 0\n" ⊞⊞ → partsOp ¿ ⌫ ¿
-        v "≼" ≡ ⤴ ↵ partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp sle i32 " ⊞⊞ cmpV ⊞⊞ ", 0\n" ⊞⊞ → partsOp ¿ ⌫ ¿
-        v "≽" ≡ ⤴ ↵ partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp sge i32 " ⊞⊞ cmpV ⊞⊞ ", 0\n" ⊞⊞ → partsOp ¿ ⌫ ¿
+        v "≺" ≡ ⤴ ↵ partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp slt i32 " ⊞⊞ cmpV ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
+        v "≻" ≡ ⤴ ↵ partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp sgt i32 " ⊞⊞ cmpV ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
+        v "≼" ≡ ⤴ ↵ partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp sle i32 " ⊞⊞ cmpV ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
+        v "≽" ≡ ⤴ ↵ partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp sge i32 " ⊞⊞ cmpV ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
         st ⟪ next_tmp ⟫ → predI ¿
-        partsOp "  " ⊞⊞ predI ⊞⊞ " = zext i1 " ⊞⊞ pred ⊞⊞ " to i32\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ predI ⊞⊞ " = zext i1 " ⊞⊞ pred ⊞⊞ " to i32\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → predD ¿
-        partsOp "  " ⊞⊞ predD ⊞⊞ " = sitofp i32 " ⊞⊞ predI ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ predD ⊞⊞ " = sitofp i32 " ⊞⊞ predI ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿
         st "uh_num" 【"double " predD】 ⟪ emit_call_value ⟫ → resPtr ¿
-        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
       ⌫ ¿
       v "∧" ≡ v "∨" ≡ ∨ ⤴ ↵
@@ -1445,21 +1502,21 @@
         st "parts" ⌈ ⌉ → partsOp ¿
         st ⟪ next_tmp ⟫ → av ¿
         st ⟪ next_tmp ⟫ → bv ¿
-        partsOp "  " ⊞⊞ av ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
-        partsOp "  " ⊞⊞ bv ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ av ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
+        partsOp "  " ⊞⊞ bv ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → avb ¿
         st ⟪ next_tmp ⟫ → bvb ¿
-        partsOp "  " ⊞⊞ avb ⊞⊞ " = icmp ne i32 " ⊞⊞ av ⊞⊞ ", 0\n" ⊞⊞ → partsOp ¿
-        partsOp "  " ⊞⊞ bvb ⊞⊞ " = icmp ne i32 " ⊞⊞ bv ⊞⊞ ", 0\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ avb ⊞⊞ " = icmp ne i32 " ⊞⊞ av ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsOp ¿
+        partsOp "  " ⊞⊞ bvb ⊞⊞ " = icmp ne i32 " ⊞⊞ bv ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → comb ¿
-        v "∧" ≡ ⤴ ↵ partsOp "  " ⊞⊞ comb ⊞⊞ " = and i1 " ⊞⊞ avb ⊞⊞ ", " ⊞⊞ bvb ⊞⊞ "\n" ⊞⊞ → partsOp ¿ ⌫ ¿
-        v "∨" ≡ ⤴ ↵ partsOp "  " ⊞⊞ comb ⊞⊞ " = or i1 " ⊞⊞ avb ⊞⊞ ", " ⊞⊞ bvb ⊞⊞ "\n" ⊞⊞ → partsOp ¿ ⌫ ¿
+        v "∧" ≡ ⤴ ↵ partsOp "  " ⊞⊞ comb ⊞⊞ " = and i1 " ⊞⊞ avb ⊞⊞ ", " ⊞⊞ bvb ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
+        v "∨" ≡ ⤴ ↵ partsOp "  " ⊞⊞ comb ⊞⊞ " = or i1 " ⊞⊞ avb ⊞⊞ ", " ⊞⊞ bvb ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
         st ⟪ next_tmp ⟫ → combI ¿
-        partsOp "  " ⊞⊞ combI ⊞⊞ " = zext i1 " ⊞⊞ comb ⊞⊞ " to i32\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ combI ⊞⊞ " = zext i1 " ⊞⊞ comb ⊞⊞ " to i32\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → combD ¿
-        partsOp "  " ⊞⊞ combD ⊞⊞ " = sitofp i32 " ⊞⊞ combI ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ combD ⊞⊞ " = sitofp i32 " ⊞⊞ combI ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿
         st "uh_num" 【"double " combD】 ⟪ emit_call_value ⟫ → resPtr ¿
-        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
       ⌫ ¿
       v "⊕⊕" ≡ ⤴ ↵
@@ -1468,20 +1525,20 @@
         st "parts" ⌈ ⌉ → partsOp ¿
         st ⟪ next_tmp ⟫ → av ¿
         st ⟪ next_tmp ⟫ → bv ¿
-        partsOp "  " ⊞⊞ av ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
-        partsOp "  " ⊞⊞ bv ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ av ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
+        partsOp "  " ⊞⊞ bv ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ bPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → avb ¿
         st ⟪ next_tmp ⟫ → bvb ¿
-        partsOp "  " ⊞⊞ avb ⊞⊞ " = icmp ne i32 " ⊞⊞ av ⊞⊞ ", 0\n" ⊞⊞ → partsOp ¿
-        partsOp "  " ⊞⊞ bvb ⊞⊞ " = icmp ne i32 " ⊞⊞ bv ⊞⊞ ", 0\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ avb ⊞⊞ " = icmp ne i32 " ⊞⊞ av ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsOp ¿
+        partsOp "  " ⊞⊞ bvb ⊞⊞ " = icmp ne i32 " ⊞⊞ bv ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → xorb ¿
-        partsOp "  " ⊞⊞ xorb ⊞⊞ " = xor i1 " ⊞⊞ avb ⊞⊞ ", " ⊞⊞ bvb ⊞⊞ "\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ xorb ⊞⊞ " = xor i1 " ⊞⊞ avb ⊞⊞ ", " ⊞⊞ bvb ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → xori ¿
-        partsOp "  " ⊞⊞ xori ⊞⊞ " = zext i1 " ⊞⊞ xorb ⊞⊞ " to i32\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ xori ⊞⊞ " = zext i1 " ⊞⊞ xorb ⊞⊞ " to i32\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → xord ¿
-        partsOp "  " ⊞⊞ xord ⊞⊞ " = sitofp i32 " ⊞⊞ xori ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ xord ⊞⊞ " = sitofp i32 " ⊞⊞ xori ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿
         st "uh_num" 【"double " xord】 ⟪ emit_call_value ⟫ → resPtr ¿
-        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
       ⌫ ¿
       v "◁" ≡ v "▷" ≡ v "∩" ≡ v "∪" ≡ ∨ ⤴ ↵
@@ -1492,70 +1549,70 @@
         st "parts" ⌈ ⌉ → partsOp ¿
         st ⟪ next_tmp ⟫ → aNum ¿
         st ⟪ next_tmp ⟫ → bNum ¿
-        partsOp "  " ⊞⊞ aNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ aVal ⊞⊞ ", 1\n" ⊞⊞ → partsOp ¿
-        partsOp "  " ⊞⊞ bNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ bVal ⊞⊞ ", 1\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ aNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ aVal ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsOp ¿
+        partsOp "  " ⊞⊞ bNum ⊞⊞ " = extractvalue %UhValue " ⊞⊞ bVal ⊞⊞ ", 1\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → aI ¿
         st ⟪ next_tmp ⟫ → bI ¿
-        partsOp "  " ⊞⊞ aI ⊞⊞ " = fptosi double " ⊞⊞ aNum ⊞⊞ " to i64\n" ⊞⊞ → partsOp ¿
-        partsOp "  " ⊞⊞ bI ⊞⊞ " = fptosi double " ⊞⊞ bNum ⊞⊞ " to i64\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ aI ⊞⊞ " = fptosi double " ⊞⊞ aNum ⊞⊞ " to i64\n" ⟪ .append ⟫ → partsOp ¿
+        partsOp "  " ⊞⊞ bI ⊞⊞ " = fptosi double " ⊞⊞ bNum ⊞⊞ " to i64\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → outI ¿
-        v "◁" ≡ ⤴ ↵ partsOp "  " ⊞⊞ outI ⊞⊞ " = shl i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⊞⊞ → partsOp ¿ ⌫ ¿
-        v "▷" ≡ ⤴ ↵ partsOp "  " ⊞⊞ outI ⊞⊞ " = ashr i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⊞⊞ → partsOp ¿ ⌫ ¿
-        v "∩" ≡ ⤴ ↵ partsOp "  " ⊞⊞ outI ⊞⊞ " = and i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⊞⊞ → partsOp ¿ ⌫ ¿
-        v "∪" ≡ ⤴ ↵ partsOp "  " ⊞⊞ outI ⊞⊞ " = or i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⊞⊞ → partsOp ¿ ⌫ ¿
+        v "◁" ≡ ⤴ ↵ partsOp "  " ⊞⊞ outI ⊞⊞ " = shl i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
+        v "▷" ≡ ⤴ ↵ partsOp "  " ⊞⊞ outI ⊞⊞ " = ashr i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
+        v "∩" ≡ ⤴ ↵ partsOp "  " ⊞⊞ outI ⊞⊞ " = and i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
+        v "∪" ≡ ⤴ ↵ partsOp "  " ⊞⊞ outI ⊞⊞ " = or i64 " ⊞⊞ aI ⊞⊞ ", " ⊞⊞ bI ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿ ⌫ ¿
         st ⟪ next_tmp ⟫ → outD ¿
-        partsOp "  " ⊞⊞ outD ⊞⊞ " = sitofp i64 " ⊞⊞ outI ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ outD ⊞⊞ " = sitofp i64 " ⊞⊞ outI ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿
         st "uh_num" 【"double " outD】 ⟪ emit_call_value ⟫ → resPtr ¿
-        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
       ⌫ ¿
       v "¬" ≡ ⤴ ↵
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿
         st "parts" ⌈ ⌉ → partsOp ¿
         st ⟪ next_tmp ⟫ → av ¿
-        partsOp "  " ⊞⊞ av ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ av ⊞⊞ " = call i32 @uh_is_true(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → pred ¿
-        partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp eq i32 " ⊞⊞ av ⊞⊞ ", 0\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ pred ⊞⊞ " = icmp eq i32 " ⊞⊞ av ⊞⊞ ", 0\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → predI ¿
-        partsOp "  " ⊞⊞ predI ⊞⊞ " = zext i1 " ⊞⊞ pred ⊞⊞ " to i32\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ predI ⊞⊞ " = zext i1 " ⊞⊞ pred ⊞⊞ " to i32\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → predD ¿
-        partsOp "  " ⊞⊞ predD ⊞⊞ " = sitofp i32 " ⊞⊞ predI ⊞⊞ " to double\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ predD ⊞⊞ " = sitofp i32 " ⊞⊞ predI ⊞⊞ " to double\n" ⟪ .append ⟫ → partsOp ¿
         st "uh_num" 【"double " predD】 ⟪ emit_call_value ⟫ → resPtr ¿
-        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿
+        partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
       ⌫ ¿
-      v "⍕" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_stringify" 【"ptr byval(%UhValue) " aPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
-      v "⊢" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_print(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⊞⊞ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⍕" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "uh_stringify" 【"ptr byval(%UhValue) " aPtr】 ⟪ emit_call_value ⟫ → resPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
+      v "⊢" ≡ ⤴ ↵ st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → aPtr ¿ st "parts" ⌈ ⌉ → partsOp ¿ partsOp "  call void @uh_print(ptr byval(%UhValue) " ⊞⊞ aPtr ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp ¿ st "parts" ← partsOp ¿ ⌫ ¿
       v "⌸" ≡ ⤴ ↵
         st "parts" ⌈ ⌉ → partsOp ¿
         st ⟪ next_tmp ⟫ → lenPtr ¿
-        partsOp "  " ⊞⊞ lenPtr ⊞⊞ " = getelementptr %UhStack, ptr %st, i32 0, i32 1\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ lenPtr ⊞⊞ " = getelementptr %UhStack, ptr %st, i32 0, i32 1\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → lenVal ¿
-        partsOp "  " ⊞⊞ lenVal ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtr ⊞⊞ "\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ lenVal ⊞⊞ " = load i64, ptr " ⊞⊞ lenPtr ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿
         st ⟪ next_tmp ⟫ → hasData ¿
-        partsOp "  " ⊞⊞ hasData ⊞⊞ " = icmp sge i64 " ⊞⊞ lenVal ⊞⊞ ", 3\n" ⊞⊞ → partsOp ¿
+        partsOp "  " ⊞⊞ hasData ⊞⊞ " = icmp sge i64 " ⊞⊞ lenVal ⊞⊞ ", 3\n" ⟪ .append ⟫ → partsOp ¿
         st "file_write" ⟪ next_label ⟫ → writeLabel ¿
         st "file_open" ⟪ next_label ⟫ → openLabel ¿
         st "file_end" ⟪ next_label ⟫ → endLabel ¿
-        partsOp "  br i1 " ⊞⊞ hasData ⊞⊞ ", label %" ⊞⊞ writeLabel ⊞⊞ ", label %" ⊞⊞ openLabel ⊞⊞ "\n" ⊞⊞ → partsOp ¿
-        partsOp writeLabel ⊞⊞ ":\n" ⊞⊞ → partsOp ¿
+        partsOp "  br i1 " ⊞⊞ hasData ⊞⊞ ", label %" ⊞⊞ writeLabel ⊞⊞ ", label %" ⊞⊞ openLabel ⊞⊞ "\n" ⟪ .append ⟫ → partsOp ¿
+        partsOp writeLabel ⊞⊞ ":\n" ⟪ .append ⟫ → partsOp ¿
         st "parts" ← partsOp ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → modePtr ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → pathPtr ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → dataPtr ¿
         st "uh_write_file" 【"ptr byval(%UhValue) " pathPtr "ptr byval(%UhValue) " dataPtr】 ⟪ emit_call_value ⟫ → resPtrW ¿
         st "parts" ⌈ ⌉ → partsOp2 ¿
-        partsOp2 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtrW ⊞⊞ ")\n" ⊞⊞ → partsOp2 ¿
-        partsOp2 "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⊞⊞ → partsOp2 ¿
-        partsOp2 openLabel ⊞⊞ ":\n" ⊞⊞ → partsOp2 ¿
+        partsOp2 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtrW ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp2 ¿
+        partsOp2 "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⟪ .append ⟫ → partsOp2 ¿
+        partsOp2 openLabel ⊞⊞ ":\n" ⟪ .append ⟫ → partsOp2 ¿
         st "parts" ← partsOp2 ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → modePtr2 ¿
         st "uh_stack_pop" 【"ptr %st"】 ⟪ emit_call_value ⟫ → pathPtr2 ¿
         st "uh_file_open" 【"ptr byval(%UhValue) " pathPtr2 "ptr byval(%UhValue) " modePtr2】 ⟪ emit_call_value ⟫ → resPtrO ¿
         st "parts" ⌈ ⌉ → partsOp3 ¿
-        partsOp3 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtrO ⊞⊞ ")\n" ⊞⊞ → partsOp3 ¿
-        partsOp3 "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⊞⊞ → partsOp3 ¿
-        partsOp3 endLabel ⊞⊞ ":\n" ⊞⊞ → partsOp3 ¿
+        partsOp3 "  call void @uh_stack_push(ptr %st, ptr byval(%UhValue) " ⊞⊞ resPtrO ⊞⊞ ")\n" ⟪ .append ⟫ → partsOp3 ¿
+        partsOp3 "  br label %" ⊞⊞ endLabel ⊞⊞ "\n" ⟪ .append ⟫ → partsOp3 ¿
+        partsOp3 endLabel ⊞⊞ ":\n" ⟪ .append ⟫ → partsOp3 ¿
         st "parts" ← partsOp3 ¿
       ⌫ ¿
     ⌫ ¿
@@ -1630,7 +1687,7 @@
 ⍝ Entry point
 ƒ
   ❴
-    "parts": "",
+    "parts": 【】,
     "strings": 【】,
     "string_map": ❴❵,
     "allocas": 【】,
@@ -1658,7 +1715,7 @@
     funcs i ⌈ ⌉ → fn ¿
     st fn ⟪ emit_function ⟫ → _ ¿
     st "parts" ⌈ ⌉ → parts ¿
-    parts "\n" ⊞⊞ → parts ¿
+    parts "\n" ⟪ .append ⟫ → parts ¿
     st "parts" ← parts ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
@@ -1668,24 +1725,24 @@
   ⍝ main
   st "allocas" ← 【】 ¿
   st "parts" ⌈ ⌉ → parts2 ¿
-  parts2 "define i32 @main(i32 %argc, ptr %argv) {\nentry:\n" ⊞⊞ → parts2 ¿
-  parts2 "  call void @uh_set_args(i32 %argc, ptr %argv)\n" ⊞⊞ → parts2 ¿
-  parts2 "  %env = alloca %UhEnv\n  %st = alloca %UhStack\n" ⊞⊞ → parts2 ¿
-  parts2 "  call void @uh_env_init(ptr %env, ptr null)\n" ⊞⊞ → parts2 ¿
-  parts2 "  call void @uh_set_global_env(ptr %env)\n" ⊞⊞ → parts2 ¿
-  parts2 "  call void @uh_stack_init(ptr %st)\n" ⊞⊞ → parts2 ¿
+  parts2 "define i32 @main(i32 %argc, ptr %argv) {\nentry:\n" ⟪ .append ⟫ → parts2 ¿
+  parts2 "  call void @uh_set_args(i32 %argc, ptr %argv)\n" ⟪ .append ⟫ → parts2 ¿
+  parts2 "  %env = alloca %UhEnv\n  %st = alloca %UhStack\n" ⟪ .append ⟫ → parts2 ¿
+  parts2 "  call void @uh_env_init(ptr %env, ptr null)\n" ⟪ .append ⟫ → parts2 ¿
+  parts2 "  call void @uh_set_global_env(ptr %env)\n" ⟪ .append ⟫ → parts2 ¿
+  parts2 "  call void @uh_stack_init(ptr %st)\n" ⟪ .append ⟫ → parts2 ¿
   st "parts" ← parts2 ¿
 
-  "" → bodyParts ¿
+  【】 → bodyParts ¿
   st "parts" ← bodyParts ¿
   st "uh_sysobj" 【】 ⟪ emit_call_value ⟫ → sysPtr ¿
   st "⎕" ⟪ emit_str_ptr ⟫ → sysName ¿
   st "parts" ⌈ ⌉ → bodyParts2 ¿
-  bodyParts2 "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ sysName ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ sysPtr ⊞⊞ ")\n" ⊞⊞ → bodyParts2 ¿
+  bodyParts2 "  call void @uh_env_set(ptr %env, ptr " ⊞⊞ sysName ⊞⊞ ", ptr byval(%UhValue) " ⊞⊞ sysPtr ⊞⊞ ")\n" ⟪ .append ⟫ → bodyParts2 ¿
   st "parts" ← bodyParts2 ¿
-  program "main" ⌈ ⌉ st ⟪ emit_block ⟫ → _ ¿
+  st program "main" ⌈ ⌉ ⟪ emit_block ⟫ → _ ¿
   st "parts" ⌈ ⌉ → bodyParts3 ¿
-  bodyParts3 "  ret i32 0\n}\n" ⊞⊞ → bodyParts3 ¿
+  bodyParts3 "  ret i32 0\n}\n" ⟪ .append ⟫ → bodyParts3 ¿
   st "parts" ← bodyParts3 ¿
 
   st "parts" ← parts2 ¿
@@ -1694,12 +1751,12 @@
   0 → ai2 ¿
   ai2 an2 ≺ ⟲ ↵
     allocas2 ai2 ⌈ ⌉ → lineA2 ¿
-    parts2 lineA2 ⊞⊞ → parts2 ¿
+    parts2 lineA2 ⟪ .append ⟫ → parts2 ¿
     ai2 1 ⊞ → ai2 ¿
   ⌫ ¿
-  parts2 bodyParts3 ⊞⊞ → parts2 ¿
+  parts2 bodyParts3 ⟪ parts_extend ⟫ → parts2 ¿
   st "parts" ← parts2 ¿
 
   st ⟪ emit_string_globals ⟫ → _ ¿
-  st "parts" ⌈ ⌉ ⇄ ¿
+  st "parts" ⌈ ⌉ "" ⟪ join ⟫ ⇄ ¿
 ↦ program ↦ emit_llvm ¿

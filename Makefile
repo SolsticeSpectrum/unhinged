@@ -2,7 +2,6 @@ UNHINGEDC_BOOT := build/bootstrap
 UNHINGEDC_STAGE1 := build/stage1
 UNHINGEDC := build/unhingedc
 TEST_BIN := build/tests
-
 .PHONY: build test clean
 
 build:
@@ -18,4 +17,3 @@ test: build
 
 clean:
 	rm -rf build output bootstrap/target
-	rm -f runtime/*.o

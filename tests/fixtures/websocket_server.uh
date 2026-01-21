@@ -1,0 +1,590 @@
+env"âµââ â env Â¿
+env "UNHINGEDC" â â â unhingedc Â¿
+unhingedc â â¡ â¤´ âµ "build/unhingedc" â unhingedc Â¿ â« Â¿
+env "RUN_NET" â â â runNetStr Â¿
+runNetStr "1" â¡ runNetStr "true" â¡ â¨ â runNet Â¿
+env "RUN_SMTP" â â â runSmtpStr Â¿
+runSmtpStr "1" â¡ runSmtpStr "true" â¡ â¨ â runSmtp Â¿
+
+"mkdir -p output/tests" âª syscall â« â _ Â¿
+
+"output/data.txt" "Hello from data.txt
+" âª write_file â« â _ Â¿
+"output/data.csv" "name,age,city
+Alice,30,Paris
+Bob,20,Oslo
+Cara,27,Berlin
+" âª write_file â« â _ Â¿
+"output/config.json" "{
+  "database": {"host": "localhost", "port": 5432},
+  "features": {"newFeature": false},
+  "users": [
+    {"name": "Alice", "active": true},
+    {"name": "Bob", "active": false},
+    {"name": "Cara", "active": true}
+  ]
+}
+" âª write_file â« â _ Â¿
+
+ã
+  â´"name": "Arrays", "src": "ã1 2 3ãâ a Â¿
+a 0 â â â¢ Â¿
+a 1 â â â¢ Â¿
+a 2 â â â¢ Â¿
+", "args": ""âµ
+  â´"name": "Basic", "src": "0 â passed Â¿
+0 â failed Â¿
+
+Æ
+  âº âµ â¡ â Â¿
+â¦ expected â¦ actual â¦ assert_eq Â¿
+
+"Running: add works" â¢ Â¿
+7 3 4 â âª assert_eq â« â ok Â¿
+ok â¤´ âµ
+  "  â PASS" â¢ Â¿
+  passed 1 â â passed Â¿
+â« â¤µ âµ
+  "  â FAIL" â¢ Â¿
+  failed 1 â â failed Â¿
+â« Â¿
+
+"Running: len works" â¢ Â¿
+3 ã1 2 3ãâª len â« âª assert_eq â« â ok Â¿
+ok â¤´ âµ
+  "  â PASS" â¢ Â¿
+  passed 1 â â passed Â¿
+â« â¤µ âµ
+  "  â FAIL" â¢ Â¿
+  failed 1 â â failed Â¿
+â« Â¿
+
+"Running: dict index works" â¢ Â¿
+â´"a": 1, "b": 2âµ â d Â¿
+1 d "a" â â âª assert_eq â« â ok Â¿
+ok â¤´ âµ
+  "  â PASS" â¢ Â¿
+  passed 1 â â passed Â¿
+â« â¤µ âµ
+  "  â FAIL" â¢ Â¿
+  failed 1 â â failed Â¿
+â« Â¿
+
+"Running: contains works" â¢ Â¿
+â¤ "a" â´"a": 1, "b": 2âµ â âª assert_eq â« â ok Â¿
+ok â¤´ âµ
+  "  â PASS" â¢ Â¿
+  passed 1 â â passed Â¿
+â« â¤µ âµ
+  "  â FAIL" â¢ Â¿
+  failed 1 â â failed Â¿
+â« Â¿
+
+"\n" â¢ Â¿
+"Passed: " passed â ââ â¢ Â¿
+"Failed: " failed â ââ â¢ Â¿
+", "args": ""âµ
+  â´"name": "Binsearch", "src": "Æ
+  0 â left Â¿
+  âº âª len â« 1 â â right Â¿
+
+  left right â¼ â² âµ
+    left right â 2 â âª int â« â mid Â¿
+
+    âº mid â â âµ â¡ â¤´ âµ
+      mid â Â¿
+    â« Â¿
+
+    âº mid â â âµ â» â¤´ âµ
+      mid 1 â â right Â¿
+    â« â¤µ âµ
+      mid 1 â â left Â¿
+    â« Â¿
+  â« Â¿
+
+  1 Â¬ â Â¿
+â¦ arr â¦ target â¦ binsearch Â¿
+
+ã1 3 5 7 9ã 7 âª binsearch â« â¢ Â¿
+", "args": ""âµ
+  â´"name": "Classes", "src": "â Person âµ
+  "" â .name â· str Â¿
+  0 â .age â· int Â¿
+
+  Æ
+    âµ â â¹.name Â¿
+    âº â â¹.age Â¿
+  â¦ name â¦ age â¦ __init__ Â¿
+
+  Æ
+    â¹.name " is " ââ â¹.age â ââ " years old" ââ â Â¿
+  â¦ describe Â¿
+â« Â¿
+
+"Alice" 30 âª Person â« â p Â¿
+p âª describe â« â¢ Â¿
+", "args": ""âµ
+  â´"name": "Cli", "src": "ââ´"args"âµââ â args Â¿
+
+args "--help" â args "-h" â â¨ â¤´ âµ
+  "Usage: program <input> <output>" â¢ Â¿
+â« Â¿
+
+args âª .len â« 3 âº â¤´ âµ
+  "Error: Input and output files required" â¢ Â¿
+â« Â¿
+
+args 1 â â â inputFile Â¿
+args 2 â â â outputFile Â¿
+
+"Processing: " inputFile ââ " -> " ââ outputFile ââ â¢ Â¿
+", "args": "input.txt output.txt"âµ
+  â´"name": "Config", "src": "ââ´"env"âµââ "ENV" â â â env Â¿
+env â â¡ â¤´ âµ "development" â env Â¿ â« Â¿
+
+â´
+  "development": â´
+    "db": â´"host": "localhost", "port": 5432âµ,
+    "debug": â¤,
+    "logLevel": "DEBUG"
+  âµ,
+  "production": â´
+    "db": â´"host": "prod-db.example.com", "port": 5432âµ,
+    "debug": â¥,
+    "logLevel": "INFO"
+  âµ
+âµ â configs Â¿
+
+configs env â â â config Â¿
+
+config â¢ Â¿
+", "args": ""âµ
+  â´"name": "Crypto", "src": ""crypto" â â crypto Â¿
+
+"mySecretPassword123" âª crypto.sha256 â« â hashed Â¿
+hashed â¢ Â¿
+
+32 âª crypto.randomBytes â« âª .hex â« â token Â¿
+token â¢ Â¿
+
+"my secret key" â key Â¿
+"Hello, World!" â plaintext Â¿
+plaintext key âª crypto.encryptAES â« â encrypted Â¿
+encrypted key âª crypto.decryptAES â« â decrypted Â¿
+
+decrypted plaintext â¡ â¤´ âµ
+  "Encryption/Decryption successful!" â¢ Â¿
+â« Â¿
+
+"message" "secret" âª crypto.hmacSHA256 â« â¢ Â¿
+", "args": ""âµ
+  â´"name": "Csv Processing", "src": ""output/data.csv" "r" â¸ â file Â¿
+file âª .readall â« â content Â¿
+file âª .close â« Â¿
+
+content "\n" âª .split â« â lines Â¿
+lines 0 â â "," âª .split â« â headers Â¿
+
+ãã â rows Â¿
+lines âª .len â« â lineCount Â¿
+1 â li Â¿
+li lineCount âº â² âµ
+  lines li â â â line Â¿
+  line "" â¢ â¤´ âµ
+    line "," âª .split â« â values Â¿
+    rows values âª .append â« Â¿
+  â« Â¿
+  li 1 â â li Â¿
+â« Â¿
+
+rows â¢ Â¿
+", "args": ""âµ
+  â´"name": "Db Sqlite", "src": "â´"database": ":memory:"âµ âª db.connect â« â conn Â¿
+
+"CREATE TABLE users (id INTEGER, name TEXT, email TEXT)" conn âª .exec â« Â¿
+"INSERT INTO users (id, name, email) VALUES (1, 'Alice', 'alice@example.com')" conn âª .exec â« Â¿
+
+"SELECT name, email FROM users" conn âª .query â« â users Â¿
+users 0 â â "name" â â â¢ Â¿
+", "args": ""âµ
+  â´"name": "Dicts", "src": "â´"name": "unhinged", "v": 3âµ â d Â¿
+d "name" â â â¢ Â¿
+"name" d â â¢ Â¿
+", "args": ""âµ
+  â´"name": "Fibonacci", "src": "Æ
+  âµ 2 âº â¤´ âµ
+    âµ â Â¿
+  â« Â¿
+  âµ 1 â âª fib â« âµ 2 â âª fib â« â â Â¿
+â¦ n â¦ fib Â¿
+
+10 âª fib â« â¢ Â¿
+", "args": ""âµ
+  â´"name": "File Io", "src": ""output/data.txt" "r" â¸ â f â· file Â¿
+
+f â â¢ â¤´ âµ
+  f âª .read â« â content Â¿
+  content â¢ Â¿
+  f âª .close â« Â¿
+â« â¤µ âµ
+  "File not found!" â¢ Â¿
+â« Â¿
+", "args": ""âµ
+  â´"name": "Fizzbuzz", "src": "1 101 â¥ i âµ
+  i 15 â 0 â¡ â¤´ âµ
+    "FizzBuzz" â¢ Â¿
+  â« â¤µ i 3 â 0 â¡ â¤´ âµ
+    "Fizz" â¢ Â¿
+  â« â¤µ i 5 â 0 â¡ â¤´ âµ
+    "Buzz" â¢ Â¿
+  â« â¤µ âµ
+    i â¢ Â¿
+  â« Â¿
+â« Â¿
+", "args": ""âµ
+  â´"name": "Hello", "src": ""Hello, World!" â¢ Â¿
+", "args": ""âµ
+  â´"name": "Json Processing", "src": ""output/config.json" "r" â¸ âª .readall â« âª json.parse â« â config Â¿
+
+configâ´"database"âµââ â´"host"âµââ â dbHost Â¿
+configâ´"database"âµââ â´"port"âµââ â dbPort Â¿
+
+configâ´"features"âµââ â´"newFeature"âµâ â¤ Â¿
+
+ãã â activeUsers Â¿
+configâ´"users"âµââ â¥ u âµ
+  uâ´"active"âµââ â¤´ âµ
+    activeUsers uâ´"name"âµââ âª .append â« Â¿
+  â« Â¿
+â« Â¿
+
+activeUsers â¢ Â¿
+", "args": ""âµ
+  â´"name": "Logging", "src": "â Logger âµ
+  "INFO" â .level â· str Â¿
+  â â .file Â¿
+
+  Æ
+    âµ â â¹.level Â¿
+    âº â â¢ â¤´ âµ
+      âº "a" â¸ â â¹.file Â¿
+    â« Â¿
+  â¦ level â¦ logFile â¦ __init__ Â¿
+
+  Æ
+    âª time.now â« âª .format â« â timestamp Â¿
+    "[" timestamp ââ "] [" ââ âº ââ "] " ââ âµ ââ â message Â¿
+    message â¢ Â¿
+    â¹.file â â¢ â¤´ âµ
+      â¹.file message "\n" ââ âª .write â« Â¿
+    â« Â¿
+  â¦ level â¦ msg â¦ _log Â¿
+
+  Æ âµ "DEBUG" â¹ âª ._log â« â¦ msg â¦ debug Â¿
+  Æ âµ "INFO" â¹ âª ._log â« â¦ msg â¦ info Â¿
+  Æ âµ "WARN" â¹ âª ._log â« â¦ msg â¦ warn Â¿
+  Æ âµ "ERROR" â¹ âª ._log â« â¦ msg â¦ error Â¿
+â« Â¿
+
+"INFO" "output/app.log" âª Logger â« â log Â¿
+"Application started" log âª .info â« Â¿
+"Something went wrong" log âª .error â« Â¿
+", "args": ""âµ
+  â´"name": "Matmul", "src": "Æ
+  âº âª len â« â rows Â¿
+  âµ âª len â« â cols Â¿
+  ãã â out Â¿
+
+  0 â i Â¿
+  i rows âº â² âµ
+    âº i â â â row Â¿
+    ãã â outrow Â¿
+    0 â j Â¿
+    j cols âº â² âµ
+      0 â sum Â¿
+      0 â k Â¿
+      k row âª len â« âº â² âµ
+        row k â â âµ k â â j â â â  sum â â sum Â¿
+        k 1 â â k Â¿
+      â« Â¿
+      outrow sum âª .append â« Â¿
+      j 1 â â j Â¿
+    â« Â¿
+    out outrow âª .append â« Â¿
+    i 1 â â i Â¿
+  â« Â¿
+
+  out â Â¿
+â¦ a â¦ b â¦ matmul Â¿
+
+ãã1 2ãã3 4ããâ m1 Â¿
+ãã5 6ãã7 8ããâ m2 Â¿
+m1 m2 âª matmul â« â¢ Â¿
+", "args": ""âµ
+  â´"name": "Nested Data", "src": "ãã1 2 3ãã4 5 6ãã7 8 9ããâ data Â¿
+
+data Î» âµ â â¿ â¥ â rowsums Â¿
+rowsums â¢ Â¿
+
+data Î» âµ â â¿ â¥ â â¿ â total Â¿
+
+total â¢ Â¿
+", "args": ""âµ
+  â´"name": "Qsort", "src": "Æ
+  âµ âª len â« 1 â¼ â¤´ âµ
+    âµ â Â¿
+  â« Â¿
+
+  âµ âµ âª len â« 2 â â â â pivot Â¿
+
+  âµ Î» âµ pivot âº â¥ â less Â¿
+  âµ Î» âµ pivot â¡ â¥ â equal Â¿
+  âµ Î» âµ pivot â» â¥ â greater Â¿
+
+  less âª qsort â« equal ââ greater âª qsort â« ââ â Â¿
+â¦ arr â¦ qsort Â¿
+
+ã64 34 25 12 22 11 90ãâª qsort â« â¢ Â¿
+", "args": ""âµ
+  â´"name": "Stdlib", "src": "0 â passed Â¿
+0 â failed Â¿
+
+Æ
+  âº âµ â¡ â Â¿
+â¦ expected â¦ actual â¦ assert_eq Â¿
+
+"Running: sha256 works" â¢ Â¿
+"hello" âª crypto.sha256 â« â hash Â¿
+"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824" hash âª assert_eq â« â ok Â¿
+ok â¤´ âµ
+  "  â PASS" â¢ Â¿
+  passed 1 â â passed Â¿
+â« â¤µ âµ
+  "  â FAIL" â¢ Â¿
+  failed 1 â â failed Â¿
+â« Â¿
+
+"Running: aes roundtrip works" â¢ Â¿
+"key" â key Â¿
+"Hello" â plaintext Â¿
+plaintext key âª crypto.encryptAES â« â encrypted Â¿
+encrypted key âª crypto.decryptAES â« â decrypted Â¿
+plaintext decrypted âª assert_eq â« â ok Â¿
+ok â¤´ âµ
+  "  â PASS" â¢ Â¿
+  passed 1 â â passed Â¿
+â« â¤µ âµ
+  "  â FAIL" â¢ Â¿
+  failed 1 â â failed Â¿
+â« Â¿
+
+"Running: sqlite works" â¢ Â¿
+â´"database": ":memory:"âµ âª db.connect â« â conn Â¿
+"CREATE TABLE t (id INTEGER, name TEXT)" conn âª .exec â« â ok Â¿
+ok 1 â¡ â¤´ âµ
+  "INSERT INTO t (id, name) VALUES (1, 'Alice')" conn âª .exec â« Â¿
+  "SELECT name FROM t" conn âª .query â« â rows Â¿
+  "Alice" rows 0 â â "name" â â âª assert_eq â« â ok Â¿
+â« Â¿
+ok â¤´ âµ
+  "  â PASS" â¢ Â¿
+  passed 1 â â passed Â¿
+â« â¤µ âµ
+  "  â FAIL" â¢ Â¿
+  failed 1 â â failed Â¿
+â« Â¿
+
+"\n" â¢ Â¿
+"Passed: " passed â ââ â¢ Â¿
+"Failed: " failed â ââ â¢ Â¿
+", "args": ""âµ
+  â´"name": "String Processing", "src": ""hello world" â text Â¿
+text " " âª split â« â words Â¿
+words Î» âµ âª upper â« â¥ â uppered Â¿
+uppered " " âª join â« â result Â¿
+result â¢ Â¿
+", "args": ""âµ
+  â´"name": "Syscall", "src": ""echo hi" âª syscall â« â¢ Â¿
+", "args": ""âµ
+  â´"name": "Testing", "src": "Æ
+  âº âµ â¡ â¤´ âµ
+    "PASS" â¢ Â¿
+  â« â¤µ âµ
+    "FAIL" â¢ Â¿
+  â« Â¿
+â¦ expected â¦ actual â¦ assert_eq Â¿
+
+"Addition works" â¢ Â¿
+2 3 â 5 âª assert_eq â« Â¿
+
+"Arrays concatenate" â¢ Â¿
+ã1 2ãã3 4ãââ â¢ Â¿
+", "args": ""âµ
+  â´"name": "Threads", "src": "Æ
+  âµ Î» item âµ
+    item 2 â â¢ Â¿
+  â« â¥ Â¿
+â¦ items â¦ worker Â¿
+
+ã1 2 3 4 5 6 7 8ãâ data Â¿
+data "worker" âª .thread â« â t Â¿
+t âª .join â« Â¿
+", "args": ""âµ
+  â´"name": "Validation", "src": "â Validator âµ
+  Æ
+    âµ â â¡ âµ "" â¡ â¨ â¤´ âµ
+      â¥ â Â¿
+    â« Â¿
+    â¤ â Â¿
+  â¦ value â¦ required Â¿
+
+  Æ
+    âµ âª type â« "str" â¡ â Â¿
+  â¦ value â¦ isString Â¿
+
+  Æ
+    âµ âª type â« "int" â¡ âµ âª type â« "float" â¡ â¨ â Â¿
+  â¦ value â¦ isNumber Â¿
+
+  Æ
+    âµ âº â½ âµ âµ â¼ â§ â Â¿
+  â¦ value â¦ min â¦ max â¦ between Â¿
+
+  Æ
+    âµ âª .match â« âº â â¢ â Â¿
+  â¦ value â¦ pattern â¦ matches Â¿
+â« Â¿
+
+â´
+  "name": "Alice",
+  "email": "alice@example.com",
+  "age": 25
+âµ â userData Â¿
+
+âª Validator â« â v Â¿
+
+userDataâ´"name"âµââ v âª .required â« â¤´ âµ
+  userDataâ´"email"âµââ "^[^@]+@[^@]+\\.[^@]+$" v âª .matches â« â¤´ âµ
+    userDataâ´"age"âµââ 0 120 v âª .between â« â¤´ âµ
+      "Validation passed!" â¢ Â¿
+    â« â¤µ âµ
+      "Invalid age" â¢ Â¿
+    â« Â¿
+  â« â¤µ âµ
+    "Invalid email" â¢ Â¿
+  â« Â¿
+â« â¤µ âµ
+  "Name is required" â¢ Â¿
+â« Â¿
+", "args": ""âµ
+ã â cases Â¿
+
+""smtp" â â smtp Â¿
+
+â â sys Â¿
+sysâ´"env"âµââ â env Â¿
+
+env "SMTP_HOST" â â â host Â¿
+host â â¡ â¤´ âµ "localhost" â host Â¿ â« Â¿
+env "SMTP_PORT" â â â portStr Â¿
+portStr â â¡ â¤´ âµ 2525 â port Â¿ â« â¤µ âµ portStr âª int â« â port Â¿ â« Â¿
+env "SMTP_USER" â â â user Â¿
+user â â¡ â¤´ âµ "" â user Â¿ â« Â¿
+env "SMTP_PASS" â â â pass Â¿
+pass â â¡ â¤´ âµ "" â pass Â¿ â« Â¿
+env "SMTP_TLS" â â â tlsStr Â¿
+tlsStr "1" â¡ tlsStr "true" â¡ â¨ â tls Â¿
+env "SMTP_STARTTLS" â â â stlsStr Â¿
+stlsStr "1" â¡ stlsStr "true" â¡ â¨ â starttls Â¿
+env "SMTP_FROM" â â â from Â¿
+from â â¡ â¤´ âµ "sender@example.com" â from Â¿ â« Â¿
+
+â´
+  "host": host,
+  "port": port,
+  "username": user,
+  "password": pass,
+  "tls": tls,
+  "starttls": starttls
+âµ âª smtp.connect â« â client Â¿
+
+â´
+  "from": from,
+  "to": ã"alt.the.ai@gmail.com"ã,
+  "subject": "Hello from UNHINGED!",
+  "body": "This is a test email.",
+  "html": "<h1>Hello from UNHINGED!</h1><p>This is a test email.</p>"
+âµ client âª .send â« Â¿
+
+client âª .disconnect â« Â¿
+" â email_uh Â¿
+""net/http" â â http Â¿
+
+Æ
+  âº âª .method â« "GET" â¡ â¤´ âµ
+    â´"status": 200, "body": "Hello from UNHINGED!"âµ âµ âª .json â« Â¿
+  â« â¤µ âµ
+    â´"status": 405, "error": "Method not allowed"âµ âµ âª .json â« Â¿
+  â« Â¿
+â¦ req â¦ res â¦ handler Â¿
+
+"/" handler âª http.handle â« Â¿
+":18081" âª http.listen â« Â¿
+" â http_server_uh Â¿
+""net/http" â â http Â¿
+
+0 â tries Â¿
+â â response Â¿
+tries 40 âº â² âµ
+  â´
+    "url": "http://127.0.0.1:18081/",
+    "headers": â´"User-Agent": "UNHINGED/1.0"âµ
+  âµ âª http.get â« â response Â¿
+  responseâ´"status"âµââ 200 â¡ â¤´ âµ
+    â Â¿
+  â« Â¿
+  "sleep 0.2" âª syscall â« â _ Â¿
+  tries 1 â â tries Â¿
+â« Â¿
+
+responseâ´"status"âµââ 200 â¡ â¤´ âµ
+  responseâ´"body"âµââ âª json.parse â« â data Â¿
+  dataâ´"body"âµââ â¢ Â¿
+â« â¤µ âµ
+  "Request failed" â¢ Â¿
+  response â¢ Â¿
+  "output/tests/uh_http.log" âª read_file â« â log Â¿
+  log "" â¢ â¤´ âµ log â¢ Â¿ â« Â¿
+â« Â¿
+" â rest_client_uh Â¿
+""websocket" â â ws Â¿
+
+"ws://127.0.0.1:8082/" âª ws.connect â« â conn Â¿
+
+â´"type": "ping"âµ âª json.stringify â« conn âª .send â« Â¿
+conn âª .receive â« â msg Â¿
+
+msg â â¢ â¤´ âµ
+  msg â¢ Â¿
+â« Â¿
+" â websocket_client_uh Â¿
+""websocket" â â ws Â¿
+
+Æ
+  "Client connected" â¢ Â¿
+  â¤ â² âµ
+    âµ âª .receive â« â msg Â¿
+    msg â â¡ msg "" â¡ â¨ â¤´ âµ
+      â Â¿
+    â« Â¿
+    msg âª json.parse â« â data Â¿
+    dataâ´"type"âµââ "ping" â¡ â¤´ âµ
+      â´"type": "pong", "timestamp": âª time.now â«âµ âª json.stringify â« âµ âª .send â« Â¿
+    â« â¤µ dataâ´"type"âµââ "message" â¡ â¤´ âµ
+      "Received: " dataâ´"text"âµââ ââ â¢ Â¿
+      data âª json.stringify â« âµ âª .send â« Â¿
+    â« Â¿
+  â« Â¿
+â¦ conn â¦ handleConnection Â¿
+
+â´"port": 8082, "handler": handleConnectionâµ âª ws.serve â« Â¿

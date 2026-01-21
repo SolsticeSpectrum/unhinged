@@ -42,8 +42,8 @@ runSmtpStr "1" ≡ runSmtpStr "true" ≡ ∨ → runSmtp ¿
 】 → cases ¿
 
 "\"smtp\" ⎕ → smtp ¿\n\n⎕ → sys ¿\nsys❴\"env\"❵⌈⌉ → env ¿\n\nenv \"SMTP_HOST\" ⌈ ⌉ → host ¿\nhost ∅ ≡ ⤴ ↵ \"localhost\" → host ¿ ⌫ ¿\nenv \"SMTP_PORT\" ⌈ ⌉ → portStr ¿\nportStr ∅ ≡ ⤴ ↵ 2525 → port ¿ ⌫ ⤵ ↵ portStr ⟪ int ⟫ → port ¿ ⌫ ¿\nenv \"SMTP_USER\" ⌈ ⌉ → user ¿\nuser ∅ ≡ ⤴ ↵ \"\" → user ¿ ⌫ ¿\nenv \"SMTP_PASS\" ⌈ ⌉ → pass ¿\npass ∅ ≡ ⤴ ↵ \"\" → pass ¿ ⌫ ¿\nenv \"SMTP_TLS\" ⌈ ⌉ → tlsStr ¿\ntlsStr \"1\" ≡ tlsStr \"true\" ≡ ∨ → tls ¿\nenv \"SMTP_STARTTLS\" ⌈ ⌉ → stlsStr ¿\nstlsStr \"1\" ≡ stlsStr \"true\" ≡ ∨ → starttls ¿\nenv \"SMTP_FROM\" ⌈ ⌉ → from ¿\nfrom ∅ ≡ ⤴ ↵ \"sender@example.com\" → from ¿ ⌫ ¿\n\n❴\n  \"host\": host,\n  \"port\": port,\n  \"username\": user,\n  \"password\": pass,\n  \"tls\": tls,\n  \"starttls\": starttls\n❵ ⟪ smtp.connect ⟫ → client ¿\n\n❴\n  \"from\": from,\n  \"to\": 【\"alt.the.ai@gmail.com\"】,\n  \"subject\": \"Hello from UNHINGED!\",\n  \"body\": \"This is a test email.\",\n  \"html\": \"<h1>Hello from UNHINGED!</h1><p>This is a test email.</p>\"\n❵ client ⟪ .send ⟫ ¿\n\nclient ⟪ .disconnect ⟫ ¿\n" → email_uh ¿
-"\"net/http\" ⎕ → http ¿\n\nƒ\n  ⍺ ⟪ .method ⟫ \"GET\" ≡ ⤴ ↵\n    ❴\"status\": 200, \"body\": \"Hello from UNHINGED!\"❵ ⍵ ⟪ .json ⟫ ¿\n  ⌫ ⤵ ↵\n    ❴\"status\": 405, \"error\": \"Method not allowed\"❵ ⍵ ⟪ .json ⟫ ¿\n  ⌫ ¿\n↦ req ↦ res ↦ handler ¿\n\n\"/\" handler ⟪ http.handle ⟫ ¿\n\":8081\" ⟪ http.listen ⟫ ¿\n" → http_server_uh ¿
-"\"net/http\" ⎕ → http ¿\n\n0 → tries ¿\n∅ → response ¿\ntries 20 ≺ ⟲ ↵\n  ❴\n    \"url\": \"http://127.0.0.1:8081/\",\n    \"headers\": ❴\"User-Agent\": \"UNHINGED/1.0\"❵\n  ❵ ⟪ http.get ⟫ → response ¿\n  response❴\"status\"❵⌈⌉ 200 ≡ ⤴ ↵\n    ⊗ ¿\n  ⌫ ¿\n  \"sleep 0.1\" ⟪ syscall ⟫ → _ ¿\n  tries 1 ⊞ → tries ¿\n⌫ ¿\n\nresponse❴\"status\"❵⌈⌉ 200 ≡ ⤴ ↵\n  response❴\"body\"❵⌈⌉ ⟪ json.parse ⟫ → data ¿\n  data❴\"body\"❵⌈⌉ ⊢ ¿\n⌫ ⤵ ↵\n  \"Request failed\" ⊢ ¿\n⌫ ¿\n" → rest_client_uh ¿
+"\"net/http\" ⎕ → http ¿\n\nƒ\n  ⍺ ⟪ .method ⟫ \"GET\" ≡ ⤴ ↵\n    ❴\"status\": 200, \"body\": \"Hello from UNHINGED!\"❵ ⍵ ⟪ .json ⟫ ¿\n  ⌫ ⤵ ↵\n    ❴\"status\": 405, \"error\": \"Method not allowed\"❵ ⍵ ⟪ .json ⟫ ¿\n  ⌫ ¿\n↦ req ↦ res ↦ handler ¿\n\n\"/\" handler ⟪ http.handle ⟫ ¿\n\":18081\" ⟪ http.listen ⟫ ¿\n" → http_server_uh ¿
+"\"net/http\" ⎕ → http ¿\n\n0 → tries ¿\n∅ → response ¿\ntries 40 ≺ ⟲ ↵\n  ❴\n    \"url\": \"http://127.0.0.1:18081/\",\n    \"headers\": ❴\"User-Agent\": \"UNHINGED/1.0\"❵\n  ❵ ⟪ http.get ⟫ → response ¿\n  response❴\"status\"❵⌈⌉ 200 ≡ ⤴ ↵\n    ⊗ ¿\n  ⌫ ¿\n  \"sleep 0.2\" ⟪ syscall ⟫ → _ ¿\n  tries 1 ⊞ → tries ¿\n⌫ ¿\n\nresponse❴\"status\"❵⌈⌉ 200 ≡ ⤴ ↵\n  response❴\"body\"❵⌈⌉ ⟪ json.parse ⟫ → data ¿\n  data❴\"body\"❵⌈⌉ ⊢ ¿\n⌫ ⤵ ↵\n  \"Request failed\" ⊢ ¿\n  response ⊢ ¿\n  \"/tmp/uh_http.log\" ⟪ read_file ⟫ → log ¿\n  log "" ≢ ⤴ ↵ log ⊢ ¿ ⌫ ¿\n⌫ ¿\n" → rest_client_uh ¿
 "\"websocket\" ⎕ → ws ¿\n\n\"ws://127.0.0.1:8082/\" ⟪ ws.connect ⟫ → conn ¿\n\n❴\"type\": \"ping\"❵ ⟪ json.stringify ⟫ conn ⟪ .send ⟫ ¿\nconn ⟪ .receive ⟫ → msg ¿\n\nmsg ∅ ≢ ⤴ ↵\n  msg ⊢ ¿\n⌫ ¿\n" → websocket_client_uh ¿
 "\"websocket\" ⎕ → ws ¿\n\nƒ\n  \"Client connected\" ⊢ ¿\n  ⊤ ⟲ ↵\n    ⍵ ⟪ .receive ⟫ → msg ¿\n    msg ∅ ≡ msg \"\" ≡ ∨ ⤴ ↵\n      ⊗ ¿\n    ⌫ ¿\n    msg ⟪ json.parse ⟫ → data ¿\n    data❴\"type\"❵⌈⌉ \"ping\" ≡ ⤴ ↵\n      ❴\"type\": \"pong\", \"timestamp\": ⟪ time.now ⟫❵ ⟪ json.stringify ⟫ ⍵ ⟪ .send ⟫ ¿\n    ⌫ ⤵ data❴\"type\"❵⌈⌉ \"message\" ≡ ⤴ ↵\n      \"Received: \" data❴\"text\"❵⌈⌉ ⊞⊞ ⊢ ¿\n      data ⟪ json.stringify ⟫ ⍵ ⟪ .send ⟫ ¿\n    ⌫ ¿\n  ⌫ ¿\n↦ conn ↦ handleConnection ¿\n\n❴\"port\": 8082, \"handler\": handleConnection❵ ⟪ ws.serve ⟫ ¿\n" → websocket_server_uh ¿
 
@@ -78,12 +78,20 @@ runNet ⤴ ↵
   rcpath rest_client_uh ⟪ write_file ⟫ → _ ¿
   "/tmp/uh_rest_client" → rcbin ¿
   unhingedc " " ⊞⊞ rcpath ⊞⊞ " " ⊞⊞ rcbin ⊞⊞ ⟪ syscall ⟫ → _ ¿
-  "sh -c "" ⊞⊞ hsbin ⊞⊞ " >/tmp/uh_http.log 2>&1 & echo $!"" ⟪ syscall ⟫ → pidStr ¿
-  pidStr ⟪ int ⟫ → pid ¿
-  "sleep 0.2" ⟪ syscall ⟫ → _ ¿
-  rcbin ⟪ syscall ⟫ → rout ¿
-  rout "" ≢ ⤴ ↵ rout ⊢ ¿ ⌫ ¿
-  "kill " pid ⍕ ⊞⊞ ⟪ syscall ⟫ → _ ¿
+  "sh -c '" ⊞⊞ hsbin ⊞⊞ " >/tmp/uh_http.log 2>&1 & echo $!'" ⟪ syscall ⟫ → pidStr ¿
+  pidStr "\n" ⟪ .split ⟫ → pidParts ¿
+  pidParts 0 ⌈ ⌉ → pidText ¿
+  pidText ⟪ int ⟫ → pid ¿
+  pid 0 ≼ ⤴ ↵
+    "http server failed to start" ⊢ ¿
+    "/tmp/uh_http.log" ⟪ read_file ⟫ → hlog ¿
+    hlog "" ≢ ⤴ ↵ hlog ⊢ ¿ ⌫ ¿
+  ⌫ ⤵ ↵
+    "sleep 0.8" ⟪ syscall ⟫ → _ ¿
+    rcbin ⟪ syscall ⟫ → rout ¿
+    rout "" ≢ ⤴ ↵ rout ⊢ ¿ ⌫ ¿
+    "sh -c 'kill " ⊞⊞ pidText ⊞⊞ " >/dev/null 2>&1 || true'" ⟪ syscall ⟫ → _ ¿
+  ⌫ ¿
 
   "===== websocket_server + websocket_client =====" ⊢ ¿
   "/tmp/uh_ws_server.uh" → wspath ¿
@@ -94,12 +102,20 @@ runNet ⤴ ↵
   wcpath websocket_client_uh ⟪ write_file ⟫ → _ ¿
   "/tmp/uh_ws_client" → wcbin ¿
   unhingedc " " ⊞⊞ wcpath ⊞⊞ " " ⊞⊞ wcbin ⊞⊞ ⟪ syscall ⟫ → _ ¿
-  "sh -c "" ⊞⊞ wsbin ⊞⊞ " >/tmp/uh_ws.log 2>&1 & echo $!"" ⟪ syscall ⟫ → wpidStr ¿
-  wpidStr ⟪ int ⟫ → wpid ¿
-  "sleep 0.2" ⟪ syscall ⟫ → _ ¿
-  wcbin ⟪ syscall ⟫ → wrout ¿
-  wrout "" ≢ ⤴ ↵ wrout ⊢ ¿ ⌫ ¿
-  "kill " wpid ⍕ ⊞⊞ ⟪ syscall ⟫ → _ ¿
+  "sh -c '" ⊞⊞ wsbin ⊞⊞ " >/tmp/uh_ws.log 2>&1 & echo $!'" ⟪ syscall ⟫ → wpidStr ¿
+  wpidStr "\n" ⟪ .split ⟫ → wpidParts ¿
+  wpidParts 0 ⌈ ⌉ → wpidText ¿
+  wpidText ⟪ int ⟫ → wpid ¿
+  wpid 0 ≼ ⤴ ↵
+    "websocket server failed to start" ⊢ ¿
+    "/tmp/uh_ws.log" ⟪ read_file ⟫ → wlog ¿
+    wlog "" ≢ ⤴ ↵ wlog ⊢ ¿ ⌫ ¿
+  ⌫ ⤵ ↵
+    "sleep 0.2" ⟪ syscall ⟫ → _ ¿
+    wcbin ⟪ syscall ⟫ → wrout ¿
+    wrout "" ≢ ⤴ ↵ wrout ⊢ ¿ ⌫ ¿
+    "sh -c 'kill " ⊞⊞ wpidText ⊞⊞ " >/dev/null 2>&1 || true'" ⟪ syscall ⟫ → _ ¿
+  ⌫ ¿
 ⌫ ⤵ ↵
   "SKIP net tests (set RUN_NET=1)" ⊢ ¿
 ⌫ ¿

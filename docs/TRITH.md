@@ -719,13 +719,15 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
   - `ʃ` and `⟦T⟧` share the layout `{ptr data, i64 len, i64 cap}`. A shadow is the same pointer, or the value itself for classical values.
   - No array is ever empty (there is no empty literal and nothing removes elements), and every buffer has one spare byte. So `⌖` loads from a clamped position and selects the result without branching. Element accesses carry alias metadata so that LLVM knows they never overwrite array headers.
   - `⌁` frees nested strings and arrays. Arrays whose elements are particles cannot be freed yet.
-  - There are no byte literals, so 𝔹 values come from strings (open question).
+  - There are no byte literals. An integer literal used next to a 𝔹 operand, or pushed into an `ʃ` with `⍆`, is read as a byte; values above 127 wrap to the signed range. `⌖` indices and the `⍈` index stay ℤ (milestone 6).
+  - `⚇` widens a 𝔹 to ℤ, and `⍆` on an `ʃ` also takes an ℤ, keeping its low byte (milestone 6).
   - Particles are made by FFI functions that return the particle type. The antiparticle receives the representation.
   - Each `⎔` binding becomes a small C wrapper in a generated `.ffi.c` file, so the C compiler checks the call against the real prototype from the system headers (`--include` adds headers, `--link` adds C files). Type mapping:
     - ℤ is `int64_t`, ℝ is `double`, ŧ is `int8_t`, 𝔹 is `uint8_t`.
     - `⟗ʃ` and `⟖ʃ` are passed as NUL-terminated `char *`. An owned `ʃ` is passed the same way and freed after the call. `⟗⟦T⟧` is passed as a pointer to the elements.
     - An `ʃ` result is copied from a `char *`.
     - A `◌` result fails when it is negative (integers), NULL (strings) or NaN (reals).
+  - The runtime offers `trith_argc`, `trith_arg(i)`, `trith_read_file(path)` and `trith_write_file(path, data)` to `⎔` bindings, for the self-hosted compiler (milestone 6). `trith_arg` and `trith_read_file` return NULL on failure, so they bind as `◌ʃ`; `trith_write_file` returns 0 or −1, so it binds as `◌ℤ`. `trith/tests/run/io_bytes.trh` uses them.
   - The runtime and FFI glue are compiled to LLVM IR and linked into one module before optimising, so calls into them can inline.
 - **Compile-time evaluation (milestone 5).**
   - The evaluator runs pure code over ℤ, ŧ and their `◌` forms. It refuses I/O, FFI, containers and future calls. Integers must stay within 2⁵³, and it gives up after 10⁷ steps or 200 nested calls.

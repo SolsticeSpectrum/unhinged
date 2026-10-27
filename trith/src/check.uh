@@ -555,6 +555,8 @@
   ⌫ ¿
   x "⚇" ≡ ⤴ ↵
     a ⟪ ck_numeric ⟫ ¬ ⤴ ↵ C tok x 0 "a number" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    ⍝ s1 extension: ⚇ also widens a byte to an integer
+    a "𝔹" ≡ ⤴ ↵ 【"ℤ"】 ⇄ ¿ ⌫ ¿
     【】 a ⟪ .append ⟫ ⇄ ¿
   ⌫ ¿
   x "⌁" ≡ ⤴ ↵ 【】 ⇄ ¿ ⌫ ¿
@@ -588,7 +590,8 @@
   ⌫ ¿
   x "⍆" ≡ ⤴ ↵
     a "ʃ" ≡ ⤴ ↵
-      b "𝔹" ≢ ⤴ ↵ C tok x 1 "𝔹" b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+      ⍝ s1 extension: appending an integer stores its low byte
+      b "𝔹" ≢ b "ℤ" ≢ ∧ ⤴ ↵ C tok x 1 "𝔹 or ℤ" b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
       【"ʃ"】 ⇄ ¿
     ⌫ ¿
     a ⟪ ck_head ⟫ "⟦" ≢ ⤴ ↵ C tok x 0 "⟦T⟧ or ʃ" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
@@ -810,6 +813,12 @@
   ⌫ ¿
   ∅ ⇄ ¿
 ↦ S ↦ n ↦ evs ↦ chs ↦ ck_annotate_top ¿
+
+ƒ
+  v "tok" ⌈ ⌉ → t ¿
+  t ∅ ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  t "kind" ⌈ ⌉ "int" ≡ v ⟪ ck_ch ⟫ "*" ≡ ∧ ⇄ ¿
+↦ v ↦ ck_is_literal ¿
 
 ⍝ Push results; returns nothing
 ƒ
@@ -1322,6 +1331,25 @@
     C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
     ts t ⟪ .append ⟫ ¿
     i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⍝ an integer literal next to a byte is a byte (literals are gluons, §3.2)
+  ⊥ → hasByte ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    ts i ⌈ ⌉ → t ¿
+    t "𝔹" ≡ t "⟗ʃ" ≡ ∨ t "⟖ʃ" ≡ ∨ ⤴ ↵ ⊤ → hasByte ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  hasByte ⤴ ↵
+    0 → i ¿
+    i k ≺ ⟲ ↵
+      vals i ⌈ ⌉ → vi ¿
+      ts i ⌈ ⌉ "ℤ" ≡ vi ⟪ ck_is_literal ⟫ ∧ x "⌖" ≢ ∧ ⤴ ↵
+        ⍝ an index stays an integer: ⌖ and ⍈ take ℤ positions
+        x "⍈" ≡ i 1 ≡ ∧ ¬ ⤴ ↵ ts i ← "𝔹" ¿ ⌫ ¿
+      ⌫ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
   ⌫ ¿
   ⍝ lifting (§8.3): an operator on superpositions applies to every alternative
   1 → lift ¿

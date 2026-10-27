@@ -111,6 +111,67 @@ void trith_print_f64(double v) {
     printf("%.15g\n", v);
 }
 
+/* ---- the outside world, for FFI bindings (§14) ---- */
+
+static int trith_argc_value;
+static char **trith_argv_value;
+
+void trith_set_args(int argc, char **argv) {
+    trith_argc_value = argc;
+    trith_argv_value = argv;
+}
+
+int64_t trith_argc(void) {
+    return trith_argc_value;
+}
+
+/* argument i (0 is the program), or NULL */
+const char *trith_arg(int64_t i) {
+    if (i < 0 || i >= trith_argc_value) {
+        return NULL;
+    }
+    return trith_argv_value[i];
+}
+
+/* the whole file as a C string, or NULL; the buffer is cached and reused */
+const char *trith_read_file(const char *path) {
+    static char *last;
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) {
+        return NULL;
+    }
+    size_t cap = 4096, len = 0;
+    char *buf = trith_xalloc(cap);
+    size_t n;
+    while ((n = fread(buf + len, 1, cap - len - 1, f)) > 0) {
+        len += n;
+        if (len + 1 >= cap) {
+            cap *= 2;
+            char *p = realloc(buf, cap);
+            if (p == NULL) {
+                abort();
+            }
+            buf = p;
+        }
+    }
+    fclose(f);
+    buf[len] = '\0';
+    free(last);
+    last = buf;
+    return buf;
+}
+
+/* write data to path; 0 on success, -1 on failure */
+int64_t trith_write_file(const char *path, const char *data) {
+    FILE *f = fopen(path, "wb");
+    if (f == NULL) {
+        return -1;
+    }
+    size_t n = strlen(data);
+    int ok = fwrite(data, 1, n, f) == n;
+    return fclose(f) == 0 && ok ? 0 : -1;
+}
+
 /* ⥀ exited with ⊖ in a function that cannot fail (§7.2, §7.3) */
 void trith_loop_failed(void) {
     fflush(stdout);

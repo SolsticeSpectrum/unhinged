@@ -643,7 +643,13 @@
     E 【op " " lt " " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
     【】 ty r ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
   ⌫ ¿
-  x "⚇" ≡ ⤴ ↵ 【】 ea ∅ ⟪ em_with_role ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+  x "⚇" ≡ ⤴ ↵
+    byte ⤴ ↵
+      E 【"zext i8 " a " to i64"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
+      【】 "ℤ" r ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+    ⌫ ¿
+    【】 ea ∅ ⟪ em_with_role ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
   x "⌁" ≡ ⤴ ↵
     ty → base ¿
     ty ⟪ em_is_fail ⟫ ty "◌" ≢ ∧ ⤴ ↵ ty ⟪ ck_tail ⟫ → base ¿ ⌫ ¿
@@ -713,6 +719,9 @@
     et ⟪ em_llty ⟫ → elt ¿
     elt ⟪ em_size ⟫ → sz ¿
     E 【"call ptr @trith_arr_push(ptr " a ", i64 " sz ")"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → slot ¿
+    vals 1 ⌈ ⌉ "ty" ⌈ ⌉ "ℤ" ≡ elt "i8" ≡ ∧ ⤴ ↵
+      E 【"trunc i64 " b " to i8"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → b ¿
+    ⌫ ¿
     E 【"store " elt " " b ", ptr " slot ", !tbaa !6"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
     【】 ty a ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
   ⌫ ¿
@@ -1115,6 +1124,7 @@
         "ℤ" tok "value" ⌈ ⌉ ∅ ⟪ em_ent ⟫ → e ¿
         tok "value" ⌈ ⌉ ⟪ int ⟫ → cv ¿
         e "c" ← cv ¿
+        e "lit" ← ⊤ ¿
       ⌫ ¿
       lk "trit" ≡ ⤴ ↵
         tok "text" ⌈ ⌉ → tt ¿
@@ -1214,6 +1224,29 @@
           x "⌁" ≢ ⤴ ↵ E e ⟪ em_unwrap ⟫ → e ¿ ⌫ ¿
           uv e ⟪ .append ⟫ ¿
           i 1 ⊞ → i ¿
+        ⌫ ¿
+        ⊥ → hasByte ¿
+        0 → q ¿
+        q ar ≺ ⟲ ↵
+          uv q ⌈ ⌉ "ty" ⌈ ⌉ → qt ¿
+          qt "𝔹" ≡ qt "⟗ʃ" ≡ ∨ qt "⟖ʃ" ≡ ∨ ⤴ ↵ ⊤ → hasByte ¿ ⌫ ¿
+          q 1 ⊞ → q ¿
+        ⌫ ¿
+        hasByte x "⌖" ≢ ∧ ⤴ ↵
+          0 → q ¿
+          q ar ≺ ⟲ ↵
+            uv q ⌈ ⌉ → ue ¿
+            ue "ty" ⌈ ⌉ "ℤ" ≡ ue "lit" ⌈ ⌉ ⊤ ≡ ∧ x "⍈" ≡ q 1 ≡ ∧ ¬ ∧ ⤴ ↵
+              ue "c" ⌈ ⌉ → bc ¿
+              bc 127 ≻ ⤴ ↵ bc 256 ⊟ → bc ¿ ⌫ ¿
+              bc ⟪ lx_num_str ⟫ → bv ¿
+              "𝔹" bv ∅ ⟪ em_ent ⟫ → be ¿
+              ue "role" ⌈ ⌉ → br ¿
+              be "role" ← br ¿
+              uv q ← be ¿
+            ⌫ ¿
+            q 1 ⊞ → q ¿
+          ⌫ ¿
         ⌫ ¿
         ∅ → res ¿
         uv ⟪ em_to_vals ⟫ → kv ¿
@@ -1885,8 +1918,10 @@
   out E "lines" ⌈ ⌉ ⟪ em_concat_into ⟫ ¿
   out "" ⟪ .append ⟫ ¿
   entry "sym" ⌈ ⌉ → es ¿
-  out "define i32 @main() {" ⟪ .append ⟫ ¿
+  out "declare void @trith_set_args(i32, ptr)" ⟪ .append ⟫ ¿
+  out "define i32 @main(i32 %argc, ptr %argv) {" ⟪ .append ⟫ ¿
   out "entry:" ⟪ .append ⟫ ¿
+  out "  call void @trith_set_args(i32 %argc, ptr %argv)" ⟪ .append ⟫ ¿
   entry "outs" ⌈ ⌉ ⟪ len ⟫ 0 ≡ ⤴ ↵
     out 【"  call void " es "()"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
     out "  ret i32 0" ⟪ .append ⟫ ¿
@@ -1932,6 +1967,10 @@
     gl "const char *trith_str_cstr(TrithStr *s);" ⟪ .append ⟫ ¿
     gl "TrithStr *trith_str_from_cstr(const char *c);" ⟪ .append ⟫ ¿
     gl "void trith_str_free(TrithStr *s);" ⟪ .append ⟫ ¿
+    gl "int64_t trith_argc(void);" ⟪ .append ⟫ ¿
+    gl "const char *trith_arg(int64_t i);" ⟪ .append ⟫ ¿
+    gl "const char *trith_read_file(const char *path);" ⟪ .append ⟫ ¿
+    gl "int64_t trith_write_file(const char *path, const char *data);" ⟪ .append ⟫ ¿
     gl glue ⟪ em_concat_into ⟫ ¿
     gl "\n" ⟪ join ⟫ → gluec ¿
   ⌫ ¿

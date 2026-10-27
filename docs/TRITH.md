@@ -745,6 +745,10 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
   - `⧗ⁿ ⟜ ⦃P⦄` filters the moment itself and leaves nothing on the stack. §15.5 only balances under this reading.
   - The compiler applies the filter where the moment was bound, so earlier reads see it too (`trith/tests/run/retrocausal.trh`). If a `⋔`, `⁇` or `⥀` comes between the bind and the filter, s1 filters from the `⟜` onwards instead.
   - Not in s1: `⋔` on a ψ, and a ψ crossing a join, a loop or a function boundary.
+- **s2 (milestone 6).**
+  - s2 is authored as logical-order Trith with named moments: `⧖:x` binds and `⧗:x` reads. `trith/s2/tools/trx.py` turns them into `⧗ⁿ`, following §5.1: every block starts an empty strand, a `⥀` exports its body's moments, and `⋔`/`⁇` faces export their common prefix. A name that is not visible is an error, which catches the most common stack mistake: reading an outer moment inside a face. `‹name›` stands for a generated Runic function name.
+  - The lexer keeps the whole token stream in one `⟦ℤ⟧`. Its first slots hold the scanner's registers, and variable-length records follow (kind, line, column, marks, index, two values, then the text's code points). So every lexing function takes and returns one array, and an error is a `◌` that propagates. Only functions with a single output may fail (§7.3), and a loop or a join does not unwrap a `◌` by itself, so the lexer passes `◌⟦ℤ⟧` results through an identity function where needed.
+  - Shadows cannot be returned, so helpers that loop over a borrowed array do their work inside the loop's faces rather than in a called function.
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
 - Mutable arrays inside `⥀`: keep threading a `⟖` through the loop stack, or allow region-scoped exclusive moments?
@@ -773,7 +777,7 @@ Milestones:
 3. Stack-to-SSA and LLVM emission for ℤ, ŧ, `⋔`, `⥀`, functions and inside-out scope. **Benchmark gate here.** **Done:** `trith/src/emit.uh`, `trith/runtime/trith_rt.c`; also ℝ, 𝔹, string literals with `⎙`, `◌`/`⁇`/`↯`, `⊨`, prayers, future calls and call by shape. `make trith-bench` passes: fib(35) 0.97× and Collatz to 10⁶ 1.03× of `clang -O2`.
 4. ◌, arrays, strings, FFI, particles, evidentials, charges. **Done.** Benchmarks: n-body 1.06× and Game of Life 0.95× of `clang -O2`. Life's grid-size prayer (§12) lets the optimiser remove every bounds check. SHA-256 is not written yet.
 5. ψ with phases, `⟜`, `⇋`, tense, prayers, call by shape. **Done** within the s1 limits recorded in §16.1.
-6. Rewrite the compiler in Trith (s2), then pass the fixpoint (s3).
+6. Rewrite the compiler in Trith (s2), then pass the fixpoint (s3). **In progress.** The s2 lexer is done (`trith/s2/`). It agrees with s1's `--tokens` on every file in the repository and on random inputs (`make s2-test`, `make s2-fuzz`), and it lexes about 10 MB/s. Next come the parser, the check pass and code generation.
 7. Port the standard library modules.
 
 Benchmarks, each of which must run within 1.5× of `clang -O2`:

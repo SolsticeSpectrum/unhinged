@@ -1,0 +1,20 @@
+⍝ joins whose faces repeat an identity face (⋔ … ∅ ⁼), and a shadow
+parameter carried through a loop whose ⋔ faces re-push it ⍝
+⍝ ᚠ c: 1, 2 or 0 for ▽, △ or anything else
+⸫ ᚠ ⟨ ℤ ⊸ ℤ ⟩ ⦃ ⁼ ∅ ⦃ ▽△ ⌁ ⦄ ⋔ ≶ △ ⧗⁰ ⁼ ∅ ⦃ △ ⌁ ⦄ ⋔ ≶ ▽ ⧗⁰ ○ ⧖ ⦄
+⍝ ᚢ a: the sum of the elements after the first
+⦄
+  ⧖
+  ○ △ ⧗⁰
+  ⍝ the loop carries [a i sum]
+  ⦄ ⥀
+    ⧖ ⧖ ⧖
+    ⦃ ⊕ ⊞ ⦃ ○ ⦄ ⦃ ⦄ ⁇ ⌖̱ ⊟ ≫ △ ⍴̱ ⧗⁰ ⧗¹ ⧗⁰ ⧗² ⊞ △ ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⍴̱ ⧗⁰ ⧗¹ ⧗² ⧗¹ ⧗⁰
+  ⦄
+  ⧗² ⧖ ⧖ ⧖
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ⟩ ᚢ ⸫
+⦄
+  ▽ ᚠ ⎙ △ ᚠ ⎙ ○ ᚠ ⎙
+  ⌁̵ ⎙ ᚢ ⟗ ⟦ ○△ ▽△ △ ○ ⟧
+⦄ ⟨ ⊸ ⟩ ᛟ ⸫ ⸱ ⸱
+

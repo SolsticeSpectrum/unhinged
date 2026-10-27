@@ -1,0 +1,88 @@
+⍝ ==== s2 utilities: the outside world, bytes and code points, printing, tests
+
+⍝ ---- the outside world
+⎔ »gra_htirt« ⟨ℤ ⊸ ◌ʃ⟩ ᚨ ⸫
+⎔ »elif_daer_htirt« ⟨⟗ʃ ⊸ ◌ʃ⟩ ᚠ ⸫
+
+⍝ ---- bytes and code points
+⍝ ᛒ s i: byte i of s (from 0) as ℤ, or −1 past either end
+⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⍴̱ △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⚇ ⦄ ⦃ #-1# ⦄ ⦄ ⟨⟗ʃ ℤ ⊸ ℤ⟩ ᛒ ⸫
+
+⍝ ᚳ a i: element i (from 0) of an array whose element 0 is a sentinel; −1 past the end
+⦃ ⧖ ⧖ ⧗⁰ ⧗¹ △ ⊞ ⧗⁰ ⍴̱ △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⦄ ⦃ #-1# ⦄ ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ᚳ ⸫
+
+⍝ ᚴ a: number of elements after the sentinel
+⦃ ⍴̱ △ ⊟ ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ⟩ ᚴ ⸫
+
+⍝ ᛝ s i b0: the code point of a multi-byte UTF-8 sequence led by b0, and its length
+⦃
+  ⧖ ⧖ ⧖
+  ⍝ ⧗⁰ s  ⧗¹ i  ⧗² b0
+  ⧗² #223# ≶ ⋔ ⦃ #2# ⦄ ⦃ #3# ⦄ ⦃ #2# ⦄
+  ⧗² #239# ≶ ⋔ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⊞ ⧖
+  ⍝ ⧗⁰ n  ⧗¹ s  ⧗² i  ⧗³ b0; the loop carries [s i n k cp]
+  ⧗¹ ⧗² ⧗⁰ △ ⧗³ #127# ⧗⁰ ≫ ⋒
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⍝ ⧗⁰ s  ⧗¹ i  ⧗² n  ⧗³ k  ⧗⁴ cp
+    ⧗⁰ ⧗¹ ⧗² ⧗³ △ ⊞
+    ⧗⁴ #6# ≪ ⧗⁰ ⧗¹ ⧗³ ⊞ ᛒ #63# ⋒ ⋓
+    ⧗² ⧗³ △ ⊞ ≶
+  ⦄
+  ⧖ ⌁ ⧖ ⌁ ⌁̱ ⧗¹ ⧗⁰
+⦄ ⟨⟗ʃ ℤ ℤ ⊸ ℤ ℤ⟩ ᛝ ⸫
+
+⍝ ᛑ s i: the code point starting at byte i, and its length in bytes
+⦃
+  ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⧗¹ ᛒ #127# ⍿¹ ≶ ⋔
+    ⦃ ⧖ ⌁ ⌁̱ ⧗⁰ △ ⦄
+    ⁼
+    ⦃ ᛝ ⦄
+⦄ ⟨⟗ʃ ℤ ⊸ ℤ ℤ⟩ ᛑ ⸫
+
+⍝ ᛞ s: the code points of s, after a sentinel; s must not be empty
+⦃
+  ⟦ ○ ⟧ ○ ⥀ ⦃
+    ⍝ the loop carries [s cps i]
+    ⧖ ⍿¹ ⧗⁰ ᛑ ⧖ ⍆̵ ⧗¹ ⧗⁰ ⊞ ⍿² ⍴̱ ⍿¹ ≶
+  ⦄
+  ⌁ ⧖ ⌁̱ ⧗⁰
+⦄ ⟨⟗ʃ ⊸ ⟦ℤ⟧⟩ ᛞ ⸫
+
+⍝ ᚦ str cp: append the UTF-8 encoding of cp ≥ 128
+⦃
+  ⧖
+  ⍝ ⧗⁰ cp; the stack holds [str]
+  ⧗⁰ #2047# ≶ ⋔ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⧗⁰ #65535# ≶ ⋔ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⊞ #2# ⊞ ⧖
+  ⍝ ⧗⁰ n  ⧗¹ cp
+  #255# #8# ⧗⁰ ⊟ ≪ #255# ⋒ ⧗¹ #6# ⧗⁰ △ ⊟ ⊠ ≫ ⋓ ⍆̵
+  ⧗¹ ⧗⁰ #2# ⊟ ⥀ ⦃
+    ⧖ ⧖
+    ⍝ ⧗⁰ cp  ⧗¹ k; the stack holds [str]
+    ⧗⁰ #6# ⧗¹ ⊠ ≫ #63# ⋒ #128# ⋓ ⍆̵
+    ⧗⁰ ⧗¹ △ ⊟ ⍿⁰ #-1# ≶
+  ⦄
+  ⌁ ⌁
+⦄ ⟨ʃ ℤ ⊸ ʃ⟩ ᚦ ⸫
+
+⍝ ᚢ cp: print one code point
+⦃ ⧖ »« ⧗⁰ ⧗⁰ #127# ≶ ⋔ ⦃ ⍆̵ ⦄ ⦃ ᚦ ⦄ ⦃ ⍆̵ ⦄ ⎙̵ ⦄ ⟨ℤ ⊸⟩ ᚢ ⸫
+
+⍝ ᛂ n: print n > 0 in decimal
+⦃
+  ⧖
+  ⍝ ⧗⁰ n; r is n mod 10 in 0 … 9
+  ⧗⁰ #10# ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ #10# ⊞ ⦄ ⧖
+  ⍝ ⧗⁰ r  ⧗¹ n
+  ⧗¹ ⧗⁰ ⊟ #10# ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ᛂ ⦄ ⦃ ⌁ ⦄
+  »« ⧗⁰ #48# ⊞ ⍆̵ ⎙̵
+⦄ ⟨ℤ ⊸⟩ ᛂ ⸫
+
+⍝ ᛁ n: print n in decimal
+⦃ ⧖ ⧗⁰ ⧗⁰ ○ ≶ ⋔ ⦃ ⌁ »0« ⎙̵ ⦄ ⦃ ᛂ ⦄ ⦃ »-« ⎙̵ ⊝ ᛂ ⦄ ⦄ ⟨ℤ ⊸⟩ ᛁ ⸫
+
+⍝ ---- tests: ⦶ means yes, ⊕ means no (so ⋏ is "or" and ⋎ is "and")
+⍝ ᛖ a b: a = b
+⦃ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼ ⦄ ⟨ℤ ℤ ⊸ ŧ⟩ ᛖ ⸫
+⍝ ᛦ cp lo hi: lo ≤ cp ≤ hi
+⦃ ⧖ ⧖ ⧖ ⧗⁰ ⧗¹ ≶ ⧗² ⧗⁰ ≶ ⋏ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⦄ ⟨ℤ ℤ ℤ ⊸ ŧ⟩ ᛦ ⸫

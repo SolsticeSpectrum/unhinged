@@ -1028,8 +1028,23 @@
   c "cmp" ⌈ ⌉ → cmp ¿
   cmp ∅ ≡ ⤴ ↵
     c "v" ⌈ ⌉ → cv ¿
-    E 【"switch i8 " cv ", label %" t2 " [ i8 0, label %" t0 "  i8 1, label %" t1 " ]"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
-    【】 【from t0】 ⟪ .append ⟫ 【from t1】 ⟪ .append ⟫ 【from t2】 ⟪ .append ⟫ ⇄ ¿
+    ⍝ one case per distinct target: LLVM wants a phi entry for every edge
+    ⍝ into a block, and the joins list each predecessor once
+    t0 t2 ≢ t1 t2 ≢ ∧ t0 t1 ≢ ∧ ⤴ ↵
+      E 【"switch i8 " cv ", label %" t2 " [ i8 0, label %" t0 "  i8 1, label %" t1 " ]"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    ⌫ ⤵ t0 t1 ≡ t1 t2 ≡ ∧ ⤴ ↵
+      E 【"br label %" t0】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    ⌫ ⤵ t0 t1 ≡ ⤴ ↵
+      E 【"switch i8 " cv ", label %" t0 " [ i8 -1, label %" t2 " ]"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    ⌫ ⤵ t0 t2 ≡ ⤴ ↵
+      E 【"switch i8 " cv ", label %" t2 " [ i8 1, label %" t1 " ]"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    ⌫ ⤵ ↵
+      E 【"switch i8 " cv ", label %" t2 " [ i8 0, label %" t0 " ]"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    ⌫ ¿
+    【】 【from t0】 ⟪ .append ⟫ → edges ¿
+    t1 t0 ≢ ⤴ ↵ edges 【from t1】 ⟪ .append ⟫ ¿ ⌫ ¿
+    t2 t0 ≢ t2 t1 ≢ ∧ ⤴ ↵ edges 【from t2】 ⟪ .append ⟫ ¿ ⌫ ¿
+    edges ⇄ ¿
   ⌫ ¿
   cmp "eq" ⌈ ⌉ → eqop ¿
   cmp "gt" ⌈ ⌉ → gtop ¿

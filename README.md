@@ -77,7 +77,9 @@ Done so far:
 - Milestone 4: arrays and strings, borrows at run time, particles, FFI through generated C glue, and checked evidentials and charges.
 - Milestone 5: superposition with phase and interference, retrocausal post-selection, reversible functions with generated inverses, past-tense calls evaluated at compile time, and prayer verdicts.
 
-Generated code runs at C speed (within about 0.9–1.06× of `clang -O2`) on all four benchmarks: fib, Collatz, n-body and Game of Life. What remains is milestone 6, rewriting the compiler in Trith itself (see `docs/TRITH.md` §17).
+Generated code runs at C speed (within about 0.9–1.06× of `clang -O2`) on all four benchmarks: fib, Collatz, n-body and Game of Life.
+
+Milestone 6, rewriting the compiler in Trith itself (stage s2), is under way. The lexer is done (`trith/s2/`). It is compiled by s1, and it prints exactly what `trithc --tokens` prints, error messages included, for every Trith file in the repository. Unlike s1, it exits with status 1 after an error.
 
 ```bash
 make trith          # builds build/trithc
@@ -97,6 +99,17 @@ make trith-memcheck # valgrind over every test program: no invalid accesses, no 
 
 Writing on-disk Trith by hand is error-prone (even lines run right to left, and the token count must divide by 3). Write the logical order and run `--plough`.
 
+The s2 sources (`trith/s2/src/*.trhx`) are logical-order Trith with a few authoring shorthands, expanded by `trith/s2/tools/trx.py`. Named moments `⧖:x` / `⧗:x` become `⧖` / `⧗ⁿ` with the index counted for you, following Trith's own scope rules. `‹name›` gets a unique Runic function name, `#42#` becomes a balanced-ternary literal, and `$text$` becomes a string literal. The generated, ploughed `trith/s2/s2lex.trh` is committed, so building s2 needs no Python.
+
+```bash
+make s2             # builds build/s2lex from trith/s2/s2lex.trh with s1
+make s2-test        # s2 and s1 token dumps must agree on every .trh file (also run by make test)
+make s2-fuzz        # 1000 random lexer inputs, s2 against s1
+make s2-regen       # regenerate trith/s2/s2lex.trh from trith/s2/src (needs python3)
+
+./build/s2lex file.trh               # same output as trithc file.trh --tokens
+```
+
 Golden tests: `trith/tests/<suite>/<name>.trh` is compared with `<name>.out`. To regenerate the `.out` files after an intended change, run `BLESS=1 TRITHC=build/trithc build/trith-tests` and review the diff.
 
 ## Layout
@@ -107,7 +120,7 @@ Golden tests: `trith/tests/<suite>/<name>.trh` is compared with `<name>.out`. To
 - `tests/` Embedded test runner and helpers.
 - `examples/` Example programs (compile outputs into `output/`).
 - `docs/TRITH.md` Trith (v2) language spec.
-- `trith/` Trith compiler (s1, written in UNHINGED) and its golden tests.
+- `trith/` Trith compiler (s1 in `trith/src/`, written in UNHINGED), its golden tests and benchmarks, and the self-hosted compiler in progress (`trith/s2/`, written in Trith).
 
 ## Examples
 

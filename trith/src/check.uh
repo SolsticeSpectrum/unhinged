@@ -690,7 +690,18 @@
       i 1 ⊞ → i ¿
     ⌫ ¿
     same ⤴ ↵ S v0 ⟪ .append ⟫ ¿ ⌫ ⤵ ↵
-      C v0 "ty" ⌈ ⌉ tok depth ⟪ ck_val ⟫ → nv ¿
+      ⍝ a joined shadow belongs to the deepest region any face's shadow came from
+      depth → rg ¿
+      v0 "of" ⌈ ⌉ ∅ ≢ ⤴ ↵
+        v0 "region" ⌈ ⌉ → rg ¿
+        1 → i ¿
+        i n ≺ ⟲ ↵
+          live i ⌈ ⌉ "stack" ⌈ ⌉ j ⌈ ⌉ "region" ⌈ ⌉ → ri ¿
+          ri rg ≻ ⤴ ↵ ri → rg ¿ ⌫ ¿
+          i 1 ⊞ → i ¿
+        ⌫ ¿
+      ⌫ ¿
+      C v0 "ty" ⌈ ⌉ tok rg ⟪ ck_val ⟫ → nv ¿
       v0 "of" ⌈ ⌉ → tmpv ¿
       nv "of" ← tmpv ¿
       v0 ⟪ ck_ev ⟫ → ev ¿

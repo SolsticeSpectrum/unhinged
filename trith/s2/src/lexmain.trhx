@@ -1,0 +1,31 @@
+⍝ ==== s2 lexer driver: print the token dump of a file, like trithc --tokens
+
+⦃
+  ⧖:path,out,count,rem
+  ⧗:path ⎙̵ $: error: imbalance: $ ⎙̵ ⧗:count ᛁ $ tokens, $ ⎙̵ ⧗:rem ᛁ $ too many for the Ternary Balance Law\n$ ⎙̵
+  ⧗:out ⌁̵ △ ‹exit›
+⦄ ⟨ʃ ⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹imbal› ⸫
+
+⦃
+  ⧖:path,out
+  ⧗:out ⟗ ○ ᚳ ⧖:count ⧖:out
+  ⧗:count #3# ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ #3# ⊞ ⦄ ⧖:rem
+  ⧗:path,out,count,rem
+  ⧗:rem ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⟗ ‹dump› ⌁̵ ⌁̵ ⦄ ⦃ ‹imbal› ⦄ ⁼
+⦄ ⟨ʃ ⟦ℤ⟧ ⊸⟩ ‹main3› ⸫
+
+⦃
+  ⧖:path,src
+  ⧗:src ⟗ ᛞ ⧖:cps ⌁̵
+  ⧗:path ⟗ ⧗:cps ‹lexw› ⁇ ⦃ ‹main3› ⦄ ⦃ ⌁̵ △ ‹exit› ⦄
+⦄ ⟨ʃ ʃ ⊸⟩ ‹main2› ⸫
+
+⦃
+  ⟗ ᚠ ⁇
+    ⦃ ⟗ ⍴̱ ○ ᛖ ⋔ ⦃ ⌁̵ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄ ⦃ ‹main2› ⦄ ⁼ ⦄
+    ⦃ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄
+⦄ ⟨ʃ ⊸⟩ ‹main1› ⸫
+
+⦃
+  △ ᚨ ⁇ ⦃ ‹main1› ⦄ ⦃ $usage: s2lex <file.trh>\n$ ⎙̵ #2# ‹exit› ⦄
+⦄ ⟨⊸⟩ ᛟ ⸫

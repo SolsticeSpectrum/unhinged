@@ -1,0 +1,4 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  »a«  ⊢ [ʃ]
+  ⧖  ⊢ []
+trith/tests/check_errors/leak.trh:1:7: error: decoherence leak: the ʃ bound here is never consumed (move it, ⌁ it, or return it; §8.1)

@@ -1,0 +1,3 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+trith/tests/check_errors/underflow.trh:1:5: error: ⊞ needs 2 value(s) but the stack holds 1

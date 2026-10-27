@@ -1,0 +1,14 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  ⊕  ⊢ [ŧ]
+    face ⦶
+      »a«  ⊢ [ʃ]
+      ⧖  ⊢ []
+      ⧗⁰  ⊢ [ʃ]
+      ⌁̵  ⊢ []
+    face ⊕
+      »b«  ⊢ [ʃ]
+      ⧖  ⊢ []
+    face ⊖
+      »c«  ⊢ [ʃ]
+      ⧖  ⊢ []
+trith/tests/check_errors/consumed_in_some_faces.trh:1:13: error: this moment is consumed in some faces but not in others

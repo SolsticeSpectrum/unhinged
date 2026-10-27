@@ -1,0 +1,4 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+    body
+      △  ⊢ [ℤ]
+trith/tests/check_errors/loop_effect.trh:1:3: error: the ⥀ body must have effect ⟨S ⊸ S ŧ⟩: expected [ŧ], found [ℤ]

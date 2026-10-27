@@ -1,0 +1,5 @@
+fn ᚠ ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+fn ᚢ ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+trith/tests/check_errors/shape_collision.trh:1:41: error: shape collision: ⟨ℤ ⊸ ℤ⟩ is the shape of ᚠ, ᚢ

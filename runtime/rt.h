@@ -81,6 +81,7 @@ UhValue uh_index(UhValue collection, UhValue key);
 void uh_store_index(UhValue *collection, UhValue key, UhValue val);
 UhValue uh_len(UhValue v);
 UhValue uh_append(UhValue arr, UhValue val);
+UhValue uh_pop(UhValue arr);
 UhValue uh_split(UhValue str, UhValue delim);
 UhValue uh_join(UhValue arr, UhValue delim);
 UhValue uh_substr(UhValue str, UhValue start, UhValue len);

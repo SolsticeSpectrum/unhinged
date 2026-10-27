@@ -1,0 +1,3 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  »a«  ⊢ [ʃ]
+trith/tests/check_errors/agreement_missing.trh:1:7: error: disagreement: ⎙ on [ʃ] needs ◌̵ quantum (§6.1)

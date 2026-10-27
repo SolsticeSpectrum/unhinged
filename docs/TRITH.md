@@ -689,6 +689,19 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
 - **Superscript indices** are decimal (open question below still stands). `⊙⁻` and `⊙⁺` take `⁻`/`⁺` as their index.
 - **Fragments.** A definition without `⸾` is fragment `○`. It may omit the signature when another fragment of the same function carries it. Two definitions without `⸾` for the same name are "defined twice".
 - **Numerals** are exact up to 2⁵³ in s1, because s1 runs on UNHINGED doubles.
+- **Check pass (milestone 2).** These are also choices the spec left open:
+  - Agreement applies to operator glyphs that consume operands, including `⌁`, `⊨` and `⟜`. It does not apply to the stack glyphs `⧖ ⧗ ⍿ ⟗ ⟖`, to `↯`, or to the control forms `⋔ ⥀ ⁇ ⍤`. This matches every example in §15.
+  - Case roles (§6) apply to glyph operators and to calls.
+  - A shadow is alive while it is on the stack or bound in a moment of the current strand. Consuming a shadow (for example with `⍴`, `⌖` or `⍈`) releases the original. Shadows cannot leave the block that created them, cannot be exported as moments, and cannot be returned.
+  - `⍿ⁿ` on a quantum value moves it to the top. `⧗ⁿ` on a quantum moment moves it out and leaves the moment void.
+  - A `⥀` body may not leave a quantum moment unconsumed, because every earlier iteration would leak it.
+  - Exported moments (§5.1 rule 3) must have the same void status in every live face.
+  - A face or arm that ends in `↯` is dead and does not take part in the join. Nothing may follow `↯` in its block.
+  - A function may fail when its single output is `◌T` or a bare `◌`. A value of type T then satisfies an output of `◌T`.
+  - The `⊨` predicate, prayers and the `⋔⇋` exit assertion see copies of classical values and `⟗` shadows of quantum ones, and must leave exactly `[ŧ]`.
+  - Inside its own antiparticle `⌁T`, a particle of type T is its representation type. Particles are created by FFI functions that return T. There is no other constructor yet (open question).
+  - Indexing an array of quantum values, and storing over a quantum element, are rejected until the spec says how they avoid cloning or dropping.
+  - Evidentials and charges are parsed but not yet checked (milestone 4). `⫴ ⊛ ⊙ ⟜` and `⋔` on a ψ are rejected as "not implemented yet" (milestone 5). Past-tense calls are typed like present ones until the evaluator exists.
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
 - Mutable arrays inside `⥀`: keep threading a `⟖` through the loop stack, or allow region-scoped exclusive moments?
@@ -713,7 +726,7 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
 Milestones:
 
 1. Lexer and parser for Trith, written in UNHINGED. Golden tests cover the Boustrophedon Rule, the Balance Law, the mark registry, and fragments. **Done:** `trith/src/`, tests in `trith/tests/`, `make trith-test`.
-2. Check pass: effects, linearity, agreement.
+2. Check pass: effects, linearity, agreement. **Done:** `trith/src/check.uh`, `trithc --check`, tests in `trith/tests/check*/`.
 3. Stack-to-SSA and LLVM emission for ℤ, ŧ, `⋔`, `⥀`, functions and inside-out scope. **Benchmark gate here.**
 4. ◌, arrays, strings, FFI, particles, evidentials, charges.
 5. ψ with phases, `⟜`, `⇋`, tense, prayers, call by shape.

@@ -1,0 +1,3 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+trith/tests/check_errors/agreement_extra.trh:1:5: error: disagreement: ⎙ on [ℤ] needs no agreement mark (§6.1)

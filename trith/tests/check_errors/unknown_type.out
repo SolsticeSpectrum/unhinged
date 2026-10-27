@@ -1,0 +1,1 @@
+trith/tests/check_errors/unknown_type.trh:1:1: error: unknown type ᚋᚐ (Ogham type names must be declared with ⚛, §8.6)

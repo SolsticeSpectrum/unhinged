@@ -1,0 +1,7 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+    elements
+      △  ⊢ [ℤ]
+  ⟦…⟧  ⊢ [⟦ℤ⟧]
+  ⟗  ⊢ [⟦ℤ⟧ ⟗⟦ℤ⟧]
+  ⍿¹  ⊢ [⟗⟦ℤ⟧ ⟦ℤ⟧]
+trith/tests/check_errors/move_entangled.trh:1:14: error: cannot move the ⟦ℤ⟧ made at 1:3 while it is entangled: a ⟗/⟖ shadow of it is still alive (§8.2)

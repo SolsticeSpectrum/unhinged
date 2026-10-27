@@ -1,0 +1,1 @@
+trith/tests/check_errors/entry_signature.trh:1:1: error: the entry point ᛟ has signature ⟨⊸⟩ or ⟨⊸ ◌⟩ (§9)

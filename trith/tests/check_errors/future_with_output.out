@@ -1,0 +1,4 @@
+fn ᚠ ⟨ ⊸ ℤ⟩  start []
+  △  ⊢ [ℤ]
+fn ᛟ ⟨ ⊸ ⟩  start []
+trith/tests/check_errors/future_with_output.trh:1:21: error: a future-tense call cannot have outputs: it runs at the end of the block (§9.2)

@@ -398,6 +398,14 @@ UhValue uh_append(UhValue arr, UhValue val) {
     return arr;
 }
 
+UhValue uh_pop(UhValue arr) {
+    if (arr.tag != UH_ARR || arr.arr == NULL || arr.arr->len == 0) {
+        return uh_null();
+    }
+    arr.arr->len--;
+    return arr.arr->items[arr.arr->len];
+}
+
 UhValue uh_split(UhValue str, UhValue delim) {
     UhValue out = uh_arr_new();
     if (str.tag != UH_STR || str.str == NULL || out.arr == NULL) {

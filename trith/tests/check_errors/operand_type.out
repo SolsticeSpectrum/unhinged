@@ -1,0 +1,4 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  ⊕  ⊢ [ℤ ŧ]
+trith/tests/check_errors/operand_type.trh:1:7: error: operand 2 of ⊞: expected ℤ, found ŧ

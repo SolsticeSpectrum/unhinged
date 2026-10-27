@@ -1,0 +1,5 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  ○  ⊢ [ℤ ℤ]
+  ⊘  ⊢ [◌ℤ]
+trith/tests/check_errors/unhandled_failure.trh:1:9: error: a possibly-failed ◌ℤ is used here; handle it with ⁇ or declare a ◌ output so the failure propagates (§7.3)

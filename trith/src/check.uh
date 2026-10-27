@@ -1,0 +1,1134 @@
+⍝ Trith check pass (spec §4–§12, milestone 2)
+⍝ Abstract interpretation of the virtual stack: every block is walked with a
+⍝ compile-time stack of typed values (WebAssembly-style validation).
+⍝ Checks: stack effects and joins, inside-out scope and moment export,
+⍝ No-Cloning (linearity), entanglement (borrows), failure propagation,
+⍝ case roles (§6) and agreement marks (§6.1).
+⍝ Not yet: evidentials and charges (milestone 4), ψ and post-selection,
+⍝ reversibility, past-tense evaluation and prayers' verdicts (milestone 5).
+⍝
+⍝ Types are canonical strings: ŧ ℤ ℝ 𝔹 ʃ ⟦T⟧ ◌T ◌ ⟗T ⟖T ψₙT and Ogham particle
+⍝ names. Evidential prefixes and charges are dropped for now.
+
+⍝ ---- type strings
+
+ƒ
+  "" → out ¿
+  ty "prefixes" ⌈ ⌉ → pre ¿
+  0 → i ¿
+  pre ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    pre i ⌈ ⌉ → p ¿
+    p "⸮" ≢ p "⁖" ≢ ∧ ⤴ ↵ out p ⊞⊞ → out ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ty "elem" ⌈ ⌉ → el ¿
+  el ∅ ≢ ⤴ ↵
+    el ⟪ ck_canon ⟫ → inner ¿
+    out "⟦" inner "⟧" ⊞⊞ ⊞⊞ ⊞⊞ ⇄ ¿
+  ⌫ ¿
+  ty "base" ⌈ ⌉ → b ¿
+  b ∅ ≢ ⤴ ↵ out b ⊞⊞ → out ¿ ⌫ ¿
+  out ⇄ ¿
+↦ ty ↦ ck_canon ¿
+
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  xs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    out xs i ⌈ ⌉ ⟪ ck_canon ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ xs ↦ ck_canon_list ¿
+
+ƒ
+  t 0 ⟪ char_at ⟫ ⇄ ¿
+↦ t ↦ ck_head ¿
+
+ƒ
+  t 1 t ⟪ len ⟫ 1 ⊟ ⟪ substr ⟫ ⇄ ¿
+↦ t ↦ ck_tail ¿
+
+⍝ ψₙT → T
+ƒ
+  1 → i ¿
+  t ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    t i ⟪ char_at ⟫ ⟪ tc_sub_digit ⟫ ∅ ≡ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  t i n i ⊟ ⟪ substr ⟫ ⇄ ¿
+↦ t ↦ ck_psi_inner ¿
+
+⍝ classical | quantum | superposed | borrowed (§3, §6.1)
+ƒ
+  t "" ≡ t "◌" ≡ ∨ ⤴ ↵ "classical" ⇄ ¿ ⌫ ¿
+  t ⟪ ck_head ⟫ → h ¿
+  h "⟗" ≡ h "⟖" ≡ ∨ ⤴ ↵ "borrowed" ⇄ ¿ ⌫ ¿
+  h "ψ" ≡ ⤴ ↵ "superposed" ⇄ ¿ ⌫ ¿
+  h "◌" ≡ ⤴ ↵ t ⟪ ck_tail ⟫ ⟪ ck_class ⟫ ⇄ ¿ ⌫ ¿
+  h ⟪ tc_base_type ⟫ h "ʃ" ≢ ∧ ⤴ ↵ "classical" ⇄ ¿ ⌫ ¿
+  "quantum" ⇄ ¿
+↦ t ↦ ck_class ¿
+
+⍝ May be copied freely: classical values and shared shadows
+ƒ
+  t "" ≡ t "◌" ≡ ∨ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
+  t ⟪ ck_head ⟫ → h ¿
+  h "⟗" ≡ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
+  h "◌" ≡ ⤴ ↵ t ⟪ ck_tail ⟫ ⟪ ck_copyable ⟫ ⇄ ¿ ⌫ ¿
+  t ⟪ ck_class ⟫ "classical" ≡ ⇄ ¿
+↦ t ↦ ck_copyable ¿
+
+ƒ
+  t "ℤ" ≡ t "ℝ" ≡ ∨ t "𝔹" ≡ ∨ ⇄ ¿
+↦ t ↦ ck_numeric ¿
+
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  vs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    out vs i ⌈ ⌉ "ty" ⌈ ⌉ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ vs ↦ ck_types ¿
+
+ƒ
+  "[" xs " " ⟪ join ⟫ "]" ⊞⊞ ⊞⊞ ⇄ ¿
+↦ xs ↦ ck_show ¿
+
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  xs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    out xs i ⌈ ⌉ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ xs ↦ ck_copy ¿
+
+⍝ ---- context, values, errors
+
+ƒ
+  C "err" ⌈ ⌉ ∅ ≡ ⤴ ↵
+    tok ∅ ≡ ⤴ ↵
+      C "path" ⌈ ⌉ ": error: " msg ⊞⊞ ⊞⊞ → e ¿
+    ⌫ ⤵ ↵
+      C "path" ⌈ ⌉ ":" tok "line" ⌈ ⌉ ⍕ ":" tok "col" ⌈ ⌉ ⍕ ": error: " msg ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → e ¿
+    ⌫ ¿
+    C "err" ← e ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ C ↦ tok ↦ msg ↦ ck_err ¿
+
+ƒ
+  C "err" ⌈ ⌉ ∅ ≢ ⇄ ¿
+↦ C ↦ ck_failed ¿
+
+ƒ
+  C "next" ⌈ ⌉ 1 ⊞ → id ¿
+  C "next" ← id ¿
+  ❴"ty": ty, "id": id, "tok": tok, "region": region❵ → v ¿
+  v "role" ← ∅ ¿
+  v "of" ← ∅ ¿
+  v ⇄ ¿
+↦ C ↦ ty ↦ tok ↦ region ↦ ck_val ¿
+
+⍝ A copy of v with a new role (values are never mutated once shared)
+ƒ
+  v "ty" ⌈ ⌉ → t ¿
+  v "id" ⌈ ⌉ → id ¿
+  v "tok" ⌈ ⌉ → tk ¿
+  v "region" ⌈ ⌉ → rg ¿
+  v "of" ⌈ ⌉ → of ¿
+  ❴"ty": t, "id": id, "tok": tk, "region": rg, "of": of, "role": role❵ ⇄ ¿
+↦ v ↦ role ↦ ck_with_role ¿
+
+⍝ Token label for traces and messages
+ƒ
+  t ∅ ≡ ⤴ ↵ "?" ⇄ ¿ ⌫ ¿
+  t "raw" ⌈ ⌉ → r ¿
+  r ∅ ≡ ⤴ ↵ t "text" ⌈ ⌉ → r ¿ ⌫ ¿
+  r ⇄ ¿
+↦ t ↦ ck_label ¿
+
+⍝ Ids of values that have a live shadow: shadows on the stack, in the
+⍝ strand, and in enclosing strands (locks).
+ƒ
+  locks ⟪ ck_copy ⟫ → out ¿
+  0 → i ¿
+  S ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    S i ⌈ ⌉ "of" ⌈ ⌉ → of ¿
+    of ∅ ≢ ⤴ ↵ out of ⟪ .append ⟫ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  strand ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    strand i ⌈ ⌉ → m ¿
+    m "void" ⌈ ⌉ ¬ ⤴ ↵
+      m "of" ⌈ ⌉ → of ¿
+      of ∅ ≢ ⤴ ↵ out of ⟪ .append ⟫ ¿ ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ S ↦ strand ↦ locks ↦ ck_live_locks ¿
+
+⍝ Moving a value out (into an operation, call or annihilation)
+ƒ
+  v "ty" ⌈ ⌉ ⟪ ck_copyable ⟫ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
+  v "id" ⌈ ⌉ live ∈ ⤴ ↵
+    v "tok" ⌈ ⌉ → vt ¿
+    C tok "cannot move the " v "ty" ⌈ ⌉ " made at " vt "line" ⌈ ⌉ ⍕ ":" vt "col" ⌈ ⌉ ⍕ " while it is entangled: a ⟗/⟖ shadow of it is still alive (§8.2)" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+    ⊥ ⇄ ¿
+  ⌫ ¿
+  ⊤ ⇄ ¿
+↦ C ↦ v ↦ live ↦ tok ↦ ck_move_ok ¿
+
+⍝ Pop k values (deepest first) and apply case roles (§6)
+ƒ
+  S ⟪ len ⟫ → n ¿
+  n k ≺ ⤴ ↵
+    C tok what " needs " k ⍕ " value(s) but the stack holds " n ⍕ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
+  ⌫ ¿
+  【】 → vals ¿
+  n k ⊟ → i ¿
+  i n ≺ ⟲ ↵
+    vals S i ⌈ ⌉ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    S ⟪ .pop ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⍝ roles: marked entries take their role, unmarked fill the rest deepest first
+  【】 → slots ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    slots ∅ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⊥ → permuted ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    vals i ⌈ ⌉ → v ¿
+    v "role" ⌈ ⌉ → r ¿
+    r ∅ ≢ ⤴ ↵
+      ⊤ → permuted ¿
+      r k ≽ ⤴ ↵ C tok "impossible case role: " what " has only " k ⍕ " operand(s)" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+      slots r ⌈ ⌉ ∅ ≢ ⤴ ↵ C tok "two operands of " what " carry the same case role" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+      slots r ← v ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    vals i ⌈ ⌉ → v ¿
+    v "role" ⌈ ⌉ ∅ ≡ ⤴ ↵
+      0 → j ¿
+      slots j ⌈ ⌉ ∅ ≢ ⟲ ↵ j 1 ⊞ → j ¿ ⌫ ¿
+      slots j ← v ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  slots ⇄ ¿
+↦ C ↦ S ↦ k ↦ tok ↦ what ↦ ck_pop ¿
+
+⍝ ◌T used where T is expected: propagate (§7.3) when the function may fail
+ƒ
+  t ⟪ ck_head ⟫ "◌" ≡ t "◌" ≢ ∧ ¬ ⤴ ↵ t ⇄ ¿ ⌫ ¿
+  C "canFail" ⌈ ⌉ ¬ ⤴ ↵
+    C tok "a possibly-failed " t " is used here; handle it with ⁇ or declare a ◌ output so the failure propagates (§7.3)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
+  ⌫ ¿
+  t ⟪ ck_tail ⟫ ⇄ ¿
+↦ C ↦ t ↦ tok ↦ ck_unwrap ¿
+
+⍝ Agreement (§6.1): the operator's marks must be exactly the operands' classes
+ƒ
+  ⊥ → q ¿
+  ⊥ → s ¿
+  ⊥ → b ¿
+  0 → i ¿
+  vals ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    vals i ⌈ ⌉ "ty" ⌈ ⌉ ⟪ ck_class ⟫ → c ¿
+    c "quantum" ≡ ⤴ ↵ ⊤ → q ¿ ⌫ ¿
+    c "superposed" ≡ ⤴ ↵ ⊤ → s ¿ ⌫ ¿
+    c "borrowed" ≡ ⤴ ↵ ⊤ → b ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  【】 → want ¿
+  b ⤴ ↵ want "borrowed" ⟪ .append ⟫ ¿ ⌫ ¿
+  q ⤴ ↵ want "quantum" ⟪ .append ⟫ ¿ ⌫ ¿
+  s ⤴ ↵ want "superposed" ⟪ .append ⟫ ¿ ⌫ ¿
+  【】 → have ¿
+  tok "marks" ⌈ ⌉ → ms ¿
+  0 → i ¿
+  ms ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ms i ⌈ ⌉ → m ¿
+    m "quantum" ≡ m "superposed" ≡ ∨ m "borrowed" ≡ ∨ ⤴ ↵ have m ⟪ .append ⟫ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  want have ≡ ¬ ⤴ ↵
+    【】 → glyphs ¿
+    "quantum" want ∈ ⤴ ↵ glyphs "◌̵ quantum" ⟪ .append ⟫ ¿ ⌫ ¿
+    "superposed" want ∈ ⤴ ↵ glyphs "◌̰ superposed" ⟪ .append ⟫ ¿ ⌫ ¿
+    "borrowed" want ∈ ⤴ ↵ glyphs "◌̱ borrowed" ⟪ .append ⟫ ¿ ⌫ ¿
+    "no agreement mark" → need ¿
+    glyphs ⟪ len ⟫ 0 ≻ ⤴ ↵ glyphs ", " ⟪ join ⟫ → need ¿ ⌫ ¿
+    vals ⟪ ck_types ⟫ ⟪ ck_show ⟫ → shown ¿
+    C tok "disagreement: " tok "text" ⌈ ⌉ " on " shown " needs " need " (§6.1)" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ C ↦ tok ↦ vals ↦ ck_agree ¿
+
+⍝ ---- glyph operators (§18): operand types → result types, or ∅ on error
+
+ƒ
+  x "⊞" ≡ x "⊟" ≡ ∨ x "⊠" ≡ ∨ x "⊘" ≡ ∨ x "⊜" ≡ ∨ x "≶" ≡ ∨ x "⋏" ≡ ∨ x "⋎" ≡ ∨ ⤴ ↵ 2 ⇄ ¿ ⌫ ¿
+  x "⋒" ≡ x "⋓" ≡ ∨ x "⩡" ≡ ∨ x "≪" ≡ ∨ x "≫" ≡ ∨ x "⌖" ≡ ∨ x "⍆" ≡ ∨ ⤴ ↵ 2 ⇄ ¿ ⌫ ¿
+  x "⊝" ≡ x "⚇" ≡ ∨ x "⌁" ≡ ∨ x "⍴" ≡ ∨ x "⎙" ≡ ∨ x "⊨" ≡ ∨ ⤴ ↵ 1 ⇄ ¿ ⌫ ¿
+  x "⍈" ≡ ⤴ ↵ 3 ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ x ↦ ck_arity ¿
+
+ƒ
+  "operand " i 1 ⊞ ⍕ " of " x ": expected " want ", found " got ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⇄ ¿
+↦ x ↦ i ↦ want ↦ got ↦ ck_operand_msg ¿
+
+ƒ
+  tok "text" ⌈ ⌉ → x ¿
+  ts 0 ⌈ ⌉ → a ¿
+  ∅ → b ¿
+  ∅ → c ¿
+  ts ⟪ len ⟫ 1 ≻ ⤴ ↵ ts 1 ⌈ ⌉ → b ¿ ⌫ ¿
+  ts ⟪ len ⟫ 2 ≻ ⤴ ↵ ts 2 ⌈ ⌉ → c ¿ ⌫ ¿
+
+  x "⊞" ≡ x "⊟" ≡ ∨ x "⊠" ≡ ∨ x "⊘" ≡ ∨ x "⊜" ≡ ∨ ⤴ ↵
+    a ⟪ ck_numeric ⟫ ¬ ⤴ ↵ C tok x 0 "ℤ, ℝ or 𝔹" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    a b ≢ ⤴ ↵ C tok x 1 a b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    x "⊘" ≡ x "⊜" ≡ ∨ ⤴ ↵ 【】 "◌" a ⊞⊞ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+    【】 a ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⋒" ≡ x "⋓" ≡ ∨ x "⩡" ≡ ∨ x "≪" ≡ ∨ x "≫" ≡ ∨ ⤴ ↵
+    a "ℤ" ≢ a "𝔹" ≢ ∧ ⤴ ↵ C tok x 0 "ℤ or 𝔹" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    a b ≢ ⤴ ↵ C tok x 1 a b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【】 a ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "≶" ≡ ⤴ ↵
+    a ⟪ ck_numeric ⟫ a "ŧ" ≡ ∨ ¬ ⤴ ↵ C tok x 0 "ℤ, ℝ, 𝔹 or ŧ" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    a b ≢ ⤴ ↵ C tok x 1 a b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【"ŧ"】 ⇄ ¿
+  ⌫ ¿
+  x "⋏" ≡ x "⋎" ≡ ∨ ⤴ ↵
+    a "ŧ" ≢ ⤴ ↵ C tok x 0 "ŧ" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    b "ŧ" ≢ ⤴ ↵ C tok x 1 "ŧ" b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【"ŧ"】 ⇄ ¿
+  ⌫ ¿
+  x "⊝" ≡ ⤴ ↵
+    a "ℤ" ≢ a "ℝ" ≢ ∧ a "ŧ" ≢ ∧ ⤴ ↵ C tok x 0 "ℤ, ℝ or ŧ" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【】 a ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⚇" ≡ ⤴ ↵
+    a ⟪ ck_numeric ⟫ ¬ ⤴ ↵ C tok x 0 "a number" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【】 a ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⌁" ≡ ⤴ ↵ 【】 ⇄ ¿ ⌫ ¿
+  x "⎙" ≡ ⤴ ↵
+    a ⟪ ck_numeric ⟫ a "ŧ" ≡ ∨ a "ʃ" ≡ ∨ a "⟗ʃ" ≡ ∨ ¬ ⤴ ↵ C tok x 0 "ʃ, ⟗ʃ or a number" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【】 ⇄ ¿
+  ⌫ ¿
+  x "⍴" ≡ ⤴ ↵
+    a "⟗ʃ" ≢ a 0 2 ⟪ substr ⟫ "⟗⟦" ≢ ∧ ⤴ ↵ C tok x 0 "⟗⟦T⟧ or ⟗ʃ" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【"ℤ"】 ⇄ ¿
+  ⌫ ¿
+  x "⌖" ≡ ⤴ ↵
+    b "ℤ" ≢ ⤴ ↵ C tok x 1 "ℤ" b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    a "⟗ʃ" ≡ ⤴ ↵ 【"◌𝔹"】 ⇄ ¿ ⌫ ¿
+    a 0 2 ⟪ substr ⟫ "⟗⟦" ≢ ⤴ ↵ C tok x 0 "⟗⟦T⟧ or ⟗ʃ" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    a 2 a ⟪ len ⟫ 3 ⊟ ⟪ substr ⟫ → el ¿
+    el ⟪ ck_copyable ⟫ ¬ ⤴ ↵ C tok "indexing an array of quantum values would clone one; not supported (§8.1)" ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【】 "◌" el ⊞⊞ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⍈" ≡ ⤴ ↵
+    b "ℤ" ≢ ⤴ ↵ C tok x 1 "ℤ" b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    a "⟖ʃ" ≡ ⤴ ↵
+      c "𝔹" ≢ ⤴ ↵ C tok x 2 "𝔹" c ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+      【"◌"】 ⇄ ¿
+    ⌫ ¿
+    a 0 2 ⟪ substr ⟫ "⟖⟦" ≢ ⤴ ↵ C tok x 0 "⟖⟦T⟧ or ⟖ʃ" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    a 2 a ⟪ len ⟫ 3 ⊟ ⟪ substr ⟫ → el ¿
+    c el ≢ ⤴ ↵ C tok x 2 el c ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    el ⟪ ck_copyable ⟫ ¬ ⤴ ↵ C tok "storing would drop the quantum element it replaces; not supported (§8.1)" ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【"◌"】 ⇄ ¿
+  ⌫ ¿
+  x "⍆" ≡ ⤴ ↵
+    a "ʃ" ≡ ⤴ ↵
+      b "𝔹" ≢ ⤴ ↵ C tok x 1 "𝔹" b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+      【"ʃ"】 ⇄ ¿
+    ⌫ ¿
+    a ⟪ ck_head ⟫ "⟦" ≢ ⤴ ↵ C tok x 0 "⟦T⟧ or ʃ" a ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    a 1 a ⟪ len ⟫ 2 ⊟ ⟪ substr ⟫ → el ¿
+    b el ≢ ⤴ ↵ C tok x 1 el b ⟪ ck_operand_msg ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    【】 a ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  C tok "internal: no rule for " x ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
+↦ C ↦ tok ↦ ts ↦ ck_glyph_types ¿
+
+⍝ ---- blocks
+⍝ ck_block walks ops over stack S (mutated) with its own strand.
+⍝ Returns ❴stack, strand, dead❵. depth is the lexical region of this block.
+
+ƒ
+  ❴"stack": S, "strand": strand, "dead": dead❵ ⇄ ¿
+↦ S ↦ strand ↦ dead ↦ ck_result ¿
+
+ƒ
+  C "trace" ⌈ ⌉ ¬ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  S ⟪ ck_types ⟫ ⟪ ck_show ⟫ → shown ¿
+  C "lines" ⌈ ⌉ ind label "  ⊢ " shown ⊞⊞ ⊞⊞ ⊞⊞ ⟪ .append ⟫ ¿
+  ∅ ⇄ ¿
+↦ C ↦ ind ↦ label ↦ S ↦ ck_trace ¿
+
+ƒ
+  C "trace" ⌈ ⌉ ¬ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  C "lines" ⌈ ⌉ ind text ⊞⊞ ⟪ .append ⟫ ¿
+  ∅ ⇄ ¿
+↦ C ↦ ind ↦ text ↦ ck_note ¿
+
+⍝ Leak check for moments that evaporate (§8.1)
+ƒ
+  from → i ¿
+  strand ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    strand i ⌈ ⌉ → m ¿
+    m "void" ⌈ ⌉ ¬ m "ty" ⌈ ⌉ ⟪ ck_copyable ⟫ ¬ ∧ ⤴ ↵
+      m "tok" ⌈ ⌉ → mt ¿
+      C mt "decoherence leak: the " m "ty" ⌈ ⌉ " bound here is never consumed (move it, ⌁ it, or return it; §8.1)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+      ⊥ ⇄ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⊤ ⇄ ¿
+↦ C ↦ strand ↦ from ↦ ck_no_leak ¿
+
+⍝ Shadows created in this block may not leave it (§8.2)
+ƒ
+  0 → i ¿
+  vs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    vs i ⌈ ⌉ → v ¿
+    v "of" ⌈ ⌉ ∅ ≢ v "region" ⌈ ⌉ depth ≽ ∧ ⤴ ↵
+      C v "tok" ⌈ ⌉ "the shadow " v "ty" ⌈ ⌉ " created here escapes its block (§8.2)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+      ⊥ ⇄ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⊤ ⇄ ¿
+↦ C ↦ vs ↦ depth ↦ ck_no_escape ¿
+
+⍝ Join several block results (faces of ⋔, arms of ⁇) — §5.1 rule 3, §7.1
+ƒ
+  【】 → live ¿
+  0 → i ¿
+  rs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    rs i ⌈ ⌉ "dead" ⌈ ⌉ ¬ ⤴ ↵ live rs i ⌈ ⌉ ⟪ .append ⟫ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  live ⟪ len ⟫ 0 ≡ ⤴ ↵ 【】 【】 ⊤ ⟪ ck_result ⟫ ⇄ ¿ ⌫ ¿
+  live 0 ⌈ ⌉ → r0 ¿
+  r0 "stack" ⌈ ⌉ ⟪ ck_types ⟫ → t0 ¿
+  1 → i ¿
+  live ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    live i ⌈ ⌉ "stack" ⌈ ⌉ ⟪ ck_types ⟫ → ti ¿
+    ti t0 ≢ ⤴ ↵
+      t0 ⟪ ck_show ⟫ → s0 ¿
+      ti ⟪ ck_show ⟫ → si ¿
+      C tok what " leaves different stacks: " s0 " and " si " (every live face must have the same effect)" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⍝ merged stack: values unchanged in every face keep their identity
+  【】 → S ¿
+  0 → j ¿
+  t0 ⟪ len ⟫ → m ¿
+  j m ≺ ⟲ ↵
+    r0 "stack" ⌈ ⌉ j ⌈ ⌉ → v0 ¿
+    ⊤ → same ¿
+    1 → i ¿
+    i n ≺ ⟲ ↵
+      live i ⌈ ⌉ "stack" ⌈ ⌉ j ⌈ ⌉ "id" ⌈ ⌉ v0 "id" ⌈ ⌉ ≢ ⤴ ↵ ⊥ → same ¿ ⌫ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    same ⤴ ↵ S v0 ⟪ .append ⟫ ¿ ⌫ ⤵ ↵
+      C v0 "ty" ⌈ ⌉ tok depth ⟪ ck_val ⟫ → nv ¿
+      v0 "of" ⌈ ⌉ → tmpv ¿
+      nv "of" ← tmpv ¿
+      S nv ⟪ .append ⟫ ¿
+    ⌫ ¿
+    j 1 ⊞ → j ¿
+  ⌫ ¿
+  ⍝ moment export: longest common prefix of the faces' moment types
+  r0 "strand" ⌈ ⌉ ⟪ len ⟫ → p ¿
+  1 → i ¿
+  i n ≺ ⟲ ↵
+    live i ⌈ ⌉ "strand" ⌈ ⌉ → si ¿
+    0 → q ¿
+    q p ≺ q si ⟪ len ⟫ ≺ ∧ ⟲ ↵
+      si q ⌈ ⌉ "ty" ⌈ ⌉ r0 "strand" ⌈ ⌉ q ⌈ ⌉ "ty" ⌈ ⌉ ≢ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      q 1 ⊞ → q ¿
+    ⌫ ¿
+    q → p ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  【】 → strand ¿
+  0 → q ¿
+  q p ≺ ⟲ ↵
+    r0 "strand" ⌈ ⌉ q ⌈ ⌉ → m0 ¿
+    0 → i ¿
+    i n ≺ ⟲ ↵
+      live i ⌈ ⌉ "strand" ⌈ ⌉ q ⌈ ⌉ "void" ⌈ ⌉ m0 "void" ⌈ ⌉ ≢ ⤴ ↵
+        C m0 "tok" ⌈ ⌉ "this moment is consumed in some faces but not in others" ⟪ ck_err ⟫ ⇄ ¿
+      ⌫ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    strand m0 ⟪ .append ⟫ ¿
+    q 1 ⊞ → q ¿
+  ⌫ ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    C live i ⌈ ⌉ "strand" ⌈ ⌉ p ⟪ ck_no_leak ⟫ ¬ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  C strand depth 1 ⊞ ⟪ ck_no_escape ⟫ ¬ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  S strand ⊥ ⟪ ck_result ⟫ ⇄ ¿
+↦ C ↦ rs ↦ tok ↦ what ↦ depth ↦ ck_join ¿
+
+⍝ Run a nested block on a copy of S. Fails if a shadow it created escapes on the stack.
+ƒ
+  S ⟪ ck_copy ⟫ → S2 ¿
+  C ops S2 depth 1 ⊞ locks ind ⟪ ck_block ⟫ → r ¿
+  C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  r "dead" ⌈ ⌉ ¬ ⤴ ↵
+    C r "stack" ⌈ ⌉ depth 1 ⊞ ⟪ ck_no_escape ⟫ ¬ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  ⌫ ¿
+  r ⇄ ¿
+↦ C ↦ ops ↦ S ↦ depth ↦ locks ↦ ind ↦ ck_sub ¿
+
+⍝ A predicate block (⍤, ⊨, ⋔⇋ assertion): sees copies or shadows of vals, must yield one ŧ
+ƒ
+  【】 → PS ¿
+  0 → i ¿
+  vals ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    vals i ⌈ ⌉ → v ¿
+    v "ty" ⌈ ⌉ → t ¿
+    t ⟪ ck_copyable ⟫ ⤴ ↵
+      PS v ⟪ .append ⟫ ¿
+    ⌫ ⤵ ↵
+      "⟗" t ⊞⊞ → sht ¿
+      C sht tok depth 1 ⊞ ⟪ ck_val ⟫ → sh ¿
+      v "id" ⌈ ⌉ → tmpv ¿
+      sh "of" ← tmpv ¿
+      PS sh ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  C ops PS depth 1 ⊞ locks ind ⟪ ck_block ⟫ → r ¿
+  C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  r "dead" ⌈ ⌉ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
+  r "stack" ⌈ ⌉ ⟪ ck_types ⟫ → ts ¿
+  ts 【"ŧ"】 ≢ ⤴ ↵
+    ts ⟪ ck_show ⟫ → shown ¿
+    C tok what " must leave exactly [ŧ], but leaves " shown ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
+  ⌫ ¿
+  C r "strand" ⌈ ⌉ 0 ⟪ ck_no_leak ⟫ ⇄ ¿
+↦ C ↦ ops ↦ vals ↦ tok ↦ what ↦ depth ↦ locks ↦ ind ↦ ck_predicate ¿
+
+⍝ Push results; returns nothing
+ƒ
+  0 → i ¿
+  outs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    S C outs i ⌈ ⌉ tok depth ⟪ ck_val ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ C ↦ S ↦ outs ↦ tok ↦ depth ↦ ck_push ¿
+
+⍝ Call a function with signature ❴ins, outs❵
+ƒ
+  f "ins" ⌈ ⌉ → ins ¿
+  f "outs" ⌈ ⌉ → outs ¿
+  ins ⟪ len ⟫ → k ¿
+  C S k tok label ⟪ ck_pop ⟫ → vals ¿
+  C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  S strand locks ⟪ ck_live_locks ⟫ → live ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    vals i ⌈ ⌉ → v ¿
+    v "ty" ⌈ ⌉ → t ¿
+    ins i ⌈ ⌉ → want ¿
+    t want ≢ ⤴ ↵
+      C t tok ⟪ ck_unwrap ⟫ → t ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    ⌫ ¿
+    t want ≢ ⤴ ↵
+      C tok "argument " i 1 ⊞ ⍕ " of " label ": expected " want ", found " t ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
+    ⌫ ¿
+    C v live tok ⟪ ck_move_ok ⟫ ¬ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  C S outs tok depth ⟪ ck_push ⟫ ¿
+  ∅ ⇄ ¿
+↦ C ↦ S ↦ strand ↦ locks ↦ f ↦ tok ↦ label ↦ depth ↦ ck_apply ¿
+
+ƒ
+  C ops S depth locks ind ⟪ ck_block_inner ⟫ ⇄ ¿
+↦ C ↦ ops ↦ S ↦ depth ↦ locks ↦ ind ↦ ck_block ¿
+
+ƒ
+  【】 → strand ¿
+  ⊥ → dead ¿
+  0 → oi ¿
+  ops ⟪ len ⟫ → nops ¿
+  oi nops ≺ ⟲ ↵
+    ops oi ⌈ ⌉ → op ¿
+    op "kind" ⌈ ⌉ → k ¿
+    op "tok" ⌈ ⌉ → tok ¿
+    tok ⟪ ck_label ⟫ → label ¿
+    dead ⤴ ↵ C tok "unreachable: nothing runs after ↯ in the same block" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+    ind "  " ⊞⊞ → ind2 ¿
+
+    k "lit" ≡ ⤴ ↵
+      tok "kind" ⌈ ⌉ → lk ¿
+      "ℤ" → t ¿
+      lk "real" ≡ ⤴ ↵ "ℝ" → t ¿ ⌫ ¿
+      lk "trit" ≡ ⤴ ↵ "ŧ" → t ¿ ⌫ ¿
+      lk "string" ≡ ⤴ ↵ "ʃ" → t ¿ ⌫ ¿
+      C t tok depth ⟪ ck_val ⟫ → v ¿
+      tok ⟪ ck_role ⟫ → role ¿
+      role ∅ ≢ ⤴ ↵ v role ⟪ ck_with_role ⟫ → v ¿ ⌫ ¿
+      S v ⟪ .append ⟫ ¿
+    ⌫ ⤵ k "call" ≡ k "anti-call" ≡ ∨ k "inverse-call" ≡ ∨ k "shape-call" ≡ ∨ ⤴ ↵
+      C op ⟪ ck_resolve ⟫ → f ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      tok "marks" ⌈ ⌉ → ms ¿
+      ms ∅ ≢ ⤴ ↵
+        "future" ms ∈ f "outs" ⌈ ⌉ ⟪ len ⟫ 0 ≻ ∧ ⤴ ↵
+          C tok "a future-tense call cannot have outputs: it runs at the end of the block (§9.2)" ⟪ ck_err ⟫ ¿ ⊗ ¿
+        ⌫ ¿
+      ⌫ ¿
+      C S strand locks f tok label depth ⟪ ck_apply ⟫ ¿
+      k "shape-call" ≡ ⤴ ↵ "shape-call → " f "name" ⌈ ⌉ ⊞⊞ → label ¿ ⌫ ¿
+    ⌫ ⤵ k "op" ≡ ⤴ ↵
+      C op S strand depth locks ind ⟪ ck_glyph ⟫ → skip ¿
+      skip ⤴ ↵ oi 1 ⊞ → oi ¿ ⌫ ¿
+      tok "text" ⌈ ⌉ "↯" ≡ ⤴ ↵ ⊤ → dead ¿ ⌫ ¿
+    ⌫ ⤵ k "quote" ≡ ⤴ ↵
+      ⍝ x ⦃pred⦄ ⊨ (§3.1 rule 4)
+      oi 1 ⊞ → nx ¿
+      ⊥ → isAttest ¿
+      nx nops ≺ ⤴ ↵
+        ops nx ⌈ ⌉ → nop ¿
+        nop "kind" ⌈ ⌉ "op" ≡ nop "tok" ⌈ ⌉ "text" ⌈ ⌉ "⊨" ≡ ∧ → isAttest ¿
+      ⌫ ¿
+      isAttest ¬ ⤴ ↵ C tok "a quoted block is only used directly before ⊨" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      ops nx ⌈ ⌉ "tok" ⌈ ⌉ → atok ¿
+      C S 1 atok "⊨" ⟪ ck_pop ⟫ → vals ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      C atok vals ⟪ ck_agree ⟫ ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      vals 0 ⌈ ⌉ → x ¿
+      C x "ty" ⌈ ⌉ atok ⟪ ck_unwrap ⟫ → xt ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      C ind "attest" ⟪ ck_note ⟫ ¿
+      C op "block" ⌈ ⌉ "ops" ⌈ ⌉ vals tok "the ⊨ predicate" depth S strand locks ⟪ ck_live_locks ⟫ ind2 ⟪ ck_predicate ⟫ ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      "◌" xt ⊞⊞ → rt ¿
+      C rt atok depth ⟪ ck_val ⟫ → res ¿
+      S res ⟪ .append ⟫ ¿
+      oi 1 ⊞ → oi ¿
+      "⊨" → label ¿
+    ⌫ ⤵ k "select" ≡ k "rselect" ≡ ∨ ⤴ ↵
+      C S 1 tok "⋔" ⟪ ck_pop ⟫ → vals ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      C vals 0 ⌈ ⌉ "ty" ⌈ ⌉ tok ⟪ ck_unwrap ⟫ → ct ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      ct ⟪ ck_head ⟫ "ψ" ≡ ⤴ ↵ C tok "⋔ on a superposition runs every live face; not implemented yet (milestone 5)" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      ct "ŧ" ≢ ⤴ ↵ C tok "⋔ selects on a trit ŧ, found " ct ⊞⊞ ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      S strand locks ⟪ ck_live_locks ⟫ → inner ¿
+      op "faces" ⌈ ⌉ → fs ¿
+      【】 → rs ¿
+      ∅ → prev ¿
+      【"face ⦶" "face ⊕" "face ⊖"】 → names ¿
+      0 → fi ¿
+      fi 3 ≺ ⟲ ↵
+        fs fi ⌈ ⌉ → f ¿
+        C ind2 names fi ⌈ ⌉ ⟪ ck_note ⟫ ¿
+        f "kind" ⌈ ⌉ "same" ≡ ⤴ ↵
+          rs prev ⟪ .append ⟫ ¿
+        ⌫ ⤵ f "kind" ⌈ ⌉ "identity" ≡ ⤴ ↵
+          S ⟪ ck_copy ⟫ 【】 ⊥ ⟪ ck_result ⟫ → prev ¿
+          rs prev ⟪ .append ⟫ ¿
+        ⌫ ⤵ ↵
+          C f "ops" ⌈ ⌉ S depth inner ind2 "  " ⊞⊞ ⟪ ck_sub ⟫ → prev ¿
+          C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+          rs prev ⟪ .append ⟫ ¿
+        ⌫ ¿
+        fi 1 ⊞ → fi ¿
+      ⌫ ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      C rs tok "⋔" depth ⟪ ck_join ⟫ → r ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      k "rselect" ≡ ⤴ ↵
+        r "stack" ⌈ ⌉ ⟪ len ⟫ 0 ≡ ⤴ ↵ C tok "⋔⇋ needs a value for its exit assertion" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+        r "stack" ⌈ ⌉ → rst ¿
+        rst rst ⟪ len ⟫ 1 ⊟ ⌈ ⌉ → topv ¿
+        C ind2 "assert" ⟪ ck_note ⟫ ¿
+        C op "assert" ⌈ ⌉ "ops" ⌈ ⌉ 【】 topv ⟪ .append ⟫ tok "the ⋔⇋ exit assertion" depth inner ind2 "  " ⊞⊞ ⟪ ck_predicate ⟫ ¿
+        C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      ⌫ ¿
+      r "stack" ⌈ ⌉ → S ¿
+      strand r "strand" ⌈ ⌉ ⊞⊞ → strand ¿
+      r "dead" ⌈ ⌉ → dead ¿
+      "⋔ (join)" → label ¿
+      k "rselect" ≡ ⤴ ↵ "⋔⇋ (join)" → label ¿ ⌫ ¿
+    ⌫ ⤵ k "loop" ≡ ⤴ ↵
+      S ⟪ ck_types ⟫ → before ¿
+      S strand locks ⟪ ck_live_locks ⟫ → inner ¿
+      C ind2 "body" ⟪ ck_note ⟫ ¿
+      C op "block" ⌈ ⌉ "ops" ⌈ ⌉ S depth inner ind2 "  " ⊞⊞ ⟪ ck_sub ⟫ → r ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      r "dead" ⌈ ⌉ ⤴ ↵
+        ⊤ → dead ¿
+      ⌫ ⤵ ↵
+        before ⟪ ck_copy ⟫ → want ¿
+        want "ŧ" ⟪ .append ⟫ ¿
+        r "stack" ⌈ ⌉ ⟪ ck_types ⟫ → got ¿
+        got want ≢ ⤴ ↵
+          want ⟪ ck_show ⟫ → ws ¿
+          got ⟪ ck_show ⟫ → gs ¿
+          C tok "the ⥀ body must have effect ⟨S ⊸ S ŧ⟩: expected " ws ", found " gs ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿ ⊗ ¿
+        ⌫ ¿
+        C r "strand" ⌈ ⌉ 0 ⟪ ck_no_leak ⟫ ¬ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        C r "strand" ⌈ ⌉ depth 1 ⊞ ⟪ ck_no_escape ⟫ ¬ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        r "stack" ⌈ ⌉ → S ¿
+        S ⟪ .pop ⟫ ¿
+        strand r "strand" ⌈ ⌉ ⊞⊞ → strand ¿
+      ⌫ ¿
+      "⥀ (exit)" → label ¿
+    ⌫ ⤵ k "handle" ≡ ⤴ ↵
+      C S 1 tok "⁇" ⟪ ck_pop ⟫ → vals ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      vals 0 ⌈ ⌉ → fv ¿
+      fv "ty" ⌈ ⌉ → ft ¿
+      ft ⟪ ck_head ⟫ "◌" ≢ ⤴ ↵ C tok "⁇ handles a possibly-failed value ◌T, found " ft ⊞⊞ ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      S strand locks ⟪ ck_live_locks ⟫ → inner ¿
+      S ⟪ ck_copy ⟫ → okS ¿
+      ft "◌" ≢ ⤴ ↵
+        C ft ⟪ ck_tail ⟫ tok depth ⟪ ck_val ⟫ → okv ¿
+        fv "of" ⌈ ⌉ → tmpv ¿
+        okv "of" ← tmpv ¿
+        okS okv ⟪ .append ⟫ ¿
+      ⌫ ¿
+      C ind2 "ok" ⟪ ck_note ⟫ ¿
+      C op "ok" ⌈ ⌉ "ops" ⌈ ⌉ okS depth inner ind2 "  " ⊞⊞ ⟪ ck_sub ⟫ → r1 ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      C ind2 "fail" ⟪ ck_note ⟫ ¿
+      C op "fail" ⌈ ⌉ "ops" ⌈ ⌉ S depth inner ind2 "  " ⊞⊞ ⟪ ck_sub ⟫ → r2 ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      C 【】 r1 ⟪ .append ⟫ r2 ⟪ .append ⟫ tok "⁇" depth ⟪ ck_join ⟫ → r ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      r "stack" ⌈ ⌉ → S ¿
+      strand r "strand" ⌈ ⌉ ⊞⊞ → strand ¿
+      r "dead" ⌈ ⌉ → dead ¿
+      "⁇ (join)" → label ¿
+    ⌫ ⤵ k "prayer" ≡ ⤴ ↵
+      tok "idx" ⌈ ⌉ → pn ¿
+      S ⟪ len ⟫ pn ≺ ⤴ ↵ C tok "⍤ needs " pn ⍕ " value(s) on the stack" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      S S ⟪ len ⟫ pn ⊟ S ⟪ len ⟫ ⟪ lx_slice ⟫ → vals ¿
+      C ind2 "prayer" ⟪ ck_note ⟫ ¿
+      C op "block" ⌈ ⌉ "ops" ⌈ ⌉ vals tok "a prayer" depth S strand locks ⟪ ck_live_locks ⟫ ind2 "  " ⊞⊞ ⟪ ck_predicate ⟫ ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    ⌫ ⤵ k "array" ≡ ⤴ ↵
+      【】 → AS ¿
+      C ind2 "elements" ⟪ ck_note ⟫ ¿
+      C op "ops" ⌈ ⌉ AS depth locks ind2 "  " ⊞⊞ ⟪ ck_sub ⟫ → r ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      r "dead" ⌈ ⌉ ⤴ ↵ C tok "an array literal cannot fail" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      r "stack" ⌈ ⌉ ⟪ ck_types ⟫ → ets ¿
+      ets ⟪ len ⟫ 0 ≡ ⤴ ↵ C tok "cannot infer the element type of an empty array ⟦ ⟧" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      ets 0 ⌈ ⌉ → et ¿
+      0 → q ¿
+      ets ⟪ len ⟫ → ne ¿
+      q ne ≺ ⟲ ↵
+        ets q ⌈ ⌉ et ≢ ⤴ ↵ C tok "array elements must share one type: " et " and " ets q ⌈ ⌉ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+        q 1 ⊞ → q ¿
+      ⌫ ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      et ⟪ ck_class ⟫ "borrowed" ≡ ⤴ ↵ C tok "an array cannot hold shadows (§8.2)" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      C r "strand" ⌈ ⌉ 0 ⟪ ck_no_leak ⟫ ¬ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      "⟦" et "⟧" ⊞⊞ ⊞⊞ → at ¿
+      S C at tok depth ⟪ ck_val ⟫ ⟪ .append ⟫ ¿
+      "⟦…⟧" → label ¿
+    ⌫ ⤵ k "postselect" ≡ ⤴ ↵
+      C tok "⟜ post-selection is not implemented yet (milestone 5)" ⟪ ck_err ⟫ ¿ ⊗ ¿
+    ⌫ ⤵ ↵
+      C tok "internal: unknown node " k ⊞⊞ ⟪ ck_err ⟫ ¿ ⊗ ¿
+    ⌫ ¿
+    C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    C ind label S ⟪ ck_trace ⟫ ¿
+    oi 1 ⊞ → oi ¿
+  ⌫ ¿
+  S strand dead ⟪ ck_result ⟫ ⇄ ¿
+↦ C ↦ ops ↦ S ↦ depth ↦ locks ↦ ind ↦ ck_block_inner ¿
+
+⍝ Case role from a token's marks: α β γ → 0 1 2
+ƒ
+  tok "marks" ⌈ ⌉ → ms ¿
+  ms ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  "α" ms ∈ ⤴ ↵ 0 ⇄ ¿ ⌫ ¿
+  "β" ms ∈ ⤴ ↵ 1 ⇄ ¿ ⌫ ¿
+  "γ" ms ∈ ⤴ ↵ 2 ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ tok ↦ ck_role ¿
+
+⍝ Glyph operators. Returns ⊤ when the next op was consumed too.
+ƒ
+  op "tok" ⌈ ⌉ → tok ¿
+  tok "text" ⌈ ⌉ → x ¿
+  tok "idx" ⌈ ⌉ → idx ¿
+  tok ⟪ ck_role ⟫ → role ¿
+
+  x "⧖" ≡ ⤴ ↵
+    C S 1 tok "⧖" ⟪ ck_pop ⟫ → vals ¿
+    C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    vals 0 ⌈ ⌉ → v ¿
+    v "ty" ⌈ ⌉ → t ¿
+    v "id" ⌈ ⌉ → id ¿
+    v "of" ⌈ ⌉ → of ¿
+    v "region" ⌈ ⌉ → rg ¿
+    ❴"ty": t, "id": id, "tok": tok, "of": of, "region": rg, "void": ⊥❵ → m ¿
+    strand m ⟪ .append ⟫ ¿
+    ⊥ ⇄ ¿
+  ⌫ ¿
+  x "⧗" ≡ ⤴ ↵
+    strand ⟪ len ⟫ → n ¿
+    idx n ≽ ⤴ ↵
+      tok ⟪ ck_label ⟫ → lbl ¿
+      C tok lbl " reads " idx 1 ⊞ ⍕ " moment(s) back, but only " n ⍕ " are visible here (data enters a block only through the stack, §5.1)" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+      ⊥ ⇄ ¿
+    ⌫ ¿
+    n 1 ⊟ idx ⊟ → mi ¿
+    strand mi ⌈ ⌉ → m ¿
+    m "void" ⌈ ⌉ ⤴ ↵
+      m "tok" ⌈ ⌉ → mt ¿
+      tok ⟪ ck_label ⟫ → lbl ¿
+      C tok lbl " reads a void moment: its " m "ty" ⌈ ⌉ " was already moved out (bound at " mt "line" ⌈ ⌉ ⍕ ":" mt "col" ⌈ ⌉ ⍕ ")" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+      ⊥ ⇄ ¿
+    ⌫ ¿
+    m "ty" ⌈ ⌉ → t ¿
+    t ⟪ ck_copyable ⟫ ⤴ ↵
+      C t tok depth ⟪ ck_val ⟫ → v ¿
+      m "of" ⌈ ⌉ → tmpv ¿
+      v "of" ← tmpv ¿
+    ⌫ ⤵ ↵
+      ⍝ quantum: move out, the moment becomes void
+      m "id" ⌈ ⌉ → id ¿
+      m "of" ⌈ ⌉ → of ¿
+      m "region" ⌈ ⌉ → rg ¿
+      ❴"ty": t, "id": id, "tok": tok, "of": of, "region": rg❵ → v ¿
+      v "role" ← ∅ ¿
+      m "tok" ⌈ ⌉ → mt ¿
+      ❴"ty": t, "id": id, "tok": mt, "of": of, "region": rg, "void": ⊤❵ → m2 ¿
+      strand mi ← m2 ¿
+    ⌫ ¿
+    role ∅ ≢ ⤴ ↵ v role ⟪ ck_with_role ⟫ → v ¿ ⌫ ¿
+    S v ⟪ .append ⟫ ¿
+    ⊥ ⇄ ¿
+  ⌫ ¿
+  x "⍿" ≡ ⤴ ↵
+    S ⟪ len ⟫ → n ¿
+    idx n ≽ ⤴ ↵ C tok tok ⟪ ck_label ⟫ " reaches below the stack (depth " n ⍕ ")" ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+    n 1 ⊟ idx ⊟ → si ¿
+    S si ⌈ ⌉ → v ¿
+    v "ty" ⌈ ⌉ ⟪ ck_copyable ⟫ ⤴ ↵
+      C v "ty" ⌈ ⌉ tok depth ⟪ ck_val ⟫ → w ¿
+      v "of" ⌈ ⌉ → tmpv ¿
+      w "of" ← tmpv ¿
+    ⌫ ⤵ ↵
+      ⍝ quantum: move it to the top
+      【】 → S2 ¿
+      0 → i ¿
+      i n ≺ ⟲ ↵
+        i si ≢ ⤴ ↵ S2 S i ⌈ ⌉ ⟪ .append ⟫ ¿ ⌫ ¿
+        i 1 ⊞ → i ¿
+      ⌫ ¿
+      0 → i ¿
+      i n ≺ ⟲ ↵ S ⟪ .pop ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+      0 → i ¿
+      i n 1 ⊟ ≺ ⟲ ↵ S S2 i ⌈ ⌉ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+      v ∅ ⟪ ck_with_role ⟫ → w ¿
+    ⌫ ¿
+    role ∅ ≢ ⤴ ↵ w role ⟪ ck_with_role ⟫ → w ¿ ⌫ ¿
+    S w ⟪ .append ⟫ ¿
+    ⊥ ⇄ ¿
+  ⌫ ¿
+  x "⟗" ≡ x "⟖" ≡ ∨ ⤴ ↵
+    S ⟪ len ⟫ 0 ≡ ⤴ ↵ C tok x " needs a value to entangle" ⊞⊞ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+    S S ⟪ len ⟫ 1 ⊟ ⌈ ⌉ → v ¿
+    v "ty" ⌈ ⌉ → t ¿
+    t ⟪ ck_class ⟫ "borrowed" ≡ t ⟪ ck_head ⟫ "◌" ≡ ∨ ⤴ ↵ C tok "cannot entangle a " t ⊞⊞ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+    S strand locks ⟪ ck_live_locks ⟫ → live ¿
+    x "⟖" ≡ v "id" ⌈ ⌉ live ∈ ∧ ⤴ ↵ C tok "⟖ needs exclusive access, but a shadow of this value is alive" ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+    ⍝ an exclusive shadow must be unique
+    0 → i ¿
+    S ⟪ len ⟫ → n ¿
+    i n ≺ ⟲ ↵
+      S i ⌈ ⌉ → w ¿
+      w "of" ⌈ ⌉ v "id" ⌈ ⌉ ≡ w "ty" ⌈ ⌉ ⟪ ck_head ⟫ "⟖" ≡ ∧ ⤴ ↵ C tok "this value already has a live ⟖ shadow" ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    x t ⊞⊞ → sht ¿
+    C sht tok depth ⟪ ck_val ⟫ → sh ¿
+    v "id" ⌈ ⌉ → tmpv ¿
+    sh "of" ← tmpv ¿
+    S sh ⟪ .append ⟫ ¿
+    ⊥ ⇄ ¿
+  ⌫ ¿
+  x "↯" ≡ ⤴ ↵
+    C "canFail" ⌈ ⌉ ¬ ⤴ ↵ C tok "↯ fails, but this function's output is not ◌ (§7.3)" ⟪ ck_err ⟫ ¿ ⌫ ¿
+    ⊥ ⇄ ¿
+  ⌫ ¿
+  x "⊨" ≡ ⤴ ↵ C tok "⊨ needs its predicate block directly before it: x ⦃pred⦄ ⊨" ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+  x "⫴" ≡ x "⊛" ≡ ∨ x "⊙" ≡ ∨ ⤴ ↵ C tok x " (superposition) is not implemented yet (milestone 5)" ⊞⊞ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+
+  x ⟪ ck_arity ⟫ → k ¿
+  k ∅ ≡ ⤴ ↵ C tok "internal: no arity for " x ⊞⊞ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+  C S k tok x ⟪ ck_pop ⟫ → vals ¿
+  C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  C tok vals ⟪ ck_agree ⟫ ¿
+  C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  【】 → ts ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    vals i ⌈ ⌉ "ty" ⌈ ⌉ → t ¿
+    x "⌁" ≢ ⤴ ↵ C t tok ⟪ ck_unwrap ⟫ → t ¿ ⌫ ¿
+    C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    ts t ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  C tok ts ⟪ ck_glyph_types ⟫ → outs ¿
+  C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  S strand locks ⟪ ck_live_locks ⟫ → live ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    C vals i ⌈ ⌉ live tok ⟪ ck_move_ok ⟫ ¬ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⍝ ⍈ consumes its exclusive shadow; ⌁ on a particle runs its antiparticle
+  C S outs tok depth ⟪ ck_push ⟫ ¿
+  ⊥ ⇄ ¿
+↦ C ↦ op ↦ S ↦ strand ↦ depth ↦ locks ↦ ind ↦ ck_glyph ¿
+
+⍝ ---- name resolution (§9, §9.1)
+
+ƒ
+  sig "ins" ⌈ ⌉ ⟪ ck_canon_list ⟫ " " ⟪ join ⟫ → a ¿
+  sig "outs" ⌈ ⌉ ⟪ ck_canon_list ⟫ " " ⟪ join ⟫ → b ¿
+  "⟨" a " ⊸ " b "⟩" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⇄ ¿
+↦ sig ↦ ck_shape ¿
+
+ƒ
+  op "kind" ⌈ ⌉ → k ¿
+  op "tok" ⌈ ⌉ → tok ¿
+  C "fns" ⌈ ⌉ → fns ¿
+  k "shape-call" ≡ ⤴ ↵
+    op "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → key ¿
+    C "shapes" ⌈ ⌉ → shapes ¿
+    key shapes ∈ ¬ ⤴ ↵ C tok "no function has the shape " key ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    shapes key ⌈ ⌉ → names ¿
+    names ⟪ len ⟫ 1 ≻ ⤴ ↵
+      names ", " ⟪ join ⟫ → ns ¿
+      C tok "shape collision: " key " is the shape of " ns ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
+    ⌫ ¿
+    names 0 ⌈ ⌉ → nm ¿
+    fns nm ⌈ ⌉ ⇄ ¿
+  ⌫ ¿
+  tok "text" ⌈ ⌉ → nm ¿
+  k "anti-call" ≡ ⤴ ↵ "⌁" nm ⊞⊞ → nm ¿ ⌫ ¿
+  nm fns ∈ ¬ ⤴ ↵ C tok "unknown function " nm ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+  fns nm ⌈ ⌉ → f ¿
+  k "inverse-call" ≡ f "rev" ⌈ ⌉ ¬ ∧ ⤴ ↵ C tok "⇜" nm " calls an inverse, but " nm " is not reversible (⇋, §10)" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+  f ⇄ ¿
+↦ C ↦ op ↦ ck_resolve ¿
+
+⍝ ---- signatures and functions
+
+ƒ
+  sig "ins" ⌈ ⌉ ⟪ ck_canon_list ⟫ → ins ¿
+  sig "outs" ⌈ ⌉ ⟪ ck_canon_list ⟫ → outs ¿
+  ❴"ins": ins, "outs": outs, "rev": rev, "name": name❵ ⇄ ¿
+↦ sig ↦ rev ↦ name ↦ ck_fn_info ¿
+
+⍝ Every named type must be a declared particle; shadows cannot be returned
+ƒ
+  ts ⟪ len ⟫ → n ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    ts i ⌈ ⌉ → t ¿
+    ⍝ strip prefixes and array brackets to find the base
+    t → b ¿
+    ⊤ → going ¿
+    going ⟲ ↵
+      b ⟪ len ⟫ 0 ≡ ⤴ ↵ ⊥ → going ¿ ⊕ ¿ ⌫ ¿
+      b ⟪ ck_head ⟫ → h ¿
+      h "◌" ≡ h "⟗" ≡ ∨ h "⟖" ≡ ∨ ⤴ ↵ b ⟪ ck_tail ⟫ → b ¿ ⊕ ¿ ⌫ ¿
+      h "ψ" ≡ ⤴ ↵ b ⟪ ck_psi_inner ⟫ → b ¿ ⊕ ¿ ⌫ ¿
+      h "⟦" ≡ ⤴ ↵ b 1 b ⟪ len ⟫ 2 ⊟ ⟪ substr ⟫ → b ¿ ⊕ ¿ ⌫ ¿
+      ⊥ → going ¿
+    ⌫ ¿
+    b "" ≢ b ⟪ ck_head ⟫ ⟪ tc_base_type ⟫ ¬ ∧ ⤴ ↵
+      b C "particles" ⌈ ⌉ ∈ ¬ ⤴ ↵ C tok "unknown type " b " (Ogham type names must be declared with ⚛, §8.6)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    ⌫ ¿
+    outputs t ⟪ ck_head ⟫ "⟗" ≡ t ⟪ ck_head ⟫ "⟖" ≡ ∨ ∧ ⤴ ↵ C tok "a function cannot return a shadow " t " (shadows never leave their block, §8.2)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ C ↦ ts ↦ tok ↦ outputs ↦ ck_check_types ¿
+
+ƒ
+  f "ins" ⌈ ⌉ → ins ¿
+  f "outs" ⌈ ⌉ → outs ¿
+  it "name" ⌈ ⌉ → name ¿
+  it "tok" ⌈ ⌉ → tok ¿
+  ⍝ §7.3: a function may fail when its output is ◌ or ◌T
+  ⊥ → canFail ¿
+  outs ⟪ len ⟫ 1 ≡ ⤴ ↵ outs 0 ⌈ ⌉ ⟪ ck_head ⟫ "◌" ≡ → canFail ¿ ⌫ ¿
+  C "canFail" ← canFail ¿
+  ⍝ inside its own antiparticle a particle decays to its representation (§8.6)
+  ins → ins2 ¿
+  name ⟪ ck_head ⟫ "⌁" ≡ ⤴ ↵
+    name ⟪ ck_tail ⟫ → pt ¿
+    C "particles" ⌈ ⌉ → ps ¿
+    pt ps ∈ ⤴ ↵
+      【】 → ins2 ¿
+      0 → i ¿
+      ins ⟪ len ⟫ → n ¿
+      i n ≺ ⟲ ↵
+        ins i ⌈ ⌉ → t ¿
+        t pt ≡ ⤴ ↵ ps pt ⌈ ⌉ → t ¿ ⌫ ¿
+        ins2 t ⟪ .append ⟫ ¿
+        i 1 ⊞ → i ¿
+      ⌫ ¿
+    ⌫ ¿
+  ⌫ ¿
+  【】 → S ¿
+  0 → i ¿
+  ins2 ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    C ins2 i ⌈ ⌉ tok 0 ⟪ ck_val ⟫ → v ¿
+    ins2 i ⌈ ⌉ ⟪ ck_class ⟫ "borrowed" ≡ ⤴ ↵ v "of" ← 0 ¿ ⌫ ¿
+    S v ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  f "ins" ⌈ ⌉ → shownIns ¿
+  "⟨" shownIns " " ⟪ join ⟫ " ⊸ " outs " " ⟪ join ⟫ "⟩" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → sigs ¿
+  C "" "fn " name " " sigs "  start " S ⟪ ck_types ⟫ ⟪ ck_show ⟫ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_note ⟫ ¿
+  C it "ops" ⌈ ⌉ S 1 【】 "  " ⟪ ck_block ⟫ → r ¿
+  C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  r "dead" ⌈ ⌉ ¬ ⤴ ↵
+    r "stack" ⌈ ⌉ ⟪ ck_types ⟫ → got ¿
+    ⊤ → ok ¿
+    got outs ≢ ⤴ ↵
+      ⊥ → ok ¿
+      ⍝ success value for a ◌T output, or nothing for a bare ◌
+      canFail ⤴ ↵
+        outs 0 ⌈ ⌉ → o ¿
+        o "◌" ≡ got ⟪ len ⟫ 0 ≡ ∧ ⤴ ↵ ⊤ → ok ¿ ⌫ ¿
+        got ⟪ len ⟫ 1 ≡ ⤴ ↵
+          got 0 ⌈ ⌉ → g0 ¿
+          "◌" g0 ⊞⊞ → wrapped ¿
+          wrapped o ≡ ⤴ ↵ ⊤ → ok ¿ ⌫ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+    ok ¬ ⤴ ↵
+      got ⟪ ck_show ⟫ → gs ¿
+      outs ⟪ ck_show ⟫ → os ¿
+      C tok name " ends with " gs " but its signature promises " os ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
+    ⌫ ¿
+  ⌫ ¿
+  C r "strand" ⌈ ⌉ 0 ⟪ ck_no_leak ⟫ ¿
+  ∅ ⇄ ¿
+↦ C ↦ it ↦ f ↦ ck_function ¿
+
+⍝ ---- entry: items → ❴err, lines❵
+
+ƒ
+  ❴"err": ∅, "path": path, "next": 0, "trace": trace, "canFail": ⊥❵ → C ¿
+  C "lines" ← 【】 ¿
+  ❴❵ → fns ¿
+  ❴❵ → shapes ¿
+  ❴❵ → particles ¿
+  C "fns" ← fns ¿
+  C "shapes" ← shapes ¿
+  C "particles" ← particles ¿
+  0 → i ¿
+  items ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    items i ⌈ ⌉ → it ¿
+    it "kind" ⌈ ⌉ "particle" ≡ ⤴ ↵
+      it "rep" ⌈ ⌉ ⟪ ck_canon ⟫ → rep ¿
+      rep ⟪ ck_copyable ⟫ ¬ ⤴ ↵ C it "tok" ⌈ ⌉ "a particle is represented by a classical type" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      particles it "name" ⌈ ⌉ ← rep ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  i n ≺ C ⟪ ck_failed ⟫ ¬ ∧ ⟲ ↵
+    items i ⌈ ⌉ → it ¿
+    it "kind" ⌈ ⌉ "particle" ≢ ⤴ ↵
+      it "kind" ⌈ ⌉ "fn" ≡ it "rev" ⌈ ⌉ ∧ → rev ¿
+      it "sig" ⌈ ⌉ rev it "name" ⌈ ⌉ ⟪ ck_fn_info ⟫ → f ¿
+      C f "ins" ⌈ ⌉ it "tok" ⌈ ⌉ ⊥ ⟪ ck_check_types ⟫ ¿
+      C f "outs" ⌈ ⌉ it "tok" ⌈ ⌉ ⊤ ⟪ ck_check_types ⟫ ¿
+      fns it "name" ⌈ ⌉ ← f ¿
+      it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → key ¿
+      key shapes ∈ ¬ ⤴ ↵ shapes key ← 【】 ¿ ⌫ ¿
+      shapes key ⌈ ⌉ it "name" ⌈ ⌉ ⟪ .append ⟫ ¿
+      rev ⤴ ↵
+        f "ins" ⌈ ⌉ f "outs" ⌈ ⌉ ≢ ⤴ ↵ C it "tok" ⌈ ⌉ "a reversible function has effect ⟨S ⊸ S⟩ (§10)" ⟪ ck_err ⟫ ¿ ⌫ ¿
+      ⌫ ¿
+      it "name" ⌈ ⌉ "ᛟ" ≡ ⤴ ↵
+        f "ins" ⌈ ⌉ ⟪ len ⟫ 0 ≢ f "outs" ⌈ ⌉ 【】 ≢ f "outs" ⌈ ⌉ 【"◌"】 ≢ ∧ ∨ ⤴ ↵
+          C it "tok" ⌈ ⌉ "the entry point ᛟ has signature ⟨⊸⟩ or ⟨⊸ ◌⟩ (§9)" ⟪ ck_err ⟫ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  i n ≺ C ⟪ ck_failed ⟫ ¬ ∧ ⟲ ↵
+    items i ⌈ ⌉ → it ¿
+    it "kind" ⌈ ⌉ "fn" ≡ ⤴ ↵
+      C it fns it "name" ⌈ ⌉ ⌈ ⌉ ⟪ ck_function ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  C "err" ⌈ ⌉ → err ¿
+  C "lines" ⌈ ⌉ → lines ¿
+  ❴"err": err, "lines": lines❵ ⇄ ¿
+↦ items ↦ path ↦ trace ↦ trith_check ¿

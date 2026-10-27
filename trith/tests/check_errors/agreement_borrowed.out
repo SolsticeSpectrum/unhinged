@@ -1,0 +1,6 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+    elements
+      △  ⊢ [ℤ]
+  ⟦…⟧  ⊢ [⟦ℤ⟧]
+  ⟗  ⊢ [⟦ℤ⟧ ⟗⟦ℤ⟧]
+trith/tests/check_errors/agreement_borrowed.trh:1:11: error: disagreement: ⍴ on [⟗⟦ℤ⟧] needs ◌̱ borrowed (§6.1)

@@ -11,7 +11,7 @@ blessStr "1" ≡ → bless ¿
 
 "mkdir -p output/trith-tests" ⟪ syscall ⟫ → _ ¿
 
-【【"lex" "--tokens"】【"parse" "--ast"】【"errors" "--ast"】【"plough" "--plough"】】 → suites ¿
+【【"lex" "--tokens"】【"parse" "--ast"】【"errors" "--ast"】【"plough" "--plough"】【"check" "--check"】【"check_errors" "--check"】】 → suites ¿
 0 → passed ¿
 0 → failed ¿
 0 → si ¿

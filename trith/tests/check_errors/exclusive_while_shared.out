@@ -1,0 +1,7 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+    elements
+      △  ⊢ [ℤ]
+  ⟦…⟧  ⊢ [⟦ℤ⟧]
+  ⟗  ⊢ [⟦ℤ⟧ ⟗⟦ℤ⟧]
+  ⍿¹  ⊢ [⟗⟦ℤ⟧ ⟦ℤ⟧]
+trith/tests/check_errors/exclusive_while_shared.trh:1:14: error: ⟖ needs exclusive access, but a shadow of this value is alive

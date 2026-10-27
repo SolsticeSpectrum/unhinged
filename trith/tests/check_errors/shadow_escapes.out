@@ -1,0 +1,8 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+    elements
+      △  ⊢ [ℤ]
+  ⟦…⟧  ⊢ [⟦ℤ⟧]
+  ⊕  ⊢ [⟦ℤ⟧ ŧ]
+    face ⦶
+      ⟗  ⊢ [⟦ℤ⟧ ⟗⟦ℤ⟧]
+trith/tests/check_errors/shadow_escapes.trh:1:15: error: the shadow ⟗⟦ℤ⟧ created here escapes its block (§8.2)

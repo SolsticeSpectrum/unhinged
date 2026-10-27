@@ -1,0 +1,4 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △̂  ⊢ [ℤ]
+  ▽△  ⊢ [ℤ ℤ]
+trith/tests/check_errors/impossible_role.trh:1:9: error: impossible case role: ⊟ has only 2 operand(s)

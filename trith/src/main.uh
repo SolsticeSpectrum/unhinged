@@ -1,5 +1,6 @@
 "lexer.uh" ⟪ import ⟫ ¿
 "parser.uh" ⟪ import ⟫ ¿
+"check.uh" ⟪ import ⟫ ¿
 
 ⍝ trithc: the Trith compiler (stage s1, written in UNHINGED)
 ⍝ Milestone 1: lexer and parser. Code generation arrives in milestone 3.
@@ -51,7 +52,22 @@
     ⌫ ¿
     0 ⇄ ¿
   ⌫ ¿
-  input ": error: code generation is not implemented yet (use --tokens or --ast)" ⊞⊞ ⊢ ¿
+  ps "items" ⌈ ⌉ input mode "check" ≡ ⟪ trith_check ⟫ → ck ¿
+  mode "check" ≡ ⤴ ↵
+    ck "lines" ⌈ ⌉ → lines ¿
+    0 → i ¿
+    lines ⟪ len ⟫ → n ¿
+    i n ≺ ⟲ ↵
+      lines i ⌈ ⌉ ⊢ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+  ⌫ ¿
+  ck "err" ⌈ ⌉ ∅ ≢ ⤴ ↵
+    ck "err" ⌈ ⌉ ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  mode "check" ≡ ⤴ ↵ "ok" ⊢ ¿ 0 ⇄ ¿ ⌫ ¿
+  input ": error: code generation is not implemented yet (use --tokens, --ast or --check)" ⊞⊞ ⊢ ¿
   1 ⇄ ¿
 ↦ input ↦ output ↦ mode ↦ trithc_main ¿
 
@@ -66,6 +82,7 @@ ai argc ≺ ⟲ ↵
   argv ai ⌈ ⌉ → a ¿
   a "--tokens" ≡ ⤴ ↵ "tokens" → mode ¿
   ⌫ ⤵ a "--ast" ≡ ⤴ ↵ "ast" → mode ¿
+  ⌫ ⤵ a "--check" ≡ ⤴ ↵ "check" → mode ¿
   ⌫ ⤵ a "--plough" ≡ ⤴ ↵ "plough" → mode ¿
   ⌫ ⤵ a "--unplough" ≡ ⤴ ↵ "unplough" → mode ¿
   ⌫ ⤵ a "-o" ≡ ⤴ ↵
@@ -77,9 +94,10 @@ ai argc ≺ ⟲ ↵
   ai 1 ⊞ → ai ¿
 ⌫ ¿
 input "" ≡ bad ∨ ⤴ ↵
-  "usage: trithc <main.trh> [-o <output>] [--tokens | --ast | --plough | --unplough]" ⊢ ¿
+  "usage: trithc <main.trh> [-o <output>] [--tokens | --ast | --check | --plough | --unplough]" ⊢ ¿
   "  --tokens    print the token stream (after the Boustrophedon Rule)" ⊢ ¿
   "  --ast       print the parsed and tangled item tree" ⊢ ¿
+  "  --check     type-check and print the virtual stack after every operation" ⊢ ¿
   "  --plough    rewrite a file written in logical order (every line left to right)" ⊢ ¿
   "              into on-disk order, padding with breaths ⸱ to satisfy the Balance Law" ⊢ ¿
   "  --unplough  rewrite an on-disk file into logical order for reading" ⊢ ¿

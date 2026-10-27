@@ -1,0 +1,5 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  »a«  ⊢ [ʃ]
+  ⧖  ⊢ []
+  ⧗⁰  ⊢ [ʃ]
+trith/tests/check_errors/void_moment.trh:1:12: error: ⧗⁰ reads a void moment: its ʃ was already moved out (bound at 1:7)

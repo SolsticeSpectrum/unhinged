@@ -1,0 +1,7 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+    elements
+      »a«  ⊢ [ʃ]
+  ⟦…⟧  ⊢ [⟦ʃ⟧]
+  ⟗  ⊢ [⟦ʃ⟧ ⟗⟦ʃ⟧]
+  ○  ⊢ [⟦ʃ⟧ ⟗⟦ʃ⟧ ℤ]
+trith/tests/check_errors/quantum_index.trh:1:15: error: indexing an array of quantum values would clone one; not supported (§8.1)

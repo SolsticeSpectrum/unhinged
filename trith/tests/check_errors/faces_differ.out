@@ -1,0 +1,7 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  ⊕  ⊢ [ŧ]
+    face ⦶
+      △  ⊢ [ℤ]
+    face ⊕
+    face ⊖
+trith/tests/check_errors/faces_differ.trh:1:5: error: ⋔ leaves different stacks: [ℤ] and [] (every live face must have the same effect)

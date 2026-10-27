@@ -1,0 +1,1 @@
+trith/tests/check_errors/reversible_effect.trh:1:3: error: a reversible function has effect ⟨S ⊸ S⟩ (§10)

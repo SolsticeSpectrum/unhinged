@@ -1,0 +1,4 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △́  ⊢ [ℤ]
+  ▽△́  ⊢ [ℤ ℤ]
+trith/tests/check_errors/duplicate_role.trh:1:10: error: two operands of ⊟ carry the same case role

@@ -1,0 +1,1 @@
+trith/tests/check_errors/return_shadow.trh:1:1: error: a function cannot return a shadow ⟗ʃ (shadows never leave their block, §8.2)

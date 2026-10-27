@@ -1,0 +1,4 @@
+fn ᚱ ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+trith/tests/check_errors/not_reversible.trh:1:23: error: ⇜ᚱ calls an inverse, but ᚱ is not reversible (⇋, §10)

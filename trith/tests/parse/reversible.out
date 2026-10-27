@@ -1,0 +1,22 @@
+fn ᚱ ⟨ℤ ⊸ ℤ⟩ reversible
+  lit int △ = 1
+  op ⊞
+  op ⊝
+fn ᛟ ⟨⊸⟩
+  lit int ▽△ = 2
+  call ᚱ
+  inverse-call ᚱ
+  op ⎙
+fn ᚳ ⟨ℤ ⊸ ℤ⟩ reversible
+  rselect
+    face ∅
+    face
+      lit int △ = 1
+      op ⊞
+    face
+      lit int △ = 1
+      op ⊟
+    assert
+      op ⍿ idx=0
+      lit int ○ = 0
+      op ≶

@@ -1,0 +1,15 @@
+fn ᛟ ⟨⊸⟩
+  lit trit ⊕
+  lit trit ⊖
+  op ⫴
+  op ⧖
+  op ⧗ idx=0
+  postselect [superposed]
+    lit trit ⦶
+    op ≶
+  op ⧗ idx=0
+  op ⊙ idx=0 [superposed]
+  handle
+    ok
+      op ⎙
+    fail

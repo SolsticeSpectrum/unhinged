@@ -1,0 +1,16 @@
+2:35 int ▽△ value=2
+2:33 int △ value=1
+2:31 glyph ⊞
+2:29 glyph ⸫
+3:1 bracket ⦃
+3:3 string "hello\n"
+3:12 glyph ⎙ marks=quantum
+3:15 bracket ⦄
+4:22 bracket ⦄
+4:20 bracket ⦃
+4:18 bracket ⟨
+4:16 glyph ⊸
+4:14 bracket ⟩
+4:12 bracket ⟦
+4:3 string "world\n"
+4:1 bracket ⟧

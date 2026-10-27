@@ -1,0 +1,22 @@
+fn ᚠ ⟨ℤ ⊸ ℤ⟩
+  op ⍿ idx=0
+  lit int ▽△ = 2
+  op ≶
+  select
+    face
+      op ⧖
+      op ⧗ idx=0
+      lit int △ = 1
+      op ⊟
+      call ᚠ
+      op ⧗ idx=0
+      lit int ▽△ = 2
+      op ⊟
+      call ᚠ
+      op ⊞
+    face ⁼
+    face ∅
+fn ᛟ ⟨⊸⟩
+  lit int ▽○△ = 8
+  call ᚠ
+  op ⎙

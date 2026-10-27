@@ -1,0 +1,713 @@
+⍝ Trith parser (spec §9, §18): LL(1) over token classes → item tree
+⍝ Items: functions (and fragments), reversible functions, particles, FFI bindings.
+⍝ After parsing, fragments are tangled (§9.3) and particles checked for antiparticles (§8.6).
+
+⍝ ---- state
+
+ƒ
+  P "pos" ⌈ ⌉ → p ¿
+  P "toks" ⌈ ⌉ → toks ¿
+  p toks ⟪ len ⟫ ≽ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  toks p ⌈ ⌉ ⇄ ¿
+↦ P ↦ ps_peek ¿
+
+ƒ
+  P ⟪ ps_peek ⟫ → t ¿
+  P "pos" ⌈ ⌉ 1 ⊞ → p ¿
+  P "pos" ← p ¿
+  t ⇄ ¿
+↦ P ↦ ps_next ¿
+
+ƒ
+  P "err" ⌈ ⌉ ∅ ≢ ⇄ ¿
+↦ P ↦ ps_failed ¿
+
+ƒ
+  P "err" ⌈ ⌉ ∅ ≡ ⤴ ↵
+    t ∅ ≡ ⤴ ↵
+      P "path" ⌈ ⌉ ": error: " msg " at end of file" ⊞⊞ ⊞⊞ ⊞⊞ → e ¿
+    ⌫ ⤵ ↵
+      P "path" ⌈ ⌉ ":" t "line" ⌈ ⌉ ⍕ ":" t "col" ⌈ ⌉ ⍕ ": error: " msg ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → e ¿
+    ⌫ ¿
+    P "err" ← e ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ P ↦ t ↦ msg ↦ ps_err ¿
+
+ƒ
+  t ∅ ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  t "kind" ⌈ ⌉ kind ≡ t "text" ⌈ ⌉ text ≡ ∧ ⇄ ¿
+↦ t ↦ kind ↦ text ↦ ps_is ¿
+
+ƒ
+  t ∅ ≡ ⤴ ↵ "end of file" ⇄ ¿ ⌫ ¿
+  t "kind" ⌈ ⌉ "string" ≡ ⤴ ↵ "a string" ⇄ ¿ ⌫ ¿
+  t "kind" ⌈ ⌉ " " t "text" ⌈ ⌉ ⊞⊞ ⊞⊞ ⇄ ¿
+↦ t ↦ ps_describe ¿
+
+⍝ Expect a bracket or glyph with the given text
+ƒ
+  P ⟪ ps_peek ⟫ → t ¿
+  t kind text ⟪ ps_is ⟫ ¬ ⤴ ↵
+    P t "expected " text ", found " t ⟪ ps_describe ⟫ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿
+  ⌫ ¿
+  P ⟪ ps_next ⟫ ⇄ ¿
+↦ P ↦ kind ↦ text ↦ ps_expect ¿
+
+⍝ ---- types (§3) inside signatures
+
+ƒ
+  t "kind" ⌈ ⌉ → k ¿
+  k "tprefix" ≡ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
+  k "glyph" ≡ ⤴ ↵ t "text" ⌈ ⌉ ⟪ tc_type_prefix ⟫ ⇄ ¿ ⌫ ¿
+  ⊥ ⇄ ¿
+↦ t ↦ ps_is_prefix ¿
+
+⍝ Type node: ❴kind: "type", prefixes, base, charge, elem❵ (elem for arrays)
+ƒ
+  ❴"kind": "type", "base": base❵ → n ¿
+  n "prefixes" ← prefixes ¿
+  n "charge" ← "" ¿
+  n "elem" ← ∅ ¿
+  n ⇄ ¿
+↦ prefixes ↦ base ↦ ps_type_node ¿
+
+ƒ
+  P ⟪ ps_peek ⟫ → t ¿
+  t ∅ ≡ ⤴ ↵ P t "unterminated signature" ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+  t ⟪ ps_is_prefix ⟫ ⤴ ↵
+    P ⟪ ps_next ⟫ ¿
+    t "kind" ⌈ ⌉ "tprefix" ≡ ⤴ ↵ t "prefixes" ⌈ ⌉ → pre ¿ ⌫ ⤵ ↵ 【】 → pre ¿ pre t "text" ⌈ ⌉ ⟪ .append ⟫ ¿ ⌫ ¿
+    P ⟪ ps_peek ⟫ → u ¿
+    u "glyph" "⊸" ⟪ ps_is ⟫ u "bracket" "⟩" ⟪ ps_is ⟫ ∨ ⤴ ↵
+      ⍝ bare ◌ in output position: "may fail, returns nothing"
+      pre ⟪ len ⟫ 1 ≡ pre 0 ⌈ ⌉ "◌" ≡ ∧ ⤴ ↵ pre ∅ ⟪ ps_type_node ⟫ ⇄ ¿ ⌫ ¿
+      P t "type prefix without a type" ⟪ ps_err ⟫ ⇄ ¿
+    ⌫ ¿
+    P ⟪ ps_type ⟫ → inner ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    pre inner "prefixes" ⌈ ⌉ ⊞⊞ → merged ¿
+    inner "prefixes" ← merged ¿
+    inner ⇄ ¿
+  ⌫ ¿
+  t "kind" ⌈ ⌉ "type" ≡ ⤴ ↵
+    P ⟪ ps_next ⟫ ¿
+    t "prefixes" ⌈ ⌉ t "base" ⌈ ⌉ ⟪ ps_type_node ⟫ → n ¿
+    t "charge" ⌈ ⌉ → tmpv ¿
+    n "charge" ← tmpv ¿
+    n ⇄ ¿
+  ⌫ ¿
+  t "kind" ⌈ ⌉ "tname" ≡ ⤴ ↵
+    P ⟪ ps_next ⟫ ¿
+    【】 t "text" ⌈ ⌉ ⟪ ps_type_node ⟫ ⇄ ¿
+  ⌫ ¿
+  t "bracket" "⟦" ⟪ ps_is ⟫ ⤴ ↵
+    P ⟪ ps_next ⟫ ¿
+    P ⟪ ps_type ⟫ → elem ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    P "bracket" "⟧" ⟪ ps_expect ⟫ ¿
+    【】 "⟦⟧" ⟪ ps_type_node ⟫ → n ¿
+    n "elem" ← elem ¿
+    n ⇄ ¿
+  ⌫ ¿
+  P t "expected a type, found " t ⟪ ps_describe ⟫ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿
+↦ P ↦ ps_type ¿
+
+⍝ ⟨ inputs ⊸ outputs ⟩
+ƒ
+  P "bracket" "⟨" ⟪ ps_expect ⟫ → open ¿
+  P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  【】 → ins ¿
+  【】 → outs ¿
+  ⊥ → sawArrow ¿
+  ⊤ → going ¿
+  going ⟲ ↵
+    P ⟪ ps_peek ⟫ → t ¿
+    t "bracket" "⟩" ⟪ ps_is ⟫ ⤴ ↵
+      P ⟪ ps_next ⟫ ¿
+      ⊥ → going ¿
+      ⊕ ¿
+    ⌫ ¿
+    t "glyph" "⊸" ⟪ ps_is ⟫ ⤴ ↵
+      sawArrow ⤴ ↵ P t "a signature has exactly one ⊸" ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+      ⊤ → sawArrow ¿
+      P ⟪ ps_next ⟫ ¿
+      ⊕ ¿
+    ⌫ ¿
+    P ⟪ ps_type ⟫ → ty ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    sawArrow ⤴ ↵ outs ty ⟪ .append ⟫ ¿ ⌫ ⤵ ↵ ins ty ⟪ .append ⟫ ¿ ⌫ ¿
+  ⌫ ¿
+  sawArrow ¬ ⤴ ↵ P open "signature is missing ⊸" ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+  ❴"kind": "sig", "ins": ins, "outs": outs❵ ⇄ ¿
+↦ P ↦ ps_sig ¿
+
+⍝ ---- code (§4–§12)
+
+ƒ
+  ❴"kind": kind, "tok": t❵ ⇄ ¿
+↦ kind ↦ t ↦ ps_node ¿
+
+ƒ
+  P "bracket" opener ⟪ ps_expect ⟫ → open ¿
+  P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  【】 → ops ¿
+  ⊤ → going ¿
+  going ⟲ ↵
+    P ⟪ ps_peek ⟫ → t ¿
+    t ∅ ≡ ⤴ ↵ P open "unclosed " opener ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+    t "bracket" closer ⟪ ps_is ⟫ ⤴ ↵
+      P ⟪ ps_next ⟫ ¿
+      ⊥ → going ¿
+      ⊕ ¿
+    ⌫ ¿
+    P ⟪ ps_op ⟫ → op ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    ops op ⟪ .append ⟫ ¿
+  ⌫ ¿
+  "block" open ⟪ ps_node ⟫ → n ¿
+  n "ops" ← ops ¿
+  n ⇄ ¿
+↦ P ↦ opener ↦ closer ↦ ps_block_until ¿
+
+ƒ
+  P "⦃" "⦄" ⟪ ps_block_until ⟫ ⇄ ¿
+↦ P ↦ ps_block ¿
+
+⍝ A face of ⋔: a block, ⁼ (same as previous) or ∅ (identity)
+ƒ
+  P ⟪ ps_peek ⟫ → t ¿
+  t "glyph" "⁼" ⟪ ps_is ⟫ ⤴ ↵
+    first ⤴ ↵ P t "the first face cannot be ⁼" ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+    P ⟪ ps_next ⟫ ¿
+    "same" t ⟪ ps_node ⟫ ⇄ ¿
+  ⌫ ¿
+  t "glyph" "∅" ⟪ ps_is ⟫ ⤴ ↵
+    P ⟪ ps_next ⟫ ¿
+    "identity" t ⟪ ps_node ⟫ ⇄ ¿
+  ⌫ ¿
+  t "bracket" "⦃" ⟪ ps_is ⟫ ⤴ ↵ P ⟪ ps_block ⟫ ⇄ ¿ ⌫ ¿
+  P t "expected a face (⦃…⦄, ⁼ or ∅), found " t ⟪ ps_describe ⟫ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿
+↦ P ↦ first ↦ ps_face ¿
+
+ƒ
+  【】 → faces ¿
+  0 → i ¿
+  i 3 ≺ ⟲ ↵
+    P i 0 ≡ ⟪ ps_face ⟫ → f ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    faces f ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  faces ⇄ ¿
+↦ P ↦ ps_faces ¿
+
+ƒ
+  P ⟪ ps_next ⟫ → t ¿
+  t "kind" ⌈ ⌉ → k ¿
+  t "text" ⌈ ⌉ → x ¿
+
+  k "bracket" ≡ ⤴ ↵
+    x "⦃" ≡ ⤴ ↵
+      P "pos" ⌈ ⌉ 1 ⊟ → back ¿
+      P "pos" ← back ¿
+      P ⟪ ps_block ⟫ → b ¿
+      P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+      "quote" t ⟪ ps_node ⟫ → n ¿
+      n "block" ← b ¿
+      n ⇄ ¿
+    ⌫ ¿
+    x "⟨" ≡ ⤴ ↵
+      P "pos" ⌈ ⌉ 1 ⊟ → back ¿
+      P "pos" ← back ¿
+      P ⟪ ps_sig ⟫ → s ¿
+      P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+      "shape-call" t ⟪ ps_node ⟫ → n ¿
+      n "sig" ← s ¿
+      n ⇄ ¿
+    ⌫ ¿
+    x "⟦" ≡ ⤴ ↵
+      P "pos" ⌈ ⌉ 1 ⊟ → back ¿
+      P "pos" ← back ¿
+      P "⟦" "⟧" ⟪ ps_block_until ⟫ → b ¿
+      P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+      "array" t ⟪ ps_node ⟫ → n ¿
+      b "ops" ⌈ ⌉ → tmpv ¿
+      n "ops" ← tmpv ¿
+      n ⇄ ¿
+    ⌫ ¿
+    P t "unexpected " x ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿
+  ⌫ ¿
+
+  k "int" ≡ k "real" ≡ ∨ k "trit" ≡ ∨ k "string" ≡ ∨ ⤴ ↵ "lit" t ⟪ ps_node ⟫ ⇄ ¿ ⌫ ¿
+  k "name" ≡ ⤴ ↵ "call" t ⟪ ps_node ⟫ ⇄ ¿ ⌫ ¿
+  k "anti" ≡ ⤴ ↵ "anti-call" t ⟪ ps_node ⟫ ⇄ ¿ ⌫ ¿
+  k "inverse" ≡ ⤴ ↵ "inverse-call" t ⟪ ps_node ⟫ ⇄ ¿ ⌫ ¿
+  k "type" ≡ k "tname" ≡ ∨ k "tprefix" ≡ ∨ ⤴ ↵
+    P t "types are only written in signatures, FFI bindings and particle declarations (§3)" ⟪ ps_err ⟫ ⇄ ¿
+  ⌫ ¿
+
+  ⍝ glyphs
+  x "⋔" ≡ ⤴ ↵
+    P ⟪ ps_faces ⟫ → fs ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    "select" t ⟪ ps_node ⟫ → n ¿
+    n "faces" ← fs ¿
+    n ⇄ ¿
+  ⌫ ¿
+  x "⋔⇋" ≡ ⤴ ↵
+    P ⟪ ps_faces ⟫ → fs ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    P ⟪ ps_block ⟫ → a ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    "rselect" t ⟪ ps_node ⟫ → n ¿
+    n "faces" ← fs ¿
+    n "assert" ← a ¿
+    n ⇄ ¿
+  ⌫ ¿
+  x "⥀" ≡ x "⟜" ≡ ∨ ⤴ ↵
+    P ⟪ ps_block ⟫ → b ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    "loop" → kind ¿
+    x "⟜" ≡ ⤴ ↵ "postselect" → kind ¿ ⌫ ¿
+    kind t ⟪ ps_node ⟫ → n ¿
+    n "block" ← b ¿
+    n ⇄ ¿
+  ⌫ ¿
+  x "⁇" ≡ ⤴ ↵
+    P ⟪ ps_block ⟫ → ok ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    P ⟪ ps_block ⟫ → fail ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    "handle" t ⟪ ps_node ⟫ → n ¿
+    n "ok" ← ok ¿
+    n "fail" ← fail ¿
+    n ⇄ ¿
+  ⌫ ¿
+  x "⍤" ≡ ⤴ ↵
+    t "idx" ⌈ ⌉ ∅ ≡ ⤴ ↵ P t "a prayer needs a count, e.g. ⍤¹" ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+    P ⟪ ps_block ⟫ → b ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    "prayer" t ⟪ ps_node ⟫ → n ¿
+    n "block" ← b ¿
+    n ⇄ ¿
+  ⌫ ¿
+  x "⧗" ≡ x "⍿" ≡ ∨ t "idx" ⌈ ⌉ ∅ ≡ ∧ ⤴ ↵
+    P t x " needs a superscript index, e.g. " x "⁰" ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿
+  ⌫ ¿
+  "⸫⸾⊸⁼∅⇋⚛⎔" x ⟪ .indexOf ⟫ 0 ≽ ⤴ ↵
+    P t "unexpected " x " inside a block" ⊞⊞ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿
+  ⌫ ¿
+  "op" t ⟪ ps_node ⟫ ⇄ ¿
+↦ P ↦ ps_op ¿
+
+⍝ ---- items
+
+ƒ
+  t ∅ ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  t "kind" ⌈ ⌉ "name" ≡ t "kind" ⌈ ⌉ "anti" ≡ ∨ ⇄ ¿
+↦ t ↦ ps_is_fname ¿
+
+ƒ
+  t "kind" ⌈ ⌉ "anti" ≡ ⤴ ↵ "⌁" t "text" ⌈ ⌉ ⊞⊞ ⇄ ¿ ⌫ ¿
+  t "text" ⌈ ⌉ ⇄ ¿
+↦ t ↦ ps_fname ¿
+
+⍝ block [sig] name [⸾ ordinal] ⸫   (rev: preceded by ⇋)
+ƒ
+  P ⟪ ps_peek ⟫ → start ¿
+  P ⟪ ps_block ⟫ → body ¿
+  P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  ∅ → sig ¿
+  P ⟪ ps_peek ⟫ "bracket" "⟨" ⟪ ps_is ⟫ ⤴ ↵
+    P ⟪ ps_sig ⟫ → sig ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  ⌫ ¿
+  P ⟪ ps_peek ⟫ → nt ¿
+  nt ⟪ ps_is_fname ⟫ ¬ ⤴ ↵ P nt "expected a function name (Runic letters), found " nt ⟪ ps_describe ⟫ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+  P ⟪ ps_next ⟫ ¿
+  nt "marks" ⌈ ⌉ ⟪ len ⟫ 0 ≻ ⤴ ↵ P nt "a function name in a definition cannot carry marks" ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+  ∅ → ord ¿
+  ∅ → ordText ¿
+  P ⟪ ps_peek ⟫ "glyph" "⸾" ⟪ ps_is ⟫ ⤴ ↵
+    P ⟪ ps_next ⟫ ¿
+    P ⟪ ps_next ⟫ → ot ¿
+    ot ∅ ≡ ⤴ ↵ P ot "expected a fragment ordinal" ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+    ot "kind" ⌈ ⌉ "int" ≢ ⤴ ↵ P ot "a fragment ordinal is a balanced-ternary integer, found " ot ⟪ ps_describe ⟫ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+    ot "value" ⌈ ⌉ ⟪ int ⟫ → ord ¿
+    ot "text" ⌈ ⌉ → ordText ¿
+  ⌫ ¿
+  P "glyph" "⸫" ⟪ ps_expect ⟫ ¿
+  P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  "fragment" start ⟪ ps_node ⟫ → n ¿
+  n "name" ← nt ⟪ ps_fname ⟫ ¿
+  n "nameTok" ← nt ¿
+  n "sig" ← sig ¿
+  n "body" ← body ¿
+  n "rev" ← rev ¿
+  n "ord" ← ord ¿
+  n "ordText" ← ordText ¿
+  n ⇄ ¿
+↦ P ↦ rev ↦ ps_function ¿
+
+⍝ ⚛ type name ⸫
+ƒ
+  P ⟪ ps_next ⟫ → start ¿
+  P ⟪ ps_type ⟫ → rep ¿
+  P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  P ⟪ ps_peek ⟫ → nt ¿
+  nt ∅ ≡ ⤴ ↵ P nt "expected a particle name (Ogham letters)" ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+  nt "kind" ⌈ ⌉ "tname" ≢ ⤴ ↵ P nt "expected a particle name (Ogham letters), found " nt ⟪ ps_describe ⟫ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+  P ⟪ ps_next ⟫ ¿
+  P "glyph" "⸫" ⟪ ps_expect ⟫ ¿
+  P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  "particle" start ⟪ ps_node ⟫ → n ¿
+  nt "text" ⌈ ⌉ → tmpv ¿
+  n "name" ← tmpv ¿
+  n "rep" ← rep ¿
+  n ⇄ ¿
+↦ P ↦ ps_particle ¿
+
+⍝ ⎔ »cname« sig name ⸫
+ƒ
+  P ⟪ ps_next ⟫ → start ¿
+  P ⟪ ps_peek ⟫ → st ¿
+  st ∅ ≡ ⤴ ↵ P st "expected the C function name as a string" ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+  st "kind" ⌈ ⌉ "string" ≢ ⤴ ↵ P st "expected the C function name as a string, found " st ⟪ ps_describe ⟫ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+  P ⟪ ps_next ⟫ ¿
+  P ⟪ ps_sig ⟫ → sig ¿
+  P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  P ⟪ ps_peek ⟫ → nt ¿
+  nt "name" ⟪ ps_is_kind ⟫ ¬ ⤴ ↵ P nt "expected a function name (Runic letters), found " nt ⟪ ps_describe ⟫ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿ ⌫ ¿
+  P ⟪ ps_next ⟫ ¿
+  P "glyph" "⸫" ⟪ ps_expect ⟫ ¿
+  P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  "ffi" start ⟪ ps_node ⟫ → n ¿
+  nt "text" ⌈ ⌉ → tmpv ¿
+  n "name" ← tmpv ¿
+  st "text" ⌈ ⌉ → tmpv ¿
+  n "cname" ← tmpv ¿
+  n "sig" ← sig ¿
+  n ⇄ ¿
+↦ P ↦ ps_ffi ¿
+
+ƒ
+  t ∅ ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  t "kind" ⌈ ⌉ kind ≡ ⇄ ¿
+↦ t ↦ kind ↦ ps_is_kind ¿
+
+ƒ
+  P ⟪ ps_peek ⟫ → t ¿
+  t "glyph" "⚛" ⟪ ps_is ⟫ ⤴ ↵ P ⟪ ps_particle ⟫ ⇄ ¿ ⌫ ¿
+  t "glyph" "⎔" ⟪ ps_is ⟫ ⤴ ↵ P ⟪ ps_ffi ⟫ ⇄ ¿ ⌫ ¿
+  t "glyph" "⇋" ⟪ ps_is ⟫ ⤴ ↵
+    P ⟪ ps_next ⟫ ¿
+    P ⊤ ⟪ ps_function ⟫ ⇄ ¿
+  ⌫ ¿
+  t "bracket" "⦃" ⟪ ps_is ⟫ ⤴ ↵ P ⊥ ⟪ ps_function ⟫ ⇄ ¿ ⌫ ¿
+  P t "expected an item (⦃ function, ⇋ reversible function, ⚛ particle or ⎔ binding), found " t ⟪ ps_describe ⟫ ⊞⊞ ⟪ ps_err ⟫ ⇄ ¿
+↦ P ↦ ps_item ¿
+
+⍝ ---- tangle (§9.3): fragments → functions
+
+ƒ
+  P "err" ⌈ ⌉ ∅ ≡ ⤴ ↵
+    P "path" ⌈ ⌉ ":" t "line" ⌈ ⌉ ⍕ ":" t "col" ⌈ ⌉ ⍕ ": error: " msg ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → e ¿
+    P "err" ← e ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ P ↦ t ↦ msg ↦ ps_err_at ¿
+
+ƒ
+  【】 → names ¿
+  ❴❵ → groups ¿
+  ❴❵ → others ¿
+  【】 → order ¿
+  0 → i ¿
+  items ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    items i ⌈ ⌉ → it ¿
+    it "kind" ⌈ ⌉ "fragment" ≡ ⤴ ↵
+      it "name" ⌈ ⌉ → nm ¿
+      nm others ∈ ⤴ ↵ P it "nameTok" ⌈ ⌉ "name defined twice: " nm ⊞⊞ ⟪ ps_err_at ⟫ ⇄ ¿ ⌫ ¿
+      nm groups ∈ ¬ ⤴ ↵
+        groups nm ← 【】 ¿
+        names nm ⟪ .append ⟫ ¿
+        order 【"fn" nm】 ⟪ .append ⟫ ¿
+      ⌫ ¿
+      groups nm ⌈ ⌉ it ⟪ .append ⟫ ¿
+    ⌫ ⤵ ↵
+      it "name" ⌈ ⌉ → nm ¿
+      nm groups ∈ nm others ∈ ∨ ⤴ ↵ P it "tok" ⌈ ⌉ "name defined twice: " nm ⊞⊞ ⟪ ps_err_at ⟫ ⇄ ¿ ⌫ ¿
+      others nm ← it ¿
+      order 【"item" nm】 ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+
+  【】 → out ¿
+  0 → i ¿
+  order ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    order i ⌈ ⌉ → o ¿
+    o 1 ⌈ ⌉ → nm ¿
+    o 0 ⌈ ⌉ "item" ≡ ⤴ ↵
+      out others nm ⌈ ⌉ ⟪ .append ⟫ ¿
+    ⌫ ⤵ ↵
+      groups nm ⌈ ⌉ → frags ¿
+      ⍝ sort fragments by ordinal (an unfragmented definition is ordinal ○ = 0)
+      【】 → sorted ¿
+      0 → j ¿
+      frags ⟪ len ⟫ → m ¿
+      j m ≺ ⟲ ↵
+        frags j ⌈ ⌉ → f ¿
+        f "ord" ⌈ ⌉ → fo ¿
+        fo ∅ ≡ ⤴ ↵ 0 → fo ¿ ⌫ ¿
+        f "key" ← fo ¿
+        【】 → nxt ¿
+        ⊥ → placed ¿
+        0 → q ¿
+        sorted ⟪ len ⟫ → sl ¿
+        q sl ≺ ⟲ ↵
+          sorted q ⌈ ⌉ → g ¿
+          g "key" ⌈ ⌉ fo ≡ ⤴ ↵
+            f "ordText" ⌈ ⌉ ∅ ≡ g "ordText" ⌈ ⌉ ∅ ≡ ∧ ⤴ ↵ P f "nameTok" ⌈ ⌉ "function " nm " is defined twice" ⊞⊞ ⊞⊞ ⟪ ps_err_at ⟫ ⇄ ¿ ⌫ ¿
+            P f "nameTok" ⌈ ⌉ "duplicate fragment ordinal for " nm ⊞⊞ ⟪ ps_err_at ⟫ ⇄ ¿
+          ⌫ ¿
+          placed ¬ fo g "key" ⌈ ⌉ ≺ ∧ ⤴ ↵
+            nxt f ⟪ .append ⟫ ¿
+            ⊤ → placed ¿
+          ⌫ ¿
+          nxt g ⟪ .append ⟫ ¿
+          q 1 ⊞ → q ¿
+        ⌫ ¿
+        placed ¬ ⤴ ↵ nxt f ⟪ .append ⟫ ¿ ⌫ ¿
+        nxt → sorted ¿
+        j 1 ⊞ → j ¿
+      ⌫ ¿
+      ∅ → sig ¿
+      ⊥ → rev ¿
+      【】 → ops ¿
+      【】 → ords ¿
+      0 → j ¿
+      j m ≺ ⟲ ↵
+        sorted j ⌈ ⌉ → f ¿
+        f "sig" ⌈ ⌉ ∅ ≢ ⤴ ↵
+          sig ∅ ≢ ⤴ ↵ P f "nameTok" ⌈ ⌉ "only one fragment of " nm " may carry the signature" ⊞⊞ ⊞⊞ ⟪ ps_err_at ⟫ ⇄ ¿ ⌫ ¿
+          f "sig" ⌈ ⌉ → sig ¿
+        ⌫ ¿
+        f "rev" ⌈ ⌉ ⤴ ↵ ⊤ → rev ¿ ⌫ ¿
+        f "ordText" ⌈ ⌉ ∅ ≢ ⤴ ↵ ords f "ordText" ⌈ ⌉ ⟪ .append ⟫ ¿ ⌫ ⤵ ↵ ords "○" ⟪ .append ⟫ ¿ ⌫ ¿
+        f "body" ⌈ ⌉ "ops" ⌈ ⌉ ops ⟪ ps_concat_into ⟫ ¿
+        j 1 ⊞ → j ¿
+      ⌫ ¿
+      sorted 0 ⌈ ⌉ → f0 ¿
+      sig ∅ ≡ m 1 ≡ ∧ ⤴ ↵ P f0 "nameTok" ⌈ ⌉ "function " nm " has no signature ⟨… ⊸ …⟩" ⊞⊞ ⊞⊞ ⟪ ps_err_at ⟫ ⇄ ¿ ⌫ ¿
+      sig ∅ ≡ ⤴ ↵ P f0 "nameTok" ⌈ ⌉ "no fragment of " nm " carries a signature" ⊞⊞ ⊞⊞ ⟪ ps_err_at ⟫ ⇄ ¿ ⌫ ¿
+      "fn" f0 "tok" ⌈ ⌉ ⟪ ps_node ⟫ → fn ¿
+      fn "name" ← nm ¿
+      fn "sig" ← sig ¿
+      fn "rev" ← rev ¿
+      fn "ops" ← ops ¿
+      fn "frags" ← ords ¿
+      out fn ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+
+  ⍝ §8.6: every particle needs an antiparticle ⌁T
+  0 → i ¿
+  out ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    out i ⌈ ⌉ → it ¿
+    it "kind" ⌈ ⌉ "particle" ≡ ⤴ ↵
+      "⌁" it "name" ⌈ ⌉ ⊞⊞ → anti ¿
+      anti groups ∈ ¬ ⤴ ↵ P it "tok" ⌈ ⌉ "particle " it "name" ⌈ ⌉ " has no antiparticle " anti ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ps_err_at ⟫ ⇄ ¿ ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ P ↦ items ↦ ps_tangle ¿
+
+ƒ
+  0 → i ¿
+  src ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    dst src i ⌈ ⌉ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ src ↦ dst ↦ ps_concat_into ¿
+
+⍝ ---- entry: tokens → ❴items, err❵
+
+ƒ
+  ❴"toks": toks, "pos": 0, "err": ∅, "path": path❵ → P ¿
+  【】 → items ¿
+  P ⟪ ps_peek ⟫ ∅ ≢ ⟲ ↵
+    P ⟪ ps_item ⟫ → it ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    items it ⟪ .append ⟫ ¿
+  ⌫ ¿
+  P ⟪ ps_failed ⟫ ¬ ⤴ ↵
+    P items ⟪ ps_tangle ⟫ → items ¿
+  ⌫ ¿
+  P "err" ⌈ ⌉ → err ¿
+  ❴"items": items, "err": err❵ ⇄ ¿
+↦ toks ↦ path ↦ trith_parse ¿
+
+⍝ ---- AST dump for golden tests
+
+ƒ
+  "" → s ¿
+  ty "prefixes" ⌈ ⌉ "" ⟪ join ⟫ → s ¿
+  ty "elem" ⌈ ⌉ ∅ ≢ ⤴ ↵
+    ty "elem" ⌈ ⌉ ⟪ ps_type_str ⟫ → inner ¿
+    s "⟦" inner "⟧" ⊞⊞ ⊞⊞ ⊞⊞ ⇄ ¿
+  ⌫ ¿
+  ty "base" ⌈ ⌉ ∅ ≢ ⤴ ↵ s ty "base" ⌈ ⌉ ⊞⊞ → s ¿ ⌫ ¿
+  ty "charge" ⌈ ⌉ "" ≢ ⤴ ↵ s "⁽" ty "charge" ⌈ ⌉ "⁾" ⊞⊞ ⊞⊞ ⊞⊞ → s ¿ ⌫ ¿
+  s ⇄ ¿
+↦ ty ↦ ps_type_str ¿
+
+ƒ
+  【】 → parts ¿
+  0 → i ¿
+  xs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    parts xs i ⌈ ⌉ ⟪ ps_type_str ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  parts " " ⟪ join ⟫ ⇄ ¿
+↦ xs ↦ ps_types_str ¿
+
+ƒ
+  sig ∅ ≡ ⤴ ↵ "" ⇄ ¿ ⌫ ¿
+  sig "ins" ⌈ ⌉ ⟪ ps_types_str ⟫ → a ¿
+  sig "outs" ⌈ ⌉ ⟪ ps_types_str ⟫ → b ¿
+  a "" ≢ ⤴ ↵ a " " ⊞⊞ → a ¿ ⌫ ¿
+  b "" ≢ ⤴ ↵ " " b ⊞⊞ → b ¿ ⌫ ¿
+  "⟨" a "⊸" b "⟩" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⇄ ¿
+↦ sig ↦ ps_sig_str ¿
+
+ƒ
+  t "marks" ⌈ ⌉ → ms ¿
+  ms ⟪ len ⟫ 0 ≡ ⤴ ↵ "" ⇄ ¿ ⌫ ¿
+  " [" ms "," ⟪ join ⟫ "]" ⊞⊞ ⊞⊞ ⇄ ¿
+↦ t ↦ ps_marks_str ¿
+
+ƒ
+  0 → i ¿
+  ops ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    out ops i ⌈ ⌉ ind ⟪ ps_dump_op ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ out ↦ ops ↦ ind ↦ ps_dump_ops ¿
+
+ƒ
+  n "kind" ⌈ ⌉ → k ¿
+  n "tok" ⌈ ⌉ → t ¿
+  t ⟪ ps_marks_str ⟫ → ms ¿
+  ind "  " ⊞⊞ → ind2 ¿
+  k "lit" ≡ ⤴ ↵
+    t "text" ⌈ ⌉ → shown ¿
+    t "kind" ⌈ ⌉ "string" ≡ ⤴ ↵ shown ⟪ lx_quote ⟫ → shown ¿ ⌫ ¿
+    ind "lit " t "kind" ⌈ ⌉ " " shown ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → line ¿
+    t "value" ⌈ ⌉ ∅ ≢ ⤴ ↵ line " = " t "value" ⌈ ⌉ ⊞⊞ ⊞⊞ → line ¿ ⌫ ¿
+    out line ms ⊞⊞ ⟪ .append ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  k "call" ≡ k "anti-call" ≡ ∨ k "inverse-call" ≡ ∨ ⤴ ↵
+    t ⟪ ps_fname ⟫ → nm ¿
+    out ind k " " nm ms ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ .append ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  k "op" ≡ ⤴ ↵
+    ind "op " t "text" ⌈ ⌉ ⊞⊞ ⊞⊞ → line ¿
+    t "idx" ⌈ ⌉ ∅ ≢ ⤴ ↵ line " idx=" t "idx" ⌈ ⌉ ⍕ ⊞⊞ ⊞⊞ → line ¿ ⌫ ¿
+    out line ms ⊞⊞ ⟪ .append ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  k "shape-call" ≡ ⤴ ↵
+    n "sig" ⌈ ⌉ ⟪ ps_sig_str ⟫ → ss ¿
+    out ind "shape-call " ss ⊞⊞ ⊞⊞ ⟪ .append ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  k "quote" ≡ ⤴ ↵
+    out ind "quote" ⊞⊞ ⟪ .append ⟫ ¿
+    out n "block" ⌈ ⌉ "ops" ⌈ ⌉ ind2 ⟪ ps_dump_ops ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  k "array" ≡ ⤴ ↵
+    out ind "array" ⊞⊞ ⟪ .append ⟫ ¿
+    out n "ops" ⌈ ⌉ ind2 ⟪ ps_dump_ops ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  k "select" ≡ k "rselect" ≡ ∨ ⤴ ↵
+    out ind k ms ⊞⊞ ⊞⊞ ⟪ .append ⟫ ¿
+    n "faces" ⌈ ⌉ → fs ¿
+    0 → i ¿
+    i 3 ≺ ⟲ ↵
+      fs i ⌈ ⌉ → f ¿
+      f "kind" ⌈ ⌉ "same" ≡ ⤴ ↵ out ind2 "face ⁼" ⊞⊞ ⟪ .append ⟫ ¿
+      ⌫ ⤵ f "kind" ⌈ ⌉ "identity" ≡ ⤴ ↵ out ind2 "face ∅" ⊞⊞ ⟪ .append ⟫ ¿
+      ⌫ ⤵ ↵
+        out ind2 "face" ⊞⊞ ⟪ .append ⟫ ¿
+        ind2 "  " ⊞⊞ → ind3 ¿
+        out f "ops" ⌈ ⌉ ind3 ⟪ ps_dump_ops ⟫ ¿
+      ⌫ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    k "rselect" ≡ ⤴ ↵
+      out ind2 "assert" ⊞⊞ ⟪ .append ⟫ ¿
+      ind2 "  " ⊞⊞ → ind3 ¿
+      out n "assert" ⌈ ⌉ "ops" ⌈ ⌉ ind3 ⟪ ps_dump_ops ⟫ ¿
+    ⌫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  k "handle" ≡ ⤴ ↵
+    out ind "handle" ms ⊞⊞ ⊞⊞ ⟪ .append ⟫ ¿
+    ind2 "  " ⊞⊞ → ind3 ¿
+    out ind2 "ok" ⊞⊞ ⟪ .append ⟫ ¿
+    out n "ok" ⌈ ⌉ "ops" ⌈ ⌉ ind3 ⟪ ps_dump_ops ⟫ ¿
+    out ind2 "fail" ⊞⊞ ⟪ .append ⟫ ¿
+    out n "fail" ⌈ ⌉ "ops" ⌈ ⌉ ind3 ⟪ ps_dump_ops ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  ⍝ loop, postselect, prayer
+  ind k ⊞⊞ → line ¿
+  t "idx" ⌈ ⌉ ∅ ≢ ⤴ ↵ line " n=" t "idx" ⌈ ⌉ ⍕ ⊞⊞ ⊞⊞ → line ¿ ⌫ ¿
+  out line ms ⊞⊞ ⟪ .append ⟫ ¿
+  out n "block" ⌈ ⌉ "ops" ⌈ ⌉ ind2 ⟪ ps_dump_ops ⟫ ¿
+  ∅ ⇄ ¿
+↦ out ↦ n ↦ ind ↦ ps_dump_op ¿
+
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  items ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    items i ⌈ ⌉ → it ¿
+    it "kind" ⌈ ⌉ → k ¿
+    k "fn" ≡ ⤴ ↵
+      it "sig" ⌈ ⌉ ⟪ ps_sig_str ⟫ → ss ¿
+      "fn " it "name" ⌈ ⌉ " " ss ⊞⊞ ⊞⊞ ⊞⊞ → line ¿
+      it "rev" ⌈ ⌉ ⤴ ↵ line " reversible" ⊞⊞ → line ¿ ⌫ ¿
+      it "frags" ⌈ ⌉ → fr ¿
+      fr ⟪ len ⟫ 1 ≻ fr 0 ⌈ ⌉ "○" ≢ ∨ ⤴ ↵ line " fragments=" fr "," ⟪ join ⟫ ⊞⊞ ⊞⊞ → line ¿ ⌫ ¿
+      out line ⟪ .append ⟫ ¿
+      out it "ops" ⌈ ⌉ "  " ⟪ ps_dump_ops ⟫ ¿
+    ⌫ ⤵ k "particle" ≡ ⤴ ↵
+      it "rep" ⌈ ⌉ ⟪ ps_type_str ⟫ → rs ¿
+      out "particle " it "name" ⌈ ⌉ " " rs ⊞⊞ ⊞⊞ ⊞⊞ ⟪ .append ⟫ ¿
+    ⌫ ⤵ ↵
+      it "sig" ⌈ ⌉ ⟪ ps_sig_str ⟫ → ss ¿
+      it "cname" ⌈ ⌉ ⟪ lx_quote ⟫ → cn ¿
+      out "ffi " it "name" ⌈ ⌉ " " cn " " ss ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ items ↦ ps_dump ¿

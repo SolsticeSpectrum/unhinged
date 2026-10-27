@@ -1,0 +1,12 @@
+1:1 int △ value=1 marks=α
+1:4 int ▽△ value=2 marks=β
+1:8 glyph ⊟
+1:10 trit ⊕ marks=γ
+1:13 name ᚠ marks=past
+1:16 name ᚢ marks=future
+1:19 glyph ⎙ marks=quantum
+1:22 glyph ⊙ idx=0 marks=borrowed,superposed
+1:27 glyph ⊙ idx=0 marks=borrowed,superposed
+1:32 glyph ⌖ marks=borrowed
+1:35 glyph ⧗ idx=0 marks=β
+1:39 string "a" marks=α

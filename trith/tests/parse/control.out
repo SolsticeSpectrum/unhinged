@@ -1,0 +1,36 @@
+fn ᚠ ⟨ℤ ⊸ ℤ⟩
+  op ⍿ idx=0
+  lit int ○ = 0
+  op ≶
+  select
+    face ∅
+    face
+      op ⊝
+    face ⁼
+  loop
+    lit int △ = 1
+    op ⊟
+    op ⍿ idx=0
+    lit int ○ = 0
+    op ≶
+fn ᛟ ⟨⊸ ◌⟩
+  array
+    lit int △ = 1
+    lit int ▽△ = 2
+    lit int ○△ = 3
+  op ⟗
+  lit int ○ = 0
+  op ⌖ [borrowed]
+  handle
+    ok
+      prayer n=1
+        lit int ○ = 0
+        op ≶
+      op ⎙
+    fail
+      op ↯
+fn ᚨ ⟨⸮ℤ ⊸ ◌ℤ⟩
+  quote
+    lit int ○ = 0
+    op ≶
+  op ⊨

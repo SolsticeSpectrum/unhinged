@@ -1,0 +1,37 @@
+1:1 bracket ⦃
+2:8 glyph ⍿ idx=0
+2:5 int ▽△ value=2
+2:3 glyph ≶
+2:1 glyph ⋔
+3:5 bracket ⦃
+3:7 glyph ⧖
+3:9 glyph ⧗ idx=0
+3:12 int △ value=1
+3:14 glyph ⊟
+3:16 name ᚠ
+3:18 glyph ⧗ idx=0
+3:21 int ▽△ value=2
+3:24 glyph ⊟
+3:26 name ᚠ
+3:28 glyph ⊞
+3:30 bracket ⦄
+4:1 glyph ⁼
+5:5 glyph ∅
+6:13 bracket ⦄
+6:11 bracket ⟨
+6:10 type ℤ base=ℤ
+6:8 glyph ⊸
+6:6 type ℤ base=ℤ
+6:5 bracket ⟩
+6:3 name ᚠ
+6:1 glyph ⸫
+8:23 bracket ⦃
+8:19 int ▽○△ value=8
+8:17 name ᚠ
+8:15 glyph ⎙
+8:13 bracket ⦄
+8:11 bracket ⟨
+8:10 glyph ⊸
+8:9 bracket ⟩
+8:7 name ᛟ
+8:5 glyph ⸫

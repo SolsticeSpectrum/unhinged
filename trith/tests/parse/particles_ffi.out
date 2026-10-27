@@ -1,0 +1,7 @@
+particle ᚋᚐ ℤ
+ffi ᚲ "close" ⟨ℤ ⊸ ℤ⟩
+fn ⌁ᚋᚐ ⟨ᚋᚐ ⊸⟩
+  call ᚲ
+  op ⌁
+ffi ᛈ "puts" ⟨⟗ʃ ⊸ ℤ⟩
+ffi ᛞ "read" ⟨ℤ ⟖ʃ ⊸ ⸮◌ℤ⟩

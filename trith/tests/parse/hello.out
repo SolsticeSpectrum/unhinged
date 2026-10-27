@@ -1,0 +1,3 @@
+fn ᛟ ⟨⊸⟩
+  lit string "hello, world\n"
+  op ⎙ [quantum]

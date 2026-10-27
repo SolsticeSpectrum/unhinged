@@ -1,0 +1,20 @@
+1:1 bracket ⦃
+1:3 bracket ⦄
+1:5 bracket ⟨
+1:6 type ℤ⁽ᵘ⁾ base=ℤ charge=u
+1:11 type ℝ⁽ᵘᵈ⁻¹⁾ base=ℝ charge=u·d^-1
+1:19 type ⸮◌ℤ prefixes=⸮,◌ base=ℤ
+1:23 type ψ₂ŧ prefixes=ψ₂ base=ŧ
+1:27 type ⟗ʃ prefixes=⟗ base=ʃ
+1:30 glyph ⟖
+1:31 bracket ⟦
+1:32 type 𝔹 base=𝔹
+1:33 bracket ⟧
+1:35 tname ᚋᚐ
+1:38 type ◌ᚋᚐ prefixes=◌ base=ᚋᚐ
+1:42 type ⁖ℝ⁽ᵗ²ˢ⁻³⁾ prefixes=⁖ base=ℝ charge=t^2·s^-3
+1:52 glyph ⊸
+1:54 glyph ◌
+1:55 bracket ⟩
+1:57 name ᚠ
+1:59 glyph ⸫

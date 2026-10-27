@@ -1,0 +1,72 @@
+⍝ Golden tests for trithc.
+⍝ Each <dir>/<name>.trh is run with the mode for its directory and the output
+⍝ is compared with <name>.out. BLESS=1 rewrites the .out files instead.
+
+⎕ → sys ¿
+sys❴"env"❵⌈⌉ → env ¿
+env "TRITHC" ⌈ ⌉ → trithc ¿
+trithc ∅ ≡ trithc "" ≡ ∨ ⤴ ↵ "build/trithc" → trithc ¿ ⌫ ¿
+env "BLESS" ⌈ ⌉ → blessStr ¿
+blessStr "1" ≡ → bless ¿
+
+"mkdir -p output/trith-tests" ⟪ syscall ⟫ → _ ¿
+
+【【"lex" "--tokens"】【"parse" "--ast"】【"errors" "--ast"】【"plough" "--plough"】】 → suites ¿
+0 → passed ¿
+0 → failed ¿
+0 → si ¿
+suites ⟪ len ⟫ → ns ¿
+si ns ≺ ⟲ ↵
+  suites si ⌈ ⌉ → suite ¿
+  suite 0 ⌈ ⌉ → dir ¿
+  suite 1 ⌈ ⌉ → flag ¿
+  "ls trith/tests/" dir "/*.trh 2>/dev/null" ⊞⊞ ⊞⊞ → lscmd ¿
+  lscmd ⟪ syscall ⟫ "\n" ⟪ split ⟫ → files ¿
+  0 → fi ¿
+  files ⟪ len ⟫ → nf ¿
+  fi nf ≺ ⟲ ↵
+    files fi ⌈ ⌉ → f ¿
+    f "" ≢ ⤴ ↵
+      f ⟪ len ⟫ → fl ¿
+      f 0 fl 4 ⊟ ⟪ substr ⟫ → base ¿
+      base ".out" ⊞⊞ → expPath ¿
+      trithc " " f " " flag " 2>&1" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → cmd ¿
+      cmd ⟪ syscall ⟫ → actual ¿
+      bless ⤴ ↵
+        expPath actual ⟪ write_file ⟫ → _ ¿
+        "BLESS " f ⊞⊞ ⊢ ¿
+      ⌫ ⤵ ↵
+        expPath ⟪ read_file ⟫ → expected ¿
+        actual expected ≡ ⤴ ↵
+          passed 1 ⊞ → passed ¿
+        ⌫ ⤵ ↵
+          failed 1 ⊞ → failed ¿
+          "FAIL " f ⊞⊞ ⊢ ¿
+          "output/trith-tests/actual.out" → actPath ¿
+          actPath actual ⟪ write_file ⟫ → _ ¿
+          "diff -u " expPath " " actPath ⊞⊞ ⊞⊞ ⊞⊞ → dcmd ¿
+          dcmd ⟪ syscall ⟫ ⊢ ¿
+        ⌫ ¿
+      ⌫ ¿
+      ⍝ ploughed output must round-trip: unplough then plough again gives the same text
+      dir "plough" ≡ bless ¬ ∧ ⤴ ↵
+        "output/trith-tests/disk.trh" → diskPath ¿
+        diskPath actual ⟪ write_file ⟫ → _ ¿
+        trithc " " diskPath " --unplough > output/trith-tests/logical.trh 2>&1" ⊞⊞ ⊞⊞ ⊞⊞ → c1 ¿
+        c1 ⟪ syscall ⟫ → _ ¿
+        trithc " output/trith-tests/logical.trh --plough 2>&1" ⊞⊞ → c2 ¿
+        c2 ⟪ syscall ⟫ → again ¿
+        again actual ≡ ⤴ ↵
+          passed 1 ⊞ → passed ¿
+        ⌫ ⤵ ↵
+          failed 1 ⊞ → failed ¿
+          "FAIL round trip " f ⊞⊞ ⊢ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+    fi 1 ⊞ → fi ¿
+  ⌫ ¿
+  si 1 ⊞ → si ¿
+⌫ ¿
+
+"trith tests: " passed ⍕ " passed, " failed ⍕ " failed" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊢ ¿

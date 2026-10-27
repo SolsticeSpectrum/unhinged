@@ -1,0 +1,88 @@
+"lexer.uh" ⟪ import ⟫ ¿
+"parser.uh" ⟪ import ⟫ ¿
+
+⍝ trithc: the Trith compiler (stage s1, written in UNHINGED)
+⍝ Milestone 1: lexer and parser. Code generation arrives in milestone 3.
+
+ƒ
+  path ⟪ len ⟫ → n ¿
+  path n 4 ⊟ 4 ⟪ substr ⟫ ".trh" ≡ path n 2 ⊟ 2 ⟪ substr ⟫ ".ŧ" ≡ ∨ ⇄ ¿
+↦ path ↦ trith_ext_ok ¿
+
+ƒ
+  input ⟪ trith_ext_ok ⟫ ¬ ⤴ ↵
+    input ": error: Trith sources end in .trh (or .ŧ)" ⊞⊞ ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  input ⟪ read_file ⟫ → src ¿
+  src "" ≡ ⤴ ↵
+    input ": error: cannot read file (or file is empty)" ⊞⊞ ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  src input mode "plough" ≡ ⟪ trith_lex_lines ⟫ → lx ¿
+  lx "err" ⌈ ⌉ ∅ ≢ ⤴ ↵
+    lx "err" ⌈ ⌉ ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  lx "tokens" ⌈ ⌉ → toks ¿
+  mode "plough" ≡ ⤴ ↵ lx "disk" ⟪ lx_plough ⟫ ⊢ ¿ 0 ⇄ ¿ ⌫ ¿
+  mode "unplough" ≡ ⤴ ↵ lx "logical" ⟪ lx_plough ⟫ ⊢ ¿ 0 ⇄ ¿ ⌫ ¿
+  mode "tokens" ≡ ⤴ ↵
+    0 → i ¿
+    toks ⟪ len ⟫ → n ¿
+    i n ≺ ⟲ ↵
+      toks i ⌈ ⌉ ⟪ lx_dump_token ⟫ ⊢ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    0 ⇄ ¿
+  ⌫ ¿
+  toks input ⟪ trith_parse ⟫ → ps ¿
+  ps "err" ⌈ ⌉ ∅ ≢ ⤴ ↵
+    ps "err" ⌈ ⌉ ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  mode "ast" ≡ ⤴ ↵
+    ps "items" ⌈ ⌉ ⟪ ps_dump ⟫ → lines ¿
+    0 → i ¿
+    lines ⟪ len ⟫ → n ¿
+    i n ≺ ⟲ ↵
+      lines i ⌈ ⌉ ⊢ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    0 ⇄ ¿
+  ⌫ ¿
+  input ": error: code generation is not implemented yet (use --tokens or --ast)" ⊞⊞ ⊢ ¿
+  1 ⇄ ¿
+↦ input ↦ output ↦ mode ↦ trithc_main ¿
+
+⟪ args ⟫ → argv ¿
+argv ⟪ len ⟫ → argc ¿
+"" → input ¿
+"" → output ¿
+"compile" → mode ¿
+1 → ai ¿
+⊥ → bad ¿
+ai argc ≺ ⟲ ↵
+  argv ai ⌈ ⌉ → a ¿
+  a "--tokens" ≡ ⤴ ↵ "tokens" → mode ¿
+  ⌫ ⤵ a "--ast" ≡ ⤴ ↵ "ast" → mode ¿
+  ⌫ ⤵ a "--plough" ≡ ⤴ ↵ "plough" → mode ¿
+  ⌫ ⤵ a "--unplough" ≡ ⤴ ↵ "unplough" → mode ¿
+  ⌫ ⤵ a "-o" ≡ ⤴ ↵
+    ai 1 ⊞ → ai ¿
+    ai argc ≺ ⤴ ↵ argv ai ⌈ ⌉ → output ¿ ⌫ ⤵ ↵ ⊤ → bad ¿ ⌫ ¿
+  ⌫ ⤵ input "" ≡ ⤴ ↵ a → input ¿
+  ⌫ ⤵ ↵ ⊤ → bad ¿
+  ⌫ ¿
+  ai 1 ⊞ → ai ¿
+⌫ ¿
+input "" ≡ bad ∨ ⤴ ↵
+  "usage: trithc <main.trh> [-o <output>] [--tokens | --ast | --plough | --unplough]" ⊢ ¿
+  "  --tokens    print the token stream (after the Boustrophedon Rule)" ⊢ ¿
+  "  --ast       print the parsed and tangled item tree" ⊢ ¿
+  "  --plough    rewrite a file written in logical order (every line left to right)" ⊢ ¿
+  "              into on-disk order, padding with breaths ⸱ to satisfy the Balance Law" ⊢ ¿
+  "  --unplough  rewrite an on-disk file into logical order for reading" ⊢ ¿
+⌫ ⤵ ↵
+  input output mode ⟪ trithc_main ⟫ → _ ¿
+⌫ ¿

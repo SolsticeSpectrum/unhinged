@@ -1,0 +1,719 @@
+"chars.uh" ⟪ import ⟫ ¿
+
+⍝ Trith lexer (spec §1, §2)
+⍝ Pipeline per file: split lines → scan each line in reading order
+⍝ (odd lines left to right, even lines right to left, mirrored brackets swapped)
+⍝ → classify chunks → Balance Law over all tokens → drop breaths.
+⍝ NFC: marks are canonicalised (sorted) per token; composition is not applied.
+
+⍝ ---- small helpers
+
+ƒ
+  【】 → out ¿
+  s ⟪ len ⟫ → n ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    out s i ⟪ char_at ⟫ ⟪ .append ⟫ → out ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ s ↦ lx_chars ¿
+
+ƒ
+  【】 → out ¿
+  xs ⟪ len ⟫ 1 ⊟ → i ¿
+  i 0 ≽ ⟲ ↵
+    out xs i ⌈ ⌉ ⟪ .append ⟫ → out ¿
+    i 1 ⊟ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ xs ↦ lx_rev ¿
+
+ƒ
+  s ⟪ len ⟫ → n ¿
+  0 → a ¿
+  a n ≺ ⟲ ↵
+    s a ⟪ char_at ⟫ ⟪ tc_space ⟫ ¬ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    a 1 ⊞ → a ¿
+  ⌫ ¿
+  n → b ¿
+  b a ≻ ⟲ ↵
+    s b 1 ⊟ ⟪ char_at ⟫ ⟪ tc_space ⟫ ¬ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    b 1 ⊟ → b ¿
+  ⌫ ¿
+  s a b a ⊟ ⟪ substr ⟫ ⇄ ¿
+↦ s ↦ lx_trim ¿
+
+⍝ Integer (stored as a double) to decimal text without exponent notation
+ƒ
+  n 0 ≡ ⤴ ↵ "0" ⇄ ¿ ⌫ ¿
+  "" → sign ¿
+  n 0 ≺ ⤴ ↵
+    "-" → sign ¿
+    0 n ⊟ → n ¿
+  ⌫ ¿
+  "" → s ¿
+  n 0 ≻ ⟲ ↵
+    n 10 ⊙ → d ¿
+    d ⍕ s ⊞⊞ → s ¿
+    n d ⊟ 10 ⊘ → n ¿
+  ⌫ ¿
+  sign s ⊞⊞ ⇄ ¿
+↦ n ↦ lx_num_str ¿
+
+ƒ
+  1 → r ¿
+  0 → i ¿
+  i e ≺ ⟲ ↵
+    r 3 ⊠ → r ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  r ⇄ ¿
+↦ e ↦ lx_pow3 ¿
+
+⍝ True when every character of s is in class cls (s must be non-empty)
+ƒ
+  s ⟪ len ⟫ → n ¿
+  n 0 ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    s i ⟪ char_at ⟫ → c ¿
+    ⊤ → ok ¿
+    cls "runic" ≡ ⤴ ↵ c ⟪ tc_runic ⟫ → ok ¿ ⌫ ¿
+    cls "ogham" ≡ ⤴ ↵ c ⟪ tc_ogham ⟫ → ok ¿ ⌫ ¿
+    cls "tdigit" ≡ ⤴ ↵ c ⟪ tc_trit_digit ⟫ ∅ ≢ → ok ¿ ⌫ ¿
+    cls "sup" ≡ ⤴ ↵ c ⟪ tc_sup_digit ⟫ ∅ ≢ → ok ¿ ⌫ ¿
+    ok ¬ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⊤ ⇄ ¿
+↦ s ↦ cls ↦ lx_all ¿
+
+⍝ Sort an array of strings (insertion sort; arrays are tiny)
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  xs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    xs i ⌈ ⌉ → x ¿
+    【】 → nxt ¿
+    ⊥ → placed ¿
+    0 → j ¿
+    out ⟪ len ⟫ → m ¿
+    j m ≺ ⟲ ↵
+      out j ⌈ ⌉ → y ¿
+      placed ¬ x y ≺ ∧ ⤴ ↵
+        nxt x ⟪ .append ⟫ → nxt ¿
+        ⊤ → placed ¿
+      ⌫ ¿
+      nxt y ⟪ .append ⟫ → nxt ¿
+      j 1 ⊞ → j ¿
+    ⌫ ¿
+    placed ¬ ⤴ ↵ nxt x ⟪ .append ⟫ → nxt ¿ ⌫ ¿
+    nxt → out ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ xs ↦ lx_sort ¿
+
+⍝ ---- errors and tokens
+
+ƒ
+  L "err" ⌈ ⌉ ∅ ≡ ⤴ ↵
+    L "path" ⌈ ⌉ ":" line ⍕ ":" col ⍕ ": error: " msg ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → e ¿
+    L "err" ← e ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ L ↦ line ↦ col ↦ msg ↦ lx_err ¿
+
+ƒ
+  ❴"kind": kind, "text": text, "line": line, "col": col❵ → t ¿
+  t "marks" ← 【】 ¿
+  t "idx" ← ∅ ¿
+  t "value" ← ∅ ¿
+  t ⇄ ¿
+↦ kind ↦ text ↦ line ↦ col ↦ lx_tok ¿
+
+⍝ ---- numerals (§2): balanced ternary, least-significant trit first
+
+ƒ
+  0 → v ¿
+  s ⟪ len ⟫ 1 ⊟ → i ¿
+  i 0 ≽ ⟲ ↵
+    v 3 ⊠ s i ⟪ char_at ⟫ ⟪ tc_trit_digit ⟫ ⊞ → v ¿
+    i 1 ⊟ → i ¿
+  ⌫ ¿
+  v ⇄ ¿
+↦ s ↦ lx_bt_value ¿
+
+ƒ
+  b "⁝" ⟪ split ⟫ → parts ¿
+  parts ⟪ len ⟫ 1 ≡ ⤴ ↵
+    b "tdigit" ⟪ lx_all ⟫ ¬ ⤴ ↵ L line col "malformed numeral: " b ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    "int" b line col ⟪ lx_tok ⟫ → t ¿
+    t "value" ← b ⟪ lx_bt_value ⟫ ⟪ lx_num_str ⟫ ¿
+    t ⇄ ¿
+  ⌫ ¿
+  parts 0 ⌈ ⌉ → ip ¿
+  parts 1 ⌈ ⌉ → fp ¿
+  parts ⟪ len ⟫ 2 ≢ ip "tdigit" ⟪ lx_all ⟫ ¬ ∨ fp "tdigit" ⟪ lx_all ⟫ ¬ ∨ ⤴ ↵
+    L line col "malformed real numeral: " b ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿
+  ⌫ ¿
+  ⍝ value = (I·3^k + Σ f_j·3^(k-j)) / 3^k
+  fp ⟪ len ⟫ → k ¿
+  ip ⟪ lx_bt_value ⟫ k ⟪ lx_pow3 ⟫ ⊠ → num ¿
+  0 → j ¿
+  j k ≺ ⟲ ↵
+    fp j ⟪ char_at ⟫ ⟪ tc_trit_digit ⟫ k j ⊟ 1 ⊟ ⟪ lx_pow3 ⟫ ⊠ num ⊞ → num ¿
+    j 1 ⊞ → j ¿
+  ⌫ ¿
+  k ⟪ lx_pow3 ⟫ → den ¿
+  num 3 ⊙ 0 ≡ den 1 ≻ ∧ ⟲ ↵
+    num 3 ⊘ → num ¿
+    den 3 ⊘ → den ¿
+  ⌫ ¿
+  "real" b line col ⟪ lx_tok ⟫ → t ¿
+  num ⟪ lx_num_str ⟫ → vs ¿
+  den 1 ≻ ⤴ ↵ vs "/" den ⟪ lx_num_str ⟫ ⊞⊞ ⊞⊞ → vs ¿ ⌫ ¿
+  t "value" ← vs ¿
+  t ⇄ ¿
+↦ L ↦ b ↦ line ↦ col ↦ lx_numeral ¿
+
+⍝ ---- charges (§3.2): ⁽ᵘᵈ⁻¹⁾ → "u·d^-1"
+
+ƒ
+  s ⟪ lx_chars ⟫ → cs ¿
+  cs ⟪ len ⟫ → n ¿
+  n 0 ≡ ⤴ ↵ L line col "empty charge" ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+  【】 → seen ¿
+  【】 → parts ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    cs i ⌈ ⌉ ⟪ tc_flavour ⟫ → f ¿
+    f ∅ ≡ ⤴ ↵ L line col "bad charge flavour: " cs i ⌈ ⌉ ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    f seen ∈ ⤴ ↵ L line col "flavour repeated in charge: " f ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    seen f ⟪ .append ⟫ → seen ¿
+    i 1 ⊞ → i ¿
+    1 → sgn ¿
+    i n ≺ ⤴ ↵
+      cs i ⌈ ⌉ "⁻" ≡ ⤴ ↵
+        0 1 ⊟ → sgn ¿
+        i 1 ⊞ → i ¿
+      ⌫ ¿
+    ⌫ ¿
+    ∅ → e ¿
+    ⊤ → more ¿
+    i n ≺ more ∧ ⟲ ↵
+      cs i ⌈ ⌉ ⟪ tc_sup_digit ⟫ → d ¿
+      d ∅ ≡ ⤴ ↵
+        ⊥ → more ¿
+      ⌫ ⤵ ↵
+        e ∅ ≡ ⤴ ↵ 0 → e ¿ ⌫ ¿
+        e 10 ⊠ d ⊞ → e ¿
+        i 1 ⊞ → i ¿
+      ⌫ ¿
+    ⌫ ¿
+    e ∅ ≡ ⤴ ↵ 1 → e ¿ ⌫ ¿
+    e 0 ≡ ⤴ ↵ L line col "zero exponent in charge" ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    e sgn ⊠ → e ¿
+    e 1 ≡ ⤴ ↵ parts f ⟪ .append ⟫ → parts ¿ ⌫ ⤵ ↵
+      parts f "^" e ⟪ lx_num_str ⟫ ⊞⊞ ⊞⊞ ⟪ .append ⟫ → parts ¿
+    ⌫ ¿
+  ⌫ ¿
+  parts "·" ⟪ join ⟫ ⇄ ¿
+↦ L ↦ s ↦ line ↦ col ↦ lx_charge ¿
+
+⍝ ---- types (§3): prefixes* base charge?
+⍝ Returns a token, or ∅ when b is not type-shaped (L err set if malformed).
+
+ƒ
+  b ⟪ lx_chars ⟫ → cs ¿
+  cs ⟪ len ⟫ → n ¿
+  "" → charge ¿
+  cs n 1 ⊟ ⌈ ⌉ "⁾" ≡ ⤴ ↵
+    ∅ → open ¿
+    0 → j ¿
+    j n ≺ ⟲ ↵
+      cs j ⌈ ⌉ "⁽" ≡ ⤴ ↵ j → open ¿ ⊗ ¿ ⌫ ¿
+      j 1 ⊞ → j ¿
+    ⌫ ¿
+    open ∅ ≡ ⤴ ↵ L line col "charge is missing ⁽" ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    L b open 1 ⊞ n open ⊟ 2 ⊟ ⟪ substr ⟫ line col ⟪ lx_charge ⟫ → charge ¿
+    L "err" ⌈ ⌉ ∅ ≢ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    open → n ¿
+    charge "" ≡ ⤴ ↵ L line col "empty charge" ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+  ⌫ ¿
+  【】 → prefixes ¿
+  0 → k ¿
+  ⊤ → more ¿
+  k n ≺ more ∧ ⟲ ↵
+    cs k ⌈ ⌉ → c ¿
+    c ⟪ tc_type_prefix ⟫ ⤴ ↵
+      prefixes c ⟪ .append ⟫ → prefixes ¿
+      k 1 ⊞ → k ¿
+    ⌫ ⤵ c "ψ" ≡ ⤴ ↵
+      k 1 ⊞ → k ¿
+      ∅ → bound ¿
+      "ψ" → braw ¿
+      ⊤ → dig ¿
+      k n ≺ dig ∧ ⟲ ↵
+        cs k ⌈ ⌉ ⟪ tc_sub_digit ⟫ → d ¿
+        d ∅ ≡ ⤴ ↵ ⊥ → dig ¿ ⌫ ⤵ ↵
+          bound ∅ ≡ ⤴ ↵ 0 → bound ¿ ⌫ ¿
+          bound 10 ⊠ d ⊞ → bound ¿
+          braw cs k ⌈ ⌉ ⊞⊞ → braw ¿
+          k 1 ⊞ → k ¿
+        ⌫ ¿
+      ⌫ ¿
+      bound ∅ ≡ ⤴ ↵ L line col "ψ needs a subscript bound, e.g. ψ₂" ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+      bound 0 ≡ ⤴ ↵ L line col "ψ₀ cannot hold anything" ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+      bound 27 ≻ ⤴ ↵ L line col "decoherence cap: ψ holds at most 27 alternatives (§8.3)" ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+      prefixes braw ⟪ .append ⟫ → prefixes ¿
+    ⌫ ⤵ ↵
+      ⊥ → more ¿
+    ⌫ ¿
+  ⌫ ¿
+  b k n k ⊟ ⟪ substr ⟫ → rest ¿
+  rest "" ≡ ⤴ ↵
+    charge "" ≢ ⤴ ↵ L line col "charge without a type: " b ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    b ⟪ len ⟫ 1 ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    "tprefix" b line col ⟪ lx_tok ⟫ → t ¿
+    t "prefixes" ← prefixes ¿
+    t ⇄ ¿
+  ⌫ ¿
+  rest ⟪ len ⟫ 1 ≡ rest ⟪ tc_base_type ⟫ ∧ rest "ogham" ⟪ lx_all ⟫ ∨ ⤴ ↵
+    "type" b line col ⟪ lx_tok ⟫ → t ¿
+    t "prefixes" ← prefixes ¿
+    t "base" ← rest ¿
+    t "charge" ← charge ¿
+    t ⇄ ¿
+  ⌫ ¿
+  prefixes ⟪ len ⟫ 0 ≻ charge "" ≢ ∨ ⤴ ↵
+    L line col "malformed type: " b ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ L ↦ b ↦ line ↦ col ↦ lx_type ¿
+
+⍝ ---- base classification of one chunk (marks already removed)
+
+ƒ
+  b ⟪ len ⟫ → n ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    b i ⟪ char_at ⟫ → c ¿
+    c ⟪ tc_ascii_letter ⟫ ⤴ ↵ L line col "ASCII letters are illegal outside strings: " b ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    c ⟪ tc_ascii_digit ⟫ ⤴ ↵ L line col "ASCII digits are illegal (numerals are ▽ ○ △): " b ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  b 0 ⟪ char_at ⟫ → c0 ¿
+  b 1 n 1 ⊟ ⟪ substr ⟫ → tail ¿
+
+  b "runic" ⟪ lx_all ⟫ ⤴ ↵ "name" b line col ⟪ lx_tok ⟫ ⇄ ¿ ⌫ ¿
+  b "ogham" ⟪ lx_all ⟫ ⤴ ↵ "tname" b line col ⟪ lx_tok ⟫ ⇄ ¿ ⌫ ¿
+  c0 "⌁" ≡ tail "ogham" ⟪ lx_all ⟫ ∧ ⤴ ↵ "anti" tail line col ⟪ lx_tok ⟫ ⇄ ¿ ⌫ ¿
+  c0 "⇜" ≡ tail "runic" ⟪ lx_all ⟫ ∧ ⤴ ↵ "inverse" tail line col ⟪ lx_tok ⟫ ⇄ ¿ ⌫ ¿
+
+  c0 ⟪ tc_trit_digit ⟫ ∅ ≢ ⤴ ↵ L b line col ⟪ lx_numeral ⟫ ⇄ ¿ ⌫ ¿
+  n 1 ≡ c0 ⟪ tc_trit ⟫ ∧ ⤴ ↵ "trit" b line col ⟪ lx_tok ⟫ ⇄ ¿ ⌫ ¿
+  b "⋔⇋" ≡ ⤴ ↵ "glyph" b line col ⟪ lx_tok ⟫ ⇄ ¿ ⌫ ¿
+
+  n 1 ≻ c0 ⟪ tc_indexed ⟫ ∧ ⤴ ↵
+    ∅ → idx ¿
+    tail "sup" ⟪ lx_all ⟫ ⤴ ↵
+      0 → idx ¿
+      0 → j ¿
+      j n 1 ⊟ ≺ ⟲ ↵
+        idx 10 ⊠ tail j ⟪ char_at ⟫ ⟪ tc_sup_digit ⟫ ⊞ → idx ¿
+        j 1 ⊞ → j ¿
+      ⌫ ¿
+    ⌫ ¿
+    c0 "⊙" ≡ tail "⁻" ≡ ∧ ⤴ ↵ "-" → idx ¿ ⌫ ¿
+    c0 "⊙" ≡ tail "⁺" ≡ ∧ ⤴ ↵ "+" → idx ¿ ⌫ ¿
+    idx ∅ ≡ ⤴ ↵ L line col "bad index on " c0 ⊞⊞ ": " ⊞⊞ tail ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    "glyph" c0 line col ⟪ lx_tok ⟫ → t ¿
+    t "idx" ← idx ¿
+    t ⇄ ¿
+  ⌫ ¿
+
+  L b line col ⟪ lx_type ⟫ → t ¿
+  L "err" ⌈ ⌉ ∅ ≢ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  t ∅ ≢ ⤴ ↵ t ⇄ ¿ ⌫ ¿
+
+  n 1 ≡ c0 ⟪ tc_glyph ⟫ ∧ ⤴ ↵ "glyph" b line col ⟪ lx_tok ⟫ ⇄ ¿ ⌫ ¿
+  L line col "unknown token: " b ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿
+↦ L ↦ b ↦ line ↦ col ↦ lx_base ¿
+
+⍝ ---- combining marks (§2.1)
+
+ƒ
+  t "kind" ⌈ ⌉ → k ¿
+  cls "case" ≡ ⤴ ↵
+    k "int" ≡ k "real" ≡ ∨ k "trit" ≡ ∨ k "string" ≡ ∨ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
+    k "glyph" ≡ t "text" ⌈ ⌉ "⧗" ≡ t "text" ⌈ ⌉ "⍿" ≡ ∨ ∧ ⇄ ¿
+  ⌫ ¿
+  cls "tense" ≡ ⤴ ↵ k "name" ≡ k "inverse" ≡ ∨ ⇄ ¿ ⌫ ¿
+  cls "agree" ≡ ⤴ ↵ k "glyph" ≡ t "text" ⌈ ⌉ "⸱" ≢ ∧ ⇄ ¿ ⌫ ¿
+  ⊥ ⇄ ¿
+↦ t ↦ cls ↦ lx_mark_ok ¿
+
+ƒ
+  t "marks" ⌈ ⌉ → names ¿
+  0 → ncase ¿
+  0 → ntense ¿
+  0 → i ¿
+  ms ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ms i ⌈ ⌉ ⟪ tc_mark_info ⟫ → info ¿
+    info ∅ ≡ ⤴ ↵ L line col "unregistered combining mark on " t "text" ⌈ ⌉ ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    info 0 ⌈ ⌉ → nm ¿
+    info 1 ⌈ ⌉ → cls ¿
+    nm names ∈ ⤴ ↵ L line col "duplicate mark " nm " on " t "text" ⌈ ⌉ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+    t cls ⟪ lx_mark_ok ⟫ ¬ ⤴ ↵
+      L line col "mark " nm " (" cls ") cannot attach to " t "kind" ⌈ ⌉ " " t "text" ⌈ ⌉ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿
+    ⌫ ¿
+    cls "case" ≡ ⤴ ↵ ncase 1 ⊞ → ncase ¿ ⌫ ¿
+    cls "tense" ≡ ⤴ ↵ ntense 1 ⊞ → ntense ¿ ⌫ ¿
+    names nm ⟪ .append ⟫ → names ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ncase 1 ≻ ⤴ ↵ L line col "more than one case mark on " t "text" ⌈ ⌉ ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+  ntense 1 ≻ ⤴ ↵ L line col "more than one tense mark on " t "text" ⌈ ⌉ ⊞⊞ ⟪ lx_err ⟫ ⇄ ¿ ⌫ ¿
+  t "marks" ← names ⟪ lx_sort ⟫ ¿
+  t ⇄ ¿
+↦ L ↦ t ↦ ms ↦ line ↦ col ↦ lx_apply_marks ¿
+
+⍝ ---- one chunk: physical characters → token
+⍝ Leading marks belong to the string physically to the left (S "lead").
+
+ƒ
+  S "chunk" ⌈ ⌉ → idxs ¿
+  S "chunk" ← 【】 ¿
+  idxs ⟪ len ⟫ 0 ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  S "odd" ⌈ ⌉ ¬ ⤴ ↵ idxs ⟪ lx_rev ⟫ → idxs ¿ ⌫ ¿
+  S "cs" ⌈ ⌉ → cs ¿
+  S "line" ⌈ ⌉ → line ¿
+  idxs 0 ⌈ ⌉ 1 ⊞ → col ¿
+  【】 → lead ¿
+  【】 → bs ¿
+  【】 → ms ¿
+  0 → i ¿
+  idxs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    cs idxs i ⌈ ⌉ ⌈ ⌉ → c ¿
+    c ⟪ tc_mark ⟫ ⤴ ↵
+      bs ⟪ len ⟫ 0 ≡ ⤴ ↵ lead c ⟪ .append ⟫ → lead ¿ ⌫ ⤵ ↵ ms c ⟪ .append ⟫ → ms ¿ ⌫ ¿
+    ⌫ ⤵ ↵
+      bs ⟪ len ⟫ 0 ≡ ⤴ ↵ idxs i ⌈ ⌉ 1 ⊞ → col ¿ ⌫ ¿
+      bs c ⟪ .append ⟫ → bs ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  lead ⟪ len ⟫ 0 ≻ ⤴ ↵
+    S "odd" ⌈ ⌉ S "adj" ⌈ ⌉ ∧ ⤴ ↵
+      S "out" ⌈ ⌉ → out ¿
+      out out ⟪ len ⟫ 1 ⊟ ⌈ ⌉ → st ¿
+      L st lead line col ⟪ lx_apply_marks ⟫ ¿
+      st "raw" ⌈ ⌉ lead "" ⟪ join ⟫ ⊞⊞ → sraw ¿
+      st "raw" ← sraw ¿
+    ⌫ ⤵ S "odd" ⌈ ⌉ ¬ reason "string" ≡ ∧ ⤴ ↵
+      S "carry" ← lead ¿
+    ⌫ ⤵ ↵
+      L line idxs 0 ⌈ ⌉ 1 ⊞ "combining mark with no base character" ⟪ lx_err ⟫ ⇄ ¿
+    ⌫ ¿
+  ⌫ ¿
+  bs ⟪ len ⟫ 0 ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  L bs "" ⟪ join ⟫ line col ⟪ lx_base ⟫ → t ¿
+  t ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  【】 → rawcs ¿
+  ⊥ → seen ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    cs idxs i ⌈ ⌉ ⌈ ⌉ → c ¿
+    c ⟪ tc_mark ⟫ ¬ ⤴ ↵ ⊤ → seen ¿ ⌫ ¿
+    seen ⤴ ↵ rawcs c ⟪ .append ⟫ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  t "raw" ← rawcs "" ⟪ join ⟫ ¿
+  ms ⟪ len ⟫ 0 ≻ ⤴ ↵
+    L t ms line col ⟪ lx_apply_marks ⟫ → t ¿
+    t ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  ⌫ ¿
+  S "out" ⌈ ⌉ t ⟪ .append ⟫ ¿
+  ∅ ⇄ ¿
+↦ L ↦ S ↦ reason ↦ lx_flush ¿
+
+⍝ String content (physical order) → logical value
+⍝ Stored reversed: reverse grapheme clusters (base + following marks); ↵ is a newline.
+ƒ
+  【】 → clusters ¿
+  0 → i ¿
+  content ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    content i ⌈ ⌉ → c ¿
+    c ⟪ tc_mark ⟫ clusters ⟪ len ⟫ 0 ≻ ∧ ⤴ ↵
+      clusters ⟪ len ⟫ 1 ⊟ → last ¿
+      clusters last ⌈ ⌉ c ⊞⊞ → merged ¿
+      clusters last ← merged ¿
+    ⌫ ⤵ ↵
+      clusters c ⟪ .append ⟫ → clusters ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  clusters ⟪ lx_rev ⟫ "" ⟪ join ⟫ → s ¿
+  s "↵" ⟪ split ⟫ "\n" ⟪ join ⟫ ⇄ ¿
+↦ content ↦ lx_decode_string ¿
+
+⍝ ---- one physical line
+
+ƒ
+  line ⟪ lx_chars ⟫ → cs ¿
+  cs ⟪ len ⟫ → n ¿
+  out ⟪ len ⟫ → first ¿
+  ∅ → comment ¿
+  0 → ws ¿
+  ws n ≺ ⟲ ↵
+    cs ws ⌈ ⌉ ⟪ tc_space ⟫ ¬ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    ws 1 ⊞ → ws ¿
+  ⌫ ¿
+  line 0 ws ⟪ substr ⟫ → indent ¿
+  lineNo 2 ⊙ 1 ≡ L "flat" ⌈ ⌉ ∨ → odd ¿
+  ❴"line": lineNo, "odd": odd, "adj": ⊥, "out": out❵ → S ¿
+  S "cs" ← cs ¿
+  S "chunk" ← 【】 ¿
+  S "carry" ← 【】 ¿
+  ⊥ → justStr ¿
+  0 → k ¿
+  k n ≺ ⟲ ↵
+    odd ⤴ ↵ k → p ¿ ⌫ ⤵ ↵ n 1 ⊟ k ⊟ → p ¿ ⌫ ¿
+    cs p ⌈ ⌉ → c ¿
+    c ⟪ tc_space ⟫ ⤴ ↵
+      L S "space" ⟪ lx_flush ⟫ ¿
+      ⊥ → justStr ¿
+      k 1 ⊞ → k ¿
+      ⊕ ¿
+    ⌫ ¿
+    c "⍝" ≡ ⤴ ↵
+      L S "comment" ⟪ lx_flush ⟫ ¿
+      odd ⤴ ↵ line p 1 ⊞ n p ⊟ 1 ⊟ ⟪ substr ⟫ → ctext ¿ ⌫ ⤵ ↵ line 0 p ⟪ substr ⟫ → ctext ¿ ⌫ ¿
+      ctext ⟪ lx_trim ⟫ → comment ¿
+      ⊗ ¿
+    ⌫ ¿
+    c ⟪ tc_bracket ⟫ ⤴ ↵
+      L S "bracket" ⟪ lx_flush ⟫ ¿
+      c → b ¿
+      odd ¬ ⤴ ↵ c ⟪ tc_mirror ⟫ → b ¿ ⌫ ¿
+      "bracket" b lineNo p 1 ⊞ ⟪ lx_tok ⟫ → bt ¿
+      bt "raw" ← b ¿
+      out bt ⟪ .append ⟫ ¿
+      ⊥ → justStr ¿
+      k 1 ⊞ → k ¿
+      ⊕ ¿
+    ⌫ ¿
+    c "»" ≡ ⤴ ↵
+      L S "string" ⟪ lx_flush ⟫ ¿
+      L "err" ⌈ ⌉ ∅ ≢ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      p → p0 ¿
+      k 1 ⊞ → k ¿
+      【】 → content ¿
+      ⊥ → closed ¿
+      k n ≺ ⟲ ↵
+        odd ⤴ ↵ k → p ¿ ⌫ ⤵ ↵ n 1 ⊟ k ⊟ → p ¿ ⌫ ¿
+        cs p ⌈ ⌉ → c ¿
+        c "«" ≡ ⤴ ↵ ⊤ → closed ¿ ⊗ ¿ ⌫ ¿
+        content c ⟪ .append ⟫ → content ¿
+        k 1 ⊞ → k ¿
+      ⌫ ¿
+      closed ¬ ⤴ ↵ L lineNo p0 1 ⊞ "unterminated string" ⟪ lx_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      odd ¬ ⤴ ↵ content ⟪ lx_rev ⟫ → content ¿ ⌫ ¿
+      p0 → left ¿
+      odd ¬ ⤴ ↵ p → left ¿ ⌫ ¿
+      "string" content ⟪ lx_decode_string ⟫ lineNo left 1 ⊞ ⟪ lx_tok ⟫ → t ¿
+      "»" content "" ⟪ join ⟫ "«" ⊞⊞ ⊞⊞ → sraw ¿
+      t "raw" ← sraw ¿
+      S "carry" ⌈ ⌉ → carry ¿
+      carry ⟪ len ⟫ 0 ≻ ⤴ ↵
+        L t carry lineNo left 1 ⊞ ⟪ lx_apply_marks ⟫ ¿
+        sraw carry "" ⟪ join ⟫ ⊞⊞ → sraw ¿
+        t "raw" ← sraw ¿
+        S "carry" ← 【】 ¿
+      ⌫ ¿
+      out t ⟪ .append ⟫ ¿
+      ⊤ → justStr ¿
+      k 1 ⊞ → k ¿
+      ⊕ ¿
+    ⌫ ¿
+    S "chunk" ⌈ ⌉ → ch ¿
+    ch ⟪ len ⟫ 0 ≡ ⤴ ↵ S "adj" ← justStr ¿ ⌫ ¿
+    ch p ⟪ .append ⟫ ¿
+    ⊥ → justStr ¿
+    k 1 ⊞ → k ¿
+  ⌫ ¿
+  L S "eol" ⟪ lx_flush ⟫ ¿
+  out ⟪ len ⟫ → last ¿
+  ❴"first": first, "last": last, "comment": comment, "indent": indent❵ → info ¿
+  L "lines" ⌈ ⌉ info ⟪ .append ⟫ ¿
+  S "carry" ⌈ ⌉ ⟪ len ⟫ 0 ≻ ⤴ ↵ L lineNo 1 "combining mark with no base character" ⟪ lx_err ⟫ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ L ↦ line ↦ lineNo ↦ out ↦ lx_line ¿
+
+⍝ ---- whole file → ❴tokens, count, err❵
+
+ƒ
+  ❴"err": ∅, "path": path, "flat": flat❵ → L ¿
+  L "lines" ← 【】 ¿
+  src "\n" ⟪ split ⟫ → lines ¿
+  【】 → all ¿
+  0 → li ¿
+  lines ⟪ len ⟫ → nl ¿
+  li nl ≺ ⟲ ↵
+    L lines li ⌈ ⌉ li 1 ⊞ all ⟪ lx_line ⟫ ¿
+    L "err" ⌈ ⌉ ∅ ≢ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    li 1 ⊞ → li ¿
+  ⌫ ¿
+  all ⟪ len ⟫ → count ¿
+  L "err" ⌈ ⌉ ∅ ≡ count 3 ⊙ 0 ≢ ∧ flat ¬ ∧ ⤴ ↵
+    path ": error: imbalance: " count ⍕ " tokens, " count 3 ⊙ ⍕ " too many for the Ternary Balance Law" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → e ¿
+    L "err" ← e ¿
+  ⌫ ¿
+  【】 → toks ¿
+  0 → i ¿
+  i count ≺ ⟲ ↵
+    all i ⌈ ⌉ → t ¿
+    t "kind" ⌈ ⌉ "glyph" ≡ t "text" ⌈ ⌉ "⸱" ≡ ∧ ¬ ⤴ ↵ toks t ⟪ .append ⟫ → toks ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  L "err" ⌈ ⌉ → err ¿
+  L "lines" ⌈ ⌉ → linfo ¿
+  ❴"tokens": toks, "count": count, "err": err, "all": all, "lines": linfo❵ ⇄ ¿
+↦ src ↦ path ↦ flat ↦ trith_lex_lines ¿
+
+ƒ
+  src path ⊥ ⟪ trith_lex_lines ⟫ ⇄ ¿
+↦ src ↦ path ↦ trith_lex ¿
+
+⍝ ---- token dump (one token per line) for golden tests
+
+ƒ
+  s "\\" ⟪ split ⟫ "\\\\" ⟪ join ⟫ → s ¿
+  s "\n" ⟪ split ⟫ "\\n" ⟪ join ⟫ → s ¿
+  s "\"" ⟪ split ⟫ "\\\"" ⟪ join ⟫ → s ¿
+  "\"" s ⊞⊞ "\"" ⊞⊞ ⇄ ¿
+↦ s ↦ lx_quote ¿
+
+ƒ
+  t "line" ⌈ ⌉ ⍕ ":" t "col" ⌈ ⌉ ⍕ " " t "kind" ⌈ ⌉ " " ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → s ¿
+  t "kind" ⌈ ⌉ "string" ≡ ⤴ ↵ s t "text" ⌈ ⌉ ⟪ lx_quote ⟫ ⊞⊞ → s ¿ ⌫ ⤵ ↵ s t "text" ⌈ ⌉ ⊞⊞ → s ¿ ⌫ ¿
+  t "idx" ⌈ ⌉ ∅ ≢ ⤴ ↵ s " idx=" t "idx" ⌈ ⌉ ⍕ ⊞⊞ ⊞⊞ → s ¿ ⌫ ¿
+  t "value" ⌈ ⌉ ∅ ≢ ⤴ ↵ s " value=" t "value" ⌈ ⌉ ⊞⊞ ⊞⊞ → s ¿ ⌫ ¿
+  t "kind" ⌈ ⌉ "type" ≡ t "kind" ⌈ ⌉ "tprefix" ≡ ∨ ⤴ ↵
+    t "prefixes" ⌈ ⌉ ⟪ len ⟫ 0 ≻ ⤴ ↵ s " prefixes=" t "prefixes" ⌈ ⌉ "," ⟪ join ⟫ ⊞⊞ ⊞⊞ → s ¿ ⌫ ¿
+  ⌫ ¿
+  t "kind" ⌈ ⌉ "type" ≡ ⤴ ↵
+    s " base=" t "base" ⌈ ⌉ ⊞⊞ ⊞⊞ → s ¿
+    t "charge" ⌈ ⌉ "" ≢ ⤴ ↵ s " charge=" t "charge" ⌈ ⌉ ⊞⊞ ⊞⊞ → s ¿ ⌫ ¿
+  ⌫ ¿
+  t "marks" ⌈ ⌉ ⟪ len ⟫ 0 ≻ ⤴ ↵ s " marks=" t "marks" ⌈ ⌉ "," ⟪ join ⟫ ⊞⊞ ⊞⊞ → s ¿ ⌫ ¿
+  s ⇄ ¿
+↦ t ↦ lx_dump_token ¿
+
+⍝ ---- plough: re-emit a file with odd lines left to right and even lines
+⍝ right to left (target "disk"), or every line left to right ("logical").
+
+ƒ
+  t "kind" ⌈ ⌉ "bracket" ≡ ⤴ ↵ t "raw" ⌈ ⌉ ⟪ tc_mirror ⟫ ⇄ ¿ ⌫ ¿
+  t "kind" ⌈ ⌉ "string" ≡ ⤴ ↵
+    t "raw" ⌈ ⌉ → r ¿
+    r ⟪ len ⟫ → n ¿
+    r "«" ⟪ split ⟫ → parts ¿
+    parts ⟪ len ⟫ 1 ⊟ → li ¿
+    parts li ⌈ ⌉ → marks ¿
+    parts 0 li ⟪ lx_slice ⟫ "«" ⟪ join ⟫ → body ¿
+    body 1 body ⟪ len ⟫ 1 ⊟ ⟪ substr ⟫ → content ¿
+    "«" content "»" marks ⊞⊞ ⊞⊞ ⊞⊞ ⇄ ¿
+  ⌫ ¿
+  t "raw" ⌈ ⌉ ⇄ ¿
+↦ t ↦ lx_raw_mirrored ¿
+
+ƒ
+  【】 → out ¿
+  a → i ¿
+  i b ≺ ⟲ ↵
+    out xs i ⌈ ⌉ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ xs ↦ a ↦ b ↦ lx_slice ¿
+
+ƒ
+  lx "all" ⌈ ⌉ → all ¿
+  lx "lines" ⌈ ⌉ → lines ¿
+  ⍝ pad with breaths on the last line that has tokens
+  all ⟪ len ⟫ 3 ⊙ → r ¿
+  3 r ⊟ 3 ⊙ → pad ¿
+  ∅ → padLine ¿
+  pad 0 ≻ ⤴ ↵
+    lines ⟪ len ⟫ 1 ⊟ → j ¿
+    j 0 ≽ ⟲ ↵
+      lines j ⌈ ⌉ → info ¿
+      info "last" ⌈ ⌉ info "first" ⌈ ⌉ ≻ ⤴ ↵ j → padLine ¿ ⊗ ¿ ⌫ ¿
+      j 1 ⊟ → j ¿
+    ⌫ ¿
+    padLine ∅ ≡ ⤴ ↵ 0 → padLine ¿ ⌫ ¿
+  ⌫ ¿
+  【】 → outLines ¿
+  0 → li ¿
+  lines ⟪ len ⟫ → nl ¿
+  li nl ≺ ⟲ ↵
+    lines li ⌈ ⌉ → info ¿
+    【】 → raws ¿
+    info "first" ⌈ ⌉ → i ¿
+    i info "last" ⌈ ⌉ ≺ ⟲ ↵
+      raws all i ⌈ ⌉ ⟪ .append ⟫ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    li padLine ≡ ⤴ ↵
+      0 → q ¿
+      q pad ≺ ⟲ ↵
+        "glyph" "⸱" 0 0 ⟪ lx_tok ⟫ → bt ¿
+        bt "raw" ← "⸱" ¿
+        raws bt ⟪ .append ⟫ ¿
+        q 1 ⊞ → q ¿
+      ⌫ ¿
+    ⌫ ¿
+    li 1 ⊞ 2 ⊙ 0 ≡ target "disk" ≡ ∧ → even ¿
+    【】 → words ¿
+    raws ⟪ len ⟫ → m ¿
+    even ⤴ ↵
+      m 1 ⊟ → i ¿
+      i 0 ≽ ⟲ ↵
+        words raws i ⌈ ⌉ ⟪ lx_raw_mirrored ⟫ ⟪ .append ⟫ ¿
+        i 1 ⊟ → i ¿
+      ⌫ ¿
+    ⌫ ⤵ ↵
+      0 → i ¿
+      i m ≺ ⟲ ↵
+        words raws i ⌈ ⌉ "raw" ⌈ ⌉ ⟪ .append ⟫ ¿
+        i 1 ⊞ → i ¿
+      ⌫ ¿
+    ⌫ ¿
+    words " " ⟪ join ⟫ → body ¿
+    info "comment" ⌈ ⌉ → c ¿
+    c ∅ ≢ ⤴ ↵
+      even ⤴ ↵
+        body "" ≡ ⤴ ↵ c " ⍝" ⊞⊞ → body ¿ ⌫ ⤵ ↵ c " ⍝ " body ⊞⊞ ⊞⊞ → body ¿ ⌫ ¿
+      ⌫ ⤵ ↵
+        "⍝" → cm ¿
+        c "" ≢ ⤴ ↵ "⍝ " c ⊞⊞ → cm ¿ ⌫ ¿
+        body "" ≡ ⤴ ↵ cm → body ¿ ⌫ ⤵ ↵ body " " cm ⊞⊞ ⊞⊞ → body ¿ ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+    body "" ≢ ⤴ ↵ info "indent" ⌈ ⌉ body ⊞⊞ → body ¿ ⌫ ¿
+    outLines body ⟪ .append ⟫ ¿
+    li 1 ⊞ → li ¿
+  ⌫ ¿
+  outLines ⟪ len ⟫ → nl ¿
+  nl 0 ≻ ⤴ ↵
+    outLines nl 1 ⊟ ⌈ ⌉ "" ≡ ⤴ ↵ outLines 0 nl 1 ⊟ ⟪ lx_slice ⟫ → outLines ¿ ⌫ ¿
+  ⌫ ¿
+  outLines "\n" ⟪ join ⟫ ⇄ ¿
+↦ lx ↦ target ↦ lx_plough ¿

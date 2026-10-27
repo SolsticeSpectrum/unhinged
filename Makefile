@@ -2,7 +2,9 @@ UNHINGEDC_BOOT := build/bootstrap
 UNHINGEDC_STAGE1 := build/stage1
 UNHINGEDC := build/unhingedc
 TEST_BIN := build/tests
-.PHONY: build test clean
+TRITHC := build/trithc
+TRITH_TESTS := build/trith-tests
+.PHONY: build test clean trith trith-test
 
 build:
 	@mkdir -p build
@@ -11,9 +13,19 @@ build:
 	$(UNHINGEDC_BOOT) compiler/src/main.uh -o $(UNHINGEDC_STAGE1)
 	$(UNHINGEDC_STAGE1) compiler/src/main.uh $(UNHINGEDC)
 
-test: build
+test: build trith-test
 	UNHINGEDC=$(UNHINGEDC) $(UNHINGEDC) tests/tests.uh $(TEST_BIN)
 	$(TEST_BIN)
+
+# Trith (v2): trithc is written in UNHINGED and compiled by the v1 compiler (spec §17, stage s1)
+trith: build
+	$(UNHINGEDC) trith/src/main.uh $(TRITHC)
+
+trith-test: trith
+	@mkdir -p output
+	$(UNHINGEDC) trith/tests/run.uh $(TRITH_TESTS)
+	TRITHC=$(TRITHC) $(TRITH_TESTS) | tee output/trith-tests.log
+	@! grep -q '^FAIL' output/trith-tests.log
 
 clean:
 	rm -rf build output bootstrap/target

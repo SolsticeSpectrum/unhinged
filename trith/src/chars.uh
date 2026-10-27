@@ -1,0 +1,133 @@
+⍝ Character classes for the Trith lexer (spec §1, §2, §18)
+
+ƒ
+  c " " ≡ c "\t" ≡ ∨ c "\r" ≡ ∨ c " " ≡ ∨ ⇄ ¿
+↦ c ↦ tc_space ¿
+
+⍝ Combining diacritical marks U+0300–U+036F
+ƒ
+  c "̀" ≽ c "ͯ" ≼ ∧ ⇄ ¿
+↦ c ↦ tc_mark ¿
+
+⍝ Runic letters U+16A0–U+16F8: function names
+ƒ
+  c "ᚠ" ≽ c "ᛸ" ≼ ∧ ⇄ ¿
+↦ c ↦ tc_runic ¿
+
+⍝ Ogham letters U+1681–U+169A: type names
+ƒ
+  c "ᚁ" ≽ c "ᚚ" ≼ ∧ ⇄ ¿
+↦ c ↦ tc_ogham ¿
+
+ƒ
+  c "a" ≽ c "z" ≼ ∧ c "A" ≽ c "Z" ≼ ∧ ∨ ⇄ ¿
+↦ c ↦ tc_ascii_letter ¿
+
+ƒ
+  c "0" ≽ c "9" ≼ ∧ ⇄ ¿
+↦ c ↦ tc_ascii_digit ¿
+
+⍝ Self-delimiting brackets
+ƒ
+  c "⦃" ≡ c "⦄" ≡ ∨ c "⟨" ≡ ∨ c "⟩" ≡ ∨ c "⟦" ≡ ∨ c "⟧" ≡ ∨ ⇄ ¿
+↦ c ↦ tc_bracket ¿
+
+⍝ Mirror image used on even lines (§1.1)
+ƒ
+  c "⦃" ≡ ⤴ ↵ "⦄" ⇄ ¿ ⌫ ¿
+  c "⦄" ≡ ⤴ ↵ "⦃" ⇄ ¿ ⌫ ¿
+  c "⟨" ≡ ⤴ ↵ "⟩" ⇄ ¿ ⌫ ¿
+  c "⟩" ≡ ⤴ ↵ "⟨" ⇄ ¿ ⌫ ¿
+  c "⟦" ≡ ⤴ ↵ "⟧" ⇄ ¿ ⌫ ¿
+  c "⟧" ≡ ⤴ ↵ "⟦" ⇄ ¿ ⌫ ¿
+  c ⇄ ¿
+↦ c ↦ tc_mirror ¿
+
+⍝ Balanced-ternary digit value, or ∅
+ƒ
+  c "▽" ≡ ⤴ ↵ 0 1 ⊟ ⇄ ¿ ⌫ ¿
+  c "○" ≡ ⤴ ↵ 0 ⇄ ¿ ⌫ ¿
+  c "△" ≡ ⤴ ↵ 1 ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ c ↦ tc_trit_digit ¿
+
+ƒ
+  c "⊖" ≡ c "⦶" ≡ ∨ c "⊕" ≡ ∨ ⇄ ¿
+↦ c ↦ tc_trit ¿
+
+⍝ Superscript decimal digit value, or ∅
+ƒ
+  c "⁰" ≡ ⤴ ↵ 0 ⇄ ¿ ⌫ ¿
+  c "¹" ≡ ⤴ ↵ 1 ⇄ ¿ ⌫ ¿
+  c "²" ≡ ⤴ ↵ 2 ⇄ ¿ ⌫ ¿
+  c "³" ≡ ⤴ ↵ 3 ⇄ ¿ ⌫ ¿
+  c "⁴" ≡ ⤴ ↵ 4 ⇄ ¿ ⌫ ¿
+  c "⁵" ≡ ⤴ ↵ 5 ⇄ ¿ ⌫ ¿
+  c "⁶" ≡ ⤴ ↵ 6 ⇄ ¿ ⌫ ¿
+  c "⁷" ≡ ⤴ ↵ 7 ⇄ ¿ ⌫ ¿
+  c "⁸" ≡ ⤴ ↵ 8 ⇄ ¿ ⌫ ¿
+  c "⁹" ≡ ⤴ ↵ 9 ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ c ↦ tc_sup_digit ¿
+
+⍝ Subscript decimal digit value, or ∅
+ƒ
+  c "₀" ≡ ⤴ ↵ 0 ⇄ ¿ ⌫ ¿
+  c "₁" ≡ ⤴ ↵ 1 ⇄ ¿ ⌫ ¿
+  c "₂" ≡ ⤴ ↵ 2 ⇄ ¿ ⌫ ¿
+  c "₃" ≡ ⤴ ↵ 3 ⇄ ¿ ⌫ ¿
+  c "₄" ≡ ⤴ ↵ 4 ⇄ ¿ ⌫ ¿
+  c "₅" ≡ ⤴ ↵ 5 ⇄ ¿ ⌫ ¿
+  c "₆" ≡ ⤴ ↵ 6 ⇄ ¿ ⌫ ¿
+  c "₇" ≡ ⤴ ↵ 7 ⇄ ¿ ⌫ ¿
+  c "₈" ≡ ⤴ ↵ 8 ⇄ ¿ ⌫ ¿
+  c "₉" ≡ ⤴ ↵ 9 ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ c ↦ tc_sub_digit ¿
+
+⍝ Charge flavours (§3.2)
+ƒ
+  c "ᵘ" ≡ ⤴ ↵ "u" ⇄ ¿ ⌫ ¿
+  c "ᵈ" ≡ ⤴ ↵ "d" ⇄ ¿ ⌫ ¿
+  c "ˢ" ≡ ⤴ ↵ "s" ⇄ ¿ ⌫ ¿
+  c "ᶜ" ≡ ⤴ ↵ "c" ⇄ ¿ ⌫ ¿
+  c "ᵇ" ≡ ⤴ ↵ "b" ⇄ ¿ ⌫ ¿
+  c "ᵗ" ≡ ⤴ ↵ "t" ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ c ↦ tc_flavour ¿
+
+⍝ Builtin base types (§3)
+ƒ
+  c "ŧ" ≡ c "ℤ" ≡ ∨ c "ℝ" ≡ ∨ c "𝔹" ≡ ∨ c "ʃ" ≡ ∨ ⇄ ¿
+↦ c ↦ tc_base_type ¿
+
+⍝ Type prefixes that attach to a type: ◌ ⟗ ⟖ ⸮ ⁖ (ψ is handled separately)
+ƒ
+  c "◌" ≡ c "⟗" ≡ ∨ c "⟖" ≡ ∨ c "⸮" ≡ ∨ c "⁖" ≡ ∨ ⇄ ¿
+↦ c ↦ tc_type_prefix ¿
+
+⍝ Glyphs that may carry a superscript index
+ƒ
+  c "⧗" ≡ c "⍿" ≡ ∨ c "⍤" ≡ ∨ c "⊙" ≡ ∨ ⇄ ¿
+↦ c ↦ tc_indexed ¿
+
+⍝ Operator and structural glyphs (§18), single code point
+ƒ
+  "⧖⧗⍿⌁⊞⊟⊠⊘⊜⊝≶⋏⋎⋒⋓⩡≪≫⚇⋔⁼∅⥀↯⁇⊨⫴⊛⊙⟜⟗⟖⌖⍈⍴⍆⇋⇜⚛⍤⎔⎙⸫⸾⸱⊸◌⸮⁖" → all ¿
+  c "" ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  all c ⟪ .indexOf ⟫ 0 ≽ ⇄ ¿
+↦ c ↦ tc_glyph ¿
+
+⍝ Combining-mark registry (§2.1): mark → [name, class]
+⍝ class: case (value tokens), tense (calls), agree (operators)
+ƒ
+  m "́" ≡ ⤴ ↵ 【"α" "case"】 ⇄ ¿ ⌫ ¿
+  m "̀" ≡ ⤴ ↵ 【"β" "case"】 ⇄ ¿ ⌫ ¿
+  m "̂" ≡ ⤴ ↵ 【"γ" "case"】 ⇄ ¿ ⌫ ¿
+  m "̈" ≡ ⤴ ↵ 【"past" "tense"】 ⇄ ¿ ⌫ ¿
+  m "̃" ≡ ⤴ ↵ 【"future" "tense"】 ⇄ ¿ ⌫ ¿
+  m "̵" ≡ ⤴ ↵ 【"quantum" "agree"】 ⇄ ¿ ⌫ ¿
+  m "̰" ≡ ⤴ ↵ 【"superposed" "agree"】 ⇄ ¿ ⌫ ¿
+  m "̱" ≡ ⤴ ↵ 【"borrowed" "agree"】 ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ m ↦ tc_mark_info ¿

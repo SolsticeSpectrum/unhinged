@@ -1,0 +1,1 @@
+trith/tests/errors/type_in_body.trh:1:3: error: types are only written in signatures, FFI bindings and particle declarations (§3)

@@ -1,0 +1,11 @@
+fn ᚹ ⟨ℤ ℤ ⊸ ℤ⟩ fragments=▽,○,△
+  op ⧖
+  op ⧖
+  op ⧗ idx=0
+  op ⧗ idx=1
+  op ⊞
+fn ᛟ ⟨⊸⟩
+  lit int △ = 1
+  lit int ▽△ = 2
+  call ᚹ
+  op ⎙

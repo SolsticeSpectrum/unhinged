@@ -64,6 +64,27 @@ Stop MailHog:
 python tests/servers/mailhog_stop.py
 ```
 
+## Trith (v2, in progress)
+
+Trith is the successor language; the spec is [`docs/TRITH.md`](docs/TRITH.md).
+Its first compiler, `trithc` (stage s1), is written in UNHINGED and built by `build/unhingedc`.
+
+Milestone 1 (lexer and parser) is done. Code generation is not implemented yet.
+
+```bash
+make trith          # builds build/trithc
+make trith-test     # golden tests in trith/tests/ (also run by make test)
+
+./build/trithc file.trh --tokens     # token stream after the Boustrophedon Rule
+./build/trithc file.trh --ast        # parsed and tangled item tree
+./build/trithc draft.trh --plough    # logical order (all lines left to right) → on-disk order, padded with breaths
+./build/trithc file.trh --unplough   # on-disk order → logical order, for reading
+```
+
+Writing on-disk Trith by hand is error-prone (even lines run right to left, and the token count must divide by 3). Write the logical order and run `--plough`.
+
+Golden tests: `trith/tests/<suite>/<name>.trh` is compared with `<name>.out`. To regenerate the `.out` files after an intended change, run `BLESS=1 TRITHC=build/trithc build/trith-tests` and review the diff.
+
 ## Layout
 
 - `bootstrap/` Rust bootstrap compiler.
@@ -71,6 +92,8 @@ python tests/servers/mailhog_stop.py
 - `runtime/` LLVM IR runtime.
 - `tests/` Embedded test runner and helpers.
 - `examples/` Example programs (compile outputs into `output/`).
+- `docs/TRITH.md` Trith (v2) language spec.
+- `trith/` Trith compiler (s1, written in UNHINGED) and its golden tests.
 
 ## Examples
 

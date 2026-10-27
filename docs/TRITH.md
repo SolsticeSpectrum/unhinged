@@ -628,10 +628,10 @@ int64_t fib(int64_t n){ return n<2 ? n : fib(n-1)+fib(n-2); }
 ### 15.4 Past tense: fib computed at compile time
 
 ```
-⦃ ▽○△ ᚠ̈ ⎙ ⦄ ⟨⊸⟩ ᛟ ⸫
+⦃ ▽○△ ᚠ̈ ⎙ ⦄ ⟨⊸⟩ ᛟ ⸫ ⸱ ⸱
 ```
 
-The binary contains only `print(21)`.
+The binary contains only `print(21)`. The line has 10 tokens, so two breaths bring it to 12. (This snippet assumes ᚠ from §15.2 is in the same module.)
 
 ### 15.5 Superposition, interference and retrocausality
 
@@ -671,11 +671,25 @@ How it works:
 - The shape of the signature calls ᚹ, because ᚹ is the only function with that shape.
 - The result is printed: 10.
 - `ᛒ̃` is a future-tense call to some goodbye function, which runs at the end of the block.
-- Remember that the Boustrophedon Rule applies to the real file.
+- This listing is in **logical order**. Written to disk as is, line 4 (an even line) would be read right to left, so its comment would hide the code after `⍝`. `trithc --plough` produces the real file and adds the one breath it needs (50 tokens → 51); see `trith/tests/plough/everything.out`.
 
 ---
 
 ## 16. Open Questions
+
+### 16.1 Decisions taken by the s1 lexer and parser (milestone 1)
+
+These were ambiguous in draft 1. The s1 compiler implements them as follows; change them here first if they are wrong.
+
+- **What a token is.** A token is a whitespace-delimited chunk. The brackets `⦃ ⦄ ⟨ ⟩ ⟦ ⟧` and string literals are self-delimiting. Everything else written without spaces is one token, so `⸮◌ℤ`, `ℤ⁽ᵘᵈ⁻¹⁾`, `⧗⁰`, `⊙̰⁰`, `⌁ᚋᚐ` and `⋔⇋` are one token each. A type prefix written alone (`◌` before `⟦`, or a bare `◌` output) is its own token.
+- **Strings on even lines.** §1.1 mirrors `»↔«`, so on an even line a string is written `«…»`. In reading order the opener is always `»`. The content is never reversed by the line rule; it is only stored reversed (§2). Reversal is by grapheme cluster, so a combining mark stays on its base character.
+- **Comments on even lines** cover everything to the left of the `⍝`, so a full-line comment on an even line is written `text ⍝`.
+- **Marks** may appear anywhere after the first base character of a token and apply to the whole token. Marks written directly after a string's last delimiter belong to the string. Case marks attach to literals, `⧗ⁿ` and `⍿ⁿ`; tense marks attach to calls; agreement marks attach to operator glyphs. A token takes at most one case mark and one tense mark. Unknown combining marks are an error.
+- **NFC.** s1 canonicalises marks by sorting them per token, which is all NFC changes for code tokens. Full NFC composition inside strings is not applied yet.
+- **Superscript indices** are decimal (open question below still stands). `⊙⁻` and `⊙⁺` take `⁻`/`⁺` as their index.
+- **Fragments.** A definition without `⸾` is fragment `○`. It may omit the signature when another fragment of the same function carries it. Two definitions without `⸾` for the same name are "defined twice".
+- **Numerals** are exact up to 2⁵³ in s1, because s1 runs on UNHINGED doubles.
+- **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
 - Mutable arrays inside `⥀`: keep threading a `⟖` through the loop stack, or allow region-scoped exclusive moments?
 - Should the ψ cap be lower than 27 for quantum alternatives, to bound the drop logic?
@@ -698,7 +712,7 @@ How it works:
 
 Milestones:
 
-1. Lexer and parser for Trith, written in UNHINGED. Golden tests cover the Boustrophedon Rule, the Balance Law, the mark registry, and fragments.
+1. Lexer and parser for Trith, written in UNHINGED. Golden tests cover the Boustrophedon Rule, the Balance Law, the mark registry, and fragments. **Done:** `trith/src/`, tests in `trith/tests/`, `make trith-test`.
 2. Check pass: effects, linearity, agreement.
 3. Stack-to-SSA and LLVM emission for ℤ, ŧ, `⋔`, `⥀`, functions and inside-out scope. **Benchmark gate here.**
 4. ◌, arrays, strings, FFI, particles, evidentials, charges.

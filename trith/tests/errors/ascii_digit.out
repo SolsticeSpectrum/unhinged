@@ -1,0 +1,1 @@
+trith/tests/errors/ascii_digit.trh:1:3: error: ASCII digits are illegal (numerals are ▽ ○ △): 42

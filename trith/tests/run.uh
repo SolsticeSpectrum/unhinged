@@ -11,7 +11,7 @@ blessStr "1" ≡ → bless ¿
 
 "mkdir -p output/trith-tests" ⟪ syscall ⟫ → _ ¿
 
-【【"lex" "--tokens"】【"parse" "--ast"】【"errors" "--ast"】【"plough" "--plough"】【"check" "--check"】【"check_errors" "--check"】】 → suites ¿
+【【"lex" "--tokens"】【"parse" "--ast"】【"errors" "--ast"】【"plough" "--plough"】【"check" "--check"】【"check_errors" "--check"】【"run" "RUN"】】 → suites ¿
 0 → passed ¿
 0 → failed ¿
 0 → si ¿
@@ -31,6 +31,11 @@ si ns ≺ ⟲ ↵
       f 0 fl 4 ⊟ ⟪ substr ⟫ → base ¿
       base ".out" ⊞⊞ → expPath ¿
       trithc " " f " " flag " 2>&1" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → cmd ¿
+      ⍝ run suite: compile, run, and record the exit status (trithc cannot set its own)
+      flag "RUN" ≡ ⤴ ↵
+        "output/trith-tests/prog" → prog ¿
+        【"rm -f " prog "; " trithc " " f " -o " prog " 2>&1 && " prog " 2>&1; echo \"exit=$?\""】 "" ⟪ join ⟫ → cmd ¿
+      ⌫ ¿
       cmd ⟪ syscall ⟫ → actual ¿
       bless ⤴ ↵
         expPath actual ⟪ write_file ⟫ → _ ¿

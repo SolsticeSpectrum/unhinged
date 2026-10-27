@@ -1,0 +1,1092 @@
+⍝ Trith code generation (spec §13, milestone 3): stack-to-SSA and LLVM IR.
+⍝ Runs only on checked programs. The virtual stack holds SSA names, never
+⍝ values: a b ⊞ emits one add. Joins (⋔, ⁇, ⥀) become phi nodes, so LLVM sees
+⍝ the same IR clang emits for the equivalent C.
+⍝ Stack entries: ❴ty, v, ok, role❵; for ◌T, v is the T and ok the i1 flag.
+
+⍝ ---- IR text helpers
+
+ƒ
+  xs "" ⟪ join ⟫ ⇄ ¿
+↦ xs ↦ em_cat ¿
+
+ƒ
+  E "lines" ⌈ ⌉ "  " line ⊞⊞ ⟪ .append ⟫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ line ↦ em_emit ¿
+
+ƒ
+  E "lines" ⌈ ⌉ 【lbl ":"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+  E "cur" ← lbl ¿
+  ∅ ⇄ ¿
+↦ E ↦ lbl ↦ em_start ¿
+
+ƒ
+  E "tmp" ⌈ ⌉ 1 ⊞ → n ¿
+  E "tmp" ← n ¿
+  "%t" n ⍕ ⊞⊞ ⇄ ¿
+↦ E ↦ em_tmp ¿
+
+ƒ
+  E "lbl" ⌈ ⌉ 1 ⊞ → n ¿
+  E "lbl" ← n ¿
+  "L" n ⍕ ⊞⊞ ⇄ ¿
+↦ E ↦ em_label ¿
+
+⍝ %t = <rhs>; returns %t
+ƒ
+  E ⟪ em_tmp ⟫ → t ¿
+  E 【t " = " rhs】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+  t ⇄ ¿
+↦ E ↦ rhs ↦ em_def ¿
+
+ƒ
+  E "err" ⌈ ⌉ ∅ ≡ ⤴ ↵
+    tok ∅ ≡ ⤴ ↵
+      E "path" ⌈ ⌉ → pth ¿
+      【pth ": error: " msg】 → parts ¿
+    ⌫ ⤵ ↵
+      tok "line" ⌈ ⌉ ⍕ → ln ¿
+      tok "col" ⌈ ⌉ ⍕ → cl ¿
+      E "path" ⌈ ⌉ → pth ¿
+      【pth ":" ln ":" cl ": error: " msg】 → parts ¿
+    ⌫ ¿
+    E "err" ← parts ⟪ em_cat ⟫ ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ tok ↦ msg ↦ em_err ¿
+
+ƒ
+  E "err" ⌈ ⌉ ∅ ≢ ⇄ ¿
+↦ E ↦ em_failed ¿
+
+⍝ ---- types
+
+ƒ
+  t "ŧ" ≡ ⤴ ↵ "i8" ⇄ ¿ ⌫ ¿
+  t "ℤ" ≡ ⤴ ↵ "i64" ⇄ ¿ ⌫ ¿
+  t "ℝ" ≡ ⤴ ↵ "double" ⇄ ¿ ⌫ ¿
+  t "𝔹" ≡ ⤴ ↵ "i8" ⇄ ¿ ⌫ ¿
+  t "ʃ" ≡ ⤴ ↵ "ptr" ⇄ ¿ ⌫ ¿
+  t "◌" ≡ ⤴ ↵ "i1" ⇄ ¿ ⌫ ¿
+  t "" ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  t ⟪ ck_head ⟫ "◌" ≡ ⤴ ↵
+    t ⟪ ck_tail ⟫ ⟪ em_llty ⟫ → inner ¿
+    inner ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    【"{" inner ", i1}"】 ⟪ em_cat ⟫ ⇄ ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ t ↦ em_llty ¿
+
+⍝ LLVM type of the v part of an entry (◌T → T); ∅ for a bare ◌
+ƒ
+  t "◌" ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  t ⟪ ck_head ⟫ "◌" ≡ ⤴ ↵ t ⟪ ck_tail ⟫ ⟪ em_llty ⟫ ⇄ ¿ ⌫ ¿
+  t ⟪ em_llty ⟫ ⇄ ¿
+↦ t ↦ em_vty ¿
+
+ƒ
+  t ⟪ ck_head ⟫ "◌" ≡ ⇄ ¿
+↦ t ↦ em_is_fail ¿
+
+ƒ
+  t ⟪ em_llty ⟫ ∅ ≢ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  t ⟪ ck_head ⟫ → h ¿
+  "4" → m ¿
+  h "ψ" ≡ ⤴ ↵ "5" → m ¿ ⌫ ¿
+  E tok 【"code generation for " t " arrives in milestone " m】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ t ↦ tok ↦ em_need_type ¿
+
+ƒ
+  ❴"ty": ty, "v": v, "ok": ok❵ → e ¿
+  e "role" ← ∅ ¿
+  e ⇄ ¿
+↦ ty ↦ v ↦ ok ↦ em_ent ¿
+
+ƒ
+  e "ty" ⌈ ⌉ → ty ¿
+  e "v" ⌈ ⌉ → v ¿
+  e "ok" ⌈ ⌉ → ok ¿
+  ❴"ty": ty, "v": v, "ok": ok, "role": role❵ ⇄ ¿
+↦ e ↦ role ↦ em_with_role ¿
+
+⍝ ---- deferred (future-tense) calls and failure exits
+
+ƒ
+  E "defers" ⌈ ⌉ 【】 ⟪ .append ⟫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ em_push_frame ¿
+
+ƒ
+  E "defers" ⌈ ⌉ ⟪ .pop ⟫ ⇄ ¿
+↦ E ↦ em_pop_frame ¿
+
+⍝ Future calls run last in, first out
+ƒ
+  frame ⟪ len ⟫ 1 ⊟ → i ¿
+  i 0 ≽ ⟲ ↵
+    E frame i ⌈ ⌉ ⟪ em_emit ⟫ ¿
+    i 1 ⊟ → i ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ frame ↦ em_run_frame ¿
+
+⍝ Leave the function by failure: run every pending future call, innermost first
+ƒ
+  E "defers" ⌈ ⌉ → fs ¿
+  fs ⟪ len ⟫ 1 ⊟ → i ¿
+  i 0 ≽ ⟲ ↵
+    E fs i ⌈ ⌉ ⟪ em_run_frame ⟫ ¿
+    i 1 ⊟ → i ¿
+  ⌫ ¿
+  E "failRet" ⌈ ⌉ → fr ¿
+  fr ∅ ≡ ⤴ ↵
+    E "call void @trith_loop_failed()" ⟪ em_emit ⟫ ¿
+    E "unreachable" ⟪ em_emit ⟫ ¿
+  ⌫ ⤵ ↵
+    E fr ⟪ em_emit ⟫ ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ em_fail_exit ¿
+
+⍝ ◌T used as T: branch out by failure, continue with the value (§7.3)
+ƒ
+  e "ty" ⌈ ⌉ → t ¿
+  t ⟪ em_is_fail ⟫ ¬ t "◌" ≡ ∨ ⤴ ↵ e ⇄ ¿ ⌫ ¿
+  E ⟪ em_label ⟫ → lc ¿
+  E ⟪ em_label ⟫ → lf ¿
+  e "ok" ⌈ ⌉ → ok ¿
+  E 【"br i1 " ok ", label %" lc ", label %" lf】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+  E lf ⟪ em_start ⟫ ¿
+  E ⟪ em_fail_exit ⟫ ¿
+  E lc ⟪ em_start ⟫ ¿
+  t ⟪ ck_tail ⟫ e "v" ⌈ ⌉ ∅ ⟪ em_ent ⟫ ⇄ ¿
+↦ E ↦ e ↦ em_unwrap ¿
+
+⍝ ---- popping with case roles (§6)
+
+ƒ
+  S ⟪ len ⟫ → n ¿
+  【】 → vals ¿
+  n k ⊟ → i ¿
+  i n ≺ ⟲ ↵
+    vals S i ⌈ ⌉ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵ S ⟪ .pop ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  【】 → slots ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵ slots ∅ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    vals i ⌈ ⌉ → v ¿
+    v "role" ⌈ ⌉ → r ¿
+    r ∅ ≢ ⤴ ↵ slots r ← v ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    vals i ⌈ ⌉ → v ¿
+    v "role" ⌈ ⌉ ∅ ≡ ⤴ ↵
+      0 → j ¿
+      slots j ⌈ ⌉ ∅ ≢ ⟲ ↵ j 1 ⊞ → j ¿ ⌫ ¿
+      slots j ← v ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  slots ⇄ ¿
+↦ S ↦ k ↦ em_pop ¿
+
+⍝ ---- packing values for calls and returns
+
+⍝ Entry e as a value of declared type o
+ƒ
+  o "◌" ≡ ⤴ ↵
+    e ∅ ≡ ⤴ ↵ "true" ⇄ ¿ ⌫ ¿
+    e "ok" ⌈ ⌉ ⇄ ¿
+  ⌫ ¿
+  o ⟪ em_is_fail ⟫ ⤴ ↵
+    o ⟪ em_llty ⟫ → st ¿
+    o ⟪ ck_tail ⟫ ⟪ em_llty ⟫ → it ¿
+    e "v" ⌈ ⌉ → v ¿
+    "true" → ok ¿
+    e "ty" ⌈ ⌉ ⟪ em_is_fail ⟫ ⤴ ↵ e "ok" ⌈ ⌉ → ok ¿ ⌫ ¿
+    E 【"insertvalue " st " undef, " it " " v ", 0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → s1 ¿
+    E 【"insertvalue " st " " s1 ", i1 " ok ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ ⇄ ¿
+  ⌫ ¿
+  e "v" ⌈ ⌉ ⇄ ¿
+↦ E ↦ e ↦ o ↦ em_pack ¿
+
+⍝ Value r of declared type o as a stack entry
+ƒ
+  o "◌" ≡ ⤴ ↵ o ∅ r ⟪ em_ent ⟫ ⇄ ¿ ⌫ ¿
+  o ⟪ em_is_fail ⟫ ⤴ ↵
+    o ⟪ em_llty ⟫ → st ¿
+    E 【"extractvalue " st " " r ", 0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → v ¿
+    E 【"extractvalue " st " " r ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
+    o v ok ⟪ em_ent ⟫ ⇄ ¿
+  ⌫ ¿
+  o r ∅ ⟪ em_ent ⟫ ⇄ ¿
+↦ E ↦ o ↦ r ↦ em_unpack ¿
+
+⍝ Return type of a function with outputs outs
+ƒ
+  outs ⟪ len ⟫ 0 ≡ ⤴ ↵ "void" ⇄ ¿ ⌫ ¿
+  outs ⟪ len ⟫ 1 ≡ ⤴ ↵ outs 0 ⌈ ⌉ ⟪ em_llty ⟫ ⇄ ¿ ⌫ ¿
+  【】 → ts ¿
+  0 → i ¿
+  outs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ts outs i ⌈ ⌉ ⟪ em_llty ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ts ", " ⟪ join ⟫ → body ¿
+  【"{" body "}"】 ⟪ em_cat ⟫ ⇄ ¿
+↦ outs ↦ em_ret_ty ¿
+
+⍝ ---- calls
+
+ƒ
+  f "ins" ⌈ ⌉ → ins ¿
+  f "outs" ⌈ ⌉ → outs ¿
+  f "sym" ⌈ ⌉ → sym ¿
+  ins ⟪ len ⟫ → k ¿
+  S k ⟪ em_pop ⟫ → vals ¿
+  【】 → args ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    vals i ⌈ ⌉ → e ¿
+    ins i ⌈ ⌉ → want ¿
+    want ⟪ em_is_fail ⟫ ¬ ⤴ ↵ E e ⟪ em_unwrap ⟫ → e ¿ ⌫ ¿
+    want ⟪ em_llty ⟫ → lt ¿
+    E e want ⟪ em_pack ⟫ → pv ¿
+    args 【lt " " pv】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  args ", " ⟪ join ⟫ → argText ¿
+  outs ⟪ em_ret_ty ⟫ → rt ¿
+  【"call " rt " " sym "(" argText ")"】 ⟪ em_cat ⟫ → callText ¿
+  future ⤴ ↵
+    E "defers" ⌈ ⌉ → fs ¿
+    fs fs ⟪ len ⟫ 1 ⊟ ⌈ ⌉ callText ⟪ .append ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  outs ⟪ len ⟫ 0 ≡ ⤴ ↵ E callText ⟪ em_emit ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  E callText ⟪ em_def ⟫ → r ¿
+  outs ⟪ len ⟫ 1 ≡ ⤴ ↵ S E outs 0 ⌈ ⌉ r ⟪ em_unpack ⟫ ⟪ .append ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  0 → i ¿
+  outs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    i ⍕ → is ¿
+    E 【"extractvalue " rt " " r ", " is】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → part ¿
+    S E outs i ⌈ ⌉ part ⟪ em_unpack ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ S ↦ f ↦ future ↦ em_call ¿
+
+⍝ ---- string literals
+
+ƒ
+  "0123456789ABCDEF" → digits ¿
+  b 16 ⊘ ⟪ int ⟫ → hi ¿
+  b hi 16 ⊠ ⊟ → lo ¿
+  digits hi ⟪ char_at ⟫ → h ¿
+  digits lo ⟪ char_at ⟫ → l ¿
+  【"\\" h l】 ⟪ em_cat ⟫ ⇄ ¿
+↦ b ↦ em_hex_byte ¿
+
+⍝ UTF-8 bytes of a code point
+ƒ
+  cp 128 ≺ ⤴ ↵ 【cp】 ⇄ ¿ ⌫ ¿
+  cp 2048 ≺ ⤴ ↵
+    cp 64 ⊘ ⟪ int ⟫ → a ¿
+    cp a 64 ⊠ ⊟ → b ¿
+    【】 a 192 ⊞ ⟪ .append ⟫ b 128 ⊞ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  cp 65536 ≺ ⤴ ↵
+    cp 4096 ⊘ ⟪ int ⟫ → a ¿
+    cp a 4096 ⊠ ⊟ → r ¿
+    r 64 ⊘ ⟪ int ⟫ → b ¿
+    r b 64 ⊠ ⊟ → c ¿
+    【】 a 224 ⊞ ⟪ .append ⟫ b 128 ⊞ ⟪ .append ⟫ c 128 ⊞ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  cp 262144 ⊘ ⟪ int ⟫ → a ¿
+  cp a 262144 ⊠ ⊟ → r ¿
+  r 4096 ⊘ ⟪ int ⟫ → b ¿
+  r b 4096 ⊠ ⊟ → r2 ¿
+  r2 64 ⊘ ⟪ int ⟫ → c ¿
+  r2 c 64 ⊠ ⊟ → d ¿
+  【】 a 240 ⊞ ⟪ .append ⟫ b 128 ⊞ ⟪ .append ⟫ c 128 ⊞ ⟪ .append ⟫ d 128 ⊞ ⟪ .append ⟫ ⇄ ¿
+↦ cp ↦ em_utf8 ¿
+
+⍝ Global constant for s; returns ❴name, len❵
+ƒ
+  【】 → out ¿
+  0 → nbytes ¿
+  0 → i ¿
+  s ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    s i ⟪ char_at ⟫ → c ¿
+    c ⟪ ord ⟫ ⟪ em_utf8 ⟫ → bs ¿
+    0 → j ¿
+    bs ⟪ len ⟫ → m ¿
+    j m ≺ ⟲ ↵
+      bs j ⌈ ⌉ → b ¿
+      b 32 ≽ b 126 ≼ ∧ c "\"" ≢ ∧ c "\\" ≢ ∧ ⤴ ↵ out c ⟪ .append ⟫ ¿ ⌫ ⤵ ↵ out b ⟪ em_hex_byte ⟫ ⟪ .append ⟫ ¿ ⌫ ¿
+      j 1 ⊞ → j ¿
+    ⌫ ¿
+    nbytes m ⊞ → nbytes ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  E "sn" ⌈ ⌉ 1 ⊞ → sn ¿
+  E "sn" ← sn ¿
+  sn ⍕ → sns ¿
+  【"@.s" sns】 ⟪ em_cat ⟫ → name ¿
+  nbytes ⍕ → nb ¿
+  out ⟪ em_cat ⟫ → body ¿
+  E "globals" ⌈ ⌉ 【name " = private unnamed_addr constant [" nb " x i8] c\"" body "\""】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+  ❴"name": name, "len": nb❵ ⇄ ¿
+↦ E ↦ s ↦ em_string ¿
+
+⍝ ---- operators (§18)
+
+ƒ
+  ty "𝔹" ≡ ⤴ ↵ "zext" ⇄ ¿ ⌫ ¿
+  "sext" ⇄ ¿
+↦ ty ↦ em_ext ¿
+
+⍝ Integer division rounding to nearest (§3): sdiv plus a correction
+ƒ
+  ty ⟪ em_llty ⟫ → lt ¿
+  E 【"icmp eq " lt " " b ", 0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → z ¿
+  E 【"select i1 " z ", " lt " 1, " lt " " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → d ¿
+  E 【"sdiv " lt " " a ", " d】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → q ¿
+  E 【"srem " lt " " a ", " d】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
+  E 【"shl " lt " " r ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r2 ¿
+  E 【"sub " lt " 0, " r2】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → nr2 ¿
+  E 【"icmp slt " lt " " r2 ", 0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → rn ¿
+  E 【"select i1 " rn ", " lt " " nr2 ", " lt " " r2】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ar2 ¿
+  E 【"sub " lt " 0, " d】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → nd ¿
+  E 【"icmp slt " lt " " d ", 0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → dn ¿
+  E 【"select i1 " dn ", " lt " " nd ", " lt " " d】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ad ¿
+  E 【"icmp sgt " lt " " ar2 ", " ad】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → gt ¿
+  E 【"xor " lt " " a ", " d】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → sx ¿
+  E 【"icmp slt " lt " " sx ", 0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → sn ¿
+  E 【"select i1 " sn ", " lt " -1, " lt " 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → adj ¿
+  E 【"select i1 " gt ", " lt " " adj ", " lt " 0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → adj2 ¿
+  E 【"add " lt " " q ", " adj2】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → q2 ¿
+  E 【"xor i1 " z ", true"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
+  x "⊜" ≡ ⤴ ↵
+    E 【"mul " lt " " q2 ", " d】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → qd ¿
+    E 【"sub " lt " " a ", " qd】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → m ¿
+    【"◌" ty】 ⟪ em_cat ⟫ m ok ⟪ em_ent ⟫ ⇄ ¿
+  ⌫ ¿
+  【"◌" ty】 ⟪ em_cat ⟫ q2 ok ⟪ em_ent ⟫ ⇄ ¿
+↦ E ↦ x ↦ ty ↦ a ↦ b ↦ em_idiv ¿
+
+⍝ Returns the entries to push, or ∅ on error
+ƒ
+  tok "text" ⌈ ⌉ → x ¿
+  vals 0 ⌈ ⌉ → ea ¿
+  ea "ty" ⌈ ⌉ → ty ¿
+  ea "v" ⌈ ⌉ → a ¿
+  ∅ → b ¿
+  vals ⟪ len ⟫ 1 ≻ ⤴ ↵ vals 1 ⌈ ⌉ "v" ⌈ ⌉ → b ¿ ⌫ ¿
+  ty ⟪ em_vty ⟫ → lt ¿
+  ty "ℝ" ≡ → real ¿
+  ty "𝔹" ≡ → byte ¿
+
+  x "⊞" ≡ x "⊟" ≡ ∨ x "⊠" ≡ ∨ ⤴ ↵
+    "add" → op ¿
+    x "⊟" ≡ ⤴ ↵ "sub" → op ¿ ⌫ ¿
+    x "⊠" ≡ ⤴ ↵ "mul" → op ¿ ⌫ ¿
+    real ⤴ ↵ 【"f" op】 ⟪ em_cat ⟫ → op ¿ ⌫ ⤵ byte ¬ ⤴ ↵ 【op " nsw"】 ⟪ em_cat ⟫ → op ¿ ⌫ ¿
+    E 【op " " lt " " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
+    【】 ty r ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⊘" ≡ x "⊜" ≡ ∨ ⤴ ↵
+    real ⤴ ↵
+      "fdiv" → op ¿
+      x "⊜" ≡ ⤴ ↵ "frem" → op ¿ ⌫ ¿
+      E 【op " double " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
+      E 【"fcmp one double " b ", 0.0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
+      【】 "◌ℝ" r ok ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+    ⌫ ¿
+    【】 E x ty a b ⟪ em_idiv ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⊝" ≡ ⤴ ↵
+    real ⤴ ↵ E 【"fneg double " a】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿ ⌫ ⤵ ↵
+      E 【"sub " lt " 0, " a】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
+    ⌫ ¿
+    【】 ty r ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "≶" ≡ ⤴ ↵
+    "sgt" → gp ¿
+    real ⤴ ↵
+      "ogt" → gp ¿
+      E 【"fcmp ogt double " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → g ¿
+      E 【"fcmp olt double " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → l ¿
+    ⌫ ⤵ ↵
+      "slt" → lp ¿
+      byte ⤴ ↵ "ugt" → gp ¿ "ult" → lp ¿ ⌫ ¿
+      E 【"icmp " gp " " lt " " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → g ¿
+      E 【"icmp " lp " " lt " " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → l ¿
+    ⌫ ¿
+    E 【"zext i1 " g " to i8"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → g8 ¿
+    E 【"zext i1 " l " to i8"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → l8 ¿
+    E 【"sub i8 " g8 ", " l8】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
+    "ŧ" r ∅ ⟪ em_ent ⟫ → te ¿
+    "icmp eq" → eqop ¿
+    【"icmp " gp】 ⟪ em_cat ⟫ → gtop ¿
+    real ⤴ ↵ "fcmp oeq" → eqop ¿ "fcmp ogt" → gtop ¿ ⌫ ¿
+    ❴"eq": eqop, "gt": gtop, "lt": lt, "a": a, "b": b❵ → cmp ¿
+    te "cmp" ← cmp ¿
+    【】 te ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⋏" ≡ x "⋎" ≡ ∨ ⤴ ↵
+    "slt" → p ¿
+    x "⋎" ≡ ⤴ ↵ "sgt" → p ¿ ⌫ ¿
+    E 【"icmp " p " i8 " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → c ¿
+    E 【"select i1 " c ", i8 " a ", i8 " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
+    【】 "ŧ" r ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⋒" ≡ x "⋓" ≡ ∨ x "⩡" ≡ ∨ x "≪" ≡ ∨ x "≫" ≡ ∨ ⤴ ↵
+    "and" → op ¿
+    x "⋓" ≡ ⤴ ↵ "or" → op ¿ ⌫ ¿
+    x "⩡" ≡ ⤴ ↵ "xor" → op ¿ ⌫ ¿
+    x "≪" ≡ ⤴ ↵ "shl" → op ¿ ⌫ ¿
+    x "≫" ≡ ⤴ ↵ "ashr" → op ¿ byte ⤴ ↵ "lshr" → op ¿ ⌫ ¿ ⌫ ¿
+    E 【op " " lt " " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
+    【】 ty r ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⚇" ≡ ⤴ ↵ 【】 ea ∅ ⟪ em_with_role ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+  x "⌁" ≡ ⤴ ↵
+    ty "ʃ" ≡ ty "◌ʃ" ≡ ∨ ⤴ ↵ E 【"call void @trith_str_free(ptr " a ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿ ⌫ ¿
+    【】 ⇄ ¿
+  ⌫ ¿
+  x "⎙" ≡ ⤴ ↵
+    ty "ʃ" ≡ ⤴ ↵ E 【"call void @trith_print_str(ptr " a ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿ 【】 ⇄ ¿ ⌫ ¿
+    real ⤴ ↵ E 【"call void @trith_print_f64(double " a ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿ 【】 ⇄ ¿ ⌫ ¿
+    a → w ¿
+    lt "i64" ≢ ⤴ ↵
+      ty ⟪ em_ext ⟫ → ext ¿
+      E 【ext " " lt " " a " to i64"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → w ¿
+    ⌫ ¿
+    E 【"call void @trith_print_i64(i64 " w ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    【】 ⇄ ¿
+  ⌫ ¿
+  "4" → m ¿
+  x "⫴" ≡ x "⊛" ≡ ∨ x "⊙" ≡ ∨ x "⟜" ≡ ∨ ⤴ ↵ "5" → m ¿ ⌫ ¿
+  E tok 【"code generation for " x " arrives in milestone " m】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ tok ↦ vals ↦ em_glyph_values ¿
+
+⍝ ---- joins: phi nodes for every slot whose name differs between predecessors
+
+ƒ
+  ❴"label": label, "stack": stack, "strand": strand❵ ⇄ ¿
+↦ label ↦ stack ↦ strand ↦ em_incoming ¿
+
+⍝ phi over field f of the entries at index j of each incoming list
+ƒ
+  ins 0 ⌈ ⌉ key ⌈ ⌉ j ⌈ ⌉ f ⌈ ⌉ → v0 ¿
+  ⊤ → same ¿
+  0 → i ¿
+  ins ⟪ len ⟫ → n ¿
+  【】 → arms ¿
+  【】 → seen ¿
+  i n ≺ ⟲ ↵
+    ins i ⌈ ⌉ → inc ¿
+    inc key ⌈ ⌉ j ⌈ ⌉ f ⌈ ⌉ → vi ¿
+    vi v0 ≢ ⤴ ↵ ⊥ → same ¿ ⌫ ¿
+    inc "label" ⌈ ⌉ → lb ¿
+    lb seen ∈ ¬ ⤴ ↵
+      seen lb ⟪ .append ⟫ ¿
+      arms 【"[ " vi ", %" lb " ]"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  same ⤴ ↵ v0 ⇄ ¿ ⌫ ¿
+  arms ", " ⟪ join ⟫ → armText ¿
+  E 【"phi " lt " " armText】 ⟪ em_cat ⟫ ⟪ em_def ⟫ ⇄ ¿
+↦ E ↦ ins ↦ key ↦ j ↦ f ↦ lt ↦ em_phi ¿
+
+ƒ
+  【】 → out ¿
+  0 → j ¿
+  m ⟪ len ⟫ → n ¿
+  n → limit ¿
+  j limit ≺ ⟲ ↵
+    m j ⌈ ⌉ → e0 ¿
+    e0 "ty" ⌈ ⌉ → ty ¿
+    ∅ → v ¿
+    ty ⟪ em_vty ⟫ → vt ¿
+    vt ∅ ≢ ⤴ ↵ E ins key j "v" vt ⟪ em_phi ⟫ → v ¿ ⌫ ¿
+    ∅ → ok ¿
+    ty ⟪ em_is_fail ⟫ ⤴ ↵ E ins key j "ok" "i1" ⟪ em_phi ⟫ → ok ¿ ⌫ ¿
+    out ty v ok ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+    j 1 ⊞ → j ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ E ↦ ins ↦ key ↦ m ↦ em_merge_list ¿
+
+⍝ Emits the join label and phis; returns ❴stack, strand, dead❵
+ƒ
+  E join ⟪ em_start ⟫ ¿
+  ins ⟪ len ⟫ 0 ≡ ⤴ ↵
+    E "unreachable" ⟪ em_emit ⟫ ¿
+    【】 【】 ⊤ ⟪ ck_result ⟫ ⇄ ¿
+  ⌫ ¿
+  ins 0 ⌈ ⌉ → i0 ¿
+  E ins "stack" i0 "stack" ⌈ ⌉ ⟪ em_merge_list ⟫ → S ¿
+  ⍝ exported moments: longest common prefix of the moment types
+  i0 "strand" ⌈ ⌉ ⟪ len ⟫ → p ¿
+  1 → i ¿
+  ins ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ins i ⌈ ⌉ "strand" ⌈ ⌉ → si ¿
+    0 → q ¿
+    q p ≺ q si ⟪ len ⟫ ≺ ∧ ⟲ ↵
+      si q ⌈ ⌉ "ty" ⌈ ⌉ → tq ¿
+      i0 "strand" ⌈ ⌉ q ⌈ ⌉ "ty" ⌈ ⌉ tq ≢ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      q 1 ⊞ → q ¿
+    ⌫ ¿
+    q → p ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  i0 "strand" ⌈ ⌉ 0 p ⟪ lx_slice ⟫ → proto ¿
+  E ins "strand" proto ⟪ em_merge_list ⟫ → strand ¿
+  S strand ⊥ ⟪ ck_result ⟫ ⇄ ¿
+↦ E ↦ ins ↦ join ↦ em_join ¿
+
+⍝ ---- three-way branches
+⍝ Branch on trit entry c to t0 (⦶), t1 (⊕), t2 (⊖). A trit fresh from ≶
+⍝ branches on the comparison itself, so LLVM sees the compares C would use.
+⍝ Returns the edges [from, to].
+ƒ
+  E "cur" ⌈ ⌉ → from ¿
+  c "cmp" ⌈ ⌉ → cmp ¿
+  cmp ∅ ≡ ⤴ ↵
+    c "v" ⌈ ⌉ → cv ¿
+    E 【"switch i8 " cv ", label %" t2 " [ i8 0, label %" t0 "  i8 1, label %" t1 " ]"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    【】 【from t0】 ⟪ .append ⟫ 【from t1】 ⟪ .append ⟫ 【from t2】 ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  cmp "eq" ⌈ ⌉ → eqop ¿
+  cmp "gt" ⌈ ⌉ → gtop ¿
+  cmp "lt" ⌈ ⌉ → lt ¿
+  cmp "a" ⌈ ⌉ → a ¿
+  cmp "b" ⌈ ⌉ → b ¿
+  t0 t1 ≡ t1 t2 ≡ ∧ ⤴ ↵
+    E 【"br label %" t0】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    【】 【from t0】 ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  t1 t2 ≡ ⤴ ↵
+    E 【eqop " " lt " " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ce ¿
+    E 【"br i1 " ce ", label %" t0 ", label %" t1】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    【】 【from t0】 ⟪ .append ⟫ 【from t1】 ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  t0 t2 ≡ ⤴ ↵
+    E 【gtop " " lt " " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → cg ¿
+    E 【"br i1 " cg ", label %" t1 ", label %" t0】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    【】 【from t1】 ⟪ .append ⟫ 【from t0】 ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  E ⟪ em_label ⟫ → lne ¿
+  E 【eqop " " lt " " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ce ¿
+  E 【"br i1 " ce ", label %" t0 ", label %" lne】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+  E lne ⟪ em_start ⟫ ¿
+  E 【gtop " " lt " " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → cg ¿
+  E 【"br i1 " cg ", label %" t1 ", label %" t2】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+  【】 【from t0】 ⟪ .append ⟫ 【lne t1】 ⟪ .append ⟫ 【lne t2】 ⟪ .append ⟫ ⇄ ¿
+↦ E ↦ c ↦ t0 ↦ t1 ↦ t2 ↦ em_branch3 ¿
+
+⍝ ---- blocks
+
+ƒ
+  E "fns" ⌈ ⌉ → fns ¿
+  op "kind" ⌈ ⌉ "shape-call" ≡ ⤴ ↵
+    op "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → key ¿
+    E "shapes" ⌈ ⌉ key ⌈ ⌉ 0 ⌈ ⌉ → nm ¿
+    fns nm ⌈ ⌉ ⇄ ¿
+  ⌫ ¿
+  op "tok" ⌈ ⌉ "text" ⌈ ⌉ → nm ¿
+  fns nm ⌈ ⌉ ⇄ ¿
+↦ E ↦ op ↦ em_resolve ¿
+
+⍝ Run ops on a copy of S inside its own future-call frame
+ƒ
+  S ⟪ ck_copy ⟫ → S2 ¿
+  E ⟪ em_push_frame ⟫ ¿
+  E ops S2 ⟪ em_block ⟫ → r ¿
+  E ⟪ em_pop_frame ⟫ → frame ¿
+  r "dead" ⌈ ⌉ ¬ ⤴ ↵ E frame ⟪ em_run_frame ⟫ ¿ ⌫ ¿
+  r ⇄ ¿
+↦ E ↦ ops ↦ S ↦ em_sub ¿
+
+ƒ
+  ⍝ predicate value for ⍤ / ⊨: run ops on vals, return the trit
+  E ops vals ⟪ em_sub ⟫ → r ¿
+  r "dead" ⌈ ⌉ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  r "stack" ⌈ ⌉ 0 ⌈ ⌉ "v" ⌈ ⌉ ⇄ ¿
+↦ E ↦ ops ↦ vals ↦ em_predicate ¿
+
+ƒ
+  【】 → strand ¿
+  ⊥ → dead ¿
+  0 → oi ¿
+  ops ⟪ len ⟫ → nops ¿
+  oi nops ≺ ⟲ ↵
+    ops oi ⌈ ⌉ → op ¿
+    op "kind" ⌈ ⌉ → k ¿
+    op "tok" ⌈ ⌉ → tok ¿
+    tok ⟪ ck_role ⟫ → role ¿
+
+    k "lit" ≡ ⤴ ↵
+      tok "kind" ⌈ ⌉ → lk ¿
+      lk "int" ≡ ⤴ ↵ "ℤ" tok "value" ⌈ ⌉ ∅ ⟪ em_ent ⟫ → e ¿ ⌫ ¿
+      lk "trit" ≡ ⤴ ↵
+        tok "text" ⌈ ⌉ → tt ¿
+        "0" → tv ¿
+        tt "⊖" ≡ ⤴ ↵ "-1" → tv ¿ ⌫ ¿
+        tt "⊕" ≡ ⤴ ↵ "1" → tv ¿ ⌫ ¿
+        "ŧ" tv ∅ ⟪ em_ent ⟫ → e ¿
+      ⌫ ¿
+      lk "real" ≡ ⤴ ↵
+        tok "value" ⌈ ⌉ "/" ⟪ split ⟫ → nd ¿
+        nd 0 ⌈ ⌉ → num ¿
+        "1" → den ¿
+        nd ⟪ len ⟫ 1 ≻ ⤴ ↵ nd 1 ⌈ ⌉ → den ¿ ⌫ ¿
+        E 【"fdiv double " num ".0, " den ".0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → rv ¿
+        "ℝ" rv ∅ ⟪ em_ent ⟫ → e ¿
+      ⌫ ¿
+      lk "string" ≡ ⤴ ↵
+        E tok "text" ⌈ ⌉ ⟪ em_string ⟫ → g ¿
+        g "name" ⌈ ⌉ → gn ¿
+        g "len" ⌈ ⌉ → gl ¿
+        E 【"call ptr @trith_str_new(ptr " gn ", i64 " gl ")"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → sv ¿
+        "ʃ" sv ∅ ⟪ em_ent ⟫ → e ¿
+      ⌫ ¿
+      role ∅ ≢ ⤴ ↵ e role ⟪ em_with_role ⟫ → e ¿ ⌫ ¿
+      S e ⟪ .append ⟫ ¿
+    ⌫ ⤵ k "call" ≡ k "shape-call" ≡ ∨ ⤴ ↵
+      E op ⟪ em_resolve ⟫ → f ¿
+      ⊥ → future ¿
+      tok "marks" ⌈ ⌉ → ms ¿
+      ms ∅ ≢ ⤴ ↵ "future" ms ∈ → future ¿ ⌫ ¿
+      E S f future ⟪ em_call ⟫ ¿
+    ⌫ ⤵ k "op" ≡ ⤴ ↵
+      tok "text" ⌈ ⌉ → x ¿
+      tok "idx" ⌈ ⌉ → idx ¿
+      x "⧖" ≡ ⤴ ↵
+        strand S ⟪ .pop ⟫ ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "⧗" ≡ ⤴ ↵
+        strand strand ⟪ len ⟫ 1 ⊟ idx ⊟ ⌈ ⌉ → e ¿
+        S e role ⟪ em_with_role ⟫ ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "⍿" ≡ ⤴ ↵
+        S ⟪ len ⟫ 1 ⊟ idx ⊟ → si ¿
+        S si ⌈ ⌉ → e ¿
+        e "ty" ⌈ ⌉ ⟪ ck_copyable ⟫ ¬ ⤴ ↵
+          ⍝ quantum: move to the top
+          【】 → rest ¿
+          S ⟪ len ⟫ → n ¿
+          si 1 ⊞ → i ¿
+          i n ≺ ⟲ ↵ rest S i ⌈ ⌉ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+          n si ⊟ → drop ¿
+          0 → i ¿
+          i drop ≺ ⟲ ↵ S ⟪ .pop ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+          S rest ⟪ em_concat_into ⟫ ¿
+        ⌫ ¿
+        S e role ⟪ em_with_role ⟫ ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "↯" ≡ ⤴ ↵
+        E ⟪ em_fail_exit ⟫ ¿
+        ⊤ → dead ¿
+      ⌫ ⤵ ↵
+        tok "text" ⌈ ⌉ ⟪ ck_arity ⟫ → ar ¿
+        ar ∅ ≡ ⤴ ↵ 1 → ar ¿ ⌫ ¿
+        S ar ⟪ em_pop ⟫ → vals ¿
+        【】 → uv ¿
+        0 → i ¿
+        i ar ≺ ⟲ ↵
+          vals i ⌈ ⌉ → e ¿
+          x "⌁" ≢ ⤴ ↵ E e ⟪ em_unwrap ⟫ → e ¿ ⌫ ¿
+          uv e ⟪ .append ⟫ ¿
+          i 1 ⊞ → i ¿
+        ⌫ ¿
+        E tok uv ⟪ em_glyph_values ⟫ → res ¿
+        E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        S res ⟪ em_concat_into ⟫ ¿
+      ⌫ ¿
+    ⌫ ⤵ k "quote" ≡ ⤴ ↵
+      ⍝ x ⦃pred⦄ ⊨  →  ◌T with ok = (pred = ⊕)
+      S 1 ⟪ em_pop ⟫ 0 ⌈ ⌉ → x ¿
+      E x ⟪ em_unwrap ⟫ → x ¿
+      x "ty" ⌈ ⌉ ⟪ ck_copyable ⟫ ¬ ⤴ ↵ E tok "code generation for ⊨ on quantum values arrives in milestone 4" ⟪ em_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      E op "block" ⌈ ⌉ "ops" ⌈ ⌉ 【x】 ⟪ em_predicate ⟫ → t ¿
+      E 【"icmp eq i8 " t ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
+      x "ty" ⌈ ⌉ → xt ¿
+      x "v" ⌈ ⌉ → xv ¿
+      S 【"◌" xt】 ⟪ em_cat ⟫ xv ok ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+      oi 1 ⊞ → oi ¿
+    ⌫ ⤵ k "prayer" ≡ ⤴ ↵
+      tok "idx" ⌈ ⌉ → pn ¿
+      S S ⟪ len ⟫ pn ⊟ S ⟪ len ⟫ ⟪ lx_slice ⟫ → vals ¿
+      E op "block" ⌈ ⌉ "ops" ⌈ ⌉ vals ⟪ em_predicate ⟫ → t ¿
+      t ∅ ≢ ⤴ ↵
+        E 【"icmp eq i8 " t ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → c ¿
+        E "debug" ⌈ ⌉ ⤴ ↵
+          E ⟪ em_label ⟫ → lok ¿
+          E ⟪ em_label ⟫ → lbad ¿
+          E 【"br i1 " c ", label %" lok ", label %" lbad】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+          E lbad ⟪ em_start ⟫ ¿
+          E "call void @llvm.trap()" ⟪ em_emit ⟫ ¿
+          E "unreachable" ⟪ em_emit ⟫ ¿
+          E lok ⟪ em_start ⟫ ¿
+        ⌫ ⤵ ↵
+          E 【"call void @llvm.assume(i1 " c ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ⤵ k "select" ≡ ⤴ ↵
+      S 1 ⟪ em_pop ⟫ 0 ⌈ ⌉ → c ¿
+      E c ⟪ em_unwrap ⟫ → c ¿
+      E ⟪ em_label ⟫ → join ¿
+      op "faces" ⌈ ⌉ → fs ¿
+      【】 → targets ¿
+      【】 → bodies ¿
+      ⊥ → hasIdentity ¿
+      0 → fi ¿
+      fi 3 ≺ ⟲ ↵
+        fs fi ⌈ ⌉ → f ¿
+        f "kind" ⌈ ⌉ "same" ≡ ⤴ ↵
+          targets targets fi 1 ⊟ ⌈ ⌉ ⟪ .append ⟫ ¿
+        ⌫ ⤵ f "kind" ⌈ ⌉ "identity" ≡ ⤴ ↵
+          targets join ⟪ .append ⟫ ¿
+          ⊤ → hasIdentity ¿
+        ⌫ ⤵ ↵
+          E ⟪ em_label ⟫ → lf ¿
+          targets lf ⟪ .append ⟫ ¿
+          bodies 【lf f】 ⟪ .append ⟫ ¿
+        ⌫ ¿
+        fi 1 ⊞ → fi ¿
+      ⌫ ¿
+      targets 0 ⌈ ⌉ → t0 ¿
+      targets 1 ⌈ ⌉ → t1 ¿
+      targets 2 ⌈ ⌉ → t2 ¿
+      E c t0 t1 t2 ⟪ em_branch3 ⟫ → edges ¿
+      【】 → ins ¿
+      0 → q ¿
+      edges ⟪ len ⟫ → ne ¿
+      q ne ≺ ⟲ ↵
+        edges q ⌈ ⌉ → ed ¿
+        ed 1 ⌈ ⌉ join ≡ ⤴ ↵ ins ed 0 ⌈ ⌉ S ⟪ ck_copy ⟫ 【】 ⟪ em_incoming ⟫ ⟪ .append ⟫ ¿ ⌫ ¿
+        q 1 ⊞ → q ¿
+      ⌫ ¿
+      0 → bi ¿
+      bodies ⟪ len ⟫ → nb ¿
+      bi nb ≺ ⟲ ↵
+        bodies bi ⌈ ⌉ → bd ¿
+        E bd 0 ⌈ ⌉ ⟪ em_start ⟫ ¿
+        E bd 1 ⌈ ⌉ "ops" ⌈ ⌉ S ⟪ em_sub ⟫ → r ¿
+        E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        r "dead" ⌈ ⌉ ¬ ⤴ ↵
+          E "cur" ⌈ ⌉ → endl ¿
+          ins endl r "stack" ⌈ ⌉ r "strand" ⌈ ⌉ ⟪ em_incoming ⟫ ⟪ .append ⟫ ¿
+          E 【"br label %" join】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+        ⌫ ¿
+        bi 1 ⊞ → bi ¿
+      ⌫ ¿
+      E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      E ins join ⟪ em_join ⟫ → r ¿
+      r "stack" ⌈ ⌉ → S ¿
+      strand r "strand" ⌈ ⌉ ⊞⊞ → strand ¿
+      r "dead" ⌈ ⌉ → dead ¿
+    ⌫ ⤵ k "handle" ≡ ⤴ ↵
+      S 1 ⟪ em_pop ⟫ 0 ⌈ ⌉ → fe ¿
+      E ⟪ em_label ⟫ → lok ¿
+      E ⟪ em_label ⟫ → lfail ¿
+      E ⟪ em_label ⟫ → join ¿
+      fe "ok" ⌈ ⌉ → fok ¿
+      E 【"br i1 " fok ", label %" lok ", label %" lfail】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+      【】 → ins ¿
+      S ⟪ ck_copy ⟫ → okS ¿
+      fe "ty" ⌈ ⌉ → fty ¿
+      fty "◌" ≢ ⤴ ↵ okS fty ⟪ ck_tail ⟫ fe "v" ⌈ ⌉ ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ¿ ⌫ ¿
+      E lok ⟪ em_start ⟫ ¿
+      E op "ok" ⌈ ⌉ "ops" ⌈ ⌉ okS ⟪ em_sub ⟫ → r1 ¿
+      E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      r1 "dead" ⌈ ⌉ ¬ ⤴ ↵
+        E "cur" ⌈ ⌉ → endl ¿
+        ins endl r1 "stack" ⌈ ⌉ r1 "strand" ⌈ ⌉ ⟪ em_incoming ⟫ ⟪ .append ⟫ ¿
+        E 【"br label %" join】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+      ⌫ ¿
+      E lfail ⟪ em_start ⟫ ¿
+      E op "fail" ⌈ ⌉ "ops" ⌈ ⌉ S ⟪ em_sub ⟫ → r2 ¿
+      E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      r2 "dead" ⌈ ⌉ ¬ ⤴ ↵
+        E "cur" ⌈ ⌉ → endl ¿
+        ins endl r2 "stack" ⌈ ⌉ r2 "strand" ⌈ ⌉ ⟪ em_incoming ⟫ ⟪ .append ⟫ ¿
+        E 【"br label %" join】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+      ⌫ ¿
+      E ins join ⟪ em_join ⟫ → r ¿
+      r "stack" ⌈ ⌉ → S ¿
+      strand r "strand" ⌈ ⌉ ⊞⊞ → strand ¿
+      r "dead" ⌈ ⌉ → dead ¿
+    ⌫ ⤵ k "loop" ≡ ⤴ ↵
+      E "cur" ⌈ ⌉ → pre ¿
+      E ⟪ em_label ⟫ → head ¿
+      E ⟪ em_label ⟫ → exit ¿
+      E ⟪ em_label ⟫ → lfail ¿
+      E 【"br label %" head】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+      E head ⟪ em_start ⟫ ¿
+      ⍝ loop-carried values: phis patched once the latch is known
+      【】 → HS ¿
+      【】 → patches ¿
+      0 → j ¿
+      S ⟪ len ⟫ → n ¿
+      j n ≺ ⟲ ↵
+        S j ⌈ ⌉ → e ¿
+        e "ty" ⌈ ⌉ → ty ¿
+        ∅ → hv ¿
+        ∅ → hok ¿
+        ty ⟪ em_vty ⟫ → vt ¿
+        vt ∅ ≢ ⤴ ↵
+          E ⟪ em_tmp ⟫ → hv ¿
+          E "lines" ⌈ ⌉ ⟪ len ⟫ → at ¿
+          E "PHI" ⟪ em_emit ⟫ ¿
+          patches 【at hv vt j "v"】 ⟪ .append ⟫ ¿
+        ⌫ ¿
+        ty ⟪ em_is_fail ⟫ ⤴ ↵
+          E ⟪ em_tmp ⟫ → hok ¿
+          E "lines" ⌈ ⌉ ⟪ len ⟫ → at ¿
+          E "PHI" ⟪ em_emit ⟫ ¿
+          patches 【at hok "i1" j "ok"】 ⟪ .append ⟫ ¿
+        ⌫ ¿
+        HS ty hv hok ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+        j 1 ⊞ → j ¿
+      ⌫ ¿
+      E op "block" ⌈ ⌉ "ops" ⌈ ⌉ HS ⟪ em_sub ⟫ → r ¿
+      E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      r "stack" ⌈ ⌉ → BS ¿
+      E "cur" ⌈ ⌉ → latch ¿
+      ∅ → te ¿
+      r "dead" ⌈ ⌉ ¬ ⤴ ↵
+        BS ⟪ .pop ⟫ → te ¿
+        E te exit head lfail ⟪ em_branch3 ⟫ → edges ¿
+        0 → q ¿
+        edges ⟪ len ⟫ → ne ¿
+        q ne ≺ ⟲ ↵
+          edges q ⌈ ⌉ → ed ¿
+          ed 1 ⌈ ⌉ head ≡ ⤴ ↵ ed 0 ⌈ ⌉ → latch ¿ ⌫ ¿
+          q 1 ⊞ → q ¿
+        ⌫ ¿
+      ⌫ ¿
+      0 → q ¿
+      patches ⟪ len ⟫ → np ¿
+      q np ≺ ⟲ ↵
+        patches q ⌈ ⌉ → pt ¿
+        pt 0 ⌈ ⌉ → at ¿
+        pt 1 ⌈ ⌉ → name ¿
+        pt 2 ⌈ ⌉ → vt ¿
+        pt 3 ⌈ ⌉ → j ¿
+        pt 4 ⌈ ⌉ → fld ¿
+        S j ⌈ ⌉ fld ⌈ ⌉ → v0 ¿
+        【"  " name " = phi " vt " [ " v0 ", %" pre " ]"】 ⟪ em_cat ⟫ → line ¿
+        r "dead" ⌈ ⌉ ¬ ⤴ ↵
+          BS j ⌈ ⌉ fld ⌈ ⌉ → v1 ¿
+          【line ", [ " v1 ", %" latch " ]"】 ⟪ em_cat ⟫ → line ¿
+        ⌫ ¿
+        E "lines" ⌈ ⌉ → LL ¿
+        LL at ← line ¿
+        q 1 ⊞ → q ¿
+      ⌫ ¿
+      r "dead" ⌈ ⌉ ⤴ ↵
+        ⊤ → dead ¿
+      ⌫ ⤵ ↵
+        E lfail ⟪ em_start ⟫ ¿
+        E ⟪ em_fail_exit ⟫ ¿
+        E exit ⟪ em_start ⟫ ¿
+        BS → S ¿
+        strand r "strand" ⌈ ⌉ ⊞⊞ → strand ¿
+      ⌫ ¿
+    ⌫ ⤵ ↵
+      "4" → m ¿
+      k "postselect" ≡ k "rselect" ≡ ∨ k "inverse-call" ≡ ∨ ⤴ ↵ "5" → m ¿ ⌫ ¿
+      tok ⟪ ck_label ⟫ → lbl ¿
+      E tok 【"code generation for " lbl " arrives in milestone " m】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
+    ⌫ ¿
+    E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    oi 1 ⊞ → oi ¿
+  ⌫ ¿
+  S strand dead ⟪ ck_result ⟫ ⇄ ¿
+↦ E ↦ ops ↦ S ↦ em_block ¿
+
+ƒ
+  0 → i ¿
+  src ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    dst src i ⌈ ⌉ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ dst ↦ src ↦ em_concat_into ¿
+
+⍝ ---- functions and module
+
+ƒ
+  f "ins" ⌈ ⌉ → ins ¿
+  f "outs" ⌈ ⌉ → outs ¿
+  f "sym" ⌈ ⌉ → sym ¿
+  it "tok" ⌈ ⌉ → tok ¿
+  0 → i ¿
+  ins outs ⊞⊞ → all ¿
+  all ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    E all i ⌈ ⌉ tok ⟪ em_need_type ⟫ ¿
+    E ⟪ em_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  E "tmp" ← 0 ¿
+  E "lbl" ← 0 ¿
+  E "defers" ← 【】 ¿
+  ⊥ → canFail ¿
+  outs ⟪ len ⟫ 1 ≡ ⤴ ↵ outs 0 ⌈ ⌉ ⟪ em_is_fail ⟫ → canFail ¿ ⌫ ¿
+  ∅ → failRet ¿
+  canFail ⤴ ↵
+    outs 0 ⌈ ⌉ → o ¿
+    o "◌" ≡ ⤴ ↵ "ret i1 false" → failRet ¿ ⌫ ⤵ ↵
+      o ⟪ em_llty ⟫ → st ¿
+      【"ret " st " zeroinitializer"】 ⟪ em_cat ⟫ → failRet ¿
+    ⌫ ¿
+  ⌫ ¿
+  E "failRet" ← failRet ¿
+  【】 → params ¿
+  【】 → S ¿
+  E "lines" ⌈ ⌉ "" ⟪ .append ⟫ ¿
+  0 → i ¿
+  ins ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ins i ⌈ ⌉ → t ¿
+    t ⟪ em_llty ⟫ → lt ¿
+    i ⍕ → is ¿
+    【"%a" is】 ⟪ em_cat ⟫ → pn ¿
+    params 【lt " " pn】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  params ", " ⟪ join ⟫ → pt ¿
+  outs ⟪ em_ret_ty ⟫ → rt ¿
+  it "name" ⌈ ⌉ → nm ¿
+  E "lines" ⌈ ⌉ 【"; " nm】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+  E "lines" ⌈ ⌉ 【"define internal " rt " " sym "(" pt ") {"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+  E "entry" ⟪ em_start ⟫ ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    i ⍕ → is ¿
+    【"%a" is】 ⟪ em_cat ⟫ → pn ¿
+    S E ins i ⌈ ⌉ pn ⟪ em_unpack ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  E ⟪ em_push_frame ⟫ ¿
+  E it "ops" ⌈ ⌉ S ⟪ em_block ⟫ → r ¿
+  E ⟪ em_pop_frame ⟫ → frame ¿
+  E ⟪ em_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  r "dead" ⌈ ⌉ ¬ ⤴ ↵
+    E frame ⟪ em_run_frame ⟫ ¿
+    r "stack" ⌈ ⌉ → FS ¿
+    outs ⟪ len ⟫ 0 ≡ ⤴ ↵
+      E "ret void" ⟪ em_emit ⟫ ¿
+    ⌫ ⤵ outs ⟪ len ⟫ 1 ≡ ⤴ ↵
+      ∅ → e ¿
+      FS ⟪ len ⟫ 0 ≻ ⤴ ↵ FS 0 ⌈ ⌉ → e ¿ ⌫ ¿
+      E e outs 0 ⌈ ⌉ ⟪ em_pack ⟫ → rv ¿
+      E 【"ret " rt " " rv】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    ⌫ ⤵ ↵
+      "undef" → agg ¿
+      0 → i ¿
+      outs ⟪ len ⟫ → no ¿
+      i no ≺ ⟲ ↵
+        outs i ⌈ ⌉ → o ¿
+        o ⟪ em_llty ⟫ → ot ¿
+        E FS i ⌈ ⌉ o ⟪ em_pack ⟫ → pv ¿
+        i ⍕ → is ¿
+        E 【"insertvalue " rt " " agg ", " ot " " pv ", " is】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → agg ¿
+        i 1 ⊞ → i ¿
+      ⌫ ¿
+      E 【"ret " rt " " agg】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    ⌫ ¿
+  ⌫ ¿
+  E "lines" ⌈ ⌉ "}" ⟪ .append ⟫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ it ↦ f ↦ em_function ¿
+
+⍝ items (checked) → ❴ir, err❵
+ƒ
+  ❴"err": ∅, "path": path, "sn": 0, "debug": debug❵ → E ¿
+  E "lines" ← 【】 ¿
+  E "globals" ← 【】 ¿
+  E "cur" ← "entry" ¿
+  ❴❵ → fns ¿
+  ❴❵ → shapes ¿
+  E "fns" ← fns ¿
+  E "shapes" ← shapes ¿
+  ∅ → entry ¿
+  0 → i ¿
+  items ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    items i ⌈ ⌉ → it ¿
+    it "kind" ⌈ ⌉ "fn" ≢ ⤴ ↵
+      E it "tok" ⌈ ⌉ "code generation for particles and FFI bindings arrives in milestone 4" ⟪ em_err ⟫ ¿
+      ⊗ ¿
+    ⌫ ¿
+    it "sig" ⌈ ⌉ it "rev" ⌈ ⌉ it "name" ⌈ ⌉ ⟪ ck_fn_info ⟫ → f ¿
+    it "name" ⌈ ⌉ → nm ¿
+    f "sym" ← 【"@\"trith." nm "\""】 ⟪ em_cat ⟫ ¿
+    fns nm ← f ¿
+    it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → key ¿
+    key shapes ∈ ¬ ⤴ ↵ shapes key ← 【】 ¿ ⌫ ¿
+    shapes key ⌈ ⌉ nm ⟪ .append ⟫ ¿
+    nm "ᛟ" ≡ ⤴ ↵ f → entry ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  E ⟪ em_failed ⟫ ¬ entry ∅ ≡ ∧ ⤴ ↵ E ∅ "a program needs an entry point ᛟ ⟨⊸⟩" ⟪ em_err ⟫ ¿ ⌫ ¿
+  0 → i ¿
+  i n ≺ E ⟪ em_failed ⟫ ¬ ∧ ⟲ ↵
+    items i ⌈ ⌉ → it ¿
+    E it fns it "name" ⌈ ⌉ ⌈ ⌉ ⟪ em_function ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  E "err" ⌈ ⌉ → err ¿
+  err ∅ ≢ ⤴ ↵ ❴"ir": "", "err": err❵ ⇄ ¿ ⌫ ¿
+  【】 → out ¿
+  out "; generated by trithc (s1)" ⟪ .append ⟫ ¿
+  out "declare ptr @trith_str_new(ptr, i64)" ⟪ .append ⟫ ¿
+  out "declare void @trith_str_free(ptr)" ⟪ .append ⟫ ¿
+  out "declare void @trith_print_str(ptr)" ⟪ .append ⟫ ¿
+  out "declare void @trith_print_i64(i64)" ⟪ .append ⟫ ¿
+  out "declare void @trith_print_f64(double)" ⟪ .append ⟫ ¿
+  out "declare void @trith_loop_failed()" ⟪ .append ⟫ ¿
+  out "declare void @trith_entry_failed()" ⟪ .append ⟫ ¿
+  out "declare void @llvm.assume(i1)" ⟪ .append ⟫ ¿
+  out "declare void @llvm.trap()" ⟪ .append ⟫ ¿
+  out E "globals" ⌈ ⌉ ⟪ em_concat_into ⟫ ¿
+  out E "lines" ⌈ ⌉ ⟪ em_concat_into ⟫ ¿
+  out "" ⟪ .append ⟫ ¿
+  entry "sym" ⌈ ⌉ → es ¿
+  out "define i32 @main() {" ⟪ .append ⟫ ¿
+  out "entry:" ⟪ .append ⟫ ¿
+  entry "outs" ⌈ ⌉ ⟪ len ⟫ 0 ≡ ⤴ ↵
+    out 【"  call void " es "()"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    out "  ret i32 0" ⟪ .append ⟫ ¿
+  ⌫ ⤵ ↵
+    out 【"  %r = call i1 " es "()"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    out "  br i1 %r, label %ok, label %bad" ⟪ .append ⟫ ¿
+    out "ok:" ⟪ .append ⟫ ¿
+    out "  ret i32 0" ⟪ .append ⟫ ¿
+    out "bad:" ⟪ .append ⟫ ¿
+    out "  call void @trith_entry_failed()" ⟪ .append ⟫ ¿
+    out "  ret i32 27" ⟪ .append ⟫ ¿
+  ⌫ ¿
+  out "}" ⟪ .append ⟫ ¿
+  out "\n" ⟪ join ⟫ → ir ¿
+  ❴"ir": ir, "err": ∅❵ ⇄ ¿
+↦ items ↦ path ↦ debug ↦ trith_emit ¿

@@ -69,11 +69,21 @@ python tests/servers/mailhog_stop.py
 Trith is the successor language; the spec is [`docs/TRITH.md`](docs/TRITH.md).
 Its first compiler, `trithc` (stage s1), is written in UNHINGED and built by `build/unhingedc`.
 
-Milestones 1 (lexer and parser) and 2 (check pass: stack effects, linearity, borrows, failure, case roles, agreement) are done. Code generation is not implemented yet.
+Done so far:
+
+- Milestone 1: lexer and parser.
+- Milestone 2: the check pass (stack effects, linearity, borrows, failure, case roles, agreement).
+- Milestone 3: native code through LLVM for integers, trits, reals, bytes, string literals, `⋔`, `⥀`, failure handling, prayers and future calls. Generated code runs at C speed on the benchmarks.
+
+Arrays, borrows at run time, FFI and particles are milestone 4; superposition is milestone 5.
 
 ```bash
 make trith          # builds build/trithc
 make trith-test     # golden tests in trith/tests/ (also run by make test)
+make trith-bench    # benchmark gate: each program within 1.5× of clang -O2 C
+
+./build/trithc main.trh -o main      # compile (run from the repo root; needs clang)
+./build/trithc main.trh --emit-llvm  # print the generated LLVM IR
 
 ./build/trithc file.trh --tokens     # token stream after the Boustrophedon Rule
 ./build/trithc file.trh --ast        # parsed and tangled item tree

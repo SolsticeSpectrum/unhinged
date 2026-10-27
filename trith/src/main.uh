@@ -1,6 +1,7 @@
 "lexer.uh" ⟪ import ⟫ ¿
 "parser.uh" ⟪ import ⟫ ¿
 "check.uh" ⟪ import ⟫ ¿
+"emit.uh" ⟪ import ⟫ ¿
 
 ⍝ trithc: the Trith compiler (stage s1, written in UNHINGED)
 ⍝ Milestone 1: lexer and parser. Code generation arrives in milestone 3.
@@ -67,15 +68,43 @@
     1 ⇄ ¿
   ⌫ ¿
   mode "check" ≡ ⤴ ↵ "ok" ⊢ ¿ 0 ⇄ ¿ ⌫ ¿
-  input ": error: code generation is not implemented yet (use --tokens, --ast or --check)" ⊞⊞ ⊢ ¿
-  1 ⇄ ¿
-↦ input ↦ output ↦ mode ↦ trithc_main ¿
+  ps "items" ⌈ ⌉ input debug ⟪ trith_emit ⟫ → em ¿
+  em "err" ⌈ ⌉ ∅ ≢ ⤴ ↵
+    em "err" ⌈ ⌉ ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  mode "llvm" ≡ ⤴ ↵ em "ir" ⌈ ⌉ ⊢ ¿ 0 ⇄ ¿ ⌫ ¿
+  output "" ≡ ⤴ ↵ input ⟪ trith_default_output ⟫ → output ¿ ⌫ ¿
+  output ".ll" ⊞⊞ → llpath ¿
+  llpath em "ir" ⌈ ⌉ ⟪ write_file ⟫ → ok ¿
+  ok 1 ≢ ⤴ ↵
+    llpath ": error: cannot write" ⊞⊞ ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  "-O2" → opt ¿
+  debug ⤴ ↵ "-O0 -g" → opt ¿ ⌫ ¿
+  【"clang " opt " -w -o " output " " llpath " trith/runtime/trith_rt.c 2>&1"】 "" ⟪ join ⟫ → cmd ¿
+  cmd ⟪ syscall ⟫ → out ¿
+  out "" ≢ ⤴ ↵
+    out ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  0 ⇄ ¿
+↦ input ↦ output ↦ mode ↦ debug ↦ trithc_main ¿
+
+⍝ main.trh → main, main.ŧ → main
+ƒ
+  path ⟪ len ⟫ → n ¿
+  path n 4 ⊟ 4 ⟪ substr ⟫ ".trh" ≡ ⤴ ↵ path 0 n 4 ⊟ ⟪ substr ⟫ ⇄ ¿ ⌫ ¿
+  path 0 n 2 ⊟ ⟪ substr ⟫ ⇄ ¿
+↦ path ↦ trith_default_output ¿
 
 ⟪ args ⟫ → argv ¿
 argv ⟪ len ⟫ → argc ¿
 "" → input ¿
 "" → output ¿
 "compile" → mode ¿
+⊥ → debug ¿
 1 → ai ¿
 ⊥ → bad ¿
 ai argc ≺ ⟲ ↵
@@ -83,6 +112,8 @@ ai argc ≺ ⟲ ↵
   a "--tokens" ≡ ⤴ ↵ "tokens" → mode ¿
   ⌫ ⤵ a "--ast" ≡ ⤴ ↵ "ast" → mode ¿
   ⌫ ⤵ a "--check" ≡ ⤴ ↵ "check" → mode ¿
+  ⌫ ⤵ a "--emit-llvm" ≡ ⤴ ↵ "llvm" → mode ¿
+  ⌫ ⤵ a "--debug" ≡ ⤴ ↵ ⊤ → debug ¿
   ⌫ ⤵ a "--plough" ≡ ⤴ ↵ "plough" → mode ¿
   ⌫ ⤵ a "--unplough" ≡ ⤴ ↵ "unplough" → mode ¿
   ⌫ ⤵ a "-o" ≡ ⤴ ↵
@@ -94,13 +125,16 @@ ai argc ≺ ⟲ ↵
   ai 1 ⊞ → ai ¿
 ⌫ ¿
 input "" ≡ bad ∨ ⤴ ↵
-  "usage: trithc <main.trh> [-o <output>] [--tokens | --ast | --check | --plough | --unplough]" ⊢ ¿
+  "usage: trithc <main.trh> [-o <output>] [--debug] [--tokens | --ast | --check | --emit-llvm | --plough | --unplough]" ⊢ ¿
+  "  (default)   compile to a native binary with clang -O2 (run from the repo root)" ⊢ ¿
+  "  --debug     compile with -O0; prayers (⍤) trap instead of informing the optimiser" ⊢ ¿
   "  --tokens    print the token stream (after the Boustrophedon Rule)" ⊢ ¿
   "  --ast       print the parsed and tangled item tree" ⊢ ¿
   "  --check     type-check and print the virtual stack after every operation" ⊢ ¿
+  "  --emit-llvm print the generated LLVM IR" ⊢ ¿
   "  --plough    rewrite a file written in logical order (every line left to right)" ⊢ ¿
   "              into on-disk order, padding with breaths ⸱ to satisfy the Balance Law" ⊢ ¿
   "  --unplough  rewrite an on-disk file into logical order for reading" ⊢ ¿
 ⌫ ⤵ ↵
-  input output mode ⟪ trithc_main ⟫ → _ ¿
+  input output mode debug ⟪ trithc_main ⟫ → _ ¿
 ⌫ ¿

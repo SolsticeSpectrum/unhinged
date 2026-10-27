@@ -702,6 +702,14 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
   - Inside its own antiparticle `⌁T`, a particle of type T is its representation type. Particles are created by FFI functions that return T. There is no other constructor yet (open question).
   - Indexing an array of quantum values, and storing over a quantum element, are rejected until the spec says how they avoid cloning or dropping.
   - Evidentials and charges are parsed but not yet checked (milestone 4). `⫴ ⊛ ⊙ ⟜` and `⋔` on a ψ are rejected as "not implemented yet" (milestone 5). Past-tense calls are typed like present ones until the evaluator exists.
+- **Code generation (milestone 3).**
+  - The virtual stack holds SSA names. Joins of `⋔`, `⁇` and `⥀` become `phi` nodes. A `⁼` face reuses the earlier face's block, and an `∅` face branches straight to the join. When `≶` feeds `⋔` or a `⥀` exit directly, the branch uses the comparison itself (`icmp eq`, `icmp sgt`) instead of materialising the trit. That is what brought the loop benchmark to C speed.
+  - Integer `⊘` rounds to nearest; exact halves round toward zero. `⊜` is the matching remainder `a − b·(a ⊘ b)`, so `▽○△ ○△ ⊜` (8 mod 3) is −1.
+  - `⎙` prints numbers and trits followed by a newline (trits as −1, 0, 1, as in §15.5), reals with `%.15g`, and strings exactly as written.
+  - A `⥀` that exits with `⊖` propagates failure when the function may fail. Otherwise the program stops with status 27.
+  - Future calls also run when their block is left by failure, innermost block first.
+  - Not yet: quantum values held by a function are not freed on a failure path; past-tense calls run at run time until the evaluator exists (milestone 5).
+  - `trithc --debug` builds with `-O0` and makes prayers trap. Release builds turn them into `llvm.assume`.
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
 - Mutable arrays inside `⥀`: keep threading a `⟖` through the loop stack, or allow region-scoped exclusive moments?
@@ -727,7 +735,7 @@ Milestones:
 
 1. Lexer and parser for Trith, written in UNHINGED. Golden tests cover the Boustrophedon Rule, the Balance Law, the mark registry, and fragments. **Done:** `trith/src/`, tests in `trith/tests/`, `make trith-test`.
 2. Check pass: effects, linearity, agreement. **Done:** `trith/src/check.uh`, `trithc --check`, tests in `trith/tests/check*/`.
-3. Stack-to-SSA and LLVM emission for ℤ, ŧ, `⋔`, `⥀`, functions and inside-out scope. **Benchmark gate here.**
+3. Stack-to-SSA and LLVM emission for ℤ, ŧ, `⋔`, `⥀`, functions and inside-out scope. **Benchmark gate here.** **Done:** `trith/src/emit.uh`, `trith/runtime/trith_rt.c`; also ℝ, 𝔹, string literals with `⎙`, `◌`/`⁇`/`↯`, `⊨`, prayers, future calls and call by shape. `make trith-bench` passes: fib(35) 0.97× and Collatz to 10⁶ 1.03× of `clang -O2`.
 4. ◌, arrays, strings, FFI, particles, evidentials, charges.
 5. ψ with phases, `⟜`, `⇋`, tense, prayers, call by shape.
 6. Rewrite the compiler in Trith (s2), then pass the fixpoint (s3).

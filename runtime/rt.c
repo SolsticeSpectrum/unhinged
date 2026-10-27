@@ -398,6 +398,24 @@ UhValue uh_append(UhValue arr, UhValue val) {
     return arr;
 }
 
+UhValue uh_ord(UhValue str) {
+    if (str.tag != UH_STR || str.str == NULL || str.str[0] == '\0') {
+        return uh_num(0);
+    }
+    const unsigned char *p = (const unsigned char *)str.str;
+    uint32_t cp;
+    if (p[0] < 0x80) {
+        cp = p[0];
+    } else if ((p[0] & 0xE0) == 0xC0) {
+        cp = ((uint32_t)(p[0] & 0x1F) << 6) | (p[1] & 0x3F);
+    } else if ((p[0] & 0xF0) == 0xE0) {
+        cp = ((uint32_t)(p[0] & 0x0F) << 12) | ((uint32_t)(p[1] & 0x3F) << 6) | (p[2] & 0x3F);
+    } else {
+        cp = ((uint32_t)(p[0] & 0x07) << 18) | ((uint32_t)(p[1] & 0x3F) << 12) | ((uint32_t)(p[2] & 0x3F) << 6) | (p[3] & 0x3F);
+    }
+    return uh_num((double)cp);
+}
+
 UhValue uh_pop(UhValue arr) {
     if (arr.tag != UH_ARR || arr.arr == NULL || arr.arr->len == 0) {
         return uh_null();

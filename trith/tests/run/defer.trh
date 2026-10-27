@@ -1,0 +1,8 @@
+⍝ future calls run at the end of their block, last in first out (§9.2)
+⸫ ᛈ ⟨ ⊸ ℤ ⟩ ⦃ ⎙ ⦄
+⦃
+  ᛈ̃ ▽△ ᛈ̃ △
+  ○△ ᛈ
+  ⁼ ⁼ ⦃ ᛈ △△ ᛈ̃ ○△○△ ⦄ ⋔ ⊕
+  ▽▽△ ᛈ
+⸱ ⸱ ⸫ ᛟ ⟨ ⊸ ⟩ ⦃

@@ -231,6 +231,7 @@
   parts "declare void @uh_len(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
   parts "declare void @uh_append(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
   parts "declare void @uh_pop(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
+  parts "declare void @uh_ord(ptr sret(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
   parts "declare void @uh_split(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
   parts "declare void @uh_join(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
   parts "declare void @uh_substr(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n" ⟪ .append ⟫ → parts ¿
@@ -1630,6 +1631,7 @@
   name "len" ≡ name ".len" ≡ ∨ ⤴ ↵ 【1 "uh_len"】 ⇄ ¿ ⌫ ¿
   name "append" ≡ name ".append" ≡ ∨ ⤴ ↵ 【2 "uh_append"】 ⇄ ¿ ⌫ ¿
   name "pop" ≡ name ".pop" ≡ ∨ ⤴ ↵ 【1 "uh_pop"】 ⇄ ¿ ⌫ ¿
+  name "ord" ≡ name ".ord" ≡ ∨ ⤴ ↵ 【1 "uh_ord"】 ⇄ ¿ ⌫ ¿
   name "split" ≡ name ".split" ≡ ∨ ⤴ ↵ 【2 "uh_split"】 ⇄ ¿ ⌫ ¿
   name "join" ≡ name ".join" ≡ ∨ ⤴ ↵ 【2 "uh_join"】 ⇄ ¿ ⌫ ¿
   name "substr" ≡ name ".substr" ≡ ∨ ⤴ ↵ 【3 "uh_substr"】 ⇄ ¿ ⌫ ¿

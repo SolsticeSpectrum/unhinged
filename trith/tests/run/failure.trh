@@ -1,0 +1,12 @@
+⍝ ◌ propagates through calls; ↯ fails explicitly; ⁇ handles both (§7.3)
+⸫ ᚦ ⟨ ◌ℤ ⊸ ℤ ℤ ⟩ ⦃ ⊘ ⦄
+⦃ ᚦ △ ⊞ ⦄ ⟨ ℤ ℤ ⊸ ◌ℤ ⟩ ᚧ ⸫
+⸫ ᛈ ⟨ ◌ℤ ⊸ ℤ ⟩ ⦃ ⦃ ↯ ⦄ ∅ ⦃ ↯ ⦄ ⋔ ≶ ○ ⍿⁰ ⦄
+⦃
+  ⦃ ⎙̵ «↵deliaf» ⦄ ⦃ ⎙ ⦄ ⁇ ᚧ ○△ ○△○△
+  ○△○△ ○ ᚧ ⁇ ⦃ ⎙ ⦄ ⦃ »↵deliaf« ⎙̵ ⦄
+  ⦃ ⎙̵ «↵deliaf» ⦄ ⦃ ⎙ ⦄ ⁇ ᛈ ▽△
+  ▽ ᛈ ⁇ ⦃ ⎙ ⦄ ⦃ »↵deliaf« ⎙̵ ⦄
+  ⦃ ⎙̵ «↵detsetta ton» ⦄ ⦃ ⎙ ⦄ ⁇ ⊨ ⦃ ≶ ○ ⦄
+⦄ ⟨ ℤ ⊸ ⟩ ᚨ ⸫
+⸱ ⸱ ⸫ ᛟ ⟨ ⊸ ⟩ ⦃ ᚨ ▽ ᚨ △ ⦄

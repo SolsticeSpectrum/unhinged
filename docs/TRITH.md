@@ -710,6 +710,23 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
   - Future calls also run when their block is left by failure, innermost block first.
   - Not yet: quantum values held by a function are not freed on a failure path; past-tense calls run at run time until the evaluator exists (milestone 5).
   - `trithc --debug` builds with `-O0` and makes prayers trap. Release builds turn them into `llvm.assume`.
+- **Evidentials and charges (milestone 4).**
+  - Every value carries an evidential and a charge. Operators propagate the strongest evidential (hearsay > inferred > witnessed). Calls and returns check them, `⊨` makes a value witnessed, and `⥀` re-checks its body until the carried annotations stop changing.
+  - Storing a hearsay value into a witnessed array with `⍈` is rejected, because it would launder the value.
+  - A literal is a gluon: in `⊞ ⊟ ≶` it takes the other operand's charge, and in `⊠ ⊘` it counts as neutral. Joins and loops must agree on charges.
+  - Call-by-shape keys include evidentials and charges (open question below, answered yes).
+- **Arrays, strings, particles and FFI (milestone 4).**
+  - `ʃ` and `⟦T⟧` share the layout `{ptr data, i64 len, i64 cap}`. A shadow is the same pointer, or the value itself for classical values.
+  - No array is ever empty (there is no empty literal and nothing removes elements), and every buffer has one spare byte. So `⌖` loads from a clamped position and selects the result without branching. Element accesses carry alias metadata so that LLVM knows they never overwrite array headers.
+  - `⌁` frees nested strings and arrays. Arrays whose elements are particles cannot be freed yet.
+  - There are no byte literals, so 𝔹 values come from strings (open question).
+  - Particles are made by FFI functions that return the particle type. The antiparticle receives the representation.
+  - Each `⎔` binding becomes a small C wrapper in a generated `.ffi.c` file, so the C compiler checks the call against the real prototype from the system headers (`--include` adds headers, `--link` adds C files). Type mapping:
+    - ℤ is `int64_t`, ℝ is `double`, ŧ is `int8_t`, 𝔹 is `uint8_t`.
+    - `⟗ʃ` and `⟖ʃ` are passed as NUL-terminated `char *`. An owned `ʃ` is passed the same way and freed after the call. `⟗⟦T⟧` is passed as a pointer to the elements.
+    - An `ʃ` result is copied from a `char *`.
+    - A `◌` result fails when it is negative (integers), NULL (strings) or NaN (reals).
+  - The runtime and FFI glue are compiled to LLVM IR and linked into one module before optimising, so calls into them can inline.
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
 - Mutable arrays inside `⥀`: keep threading a `⟖` through the loop stack, or allow region-scoped exclusive moments?
@@ -736,7 +753,7 @@ Milestones:
 1. Lexer and parser for Trith, written in UNHINGED. Golden tests cover the Boustrophedon Rule, the Balance Law, the mark registry, and fragments. **Done:** `trith/src/`, tests in `trith/tests/`, `make trith-test`.
 2. Check pass: effects, linearity, agreement. **Done:** `trith/src/check.uh`, `trithc --check`, tests in `trith/tests/check*/`.
 3. Stack-to-SSA and LLVM emission for ℤ, ŧ, `⋔`, `⥀`, functions and inside-out scope. **Benchmark gate here.** **Done:** `trith/src/emit.uh`, `trith/runtime/trith_rt.c`; also ℝ, 𝔹, string literals with `⎙`, `◌`/`⁇`/`↯`, `⊨`, prayers, future calls and call by shape. `make trith-bench` passes: fib(35) 0.97× and Collatz to 10⁶ 1.03× of `clang -O2`.
-4. ◌, arrays, strings, FFI, particles, evidentials, charges.
+4. ◌, arrays, strings, FFI, particles, evidentials, charges. **Done.** Benchmarks: n-body 1.06× and Game of Life 0.95× of `clang -O2`. Life's grid-size prayer (§12) lets the optimiser remove every bounds check. SHA-256 is not written yet.
 5. ψ with phases, `⟜`, `⇋`, tense, prayers, call by shape.
 6. Rewrite the compiler in Trith (s2), then pass the fixpoint (s3).
 7. Port the standard library modules.

@@ -68,7 +68,7 @@
     1 ⇄ ¿
   ⌫ ¿
   mode "check" ≡ ⤴ ↵ "ok" ⊢ ¿ 0 ⇄ ¿ ⌫ ¿
-  ps "items" ⌈ ⌉ input debug ⟪ trith_emit ⟫ → em ¿
+  ps "items" ⌈ ⌉ input debug includes ⟪ trith_emit ⟫ → em ¿
   em "err" ⌈ ⌉ ∅ ≢ ⤴ ↵
     em "err" ⌈ ⌉ ⊢ ¿
     1 ⇄ ¿
@@ -83,14 +83,47 @@
   ⌫ ¿
   "-O2" → opt ¿
   debug ⤴ ↵ "-O0 -g" → opt ¿ ⌫ ¿
-  【"clang " opt " -w -o " output " " llpath " trith/runtime/trith_rt.c 2>&1"】 "" ⟪ join ⟫ → cmd ¿
+  ⍝ C sources (runtime, FFI glue, --link files) become LLVM IR and are linked
+  ⍝ into one module before optimising, so calls into them can inline
+  【"trith/runtime/trith_rt.c"】 → csrcs ¿
+  em "glue" ⌈ ⌉ "" ≢ ⤴ ↵
+    output ".ffi.c" ⊞⊞ → gpath ¿
+    gpath em "glue" ⌈ ⌉ ⟪ write_file ⟫ → _ ¿
+    csrcs gpath ⟪ .append ⟫ ¿
+  ⌫ ¿
+  csrcs links ⊞⊞ → csrcs ¿
+  【llpath】 → lls ¿
+  0 → ci ¿
+  csrcs ⟪ len ⟫ → nc ¿
+  ci nc ≺ ⟲ ↵
+    csrcs ci ⌈ ⌉ → src ¿
+    ci ⍕ → cis ¿
+    【output ".c" cis ".ll"】 "" ⟪ join ⟫ → cll ¿
+    【"clang -S -emit-llvm " opt " -w -o " cll " " src " 2>&1"】 "" ⟪ join ⟫ → ccmd ¿
+    ccmd ⟪ syscall ⟫ → cout ¿
+    cout "" ≢ ⤴ ↵
+      cout ⊢ ¿
+      1 ⇄ ¿
+    ⌫ ¿
+    lls cll ⟪ .append ⟫ ¿
+    ci 1 ⊞ → ci ¿
+  ⌫ ¿
+  output ".bc" ⊞⊞ → bc ¿
+  lls " " ⟪ join ⟫ → llList ¿
+  【"llvm-link -o " bc " " llList " 2>&1"】 "" ⟪ join ⟫ → lcmd ¿
+  lcmd ⟪ syscall ⟫ → lout ¿
+  lout "" ≢ ⤴ ↵
+    lout ⊢ ¿
+    1 ⇄ ¿
+  ⌫ ¿
+  【"clang " opt " -w -o " output " " bc " -lm 2>&1"】 "" ⟪ join ⟫ → cmd ¿
   cmd ⟪ syscall ⟫ → out ¿
   out "" ≢ ⤴ ↵
     out ⊢ ¿
     1 ⇄ ¿
   ⌫ ¿
   0 ⇄ ¿
-↦ input ↦ output ↦ mode ↦ debug ↦ trithc_main ¿
+↦ input ↦ output ↦ mode ↦ debug ↦ includes ↦ links ↦ trithc_main ¿
 
 ⍝ main.trh → main, main.ŧ → main
 ƒ
@@ -105,6 +138,8 @@ argv ⟪ len ⟫ → argc ¿
 "" → output ¿
 "compile" → mode ¿
 ⊥ → debug ¿
+【】 → includes ¿
+【】 → links ¿
 1 → ai ¿
 ⊥ → bad ¿
 ai argc ≺ ⟲ ↵
@@ -114,6 +149,12 @@ ai argc ≺ ⟲ ↵
   ⌫ ⤵ a "--check" ≡ ⤴ ↵ "check" → mode ¿
   ⌫ ⤵ a "--emit-llvm" ≡ ⤴ ↵ "llvm" → mode ¿
   ⌫ ⤵ a "--debug" ≡ ⤴ ↵ ⊤ → debug ¿
+  ⌫ ⤵ a "--include" ≡ ⤴ ↵
+    ai 1 ⊞ → ai ¿
+    ai argc ≺ ⤴ ↵ includes argv ai ⌈ ⌉ ⟪ .append ⟫ ¿ ⌫ ⤵ ↵ ⊤ → bad ¿ ⌫ ¿
+  ⌫ ⤵ a "--link" ≡ ⤴ ↵
+    ai 1 ⊞ → ai ¿
+    ai argc ≺ ⤴ ↵ links argv ai ⌈ ⌉ ⟪ .append ⟫ ¿ ⌫ ⤵ ↵ ⊤ → bad ¿ ⌫ ¿
   ⌫ ⤵ a "--plough" ≡ ⤴ ↵ "plough" → mode ¿
   ⌫ ⤵ a "--unplough" ≡ ⤴ ↵ "unplough" → mode ¿
   ⌫ ⤵ a "-o" ≡ ⤴ ↵
@@ -128,6 +169,8 @@ input "" ≡ bad ∨ ⤴ ↵
   "usage: trithc <main.trh> [-o <output>] [--debug] [--tokens | --ast | --check | --emit-llvm | --plough | --unplough]" ⊢ ¿
   "  (default)   compile to a native binary with clang -O2 (run from the repo root)" ⊢ ¿
   "  --debug     compile with -O0; prayers (⍤) trap instead of informing the optimiser" ⊢ ¿
+  "  --include h make C header h visible to FFI bindings (⎔)" ⊢ ¿
+  "  --link f.c  compile and link C file f.c (for FFI bindings)" ⊢ ¿
   "  --tokens    print the token stream (after the Boustrophedon Rule)" ⊢ ¿
   "  --ast       print the parsed and tangled item tree" ⊢ ¿
   "  --check     type-check and print the virtual stack after every operation" ⊢ ¿
@@ -136,5 +179,5 @@ input "" ≡ bad ∨ ⤴ ↵
   "              into on-disk order, padding with breaths ⸱ to satisfy the Balance Law" ⊢ ¿
   "  --unplough  rewrite an on-disk file into logical order for reading" ⊢ ¿
 ⌫ ⤵ ↵
-  input output mode debug ⟪ trithc_main ⟫ → _ ¿
+  input output mode debug includes links ⟪ trithc_main ⟫ → _ ¿
 ⌫ ¿

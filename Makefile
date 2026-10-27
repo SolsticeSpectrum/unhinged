@@ -4,7 +4,7 @@ UNHINGEDC := build/unhingedc
 TEST_BIN := build/tests
 TRITHC := build/trithc
 TRITH_TESTS := build/trith-tests
-.PHONY: build test clean trith trith-test trith-bench
+.PHONY: build test clean trith trith-test trith-bench trith-memcheck
 
 build:
 	@mkdir -p build
@@ -26,6 +26,10 @@ trith-test: trith
 	$(UNHINGEDC) trith/tests/run.uh $(TRITH_TESTS)
 	TRITHC=$(TRITHC) $(TRITH_TESTS) | tee output/trith-tests.log
 	@! grep -q '^FAIL' output/trith-tests.log
+
+# valgrind over every program in trith/tests/run (needs valgrind)
+trith-memcheck: trith
+	TRITHC=$(TRITHC) trith/tests/memcheck.sh
 
 # benchmark gate (spec §17): each program within 1.5× of clang -O2 C
 trith-bench: trith

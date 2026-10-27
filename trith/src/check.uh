@@ -1123,7 +1123,10 @@
     ⌫ ¿
     m "ty" ⌈ ⌉ → t ¿
     t ⟪ ck_copyable ⟫ ⤴ ↵
-      C t tok depth ⟪ ck_val ⟫ → v ¿
+      ⍝ a copy of a shadow belongs to the region where the shadow was made
+      m "region" ⌈ ⌉ → rg ¿
+      m "of" ⌈ ⌉ ∅ ≡ ⤴ ↵ depth → rg ¿ ⌫ ¿
+      C t tok rg ⟪ ck_val ⟫ → v ¿
       m "of" ⌈ ⌉ → tmpv ¿
       v "of" ← tmpv ¿
       m v ⟪ ck_copy_annot ⟫ ¿
@@ -1150,7 +1153,9 @@
     n 1 ⊟ idx ⊟ → si ¿
     S si ⌈ ⌉ → v ¿
     v "ty" ⌈ ⌉ ⟪ ck_copyable ⟫ ⤴ ↵
-      C v "ty" ⌈ ⌉ tok depth ⟪ ck_val ⟫ → w ¿
+      v "region" ⌈ ⌉ → rg ¿
+      v "of" ⌈ ⌉ ∅ ≡ ⤴ ↵ depth → rg ¿ ⌫ ¿
+      C v "ty" ⌈ ⌉ tok rg ⟪ ck_val ⟫ → w ¿
       v "of" ⌈ ⌉ → tmpv ¿
       w "of" ← tmpv ¿
       v w ⟪ ck_copy_annot ⟫ ¿

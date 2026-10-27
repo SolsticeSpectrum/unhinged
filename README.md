@@ -73,14 +73,16 @@ Done so far:
 
 - Milestone 1: lexer and parser.
 - Milestone 2: the check pass (stack effects, linearity, borrows, failure, case roles, agreement).
-- Milestone 3: native code through LLVM for integers, trits, reals, bytes, string literals, `⋔`, `⥀`, failure handling, prayers and future calls. Generated code runs at C speed on the benchmarks.
+- Milestone 3: native code through LLVM for integers, trits, reals, bytes, string literals, `⋔`, `⥀`, failure handling, prayers and future calls.
+- Milestone 4: arrays and strings, borrows at run time, particles, FFI through generated C glue, and checked evidentials and charges.
 
-Arrays, borrows at run time, FFI and particles are milestone 4; superposition is milestone 5.
+Generated code runs within 0.95–1.06× of `clang -O2` C on all four benchmarks (fib, Collatz, n-body, Game of Life). Superposition is milestone 5.
 
 ```bash
 make trith          # builds build/trithc
 make trith-test     # golden tests in trith/tests/ (also run by make test)
 make trith-bench    # benchmark gate: each program within 1.5× of clang -O2 C
+make trith-memcheck # valgrind over every test program: no invalid accesses, no leaks
 
 ./build/trithc main.trh -o main      # compile (run from the repo root; needs clang)
 ./build/trithc main.trh --emit-llvm  # print the generated LLVM IR

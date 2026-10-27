@@ -1,0 +1,9 @@
+⍝ strings are byte arrays (§11): length, bytes, appending, nested ⌁
+⦄
+  »↵ẞṭịrt« ⟗ ⍴̱ ⎙
+  ⦃ ⦄ ⦃ ⎙ ⦄ ⁇ ⌖̱ ▽ ⟗
+  ⟗ ⎙̱
+  ⎙̵ ⍆̵ ⧗⁰ ⍆̵ ⧗⁰ ⌁̵ ⧖ ⌖̱ ○ ⟗ «!»
+  ⟦ »a« »b« ⟧ ⌁̵
+  ⌁̵ ⟦ ⟦ ▽△ ⟧ ⟦ △ ⟧ ⟧
+⦄ ⟨ ⊸ ◌ ⟩ ᛟ ⸫

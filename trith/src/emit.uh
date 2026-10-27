@@ -4,6 +4,9 @@
 ⍝ the same IR clang emits for the equivalent C.
 ⍝ Stack entries: ❴ty, v, ok, role❵; for ◌T, v is the T and ok the i1 flag.
 
+⍝ particle type → representation type (§8.6), filled by trith_emit
+❴❵ → EM_PARTICLES ¿
+
 ⍝ ---- IR text helpers
 
 ƒ
@@ -75,8 +78,72 @@
     inner ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
     【"{" inner ", i1}"】 ⟪ em_cat ⟫ ⇄ ¿
   ⌫ ¿
+  t ⟪ ck_head ⟫ → h ¿
+  h "⟦" ≡ ⤴ ↵ "ptr" ⇄ ¿ ⌫ ¿
+  h "⟗" ≡ h "⟖" ≡ ∨ ⤴ ↵
+    t ⟪ ck_tail ⟫ → inner ¿
+    inner ⟪ ck_copyable ⟫ ⤴ ↵ inner ⟪ em_llty ⟫ ⇄ ¿ ⌫ ¿
+    "ptr" ⇄ ¿
+  ⌫ ¿
+  t EM_PARTICLES ∈ ⤴ ↵ EM_PARTICLES t ⌈ ⌉ ⟪ em_llty ⟫ ⇄ ¿ ⌫ ¿
   ∅ ⇄ ¿
 ↦ t ↦ em_llty ¿
+
+⍝ ---- containers: ʃ and ⟦T⟧ share the layout { ptr data, i64 len, i64 cap }
+
+ƒ
+  t ⟪ ck_head ⟫ → h ¿
+  h "⟗" ≡ h "⟖" ≡ ∨ ⤴ ↵ t ⟪ ck_tail ⟫ ⇄ ¿ ⌫ ¿
+  t ⇄ ¿
+↦ t ↦ em_strip_ref ¿
+
+⍝ element type of a string or array type (shadows allowed)
+ƒ
+  t ⟪ em_strip_ref ⟫ → b ¿
+  b "ʃ" ≡ ⤴ ↵ "𝔹" ⇄ ¿ ⌫ ¿
+  b 1 b ⟪ len ⟫ 2 ⊟ ⟪ substr ⟫ ⇄ ¿
+↦ t ↦ em_elem ¿
+
+ƒ
+  lt "i8" ≡ lt "i1" ≡ ∨ ⤴ ↵ "1" ⇄ ¿ ⌫ ¿
+  "8" ⇄ ¿
+↦ lt ↦ em_size ¿
+
+ƒ
+  lt "double" ≡ ⤴ ↵ "0.0" ⇄ ¿ ⌫ ¿
+  lt "ptr" ≡ ⤴ ↵ "null" ⇄ ¿ ⌫ ¿
+  lt ⟪ ck_head ⟫ "{" ≡ ⤴ ↵ "zeroinitializer" ⇄ ¿ ⌫ ¿
+  "0" ⇄ ¿
+↦ lt ↦ em_zero ¿
+
+⍝ nesting depth of quantum elements inside a container type; ∅ if unsupported
+ƒ
+  t "ʃ" ≡ ⤴ ↵ 0 ⇄ ¿ ⌫ ¿
+  t ⟪ em_elem ⟫ → el ¿
+  el ⟪ ck_copyable ⟫ ⤴ ↵ 0 ⇄ ¿ ⌫ ¿
+  el "ʃ" ≡ el ⟪ ck_head ⟫ "⟦" ≡ ∨ ⤴ ↵
+    el ⟪ em_levels ⟫ → inner ¿
+    inner ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    inner 1 ⊞ ⇄ ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ t ↦ em_levels ¿
+
+⍝ load field k (0 data, 1 len) of a container
+ƒ
+  k "0" ≡ ⤴ ↵ E 【"load ptr, ptr " a ", !tbaa !5"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ ⇄ ¿ ⌫ ¿
+  E 【"getelementptr inbounds %trith.arr, ptr " a ", i32 0, i32 " k】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → p ¿
+  E 【"load i64, ptr " p ", !tbaa !4"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ ⇄ ¿
+↦ E ↦ a ↦ k ↦ em_field ¿
+
+⍝ centre-based index (§11): position i + len/2, checked against len
+ƒ
+  E a "1" ⟪ em_field ⟫ → ln ¿
+  E 【"lshr i64 " ln ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → half ¿
+  E 【"add i64 " i ", " half】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → pos ¿
+  E 【"icmp ult i64 " pos ", " ln】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
+  【pos ok】 ⇄ ¿
+↦ E ↦ a ↦ i ↦ em_position ¿
 
 ⍝ LLVM type of the v part of an entry (◌T → T); ∅ for a bare ◌
 ƒ
@@ -92,7 +159,7 @@
 ƒ
   t ⟪ em_llty ⟫ ∅ ≢ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
   t ⟪ ck_head ⟫ → h ¿
-  "4" → m ¿
+  "5" → m ¿
   h "ψ" ≡ ⤴ ↵ "5" → m ¿ ⌫ ¿
   E tok 【"code generation for " t " arrives in milestone " m】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
   ∅ ⇄ ¿
@@ -267,6 +334,25 @@
   ⌫ ¿
   args ", " ⟪ join ⟫ → argText ¿
   outs ⟪ em_ret_ty ⟫ → rt ¿
+  f "ffi" ⌈ ⌉ ⊤ ≡ outs ⟪ len ⟫ 1 ≡ ∧ ⤴ ↵
+    outs 0 ⌈ ⌉ → o ¿
+    o ⟪ em_is_fail ⟫ ⤴ ↵
+      o ⟪ em_ffi_base ⟫ → base ¿
+      base ⟪ em_llty ⟫ → blt ¿
+      E 【"call " blt " " sym "(" argText ")"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → raw ¿
+      blt "ptr" ≡ ⤴ ↵
+        E 【"icmp ne ptr " raw ", null"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
+      ⌫ ⤵ blt "double" ≡ ⤴ ↵
+        E 【"fcmp ord double " raw ", 0.0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
+      ⌫ ⤵ ↵
+        E 【"icmp sge " blt " " raw ", 0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
+      ⌫ ¿
+      ∅ → v ¿
+      o "◌" ≢ ⤴ ↵ raw → v ¿ ⌫ ¿
+      S o v ok ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+      ∅ ⇄ ¿
+    ⌫ ¿
+  ⌫ ¿
   【"call " rt " " sym "(" argText ")"】 ⟪ em_cat ⟫ → callText ¿
   future ⤴ ↵
     E "defers" ⌈ ⌉ → fs ¿
@@ -464,11 +550,26 @@
   ⌫ ¿
   x "⚇" ≡ ⤴ ↵ 【】 ea ∅ ⟪ em_with_role ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
   x "⌁" ≡ ⤴ ↵
-    ty "ʃ" ≡ ty "◌ʃ" ≡ ∨ ⤴ ↵ E 【"call void @trith_str_free(ptr " a ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿ ⌫ ¿
+    ty → base ¿
+    ty ⟪ em_is_fail ⟫ ty "◌" ≢ ∧ ⤴ ↵ ty ⟪ ck_tail ⟫ → base ¿ ⌫ ¿
+    base ⟪ ck_copyable ⟫ ⤴ ↵ 【】 ⇄ ¿ ⌫ ¿
+    base EM_PARTICLES ∈ ⤴ ↵
+      ty base ≢ ⤴ ↵ E tok "code generation for ⌁ on a possibly-failed particle arrives later" ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+      【"⌁" base】 ⟪ em_cat ⟫ → anti ¿
+      E "fns" ⌈ ⌉ anti ⌈ ⌉ "sym" ⌈ ⌉ → asym ¿
+      base ⟪ em_llty ⟫ → plt ¿
+      E 【"call void " asym "(" plt " " a ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+      【】 ⇄ ¿
+    ⌫ ¿
+    base ⟪ em_levels ⟫ → lv ¿
+    lv ∅ ≡ ⤴ ↵ E tok 【"code generation for ⌁ on " base " (elements with antiparticles) is not supported yet"】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+    lv ⍕ → lvs ¿
+    E 【"call void @trith_arr_free(ptr " a ", i64 " lvs ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
     【】 ⇄ ¿
   ⌫ ¿
   x "⎙" ≡ ⤴ ↵
     ty "ʃ" ≡ ⤴ ↵ E 【"call void @trith_print_str(ptr " a ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿ 【】 ⇄ ¿ ⌫ ¿
+    ty "⟗ʃ" ≡ ⤴ ↵ E 【"call void @trith_print_str_ref(ptr " a ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿ 【】 ⇄ ¿ ⌫ ¿
     real ⤴ ↵ E 【"call void @trith_print_f64(double " a ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿ 【】 ⇄ ¿ ⌫ ¿
     a → w ¿
     lt "i64" ≢ ⤴ ↵
@@ -478,8 +579,49 @@
     E 【"call void @trith_print_i64(i64 " w ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
     【】 ⇄ ¿
   ⌫ ¿
-  "4" → m ¿
-  x "⫴" ≡ x "⊛" ≡ ∨ x "⊙" ≡ ∨ x "⟜" ≡ ∨ ⤴ ↵ "5" → m ¿ ⌫ ¿
+  x "⍴" ≡ ⤴ ↵
+    E a "1" ⟪ em_field ⟫ → r ¿
+    【】 "ℤ" r ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⌖" ≡ x "⍈" ≡ ∨ ⤴ ↵
+    ty ⟪ em_elem ⟫ → et ¿
+    et ⟪ em_llty ⟫ → elt ¿
+    E a b ⟪ em_position ⟫ → po ¿
+    po 0 ⌈ ⌉ → pos ¿
+    po 1 ⌈ ⌉ → ok ¿
+    x "⌖" ≡ ⤴ ↵
+      ⍝ no array is ever empty (and strings keep a spare byte), so position 0
+      ⍝ is always loadable: clamp instead of branching
+      E 【"select i1 " ok ", i64 " pos ", i64 0"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → safe ¿
+      E a "0" ⟪ em_field ⟫ → data ¿
+      E 【"getelementptr inbounds " elt ", ptr " data ", i64 " safe】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → slot ¿
+      E 【"load " elt ", ptr " slot ", !tbaa !6"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → got ¿
+      elt ⟪ em_zero ⟫ → z ¿
+      E 【"select i1 " ok ", " elt " " got ", " elt " " z】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → r ¿
+      【"◌" et】 ⟪ em_cat ⟫ → rt ¿
+      【】 rt r ok ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+    ⌫ ¿
+    E ⟪ em_label ⟫ → lin ¿
+    E ⟪ em_label ⟫ → lj ¿
+    E 【"br i1 " ok ", label %" lin ", label %" lj】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    E lin ⟪ em_start ⟫ ¿
+    E a "0" ⟪ em_field ⟫ → data ¿
+    E 【"getelementptr inbounds " elt ", ptr " data ", i64 " pos】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → slot ¿
+    vals 2 ⌈ ⌉ "v" ⌈ ⌉ → sv ¿
+    E 【"store " elt " " sv ", ptr " slot ", !tbaa !6"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    E 【"br label %" lj】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    E lj ⟪ em_start ⟫ ¿
+    【】 "◌" ∅ ok ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⍆" ≡ ⤴ ↵
+    ty ⟪ em_elem ⟫ → et ¿
+    et ⟪ em_llty ⟫ → elt ¿
+    elt ⟪ em_size ⟫ → sz ¿
+    E 【"call ptr @trith_arr_push(ptr " a ", i64 " sz ")"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → slot ¿
+    E 【"store " elt " " b ", ptr " slot ", !tbaa !6"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    【】 ty a ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  "5" → m ¿
   E tok 【"code generation for " x " arrives in milestone " m】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
   ∅ ⇄ ¿
 ↦ E ↦ tok ↦ vals ↦ em_glyph_values ¿
@@ -625,6 +767,24 @@
   r ⇄ ¿
 ↦ E ↦ ops ↦ S ↦ em_sub ¿
 
+⍝ what a predicate sees: copies of classical values, shadows of quantum ones
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  vals ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    vals i ⌈ ⌉ → e ¿
+    e "ty" ⌈ ⌉ → t ¿
+    t ⟪ ck_copyable ⟫ ⤴ ↵ out e ⟪ .append ⟫ ¿ ⌫ ⤵ ↵
+      【"⟗" t】 ⟪ em_cat ⟫ → st ¿
+      e "v" ⌈ ⌉ → ev ¿
+      out st ev ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ vals ↦ em_shadows ¿
+
 ƒ
   ⍝ predicate value for ⍤ / ⊨: run ops on vals, return the trit
   E ops vals ⟪ em_sub ⟫ → r ¿
@@ -699,6 +859,12 @@
           S rest ⟪ em_concat_into ⟫ ¿
         ⌫ ¿
         S e role ⟪ em_with_role ⟫ ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "⟗" ≡ x "⟖" ≡ ∨ ⤴ ↵
+        S S ⟪ len ⟫ 1 ⊟ ⌈ ⌉ → e ¿
+        e "ty" ⌈ ⌉ → et ¿
+        e "v" ⌈ ⌉ → ev ¿
+        【x et】 ⟪ em_cat ⟫ → st ¿
+        S st ev ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
       ⌫ ⤵ x "↯" ≡ ⤴ ↵
         E ⟪ em_fail_exit ⟫ ¿
         ⊤ → dead ¿
@@ -722,8 +888,8 @@
       ⍝ x ⦃pred⦄ ⊨  →  ◌T with ok = (pred = ⊕)
       S 1 ⟪ em_pop ⟫ 0 ⌈ ⌉ → x ¿
       E x ⟪ em_unwrap ⟫ → x ¿
-      x "ty" ⌈ ⌉ ⟪ ck_copyable ⟫ ¬ ⤴ ↵ E tok "code generation for ⊨ on quantum values arrives in milestone 4" ⟪ em_err ⟫ ¿ ⊗ ¿ ⌫ ¿
-      E op "block" ⌈ ⌉ "ops" ⌈ ⌉ 【x】 ⟪ em_predicate ⟫ → t ¿
+      【x】 ⟪ em_shadows ⟫ → pvals ¿
+      E op "block" ⌈ ⌉ "ops" ⌈ ⌉ pvals ⟪ em_predicate ⟫ → t ¿
       E 【"icmp eq i8 " t ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
       x "ty" ⌈ ⌉ → xt ¿
       x "v" ⌈ ⌉ → xv ¿
@@ -731,7 +897,7 @@
       oi 1 ⊞ → oi ¿
     ⌫ ⤵ k "prayer" ≡ ⤴ ↵
       tok "idx" ⌈ ⌉ → pn ¿
-      S S ⟪ len ⟫ pn ⊟ S ⟪ len ⟫ ⟪ lx_slice ⟫ → vals ¿
+      S S ⟪ len ⟫ pn ⊟ S ⟪ len ⟫ ⟪ lx_slice ⟫ ⟪ em_shadows ⟫ → vals ¿
       E op "block" ⌈ ⌉ "ops" ⌈ ⌉ vals ⟪ em_predicate ⟫ → t ¿
       t ∅ ≢ ⤴ ↵
         E 【"icmp eq i8 " t ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → c ¿
@@ -909,9 +1075,34 @@
         BS → S ¿
         strand r "strand" ⌈ ⌉ ⊞⊞ → strand ¿
       ⌫ ¿
+    ⌫ ⤵ k "array" ≡ ⤴ ↵
+      E op "ops" ⌈ ⌉ 【】 ⟪ em_sub ⟫ → r ¿
+      E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      r "stack" ⌈ ⌉ → els ¿
+      els ⟪ len ⟫ → ne ¿
+      els 0 ⌈ ⌉ "ty" ⌈ ⌉ → et ¿
+      et ⟪ em_llty ⟫ → elt ¿
+      elt ⟪ em_size ⟫ → sz ¿
+      ne ⍕ → nes ¿
+      E 【"call ptr @trith_arr_new(i64 " sz ", i64 " nes ")"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → arr ¿
+      E arr "0" ⟪ em_field ⟫ → data ¿
+      0 → q ¿
+      q ne ≺ ⟲ ↵
+        q ⍕ → qs ¿
+        els q ⌈ ⌉ "v" ⌈ ⌉ → ev ¿
+        E 【"getelementptr inbounds " elt ", ptr " data ", i64 " qs】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → slot ¿
+        E 【"store " elt " " ev ", ptr " slot ", !tbaa !6"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+        q 1 ⊞ → q ¿
+      ⌫ ¿
+      【"⟦" et "⟧"】 ⟪ em_cat ⟫ → at ¿
+      S at arr ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+    ⌫ ⤵ k "anti-call" ≡ ⤴ ↵
+      tok "text" ⌈ ⌉ → pt ¿
+      【"⌁" pt】 ⟪ em_cat ⟫ → anti ¿
+      E "fns" ⌈ ⌉ anti ⌈ ⌉ → f ¿
+      E S f ⊥ ⟪ em_call ⟫ ¿
     ⌫ ⤵ ↵
-      "4" → m ¿
-      k "postselect" ≡ k "rselect" ≡ ∨ k "inverse-call" ≡ ∨ ⤴ ↵ "5" → m ¿ ⌫ ¿
+      "5" → m ¿
       tok ⟪ ck_label ⟫ → lbl ¿
       E tok 【"code generation for " lbl " arrives in milestone " m】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
     ⌫ ¿
@@ -983,7 +1174,9 @@
   i n ≺ ⟲ ↵
     i ⍕ → is ¿
     【"%a" is】 ⟪ em_cat ⟫ → pn ¿
-    S E ins i ⌈ ⌉ pn ⟪ em_unpack ⟫ ⟪ .append ⟫ ¿
+    ins i ⌈ ⌉ → pty ¿
+    nm ⟪ ck_head ⟫ "⌁" ≡ pty EM_PARTICLES ∈ ∧ ⤴ ↵ EM_PARTICLES pty ⌈ ⌉ → pty ¿ ⌫ ¿
+    S E pty pn ⟪ em_unpack ⟫ ⟪ .append ⟫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
   E ⟪ em_push_frame ⟫ ¿
@@ -1019,6 +1212,93 @@
   ∅ ⇄ ¿
 ↦ E ↦ it ↦ f ↦ em_function ¿
 
+⍝ ---- FFI (§14): a C wrapper per binding, so C converts to the real prototype
+
+ƒ
+  o "◌" ≡ ⤴ ↵ "ℤ" ⇄ ¿ ⌫ ¿
+  o ⟪ em_is_fail ⟫ ⤴ ↵ o ⟪ ck_tail ⟫ ⇄ ¿ ⌫ ¿
+  o ⇄ ¿
+↦ o ↦ em_ffi_base ¿
+
+ƒ
+  t EM_PARTICLES ∈ ⤴ ↵ EM_PARTICLES t ⌈ ⌉ ⟪ em_ctype ⟫ ⇄ ¿ ⌫ ¿
+  t "ℤ" ≡ ⤴ ↵ "int64_t" ⇄ ¿ ⌫ ¿
+  t "ℝ" ≡ ⤴ ↵ "double" ⇄ ¿ ⌫ ¿
+  t "ŧ" ≡ ⤴ ↵ "int8_t" ⇄ ¿ ⌫ ¿
+  t "𝔹" ≡ ⤴ ↵ "uint8_t" ⇄ ¿ ⌫ ¿
+  t ⟪ em_strip_ref ⟫ → b ¿
+  b "ʃ" ≡ b ⟪ ck_head ⟫ "⟦" ≡ ∨ ⤴ ↵ "TrithStr *" ⇄ ¿ ⌫ ¿
+  t ⟪ ck_head ⟫ "⟗" ≡ ⤴ ↵ b ⟪ em_ctype ⟫ ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ t ↦ em_ctype ¿
+
+⍝ C wrapper for binding it; returns ❴sym, decl, c❵
+ƒ
+  f "ins" ⌈ ⌉ → ins ¿
+  f "outs" ⌈ ⌉ → outs ¿
+  it "tok" ⌈ ⌉ → tok ¿
+  it "cname" ⌈ ⌉ → cname ¿
+  k ⍕ → ks ¿
+  【"trith_ffi_" ks】 ⟪ em_cat ⟫ → cfn ¿
+  outs ⟪ len ⟫ 1 ≻ ⤴ ↵ E tok "an FFI binding returns at most one value" ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  【】 → cps ¿
+  【】 → lps ¿
+  【】 → cargs ¿
+  【】 → frees ¿
+  0 → i ¿
+  ins ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ins i ⌈ ⌉ → t ¿
+    t ⟪ em_ctype ⟫ → ct ¿
+    ct ∅ ≡ ⤴ ↵ E tok 【"an FFI binding cannot take " t】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+    i ⍕ → is ¿
+    【"a" is】 ⟪ em_cat ⟫ → an ¿
+    cps 【ct " " an】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    lps t ⟪ em_llty ⟫ ⟪ .append ⟫ ¿
+    t ⟪ em_strip_ref ⟫ → b ¿
+    b "ʃ" ≡ ⤴ ↵
+      cargs 【"trith_str_cstr(" an ")"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+      t "ʃ" ≡ ⤴ ↵ frees 【"    trith_str_free(" an ");"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿ ⌫ ¿
+    ⌫ ⤵ b ⟪ ck_head ⟫ "⟦" ≡ ⤴ ↵
+      t b ≡ ⤴ ↵ E tok "an FFI binding takes arrays only as shadows ⟗⟦T⟧ or ⟖⟦T⟧" ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+      cargs 【"(void *)" an "->ptr"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    ⌫ ⤵ ↵
+      cargs an ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  cps ", " ⟪ join ⟫ → cpt ¿
+  cpt "" ≡ ⤴ ↵ "void" → cpt ¿ ⌫ ¿
+  cargs ", " ⟪ join ⟫ → cat ¿
+  lps ", " ⟪ join ⟫ → lpt ¿
+  frees "\n" ⟪ join ⟫ → fr ¿
+  【cname "(" cat ")"】 ⟪ em_cat ⟫ → callx ¿
+  【】 → body ¿
+  outs ⟪ len ⟫ 0 ≡ ⤴ ↵
+    "void" → cret ¿
+    "void" → lret ¿
+    body 【"    " callx ";"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    fr "" ≢ ⤴ ↵ body fr ⟪ .append ⟫ ¿ ⌫ ¿
+  ⌫ ⤵ ↵
+    outs 0 ⌈ ⌉ ⟪ em_ffi_base ⟫ → base ¿
+    base ⟪ em_ctype ⟫ → cret ¿
+    cret ∅ ≡ base ⟪ ck_head ⟫ "⟦" ≡ ∨ ⤴ ↵ E tok 【"an FFI binding cannot return " base】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+    base ⟪ em_llty ⟫ → lret ¿
+    base "ʃ" ≡ ⤴ ↵
+      body 【"    TrithStr *r = trith_str_from_cstr(" callx ");"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    ⌫ ⤵ ↵
+      body 【"    " cret " r = (" cret ")" callx ";"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+    ⌫ ¿
+    fr "" ≢ ⤴ ↵ body fr ⟪ .append ⟫ ¿ ⌫ ¿
+    body "    return r;" ⟪ .append ⟫ ¿
+  ⌫ ¿
+  body "\n" ⟪ join ⟫ → bt ¿
+  【"\n" cret " " cfn "(" cpt ") {\n" bt "\n}"】 ⟪ em_cat ⟫ → c ¿
+  【"declare " lret " @" cfn "(" lpt ")"】 ⟪ em_cat ⟫ → decl ¿
+  【"@" cfn】 ⟪ em_cat ⟫ → sym ¿
+  ❴"sym": sym, "decl": decl, "c": c❵ ⇄ ¿
+↦ E ↦ it ↦ f ↦ k ↦ em_ffi ¿
+
 ⍝ items (checked) → ❴ir, err❵
 ƒ
   ❴"err": ∅, "path": path, "sn": 0, "debug": debug❵ → E ¿
@@ -1034,13 +1314,33 @@
   items ⟪ len ⟫ → n ¿
   i n ≺ ⟲ ↵
     items i ⌈ ⌉ → it ¿
-    it "kind" ⌈ ⌉ "fn" ≢ ⤴ ↵
-      E it "tok" ⌈ ⌉ "code generation for particles and FFI bindings arrives in milestone 4" ⟪ em_err ⟫ ¿
-      ⊗ ¿
+    it "kind" ⌈ ⌉ "particle" ≡ ⤴ ↵
+      it "rep" ⌈ ⌉ ⟪ ck_canon ⟫ → rp ¿
+      EM_PARTICLES it "name" ⌈ ⌉ ← rp ¿
     ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  0 → nffi ¿
+  【】 → glue ¿
+  【】 → decls ¿
+  i n ≺ ⟲ ↵
+    items i ⌈ ⌉ → it ¿
+    it "kind" ⌈ ⌉ "particle" ≡ ⤴ ↵ i 1 ⊞ → i ¿ ⊕ ¿ ⌫ ¿
     it "sig" ⌈ ⌉ it "rev" ⌈ ⌉ it "name" ⌈ ⌉ ⟪ ck_fn_info ⟫ → f ¿
     it "name" ⌈ ⌉ → nm ¿
-    f "sym" ← 【"@\"trith." nm "\""】 ⟪ em_cat ⟫ ¿
+    【"@\"trith." nm "\""】 ⟪ em_cat ⟫ → fsym ¿
+    f "sym" ← fsym ¿
+    it "kind" ⌈ ⌉ "ffi" ≡ ⤴ ↵
+      E it f nffi ⟪ em_ffi ⟫ → g ¿
+      E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      g "sym" ⌈ ⌉ → gsym ¿
+      f "sym" ← gsym ¿
+      f "ffi" ← ⊤ ¿
+      glue g "c" ⌈ ⌉ ⟪ .append ⟫ ¿
+      decls g "decl" ⌈ ⌉ ⟪ .append ⟫ ¿
+      nffi 1 ⊞ → nffi ¿
+    ⌫ ¿
     fns nm ← f ¿
     it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → key ¿
     key shapes ∈ ¬ ⤴ ↵ shapes key ← 【】 ¿ ⌫ ¿
@@ -1052,13 +1352,19 @@
   0 → i ¿
   i n ≺ E ⟪ em_failed ⟫ ¬ ∧ ⟲ ↵
     items i ⌈ ⌉ → it ¿
-    E it fns it "name" ⌈ ⌉ ⌈ ⌉ ⟪ em_function ⟫ ¿
+    it "kind" ⌈ ⌉ "fn" ≡ ⤴ ↵ E it fns it "name" ⌈ ⌉ ⌈ ⌉ ⟪ em_function ⟫ ¿ ⌫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
   E "err" ⌈ ⌉ → err ¿
-  err ∅ ≢ ⤴ ↵ ❴"ir": "", "err": err❵ ⇄ ¿ ⌫ ¿
+  err ∅ ≢ ⤴ ↵ ❴"ir": "", "err": err, "glue": ""❵ ⇄ ¿ ⌫ ¿
   【】 → out ¿
   out "; generated by trithc (s1)" ⟪ .append ⟫ ¿
+  out "%trith.arr = type { ptr, i64, i64 }" ⟪ .append ⟫ ¿
+  out "declare ptr @trith_arr_new(i64, i64)" ⟪ .append ⟫ ¿
+  out "declare ptr @trith_arr_push(ptr, i64)" ⟪ .append ⟫ ¿
+  out "declare void @trith_arr_free(ptr, i64)" ⟪ .append ⟫ ¿
+  out "declare void @trith_print_str_ref(ptr)" ⟪ .append ⟫ ¿
+  out decls ⟪ em_concat_into ⟫ ¿
   out "declare ptr @trith_str_new(ptr, i64)" ⟪ .append ⟫ ¿
   out "declare void @trith_str_free(ptr)" ⟪ .append ⟫ ¿
   out "declare void @trith_print_str(ptr)" ⟪ .append ⟫ ¿
@@ -1087,6 +1393,40 @@
     out "  ret i32 27" ⟪ .append ⟫ ¿
   ⌫ ¿
   out "}" ⟪ .append ⟫ ¿
+  ⍝ alias classes: array headers (len, data) never alias array elements
+  out "!0 = !{!\"trith tbaa\"}" ⟪ .append ⟫ ¿
+  out "!1 = !{!\"trith.len\", !0, i64 0}" ⟪ .append ⟫ ¿
+  out "!2 = !{!\"trith.data\", !0, i64 0}" ⟪ .append ⟫ ¿
+  out "!3 = !{!\"trith.elem\", !0, i64 0}" ⟪ .append ⟫ ¿
+  out "!4 = !{!1, !1, i64 0}" ⟪ .append ⟫ ¿
+  out "!5 = !{!2, !2, i64 0}" ⟪ .append ⟫ ¿
+  out "!6 = !{!3, !3, i64 0}" ⟪ .append ⟫ ¿
   out "\n" ⟪ join ⟫ → ir ¿
-  ❴"ir": ir, "err": ∅❵ ⇄ ¿
-↦ items ↦ path ↦ debug ↦ trith_emit ¿
+  "" → gluec ¿
+  glue ⟪ len ⟫ 0 ≻ ⤴ ↵
+    【】 → gl ¿
+    gl "/* FFI glue generated by trithc: the C compiler sees the real prototypes */" ⟪ .append ⟫ ¿
+    gl "#include <fcntl.h>" ⟪ .append ⟫ ¿
+    gl "#include <math.h>" ⟪ .append ⟫ ¿
+    gl "#include <stdint.h>" ⟪ .append ⟫ ¿
+    gl "#include <stdio.h>" ⟪ .append ⟫ ¿
+    gl "#include <stdlib.h>" ⟪ .append ⟫ ¿
+    gl "#include <string.h>" ⟪ .append ⟫ ¿
+    gl "#include <time.h>" ⟪ .append ⟫ ¿
+    gl "#include <unistd.h>" ⟪ .append ⟫ ¿
+    0 → q ¿
+    includes ⟪ len ⟫ → nq ¿
+    q nq ≺ ⟲ ↵
+      includes q ⌈ ⌉ → inc ¿
+      gl 【"#include \"" inc "\""】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+      q 1 ⊞ → q ¿
+    ⌫ ¿
+    gl "typedef struct { char *ptr; int64_t len; int64_t cap; } TrithStr;" ⟪ .append ⟫ ¿
+    gl "const char *trith_str_cstr(TrithStr *s);" ⟪ .append ⟫ ¿
+    gl "TrithStr *trith_str_from_cstr(const char *c);" ⟪ .append ⟫ ¿
+    gl "void trith_str_free(TrithStr *s);" ⟪ .append ⟫ ¿
+    gl glue ⟪ em_concat_into ⟫ ¿
+    gl "\n" ⟪ join ⟫ → gluec ¿
+  ⌫ ¿
+  ❴"ir": ir, "err": ∅, "glue": gluec❵ ⇄ ¿
+↦ items ↦ path ↦ debug ↦ includes ↦ trith_emit ¿

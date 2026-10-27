@@ -1,0 +1,2 @@
+fn ᚠ ⟨ℤ⁽u⁾ ⊸ ⟩  start [ℤ⁽u⁾]
+trith/tests/check_errors/charge_loop.trh:1:3: error: charge violation: a value carried by ⥀ changes its charge on every iteration (§3.2)

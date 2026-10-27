@@ -1,0 +1,8 @@
+fn ᚠ ⟨ℤ⁽u⁾ ⊸ ℤ⁽u⁾⟩  start [ℤ⁽u⁾]
+  ⊕  ⊢ [ℤ⁽u⁾ ŧ]
+    face ⦶
+    face ⊕
+      ⍿⁰  ⊢ [ℤ⁽u⁾ ℤ⁽u⁾]
+      ⊠  ⊢ [ℤ⁽u^2⁾]
+    face ⊖
+trith/tests/check_errors/charge_join.trh:1:5: error: charge violation: ⋔ joins ℤ⁽u⁾ with ℤ⁽u^2⁾ (§3.2)

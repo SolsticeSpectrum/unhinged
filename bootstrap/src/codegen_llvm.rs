@@ -128,6 +128,7 @@ fn emit_header(ctx: &mut EmitCtx) {
     ctx.out.push_str("declare void @uh_append(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n");
     ctx.out.push_str("declare void @uh_pop(ptr sret(%UhValue), ptr byval(%UhValue))\n");
     ctx.out.push_str("declare void @uh_ord(ptr sret(%UhValue), ptr byval(%UhValue))\n");
+    ctx.out.push_str("declare void @uh_chars(ptr sret(%UhValue), ptr byval(%UhValue))\n");
     ctx.out.push_str("declare void @uh_split(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n");
     ctx.out.push_str("declare void @uh_join(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n");
     ctx.out.push_str("declare void @uh_substr(ptr sret(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue), ptr byval(%UhValue))\n");
@@ -755,6 +756,7 @@ fn builtin_call(name: &str) -> Option<(usize, &'static str)> {
         "append" | ".append" => Some((2, "uh_append")),
         "pop" | ".pop" => Some((1, "uh_pop")),
         "ord" | ".ord" => Some((1, "uh_ord")),
+        "chars" | ".chars" => Some((1, "uh_chars")),
         "split" | ".split" => Some((2, "uh_split")),
         "join" | ".join" => Some((2, "uh_join")),
         "substr" | ".substr" => Some((3, "uh_substr")),

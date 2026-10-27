@@ -3,22 +3,12 @@
 ƒ
   【】 → tokens ¿
   0 → i ¿
-  ⍝ Count Unicode codepoints for correct tokenization
-  0 → n ¿
-  0 → ti ¿
-  ⊥ → done ¿
-  done ⊥ ≡ ⟲ ↵
-    src ti ⟪ char_at ⟫ → tch ¿
-    tch "" ≡ ⤴ ↵
-      ⊤ → done ¿
-      ⊕ ¿
-    ⌫ ¿
-    ti 1 ⊞ → ti ¿
-  ⌫ ¿
-  ti → n ¿
+  ⍝ Split into code points once; indexing the string itself is O(n) per call
+  src ⟪ chars ⟫ → cs ¿
+  cs ⟪ len ⟫ → n ¿
 
   i n ≺ ⟲ ↵
-    src i ⟪ char_at ⟫ → ch ¿
+    cs i ⌈ ⌉ → ch ¿
 
     ch " " ≡ ch "\n" ≡ ∨ ch "\t" ≡ ∨ ⤴ ↵
       i 1 ⊞ → i ¿
@@ -33,7 +23,7 @@
     ch "⍝" ≡ ⤴ ↵
       i 1 ⊞ → i ¿
       i n ≺ ⟲ ↵
-        src i ⟪ char_at ⟫ → c2 ¿
+        cs i ⌈ ⌉ → c2 ¿
         c2 "\n" ≡ ⤴ ↵
           i 1 ⊞ → i ¿
           ⊗ ¿
@@ -47,7 +37,7 @@
       i 1 ⊞ → i ¿
       "" → buf ¿
       i n ≺ ⟲ ↵
-        src i ⟪ char_at ⟫ → c3 ¿
+        cs i ⌈ ⌉ → c3 ¿
         c3 "\"" ≡ ⤴ ↵
           i 1 ⊞ → i ¿
           ⊗ ¿
@@ -55,7 +45,7 @@
         c3 "\\" ≡ ⤴ ↵
           i 1 ⊞ → i ¿
           i n ≺ ⤴ ↵
-            src i ⟪ char_at ⟫ → esc ¿
+            cs i ⌈ ⌉ → esc ¿
             esc "n" ≡ ⤴ ↵ "\n" → esc ¿ ⌫ ¿
             esc "r" ≡ ⤴ ↵ "\r" → esc ¿ ⌫ ¿
             esc "t" ≡ ⤴ ↵ "\t" → esc ¿ ⌫ ¿
@@ -78,7 +68,7 @@
       i → start ¿
       ⊥ → sawDot ¿
       i n ≺ ⟲ ↵
-        src i ⟪ char_at ⟫ → c4 ¿
+        cs i ⌈ ⌉ → c4 ¿
         c4 "0" ≽ c4 "9" ≼ ∧ ⤴ ↵
           i 1 ⊞ → i ¿
           ⊕ ¿
@@ -86,7 +76,7 @@
         c4 "." ≡ sawDot ⊥ ≡ ∧ ⤴ ↵
           i 1 ⊞ → ip1 ¿
           ip1 n ≺ ⤴ ↵
-            src ip1 ⟪ char_at ⟫ → c5 ¿
+            cs ip1 ⌈ ⌉ → c5 ¿
             c5 "0" ≽ c5 "9" ≼ ∧ ⤴ ↵
               ⊤ → sawDot ¿
               i 1 ⊞ → i ¿
@@ -97,7 +87,7 @@
         ⊗ ¿
       ⌫ ¿
       i start ⊟ → len ¿
-      src start len ⟪ substr ⟫ → buf ¿
+      cs start i ⟪ lex_join ⟫ → buf ¿
       ❴"kind": "number", "text": buf❵ → tok ¿
       tokens tok ⟪ .append ⟫ → tokens ¿
       ⊕ ¿
@@ -106,7 +96,7 @@
     ch "_" ≡ ch "." ≡ ∨ ch "a" ≽ ch "z" ≼ ∧ ∨ ch "A" ≽ ch "Z" ≼ ∧ ∨ ch "⍺" ≡ ∨ ch "⍵" ≡ ∨ ch "⍹" ≡ ∨ ch "⎕" ≡ ∨ ⤴ ↵
       i → start ¿
       i n ≺ ⟲ ↵
-        src i ⟪ char_at ⟫ → c5 ¿
+        cs i ⌈ ⌉ → c5 ¿
         c5 "_" ≡ c5 "." ≡ ∨ c5 "a" ≽ c5 "z" ≼ ∧ ∨ c5 "A" ≽ c5 "Z" ≼ ∧ ∨ c5 "0" ≽ c5 "9" ≼ ∧ ∨ c5 "⍺" ≡ ∨ c5 "⍵" ≡ ∨ c5 "⍹" ≡ ∨ c5 "⎕" ≡ ∨ ⤴ ↵
           i 1 ⊞ → i ¿
           ⊕ ¿
@@ -114,7 +104,7 @@
         ⊗ ¿
       ⌫ ¿
       i start ⊟ → len ¿
-      src start len ⟪ substr ⟫ → buf ¿
+      cs start i ⟪ lex_join ⟫ → buf ¿
       ❴"kind": "ident", "text": buf❵ → tok ¿
       tokens tok ⟪ .append ⟫ → tokens ¿
       ⊕ ¿
@@ -122,7 +112,7 @@
 
     i 1 ⊞ → ip1 ¿
     ip1 n ≺ ⤴ ↵
-      src ip1 ⟪ char_at ⟫ → ch2 ¿
+      cs ip1 ⌈ ⌉ → ch2 ¿
       ch ch2 ⊞⊞ → pair ¿
       pair "⊞⊞" ≡ pair "⊟⊟" ≡ ∨ pair "⊕⊕" ≡ ∨ ⤴ ↵
         ❴"kind": "symbol", "text": pair❵ → tok ¿
@@ -139,3 +129,14 @@
 
   tokens ⇄ ¿
 ↦ src ↦ lex ¿
+
+⍝ Join code points cs[a..b) into a string
+ƒ
+  【】 → parts ¿
+  a → k ¿
+  k b ≺ ⟲ ↵
+    parts cs k ⌈ ⌉ ⟪ .append ⟫ → parts ¿
+    k 1 ⊞ → k ¿
+  ⌫ ¿
+  parts "" ⟪ join ⟫ ⇄ ¿
+↦ cs ↦ a ↦ b ↦ lex_join ¿

@@ -112,6 +112,181 @@
   out ⇄ ¿
 ↦ xs ↦ ck_copy ¿
 
+
+⍝ ---- evidentials (§3.1) and charges (§3.2)
+⍝ Every value carries ev: "w" witnessed, "i" inferred, "h" hearsay, and
+⍝ ch: "" neutral, "*" a gluon (literal), or a canonical charge like "u·d^-1".
+
+ƒ
+  v "ev" ⌈ ⌉ → e ¿
+  e ∅ ≡ ⤴ ↵ "w" ⇄ ¿ ⌫ ¿
+  e ⇄ ¿
+↦ v ↦ ck_ev ¿
+
+ƒ
+  v "ch" ⌈ ⌉ → c ¿
+  c ∅ ≡ ⤴ ↵ "" ⇄ ¿ ⌫ ¿
+  c ⇄ ¿
+↦ v ↦ ck_ch ¿
+
+ƒ
+  e "h" ≡ ⤴ ↵ 2 ⇄ ¿ ⌫ ¿
+  e "i" ≡ ⤴ ↵ 1 ⇄ ¿ ⌫ ¿
+  0 ⇄ ¿
+↦ e ↦ ck_ev_rank ¿
+
+ƒ
+  a ⟪ ck_ev_rank ⟫ b ⟪ ck_ev_rank ⟫ ≽ ⤴ ↵ a ⇄ ¿ ⌫ ¿
+  b ⇄ ¿
+↦ a ↦ b ↦ ck_ev_max ¿
+
+⍝ May a value with evidential have flow where want is declared?
+ƒ
+  want "h" ≡ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
+  want "i" ≡ ⤴ ↵ have "h" ≢ ⇄ ¿ ⌫ ¿
+  have "w" ≡ ⇄ ¿
+↦ have ↦ want ↦ ck_ev_ok ¿
+
+ƒ
+  e "h" ≡ ⤴ ↵ "hearsay ⸮" ⇄ ¿ ⌫ ¿
+  e "i" ≡ ⤴ ↵ "inferred ⁖" ⇄ ¿ ⌫ ¿
+  "witnessed" ⇄ ¿
+↦ e ↦ ck_ev_name ¿
+
+⍝ "u·d^-1" → ❴u: 1, d: -1❵
+ƒ
+  ❴❵ → out ¿
+  c "" ≡ c "*" ≡ ∨ ⤴ ↵ out ⇄ ¿ ⌫ ¿
+  c "·" ⟪ split ⟫ → parts ¿
+  0 → i ¿
+  parts ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    parts i ⌈ ⌉ "^" ⟪ split ⟫ → fe ¿
+    fe 0 ⌈ ⌉ → f ¿
+    1 → e ¿
+    fe ⟪ len ⟫ 1 ≻ ⤴ ↵ fe 1 ⌈ ⌉ ⟪ int ⟫ → e ¿ ⌫ ¿
+    out f ← e ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ c ↦ ck_ch_parse ¿
+
+ƒ
+  【】 → parts ¿
+  【"u" "d" "s" "c" "b" "t"】 → order ¿
+  0 → i ¿
+  i 6 ≺ ⟲ ↵
+    order i ⌈ ⌉ → f ¿
+    f d ∈ ⤴ ↵
+      d f ⌈ ⌉ → e ¿
+      e 0 ≢ ⤴ ↵
+        e 1 ≡ ⤴ ↵ parts f ⟪ .append ⟫ ¿ ⌫ ⤵ ↵
+          e ⟪ lx_num_str ⟫ → es ¿
+          parts 【f "^" es】 ⟪ em_cat_ck ⟫ ⟪ .append ⟫ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  parts "·" ⟪ join ⟫ ⇄ ¿
+↦ d ↦ ck_ch_fmt ¿
+
+ƒ
+  xs "" ⟪ join ⟫ ⇄ ¿
+↦ xs ↦ em_cat_ck ¿
+
+⍝ product (sign 1) or quotient (sign -1) of charges; gluons count as neutral
+ƒ
+  a "*" ≡ b "*" ≡ ∧ ⤴ ↵ "*" ⇄ ¿ ⌫ ¿
+  a ⟪ ck_ch_parse ⟫ → da ¿
+  b ⟪ ck_ch_parse ⟫ → db ¿
+  【"u" "d" "s" "c" "b" "t"】 → order ¿
+  ❴❵ → out ¿
+  0 → i ¿
+  i 6 ≺ ⟲ ↵
+    order i ⌈ ⌉ → f ¿
+    0 → e ¿
+    f da ∈ ⤴ ↵ e da f ⌈ ⌉ ⊞ → e ¿ ⌫ ¿
+    f db ∈ ⤴ ↵ db f ⌈ ⌉ sign ⊠ e ⊞ → e ¿ ⌫ ¿
+    out f ← e ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⟪ ck_ch_fmt ⟫ ⇄ ¿
+↦ a ↦ b ↦ sign ↦ ck_ch_combine ¿
+
+⍝ Charges that must agree (⊞ ⊟ ≶ …): the common charge, or ∅ on a violation
+ƒ
+  a "*" ≡ ⤴ ↵ b ⇄ ¿ ⌫ ¿
+  b "*" ≡ ⤴ ↵ a ⇄ ¿ ⌫ ¿
+  a b ≡ ⤴ ↵ a ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ a ↦ b ↦ ck_ch_same ¿
+
+⍝ Type with its evidential and charge, for messages and traces
+ƒ
+  "" → pre ¿
+  v ⟪ ck_ev ⟫ → e ¿
+  e "h" ≡ ⤴ ↵ "⸮" → pre ¿ ⌫ ¿
+  e "i" ≡ ⤴ ↵ "⁖" → pre ¿ ⌫ ¿
+  v ⟪ ck_ch ⟫ → c ¿
+  "" → post ¿
+  c "" ≢ c "*" ≢ ∧ ⤴ ↵ 【"⁽" c "⁾"】 ⟪ em_cat_ck ⟫ → post ¿ ⌫ ¿
+  v "ty" ⌈ ⌉ → t ¿
+  【pre t post】 ⟪ em_cat_ck ⟫ ⇄ ¿
+↦ v ↦ ck_vstr ¿
+
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  vs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    out vs i ⌈ ⌉ ⟪ ck_vstr ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ vs ↦ ck_vtypes ¿
+
+⍝ ev and ch of a signature type node
+ƒ
+  "w" → e ¿
+  ty "prefixes" ⌈ ⌉ → pre ¿
+  "⸮" pre ∈ ⤴ ↵ "h" → e ¿ ⌫ ⤵ "⁖" pre ∈ ⤴ ↵ "i" → e ¿ ⌫ ¿
+  ty "charge" ⌈ ⌉ → c ¿
+  c ∅ ≡ ⤴ ↵ "" → c ¿ ⌫ ¿
+  c ⟪ ck_ch_parse ⟫ ⟪ ck_ch_fmt ⟫ → c ¿
+  【e c】 ⇄ ¿
+↦ ty ↦ ck_annot_of ¿
+
+ƒ
+  【】 → evs ¿
+  【】 → chs ¿
+  0 → i ¿
+  xs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    xs i ⌈ ⌉ ⟪ ck_annot_of ⟫ → a ¿
+    evs a 0 ⌈ ⌉ ⟪ .append ⟫ ¿
+    chs a 1 ⌈ ⌉ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  【evs chs】 ⇄ ¿
+↦ xs ↦ ck_annot_list ¿
+
+⍝ Type string keeping evidentials and charges (call-by-shape keys, §16)
+ƒ
+  "" → out ¿
+  ty "prefixes" ⌈ ⌉ "" ⟪ join ⟫ → out ¿
+  ty "elem" ⌈ ⌉ → el ¿
+  el ∅ ≢ ⤴ ↵
+    el ⟪ ck_canon_full ⟫ → inner ¿
+    【out "⟦" inner "⟧"】 ⟪ em_cat_ck ⟫ ⇄ ¿
+  ⌫ ¿
+  ty "base" ⌈ ⌉ → b ¿
+  b ∅ ≢ ⤴ ↵ out b ⊞⊞ → out ¿ ⌫ ¿
+  ty ⟪ ck_annot_of ⟫ 1 ⌈ ⌉ → c ¿
+  c "" ≢ ⤴ ↵ 【out "⁽" c "⁾"】 ⟪ em_cat_ck ⟫ → out ¿ ⌫ ¿
+  out ⇄ ¿
+↦ ty ↦ ck_canon_full ¿
+
 ⍝ ---- context, values, errors
 
 ƒ
@@ -146,7 +321,9 @@
   v "tok" ⌈ ⌉ → tk ¿
   v "region" ⌈ ⌉ → rg ¿
   v "of" ⌈ ⌉ → of ¿
-  ❴"ty": t, "id": id, "tok": tk, "region": rg, "of": of, "role": role❵ ⇄ ¿
+  v "ev" ⌈ ⌉ → ev ¿
+  v "ch" ⌈ ⌉ → ch ¿
+  ❴"ty": t, "id": id, "tok": tk, "region": rg, "of": of, "role": role, "ev": ev, "ch": ch❵ ⇄ ¿
 ↦ v ↦ role ↦ ck_with_role ¿
 
 ⍝ Token label for traces and messages
@@ -394,7 +571,7 @@
 
 ƒ
   C "trace" ⌈ ⌉ ¬ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
-  S ⟪ ck_types ⟫ ⟪ ck_show ⟫ → shown ¿
+  S ⟪ ck_vtypes ⟫ ⟪ ck_show ⟫ → shown ¿
   C "lines" ⌈ ⌉ ind label "  ⊢ " shown ⊞⊞ ⊞⊞ ⊞⊞ ⟪ .append ⟫ ¿
   ∅ ⇄ ¿
 ↦ C ↦ ind ↦ label ↦ S ↦ ck_trace ¿
@@ -475,6 +652,23 @@
       C v0 "ty" ⌈ ⌉ tok depth ⟪ ck_val ⟫ → nv ¿
       v0 "of" ⌈ ⌉ → tmpv ¿
       nv "of" ← tmpv ¿
+      v0 ⟪ ck_ev ⟫ → ev ¿
+      v0 ⟪ ck_ch ⟫ → ch ¿
+      1 → i ¿
+      i n ≺ ⟲ ↵
+        live i ⌈ ⌉ "stack" ⌈ ⌉ j ⌈ ⌉ → vi ¿
+        ev vi ⟪ ck_ev ⟫ ⟪ ck_ev_max ⟫ → ev ¿
+        ch vi ⟪ ck_ch ⟫ ⟪ ck_ch_same ⟫ → ch2 ¿
+        ch2 ∅ ≡ ⤴ ↵
+          v0 ⟪ ck_vstr ⟫ → a ¿
+          vi ⟪ ck_vstr ⟫ → b ¿
+          C tok 【"charge violation: " what " joins " a " with " b " (§3.2)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ⇄ ¿
+        ⌫ ¿
+        ch2 → ch ¿
+        i 1 ⊞ → i ¿
+      ⌫ ¿
+      nv "ev" ← ev ¿
+      nv "ch" ← ch ¿
       S nv ⟪ .append ⟫ ¿
     ⌫ ¿
     j 1 ⊞ → j ¿
@@ -556,6 +750,29 @@
   C r "strand" ⌈ ⌉ 0 ⟪ ck_no_leak ⟫ ⇄ ¿
 ↦ C ↦ ops ↦ vals ↦ tok ↦ what ↦ depth ↦ locks ↦ ind ↦ ck_predicate ¿
 
+ƒ
+  from "ev" ⌈ ⌉ → e ¿
+  from "ch" ⌈ ⌉ → c ¿
+  to "ev" ← e ¿
+  to "ch" ← c ¿
+  to ⇄ ¿
+↦ from ↦ to ↦ ck_copy_annot ¿
+
+⍝ Set ev/ch on the top n (freshly pushed) values from lists
+ƒ
+  S ⟪ len ⟫ n ⊟ → base ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    S base i ⊞ ⌈ ⌉ → v ¿
+    evs i ⌈ ⌉ → e ¿
+    chs i ⌈ ⌉ → c ¿
+    v "ev" ← e ¿
+    v "ch" ← c ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ S ↦ n ↦ evs ↦ chs ↦ ck_annotate_top ¿
+
 ⍝ Push results; returns nothing
 ƒ
   0 → i ¿
@@ -587,10 +804,26 @@
     t want ≢ ⤴ ↵
       C tok "argument " i 1 ⊞ ⍕ " of " label ": expected " want ", found " t ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
     ⌫ ¿
+    v ⟪ ck_ev ⟫ → have ¿
+    f "insEv" ⌈ ⌉ i ⌈ ⌉ → wev ¿
+    have wev ⟪ ck_ev_ok ⟫ ¬ ⤴ ↵
+      i 1 ⊞ ⍕ → an ¿
+      have ⟪ ck_ev_name ⟫ → hn ¿
+      wev ⟪ ck_ev_name ⟫ → wn ¿
+      C tok 【"argument " an " of " label " is " hn ", but the parameter accepts only " wn " values; attest it with ⊨ or mark the parameter (§3.1)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ⇄ ¿
+    ⌫ ¿
+    f "rev" ⌈ ⌉ have "i" ≡ ∧ ⤴ ↵ C tok "an inferred ⁖ value cannot enter a reversible function: a collapse cannot be undone (§3.1)" ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    f "insCh" ⌈ ⌉ i ⌈ ⌉ → wch ¿
+    v ⟪ ck_ch ⟫ wch ⟪ ck_ch_same ⟫ ∅ ≡ ⤴ ↵
+      i 1 ⊞ ⍕ → an ¿
+      v ⟪ ck_vstr ⟫ → vs ¿
+      C tok 【"charge violation: argument " an " of " label " is " vs ", the parameter wants charge ⁽" wch "⁾ (§3.2)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ⇄ ¿
+    ⌫ ¿
     C v live tok ⟪ ck_move_ok ⟫ ¬ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
   C S outs tok depth ⟪ ck_push ⟫ ¿
+  S outs ⟪ len ⟫ f "outsEv" ⌈ ⌉ f "outsCh" ⌈ ⌉ ⟪ ck_annotate_top ⟫ ¿
   ∅ ⇄ ¿
 ↦ C ↦ S ↦ strand ↦ locks ↦ f ↦ tok ↦ label ↦ depth ↦ ck_apply ¿
 
@@ -618,6 +851,7 @@
       lk "trit" ≡ ⤴ ↵ "ŧ" → t ¿ ⌫ ¿
       lk "string" ≡ ⤴ ↵ "ʃ" → t ¿ ⌫ ¿
       C t tok depth ⟪ ck_val ⟫ → v ¿
+      lk "int" ≡ lk "real" ≡ ∨ ⤴ ↵ v "ch" ← "*" ¿ ⌫ ¿
       tok ⟪ ck_role ⟫ → role ¿
       role ∅ ≢ ⤴ ↵ v role ⟪ ck_with_role ⟫ → v ¿ ⌫ ¿
       S v ⟪ .append ⟫ ¿
@@ -658,6 +892,8 @@
       C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
       "◌" xt ⊞⊞ → rt ¿
       C rt atok depth ⟪ ck_val ⟫ → res ¿
+      x res ⟪ ck_copy_annot ⟫ ¿
+      res "ev" ← "w" ¿
       S res ⟪ .append ⟫ ¿
       oi 1 ⊞ → oi ¿
       "⊨" → label ¿
@@ -708,6 +944,44 @@
     ⌫ ⤵ k "loop" ≡ ⤴ ↵
       S ⟪ ck_types ⟫ → before ¿
       S strand locks ⟪ ck_live_locks ⟫ → inner ¿
+      ⍝ evidentials and charges carried round the loop must reach a fixpoint
+      C "trace" ⌈ ⌉ → tracing ¿
+      C "trace" ← ⊥ ¿
+      0 → attempt ¿
+      ⊤ → unstable ¿
+      unstable ⟲ ↵
+        C op "block" ⌈ ⌉ "ops" ⌈ ⌉ S depth inner ind2 ⟪ ck_sub ⟫ → r ¿
+        C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        ⊥ → unstable ¿
+        r "dead" ⌈ ⌉ ¬ r "stack" ⌈ ⌉ ⟪ len ⟫ S ⟪ len ⟫ ≻ ∧ ⤴ ↵
+          【】 → S2 ¿
+          0 → q ¿
+          S ⟪ len ⟫ → nq ¿
+          q nq ≺ ⟲ ↵
+            S q ⌈ ⌉ → sv ¿
+            r "stack" ⌈ ⌉ q ⌈ ⌉ → bv ¿
+            sv ⟪ ck_ev ⟫ bv ⟪ ck_ev ⟫ ⟪ ck_ev_max ⟫ → ev ¿
+            sv ⟪ ck_ch ⟫ bv ⟪ ck_ch ⟫ ⟪ ck_ch_same ⟫ → ch ¿
+            ch ∅ ≡ ⤴ ↵ bv ⟪ ck_ch ⟫ → ch ¿ ⌫ ¿
+            ev sv ⟪ ck_ev ⟫ ≢ ch sv ⟪ ck_ch ⟫ ≢ ∨ ⤴ ↵
+              ⊤ → unstable ¿
+              sv sv "role" ⌈ ⌉ ⟪ ck_with_role ⟫ → sv ¿
+              sv "ev" ← ev ¿
+              sv "ch" ← ch ¿
+            ⌫ ¿
+            S2 sv ⟪ .append ⟫ ¿
+            q 1 ⊞ → q ¿
+          ⌫ ¿
+          S2 → S ¿
+        ⌫ ¿
+        attempt 1 ⊞ → attempt ¿
+        unstable attempt 3 ≻ ∧ ⤴ ↵
+          C tok "charge violation: a value carried by ⥀ changes its charge on every iteration (§3.2)" ⟪ ck_err ⟫ ¿
+          ⊗ ¿
+        ⌫ ¿
+      ⌫ ¿
+      C "trace" ← tracing ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
       C ind2 "body" ⟪ ck_note ⟫ ¿
       C op "block" ⌈ ⌉ "ops" ⌈ ⌉ S depth inner ind2 "  " ⊞⊞ ⟪ ck_sub ⟫ → r ¿
       C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
@@ -741,6 +1015,7 @@
         C ft ⟪ ck_tail ⟫ tok depth ⟪ ck_val ⟫ → okv ¿
         fv "of" ⌈ ⌉ → tmpv ¿
         okv "of" ← tmpv ¿
+        fv okv ⟪ ck_copy_annot ⟫ ¿
         okS okv ⟪ .append ⟫ ¿
       ⌫ ¿
       C ind2 "ok" ⟪ ck_note ⟫ ¿
@@ -781,7 +1056,13 @@
       et ⟪ ck_class ⟫ "borrowed" ≡ ⤴ ↵ C tok "an array cannot hold shadows (§8.2)" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
       C r "strand" ⌈ ⌉ 0 ⟪ ck_no_leak ⟫ ¬ ⤴ ↵ ⊗ ¿ ⌫ ¿
       "⟦" et "⟧" ⊞⊞ ⊞⊞ → at ¿
-      S C at tok depth ⟪ ck_val ⟫ ⟪ .append ⟫ ¿
+      C at tok depth ⟪ ck_val ⟫ → av ¿
+      "w" → aev ¿
+      0 → q ¿
+      r "stack" ⌈ ⌉ → els ¿
+      q ne ≺ ⟲ ↵ aev els q ⌈ ⌉ ⟪ ck_ev ⟫ ⟪ ck_ev_max ⟫ → aev ¿ q 1 ⊞ → q ¿ ⌫ ¿
+      av "ev" ← aev ¿
+      S av ⟪ .append ⟫ ¿
       "⟦…⟧" → label ¿
     ⌫ ⤵ k "postselect" ≡ ⤴ ↵
       C tok "⟜ post-selection is not implemented yet (milestone 5)" ⟪ ck_err ⟫ ¿ ⊗ ¿
@@ -821,6 +1102,7 @@
     v "of" ⌈ ⌉ → of ¿
     v "region" ⌈ ⌉ → rg ¿
     ❴"ty": t, "id": id, "tok": tok, "of": of, "region": rg, "void": ⊥❵ → m ¿
+    v m ⟪ ck_copy_annot ⟫ ¿
     strand m ⟪ .append ⟫ ¿
     ⊥ ⇄ ¿
   ⌫ ¿
@@ -844,6 +1126,7 @@
       C t tok depth ⟪ ck_val ⟫ → v ¿
       m "of" ⌈ ⌉ → tmpv ¿
       v "of" ← tmpv ¿
+      m v ⟪ ck_copy_annot ⟫ ¿
     ⌫ ⤵ ↵
       ⍝ quantum: move out, the moment becomes void
       m "id" ⌈ ⌉ → id ¿
@@ -851,8 +1134,10 @@
       m "region" ⌈ ⌉ → rg ¿
       ❴"ty": t, "id": id, "tok": tok, "of": of, "region": rg❵ → v ¿
       v "role" ← ∅ ¿
+      m v ⟪ ck_copy_annot ⟫ ¿
       m "tok" ⌈ ⌉ → mt ¿
       ❴"ty": t, "id": id, "tok": mt, "of": of, "region": rg, "void": ⊤❵ → m2 ¿
+      m m2 ⟪ ck_copy_annot ⟫ ¿
       strand mi ← m2 ¿
     ⌫ ¿
     role ∅ ≢ ⤴ ↵ v role ⟪ ck_with_role ⟫ → v ¿ ⌫ ¿
@@ -868,6 +1153,7 @@
       C v "ty" ⌈ ⌉ tok depth ⟪ ck_val ⟫ → w ¿
       v "of" ⌈ ⌉ → tmpv ¿
       w "of" ← tmpv ¿
+      v w ⟪ ck_copy_annot ⟫ ¿
     ⌫ ⤵ ↵
       ⍝ quantum: move it to the top
       【】 → S2 ¿
@@ -905,6 +1191,7 @@
     C sht tok depth ⟪ ck_val ⟫ → sh ¿
     v "id" ⌈ ⌉ → tmpv ¿
     sh "of" ← tmpv ¿
+    v sh ⟪ ck_copy_annot ⟫ ¿
     S sh ⟪ .append ⟫ ¿
     ⊥ ⇄ ¿
   ⌫ ¿
@@ -938,17 +1225,66 @@
     C vals i ⌈ ⌉ live tok ⟪ ck_move_ok ⟫ ¬ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
+  ⍝ evidentials are contagious; charges follow the conservation laws (§3.1, §3.2)
+  "w" → ev ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    ev vals i ⌈ ⌉ ⟪ ck_ev ⟫ ⟪ ck_ev_max ⟫ → ev ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  vals 0 ⌈ ⌉ ⟪ ck_ch ⟫ → ca ¿
+  "" → cb ¿
+  k 1 ≻ ⤴ ↵ vals 1 ⌈ ⌉ ⟪ ck_ch ⟫ → cb ¿ ⌫ ¿
+  "" → ch ¿
+  x "⊞" ≡ x "⊟" ≡ ∨ x "≶" ≡ ∨ x "⋏" ≡ ∨ x "⋎" ≡ ∨ x "⋒" ≡ ∨ x "⋓" ≡ ∨ x "⩡" ≡ ∨ ⤴ ↵
+    ca cb ⟪ ck_ch_same ⟫ → ch ¿
+    ch ∅ ≡ ⤴ ↵
+      vals ⟪ ck_vtypes ⟫ ⟪ ck_show ⟫ → shown ¿
+      C tok 【"charge violation: " x " needs equal charges, found " shown " (§3.2)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿
+      ⊥ ⇄ ¿
+    ⌫ ¿
+    x "≶" ≡ x "⋏" ≡ ∨ x "⋎" ≡ ∨ ⤴ ↵ "" → ch ¿ ⌫ ¿
+  ⌫ ¿
+  x "⊠" ≡ ⤴ ↵ ca cb 1 ⟪ ck_ch_combine ⟫ → ch ¿ ⌫ ¿
+  x "⊘" ≡ x "⊜" ≡ ∨ ⤴ ↵ ca cb 0 1 ⊟ ⟪ ck_ch_combine ⟫ → ch ¿ ⌫ ¿
+  x "⊝" ≡ x "≪" ≡ ∨ x "≫" ≡ ∨ ⤴ ↵ ca → ch ¿ ⌫ ¿
+  x "⍈" ≡ ⤴ ↵
+    vals 2 ⌈ ⌉ ⟪ ck_ev ⟫ → sev ¿
+    vals 0 ⌈ ⌉ ⟪ ck_ev ⟫ → aev ¿
+    sev aev ⟪ ck_ev_ok ⟫ ¬ ⤴ ↵
+      sev ⟪ ck_ev_name ⟫ → sn ¿
+      aev ⟪ ck_ev_name ⟫ → an ¿
+      C tok 【"storing a " sn " value into a " an " array would launder it (§3.1)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿
+      ⊥ ⇄ ¿
+    ⌫ ¿
+  ⌫ ¿
   ⍝ ⍈ consumes its exclusive shadow; ⌁ on a particle runs its antiparticle
   C S outs tok depth ⟪ ck_push ⟫ ¿
+  【】 → evs ¿
+  【】 → chs ¿
+  0 → i ¿
+  outs ⟪ len ⟫ → no ¿
+  i no ≺ ⟲ ↵ evs ev ⟪ .append ⟫ ¿ chs ch ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  S no evs chs ⟪ ck_annotate_top ⟫ ¿
   ⊥ ⇄ ¿
 ↦ C ↦ op ↦ S ↦ strand ↦ depth ↦ locks ↦ ind ↦ ck_glyph ¿
 
 ⍝ ---- name resolution (§9, §9.1)
 
 ƒ
-  sig "ins" ⌈ ⌉ ⟪ ck_canon_list ⟫ " " ⟪ join ⟫ → a ¿
-  sig "outs" ⌈ ⌉ ⟪ ck_canon_list ⟫ " " ⟪ join ⟫ → b ¿
-  "⟨" a " ⊸ " b "⟩" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⇄ ¿
+  【】 → xs ¿
+  sig "ins" ⌈ ⌉ → ins ¿
+  0 → i ¿
+  ins ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵ xs ins i ⌈ ⌉ ⟪ ck_canon_full ⟫ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  xs " " ⟪ join ⟫ → a ¿
+  【】 → ys ¿
+  sig "outs" ⌈ ⌉ → outs ¿
+  0 → i ¿
+  outs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵ ys outs i ⌈ ⌉ ⟪ ck_canon_full ⟫ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  ys " " ⟪ join ⟫ → b ¿
+  【"⟨" a " ⊸ " b "⟩"】 ⟪ em_cat_ck ⟫ ⇄ ¿
 ↦ sig ↦ ck_shape ¿
 
 ƒ
@@ -980,7 +1316,18 @@
 ƒ
   sig "ins" ⌈ ⌉ ⟪ ck_canon_list ⟫ → ins ¿
   sig "outs" ⌈ ⌉ ⟪ ck_canon_list ⟫ → outs ¿
-  ❴"ins": ins, "outs": outs, "rev": rev, "name": name❵ ⇄ ¿
+  ❴"ins": ins, "outs": outs, "rev": rev, "name": name❵ → f ¿
+  sig "ins" ⌈ ⌉ ⟪ ck_annot_list ⟫ → ia ¿
+  sig "outs" ⌈ ⌉ ⟪ ck_annot_list ⟫ → oa ¿
+  ia 0 ⌈ ⌉ → x0 ¿
+  ia 1 ⌈ ⌉ → x1 ¿
+  oa 0 ⌈ ⌉ → x2 ¿
+  oa 1 ⌈ ⌉ → x3 ¿
+  f "insEv" ← x0 ¿
+  f "insCh" ← x1 ¿
+  f "outsEv" ← x2 ¿
+  f "outsCh" ← x3 ¿
+  f ⇄ ¿
 ↦ sig ↦ rev ↦ name ↦ ck_fn_info ¿
 
 ⍝ Every named type must be a declared particle; shadows cannot be returned
@@ -1041,12 +1388,15 @@
   i n ≺ ⟲ ↵
     C ins2 i ⌈ ⌉ tok 0 ⟪ ck_val ⟫ → v ¿
     ins2 i ⌈ ⌉ ⟪ ck_class ⟫ "borrowed" ≡ ⤴ ↵ v "of" ← 0 ¿ ⌫ ¿
+    f "insEv" ⌈ ⌉ i ⌈ ⌉ → iev ¿
+    f "insCh" ⌈ ⌉ i ⌈ ⌉ → ich ¿
+    v "ev" ← iev ¿
+    v "ch" ← ich ¿
     S v ⟪ .append ⟫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
-  f "ins" ⌈ ⌉ → shownIns ¿
-  "⟨" shownIns " " ⟪ join ⟫ " ⊸ " outs " " ⟪ join ⟫ "⟩" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ → sigs ¿
-  C "" "fn " name " " sigs "  start " S ⟪ ck_types ⟫ ⟪ ck_show ⟫ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_note ⟫ ¿
+  it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → sigs ¿
+  C "" "fn " name " " sigs "  start " S ⟪ ck_vtypes ⟫ ⟪ ck_show ⟫ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_note ⟫ ¿
   C it "ops" ⌈ ⌉ S 1 【】 "  " ⟪ ck_block ⟫ → r ¿
   C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
   r "dead" ⌈ ⌉ ¬ ⤴ ↵
@@ -1069,6 +1419,24 @@
       got ⟪ ck_show ⟫ → gs ¿
       outs ⟪ ck_show ⟫ → os ¿
       C tok name " ends with " gs " but its signature promises " os ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
+    ⌫ ¿
+    r "stack" ⌈ ⌉ → FS ¿
+    0 → i ¿
+    FS ⟪ len ⟫ → nf ¿
+    i nf ≺ ⟲ ↵
+      FS i ⌈ ⌉ → v ¿
+      v ⟪ ck_ev ⟫ → have ¿
+      f "outsEv" ⌈ ⌉ i ⌈ ⌉ → wev ¿
+      have wev ⟪ ck_ev_ok ⟫ ¬ ⤴ ↵
+        have ⟪ ck_ev_name ⟫ → hn ¿
+        C tok 【name " returns a " hn " value; declare the output ⸮ (or ⁖), or attest the value with ⊨ (§3.1)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ⇄ ¿
+      ⌫ ¿
+      f "outsCh" ⌈ ⌉ i ⌈ ⌉ → wch ¿
+      v ⟪ ck_ch ⟫ wch ⟪ ck_ch_same ⟫ ∅ ≡ ⤴ ↵
+        v ⟪ ck_vstr ⟫ → vs ¿
+        C tok 【"charge violation: " name " returns " vs " but promises charge ⁽" wch "⁾ (§3.2)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ⇄ ¿
+      ⌫ ¿
+      i 1 ⊞ → i ¿
     ⌫ ¿
   ⌫ ¿
   C r "strand" ⌈ ⌉ 0 ⟪ ck_no_leak ⟫ ¿

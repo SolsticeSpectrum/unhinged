@@ -1,0 +1,3 @@
+fn ᚱ ⟨⁖ℤ ⊸ ⁖ℤ⟩  start [⁖ℤ]
+fn ᚠ ⟨⁖ℤ ⊸ ⁖ℤ⟩  start [⁖ℤ]
+trith/tests/check_errors/inferred_reversible.trh:1:25: error: an inferred ⁖ value cannot enter a reversible function: a collapse cannot be undone (§3.1)

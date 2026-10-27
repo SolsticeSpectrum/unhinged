@@ -398,6 +398,27 @@ UhValue uh_append(UhValue arr, UhValue val) {
     return arr;
 }
 
+/* Split a string into its code points, in one pass */
+UhValue uh_chars(UhValue str) {
+    UhValue out = uh_arr_new();
+    if (str.tag != UH_STR || str.str == NULL || out.arr == NULL) {
+        return out;
+    }
+    size_t i = 0;
+    while (str.str[i] != '\0') {
+        size_t adv = utf8_advance(str.str, i);
+        char buf[5];
+        if (adv > 4) {
+            adv = 1;
+        }
+        memcpy(buf, str.str + i, adv);
+        buf[adv] = '\0';
+        uh_arr_push(&out, uh_str(buf));
+        i += adv;
+    }
+    return out;
+}
+
 UhValue uh_ord(UhValue str) {
     if (str.tag != UH_STR || str.str == NULL || str.str[0] == '\0') {
         return uh_num(0);

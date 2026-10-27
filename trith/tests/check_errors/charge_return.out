@@ -1,0 +1,4 @@
+fn ᚠ ⟨ℤ⁽u⁾ ⊸ ℤ⁽u⁾⟩  start [ℤ⁽u⁾]
+  ⍿⁰  ⊢ [ℤ⁽u⁾ ℤ⁽u⁾]
+  ⊠  ⊢ [ℤ⁽u^2⁾]
+trith/tests/check_errors/charge_return.trh:1:1: error: charge violation: ᚠ returns ℤ⁽u^2⁾ but promises charge ⁽u⁾ (§3.2)

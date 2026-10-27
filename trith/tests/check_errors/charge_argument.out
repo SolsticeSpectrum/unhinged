@@ -1,0 +1,3 @@
+fn ᚠ ⟨ℤ⁽u⁾ ⊸ ℤ⁽u⁾⟩  start [ℤ⁽u⁾]
+fn ᚢ ⟨ℤ⁽d⁾ ⊸ ℤ⁽u⁾⟩  start [ℤ⁽d⁾]
+trith/tests/check_errors/charge_argument.trh:1:27: error: charge violation: argument 1 of ᚠ is ℤ⁽d⁾, the parameter wants charge ⁽u⁾ (§3.2)

@@ -1,0 +1,4 @@
+fn ᛈ ⟨ℤ ⊸ ⟩  start [ℤ]
+  ⎙  ⊢ []
+fn ᚠ ⟨⸮ℤ ⊸ ⟩  start [⸮ℤ]
+trith/tests/check_errors/hearsay_argument.trh:1:21: error: argument 1 of ᛈ is hearsay ⸮, but the parameter accepts only witnessed values; attest it with ⊨ or mark the parameter (§3.1)

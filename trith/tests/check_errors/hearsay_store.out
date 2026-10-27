@@ -1,0 +1,8 @@
+fn ᚠ ⟨⸮ℤ ⊸ ⟩  start [⸮ℤ]
+    elements
+      △  ⊢ [ℤ]
+  ⟦…⟧  ⊢ [⸮ℤ ⟦ℤ⟧]
+  ⟖  ⊢ [⸮ℤ ⟦ℤ⟧ ⟖⟦ℤ⟧]
+  ○  ⊢ [⸮ℤ ⟦ℤ⟧ ⟖⟦ℤ⟧ ℤ]
+  ⍿³  ⊢ [⸮ℤ ⟦ℤ⟧ ⟖⟦ℤ⟧ ℤ ⸮ℤ]
+trith/tests/check_errors/hearsay_store.trh:1:16: error: storing a hearsay ⸮ value into a witnessed array would launder it (§3.1)

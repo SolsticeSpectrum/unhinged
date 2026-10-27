@@ -2,6 +2,7 @@
 "parser.uh" ⟪ import ⟫ ¿
 "check.uh" ⟪ import ⟫ ¿
 "emit.uh" ⟪ import ⟫ ¿
+"eval.uh" ⟪ import ⟫ ¿
 
 ⍝ trithc: the Trith compiler (stage s1, written in UNHINGED)
 ⍝ Milestone 1: lexer and parser. Code generation arrives in milestone 3.

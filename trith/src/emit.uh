@@ -175,8 +175,62 @@
   e "ty" ⌈ ⌉ → ty ¿
   e "v" ⌈ ⌉ → v ¿
   e "ok" ⌈ ⌉ → ok ¿
-  ❴"ty": ty, "v": v, "ok": ok, "role": role❵ ⇄ ¿
+  e "c" ⌈ ⌉ → c ¿
+  ❴"ty": ty, "v": v, "ok": ok, "role": role, "c": c❵ ⇄ ¿
 ↦ e ↦ role ↦ em_with_role ¿
+
+⍝ ---- compile-time values (milestone 5): entries with a known value carry c
+
+ƒ
+  ty "ŧ" ≡ ⤴ ↵ n ⍕ ⇄ ¿ ⌫ ¿
+  n ⟪ lx_num_str ⟫ ⇄ ¿
+↦ ty ↦ n ↦ em_const_text ¿
+
+⍝ evaluator value → stack entry
+ƒ
+  val "ty" ⌈ ⌉ → ty ¿
+  val "n" ⌈ ⌉ → n ¿
+  ty ⟪ em_is_fail ⟫ ⤴ ↵
+    "false" → ok ¿
+    val "ok" ⌈ ⌉ ⤴ ↵ "true" → ok ¿ ⌫ ¿
+    ty "◌" ≡ ⤴ ↵ ty ∅ ok ⟪ em_ent ⟫ ⇄ ¿ ⌫ ¿
+    ty ⟪ ck_tail ⟫ → bt ¿
+    bt ⟪ em_llty ⟫ ⟪ em_zero ⟫ → v ¿
+    n ∅ ≢ ⤴ ↵ bt n ⟪ em_const_text ⟫ → v ¿ ⌫ ¿
+    ty v ok ⟪ em_ent ⟫ → e ¿
+    val "ok" ⌈ ⌉ ⤴ ↵ e "c" ← n ¿ ⌫ ¿
+    e ⇄ ¿
+  ⌫ ¿
+  ty ty n ⟪ em_const_text ⟫ ∅ ⟪ em_ent ⟫ → e ¿
+  e "c" ← n ¿
+  e ⇄ ¿
+↦ val ↦ em_from_val ¿
+
+⍝ stack entry → evaluator value, or ∅ when not known at compile time
+ƒ
+  e "ty" ⌈ ⌉ → ty ¿
+  ty ⟪ em_is_fail ⟫ ⤴ ↵
+    e "ok" ⌈ ⌉ "false" ≡ ⤴ ↵ ty ∅ ⊥ ⟪ ev_val ⟫ ⇄ ¿ ⌫ ¿
+    e "ok" ⌈ ⌉ "true" ≢ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    ty "◌" ≡ ⤴ ↵ ty ∅ ⊤ ⟪ ev_val ⟫ ⇄ ¿ ⌫ ¿
+  ⌫ ¿
+  e "c" ⌈ ⌉ → c ¿
+  c ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  ty c ⊤ ⟪ ev_val ⟫ ⇄ ¿
+↦ e ↦ em_to_val ¿
+
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  es ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    es i ⌈ ⌉ ⟪ em_to_val ⟫ → v ¿
+    v ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    out v ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ es ↦ em_to_vals ¿
 
 ⍝ ---- deferred (future-tense) calls and failure exits
 
@@ -372,6 +426,36 @@
   ⌫ ¿
   ∅ ⇄ ¿
 ↦ E ↦ S ↦ f ↦ future ↦ em_call ¿
+
+⍝ Past tense (§9.2): the call already happened; evaluate it now
+ƒ
+  f "name" ⌈ ⌉ → nm ¿
+  E nm 【】 ⟪ ev_pure ⟫ ¬ ⤴ ↵
+    E tok 【"a past-tense call needs a pure function, and " nm " is not (or is beyond s1's evaluator: only ℤ and ŧ code)"】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  f "ins" ⌈ ⌉ ⟪ len ⟫ → k ¿
+  S k ⟪ em_pop ⟫ → args ¿
+  args ⟪ em_to_vals ⟫ → vals ¿
+  vals ∅ ≡ ⤴ ↵ E tok "the past cannot depend on the present: every argument of a past-tense call must be known at compile time (§9.2)" ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  ⟪ ev_state ⟫ → X ¿
+  ⍝ arguments may be ◌ values; unwrap where the parameter is not ◌
+  【】 → uv ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    vals i ⌈ ⌉ → v ¿
+    f "ins" ⌈ ⌉ i ⌈ ⌉ ⟪ em_is_fail ⟫ ¬ ⤴ ↵ X v ⟪ ev_unwrap ⟫ → v ¿ ⌫ ¿
+    uv v ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  X "fail" ⌈ ⌉ ⤴ ↵ E tok "a past-tense call received a failed argument" ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  E X f uv ⟪ ev_call ⟫ → res ¿
+  X "err" ⌈ ⌉ ∅ ≢ ⤴ ↵ E tok X "err" ⌈ ⌉ ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  0 → i ¿
+  res ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵ S res i ⌈ ⌉ ⟪ em_from_val ⟫ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ E ↦ S ↦ f ↦ tok ↦ em_past ¿
 
 ⍝ ---- string literals
 
@@ -805,13 +889,19 @@
 
     k "lit" ≡ ⤴ ↵
       tok "kind" ⌈ ⌉ → lk ¿
-      lk "int" ≡ ⤴ ↵ "ℤ" tok "value" ⌈ ⌉ ∅ ⟪ em_ent ⟫ → e ¿ ⌫ ¿
+      lk "int" ≡ ⤴ ↵
+        "ℤ" tok "value" ⌈ ⌉ ∅ ⟪ em_ent ⟫ → e ¿
+        tok "value" ⌈ ⌉ ⟪ int ⟫ → cv ¿
+        e "c" ← cv ¿
+      ⌫ ¿
       lk "trit" ≡ ⤴ ↵
         tok "text" ⌈ ⌉ → tt ¿
         "0" → tv ¿
         tt "⊖" ≡ ⤴ ↵ "-1" → tv ¿ ⌫ ¿
         tt "⊕" ≡ ⤴ ↵ "1" → tv ¿ ⌫ ¿
         "ŧ" tv ∅ ⟪ em_ent ⟫ → e ¿
+        tv ⟪ int ⟫ → cv ¿
+        e "c" ← cv ¿
       ⌫ ¿
       lk "real" ≡ ⤴ ↵
         tok "value" ⌈ ⌉ "/" ⟪ split ⟫ → nd ¿
@@ -833,9 +923,14 @@
     ⌫ ⤵ k "call" ≡ k "shape-call" ≡ ∨ ⤴ ↵
       E op ⟪ em_resolve ⟫ → f ¿
       ⊥ → future ¿
+      ⊥ → past ¿
       tok "marks" ⌈ ⌉ → ms ¿
-      ms ∅ ≢ ⤴ ↵ "future" ms ∈ → future ¿ ⌫ ¿
-      E S f future ⟪ em_call ⟫ ¿
+      ms ∅ ≢ ⤴ ↵ "future" ms ∈ → future ¿ "past" ms ∈ → past ¿ ⌫ ¿
+      past ⤴ ↵
+        E S f tok ⟪ em_past ⟫ ¿
+      ⌫ ⤵ ↵
+        E S f future ⟪ em_call ⟫ ¿
+      ⌫ ¿
     ⌫ ⤵ k "op" ≡ ⤴ ↵
       tok "text" ⌈ ⌉ → x ¿
       tok "idx" ⌈ ⌉ → idx ¿
@@ -880,7 +975,19 @@
           uv e ⟪ .append ⟫ ¿
           i 1 ⊞ → i ¿
         ⌫ ¿
-        E tok uv ⟪ em_glyph_values ⟫ → res ¿
+        ∅ → res ¿
+        uv ⟪ em_to_vals ⟫ → kv ¿
+        kv ∅ ≢ "⊞⊟⊠⊘⊜⊝≶⋏⋎⚇" x ⟪ .indexOf ⟫ 0 ≽ ∧ ⤴ ↵
+          ⟪ ev_state ⟫ → X ¿
+          X x kv ⟪ ev_glyph ⟫ → fv ¿
+          X "err" ⌈ ⌉ ∅ ≡ ⤴ ↵
+            【】 → res ¿
+            0 → q ¿
+            fv ⟪ len ⟫ → nq ¿
+            q nq ≺ ⟲ ↵ res fv q ⌈ ⌉ ⟪ em_from_val ⟫ ⟪ .append ⟫ ¿ q 1 ⊞ → q ¿ ⌫ ¿
+          ⌫ ¿
+        ⌫ ¿
+        res ∅ ≡ ⤴ ↵ E tok uv ⟪ em_glyph_values ⟫ → res ¿ ⌫ ¿
         E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
         S res ⟪ em_concat_into ⟫ ¿
       ⌫ ¿
@@ -898,7 +1005,19 @@
     ⌫ ⤵ k "prayer" ≡ ⤴ ↵
       tok "idx" ⌈ ⌉ → pn ¿
       S S ⟪ len ⟫ pn ⊟ S ⟪ len ⟫ ⟪ lx_slice ⟫ ⟪ em_shadows ⟫ → vals ¿
-      E op "block" ⌈ ⌉ "ops" ⌈ ⌉ vals ⟪ em_predicate ⟫ → t ¿
+      vals ⟪ em_to_vals ⟫ → kv ¿
+      ∅ → t ¿
+      kv ∅ ≢ ⤴ ↵
+        ⟪ ev_state ⟫ → X ¿
+        E X op "block" ⌈ ⌉ "ops" ⌈ ⌉ kv ⟪ ev_block ⟫ → PS ¿
+        X "err" ⌈ ⌉ ∅ ≢ ⤴ ↵ E tok X "err" ⌈ ⌉ ⟪ em_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+        PS 0 ⌈ ⌉ "n" ⌈ ⌉ → verdict ¿
+        verdict 0 1 ⊟ ≡ ⤴ ↵ E tok "blasphemy: this prayer is false for the values it is given (§12)" ⟪ em_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+        verdict 0 ≡ ⤴ ↵ E tok "doubt: this prayer is neither true nor false (it yields ⦶; §12)" ⟪ em_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+        ⍝ proved: the prayer is erased
+      ⌫ ⤵ ↵
+        E op "block" ⌈ ⌉ "ops" ⌈ ⌉ vals ⟪ em_predicate ⟫ → t ¿
+      ⌫ ¿
       t ∅ ≢ ⤴ ↵
         E 【"icmp eq i8 " t ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → c ¿
         E "debug" ⌈ ⌉ ⤴ ↵
@@ -913,7 +1032,7 @@
           E 【"call void @llvm.assume(i1 " c ")"】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
         ⌫ ¿
       ⌫ ¿
-    ⌫ ⤵ k "select" ≡ ⤴ ↵
+    ⌫ ⤵ k "select" ≡ k "rselect" ≡ ∨ ⤴ ↵
       S 1 ⟪ em_pop ⟫ 0 ⌈ ⌉ → c ¿
       E c ⟪ em_unwrap ⟫ → c ¿
       E ⟪ em_label ⟫ → join ¿
@@ -967,6 +1086,19 @@
       r "stack" ⌈ ⌉ → S ¿
       strand r "strand" ⌈ ⌉ ⊞⊞ → strand ¿
       r "dead" ⌈ ⌉ → dead ¿
+      k "rselect" ≡ dead ¬ ∧ ⤴ ↵
+        S S ⟪ len ⟫ 1 ⊟ ⌈ ⌉ → topv ¿
+        E op "assert" ⌈ ⌉ "ops" ⌈ ⌉ 【topv】 ⟪ em_predicate ⟫ → at ¿
+        c "v" ⌈ ⌉ → cv ¿
+        E 【"icmp eq i8 " at ", " cv】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → same ¿
+        E ⟪ em_label ⟫ → lgood ¿
+        E ⟪ em_label ⟫ → lbad ¿
+        E 【"br i1 " same ", label %" lgood ", label %" lbad】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+        E lbad ⟪ em_start ⟫ ¿
+        E "call void @trith_reversal_failed()" ⟪ em_emit ⟫ ¿
+        E "unreachable" ⟪ em_emit ⟫ ¿
+        E lgood ⟪ em_start ⟫ ¿
+      ⌫ ¿
     ⌫ ⤵ k "handle" ≡ ⤴ ↵
       S 1 ⟪ em_pop ⟫ 0 ⌈ ⌉ → fe ¿
       E ⟪ em_label ⟫ → lok ¿
@@ -1096,6 +1228,11 @@
       ⌫ ¿
       【"⟦" et "⟧"】 ⟪ em_cat ⟫ → at ¿
       S at arr ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+    ⌫ ⤵ k "inverse-call" ≡ ⤴ ↵
+      tok "text" ⌈ ⌉ → fwd ¿
+      【"⇜" fwd】 ⟪ em_cat ⟫ → inv ¿
+      E "fns" ⌈ ⌉ inv ⌈ ⌉ → f ¿
+      E S f ⊥ ⟪ em_call ⟫ ¿
     ⌫ ⤵ k "anti-call" ≡ ⤴ ↵
       tok "text" ⌈ ⌉ → pt ¿
       【"⌁" pt】 ⟪ em_cat ⟫ → anti ¿
@@ -1212,6 +1349,79 @@
   ∅ ⇄ ¿
 ↦ E ↦ it ↦ f ↦ em_function ¿
 
+⍝ ---- reversible functions (§10): generate the inverse at compile time
+
+ƒ
+  "glyph" text t "line" ⌈ ⌉ t "col" ⌈ ⌉ ⟪ lx_tok ⟫ → nt ¿
+  nt "raw" ← text ¿
+  t "marks" ⌈ ⌉ → ms ¿
+  nt "marks" ← ms ¿
+  nt ⇄ ¿
+↦ t ↦ text ↦ em_retok ¿
+
+ƒ
+  ❴"kind": "block", "tok": tok, "ops": ops❵ ⇄ ¿
+↦ tok ↦ ops ↦ em_block_node ¿
+
+⍝ The inverse of a reversible body: units reversed, each one inverted
+ƒ
+  E ops ⟪ ck_reversible ⟫ → units ¿
+  units ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  【】 → out ¿
+  units ⟪ len ⟫ 1 ⊟ → i ¿
+  i 0 ≽ ⟲ ↵
+    units i ⌈ ⌉ → u ¿
+    u 0 ⌈ ⌉ → kind ¿
+    kind "neg" ≡ ⤴ ↵ out u 1 ⌈ ⌉ ⟪ .append ⟫ ¿ ⌫ ¿
+    kind "call" ≡ ⤴ ↵
+      u 1 ⌈ ⌉ → op ¿
+      op "tok" ⌈ ⌉ → t ¿
+      "inverse-call" → nk ¿
+      op "kind" ⌈ ⌉ "inverse-call" ≡ ⤴ ↵ "call" → nk ¿ ⌫ ¿
+      out ❴"kind": nk, "tok": t❵ ⟪ .append ⟫ ¿
+    ⌫ ¿
+    kind "upd" ≡ ⤴ ↵
+      u 2 ⌈ ⌉ "tok" ⌈ ⌉ → t ¿
+      t "text" ⌈ ⌉ → x ¿
+      x → y ¿
+      x "⊞" ≡ ⤴ ↵ "⊟" → y ¿ ⌫ ¿
+      x "⊟" ≡ ⤴ ↵ "⊞" → y ¿ ⌫ ¿
+      t y ⟪ em_retok ⟫ → nt ¿
+      out u 1 ⌈ ⌉ ⟪ .append ⟫ ¿
+      out ❴"kind": "op", "tok": nt❵ ⟪ .append ⟫ ¿
+    ⌫ ¿
+    kind "rsel" ≡ ⤴ ↵
+      ⍝ ⍿⁰ x ≶ ⋔⇋ F₀ F₊ F₋ ⦃A⦄  ⟶  ⍿⁰ A ⋔⇋ F₀⁻¹ F₊⁻¹ F₋⁻¹ ⦃x ≶⦄
+      u 1 ⌈ ⌉ → p0 ¿
+      u 2 ⌈ ⌉ → lit ¿
+      u 3 ⌈ ⌉ → cmp ¿
+      u 4 ⌈ ⌉ → rs ¿
+      out p0 ⟪ .append ⟫ ¿
+      out rs "assert" ⌈ ⌉ "ops" ⌈ ⌉ ⟪ em_concat_into ⟫ ¿
+      【】 → nfs ¿
+      0 → q ¿
+      q 3 ≺ ⟲ ↵
+        rs "faces" ⌈ ⌉ q ⌈ ⌉ → f ¿
+        f "kind" ⌈ ⌉ "block" ≡ ⤴ ↵
+          E f "ops" ⌈ ⌉ ⟪ em_invert ⟫ → fo ¿
+          fo ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+          nfs f "tok" ⌈ ⌉ fo ⟪ em_block_node ⟫ ⟪ .append ⟫ ¿
+        ⌫ ⤵ ↵
+          nfs f ⟪ .append ⟫ ¿
+        ⌫ ¿
+        q 1 ⊞ → q ¿
+      ⌫ ¿
+      rs "tok" ⌈ ⌉ → rt ¿
+      ❴"kind": "rselect", "tok": rt, "faces": nfs❵ → nrs ¿
+      rt 【lit cmp】 ⟪ em_block_node ⟫ → ab ¿
+      nrs "assert" ← ab ¿
+      out nrs ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊟ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ E ↦ ops ↦ em_invert ¿
+
 ⍝ ---- FFI (§14): a C wrapper per binding, so C converts to the real prototype
 
 ƒ
@@ -1309,6 +1519,8 @@
   ❴❵ → shapes ¿
   E "fns" ← fns ¿
   E "shapes" ← shapes ¿
+  ❴❵ → byName ¿
+  E "items" ← byName ¿
   ∅ → entry ¿
   0 → i ¿
   items ⟪ len ⟫ → n ¿
@@ -1331,6 +1543,7 @@
     it "name" ⌈ ⌉ → nm ¿
     【"@\"trith." nm "\""】 ⟪ em_cat ⟫ → fsym ¿
     f "sym" ← fsym ¿
+    byName nm ← it ¿
     it "kind" ⌈ ⌉ "ffi" ≡ ⤴ ↵
       E it f nffi ⟪ em_ffi ⟫ → g ¿
       E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
@@ -1349,10 +1562,36 @@
     i 1 ⊞ → i ¿
   ⌫ ¿
   E ⟪ em_failed ⟫ ¬ entry ∅ ≡ ∧ ⤴ ↵ E ∅ "a program needs an entry point ᛟ ⟨⊸⟩" ⟪ em_err ⟫ ¿ ⌫ ¿
+  ⍝ every ⇋ function gets a generated inverse ⇜name
   0 → i ¿
   i n ≺ E ⟪ em_failed ⟫ ¬ ∧ ⟲ ↵
     items i ⌈ ⌉ → it ¿
-    it "kind" ⌈ ⌉ "fn" ≡ ⤴ ↵ E it fns it "name" ⌈ ⌉ ⌈ ⌉ ⟪ em_function ⟫ ¿ ⌫ ¿
+    it "kind" ⌈ ⌉ "fn" ≡ it "rev" ⌈ ⌉ ∧ ⤴ ↵
+      it "name" ⌈ ⌉ → nm ¿
+      【"⇜" nm】 ⟪ em_cat ⟫ → inm ¿
+      it "sig" ⌈ ⌉ ⊤ inm ⟪ ck_fn_info ⟫ → f ¿
+      【"@\"trith." inm "\""】 ⟪ em_cat ⟫ → fsym ¿
+      f "sym" ← fsym ¿
+      fns inm ← f ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  i n ≺ E ⟪ em_failed ⟫ ¬ ∧ ⟲ ↵
+    items i ⌈ ⌉ → it ¿
+    it "kind" ⌈ ⌉ "fn" ≡ ⤴ ↵
+      E it fns it "name" ⌈ ⌉ ⌈ ⌉ ⟪ em_function ⟫ ¿
+      it "rev" ⌈ ⌉ E ⟪ em_failed ⟫ ¬ ∧ ⤴ ↵
+        it "name" ⌈ ⌉ → nm ¿
+        【"⇜" nm】 ⟪ em_cat ⟫ → inm ¿
+        E it "ops" ⌈ ⌉ ⟪ em_invert ⟫ → iops ¿
+        E ⟪ em_failed ⟫ ¬ ⤴ ↵
+          it "tok" ⌈ ⌉ → itok ¿
+          ❴"kind": "fn", "name": inm, "tok": itok, "ops": iops❵ → inv ¿
+          E inv fns inm ⌈ ⌉ ⟪ em_function ⟫ ¿
+        ⌫ ¿
+      ⌫ ¿
+    ⌫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
   E "err" ⌈ ⌉ → err ¿
@@ -1371,6 +1610,7 @@
   out "declare void @trith_print_i64(i64)" ⟪ .append ⟫ ¿
   out "declare void @trith_print_f64(double)" ⟪ .append ⟫ ¿
   out "declare void @trith_loop_failed()" ⟪ .append ⟫ ¿
+  out "declare void @trith_reversal_failed()" ⟪ .append ⟫ ¿
   out "declare void @trith_entry_failed()" ⟪ .append ⟫ ¿
   out "declare void @llvm.assume(i1)" ⟪ .append ⟫ ¿
   out "declare void @llvm.trap()" ⟪ .append ⟫ ¿

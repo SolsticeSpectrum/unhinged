@@ -1274,6 +1274,89 @@
   ⊥ ⇄ ¿
 ↦ C ↦ op ↦ S ↦ strand ↦ depth ↦ locks ↦ ind ↦ ck_glyph ¿
 
+⍝ ---- reversible functions (§10)
+⍝ Units the s1 inverter understands:
+⍝   lit ⊞ | lit ⊟ | lit ⩡ | ⍿ⁿ ⊞ | ⍿ⁿ ⊟ | ⍿ⁿ ⩡ (n ≥ 1) | ⊝
+⍝   call of a ⇋ function | ⇜ call
+⍝   ⍿⁰ lit ≶ ⋔⇋ face face face ⦃assert⦄   (faces are reversible too)
+
+ƒ
+  op ∅ ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  op "kind" ⌈ ⌉ "op" ≡ op "tok" ⌈ ⌉ "text" ⌈ ⌉ x ≡ ∧ ⇄ ¿
+↦ op ↦ x ↦ ck_is_glyph ¿
+
+ƒ
+  op ∅ ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  op "kind" ⌈ ⌉ "lit" ≡ op "tok" ⌈ ⌉ "kind" ⌈ ⌉ "int" ≡ ∧ ⇄ ¿
+↦ op ↦ ck_is_int_lit ¿
+
+⍝ Split a reversible body into units; returns the units or ∅ (C err set)
+ƒ
+  【】 → units ¿
+  0 → i ¿
+  ops ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ops i ⌈ ⌉ → op ¿
+    op "kind" ⌈ ⌉ → k ¿
+    op "tok" ⌈ ⌉ → tok ¿
+    ∅ → nx ¿
+    i 1 ⊞ n ≺ ⤴ ↵ ops i 1 ⊞ ⌈ ⌉ → nx ¿ ⌫ ¿
+    ⊥ → done ¿
+    op "⊝" ⟪ ck_is_glyph ⟫ ⤴ ↵
+      units 【"neg" op】 ⟪ .append ⟫ ¿
+      i 1 ⊞ → i ¿
+      ⊤ → done ¿
+    ⌫ ¿
+    done ¬ k "call" ≡ k "inverse-call" ≡ ∨ ∧ ⤴ ↵
+      C op ⟪ ck_resolve ⟫ → f ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+      tok "text" ⌈ ⌉ → cn ¿
+      f "rev" ⌈ ⌉ ¬ ⤴ ↵ C tok 【"a reversible function can only call reversible functions, and " cn " is not ⇋ (§10)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+      tok "marks" ⌈ ⌉ → ms ¿
+      ms ⟪ len ⟫ 0 ≻ ⤴ ↵ C tok "calls in a reversible function cannot be past or future tense" ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+      units 【"call" op】 ⟪ .append ⟫ ¿
+      i 1 ⊞ → i ¿
+      ⊤ → done ¿
+    ⌫ ¿
+    done ¬ ⤴ ↵
+      ⍝ value then ⊞ ⊟ ⩡
+      op ⟪ ck_is_int_lit ⟫ op "⍿" ⟪ ck_is_glyph ⟫ op "tok" ⌈ ⌉ "idx" ⌈ ⌉ 0 ≻ ∧ ∨ → isVal ¿
+      isVal nx "⊞" ⟪ ck_is_glyph ⟫ nx "⊟" ⟪ ck_is_glyph ⟫ ∨ nx "⩡" ⟪ ck_is_glyph ⟫ ∨ ∧ ⤴ ↵
+        units 【"upd" op nx】 ⟪ .append ⟫ ¿
+        i 2 ⊞ → i ¿
+        ⊤ → done ¿
+      ⌫ ¿
+    ⌫ ¿
+    done ¬ op "⍿" ⟪ ck_is_glyph ⟫ ∧ op "tok" ⌈ ⌉ "idx" ⌈ ⌉ 0 ≡ ∧ i 3 ⊞ n ≺ ∧ ⤴ ↵
+      ⍝ ⍿⁰ lit ≶ ⋔⇋
+      ops i 1 ⊞ ⌈ ⌉ → o1 ¿
+      ops i 2 ⊞ ⌈ ⌉ → o2 ¿
+      ops i 3 ⊞ ⌈ ⌉ → o3 ¿
+      o1 ⟪ ck_is_int_lit ⟫ o2 "≶" ⟪ ck_is_glyph ⟫ ∧ o3 "kind" ⌈ ⌉ "rselect" ≡ ∧ ⤴ ↵
+        o3 "faces" ⌈ ⌉ → fs ¿
+        0 → q ¿
+        q 3 ≺ ⟲ ↵
+          fs q ⌈ ⌉ → f ¿
+          f "kind" ⌈ ⌉ "block" ≡ ⤴ ↵
+            C f "ops" ⌈ ⌉ ⟪ ck_reversible ⟫ ¿
+            C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+          ⌫ ¿
+          q 1 ⊞ → q ¿
+        ⌫ ¿
+        units 【"rsel" op o1 o2 o3】 ⟪ .append ⟫ ¿
+        i 4 ⊞ → i ¿
+        ⊤ → done ¿
+      ⌫ ¿
+    ⌫ ¿
+    done ¬ ⤴ ↵
+      k "rselect" ≡ ⤴ ↵ C tok "⋔⇋ must follow its condition written as ⍿⁰ x ≶ with a literal x (s1, §10)" ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+      tok ⟪ ck_label ⟫ → lbl ¿
+      C tok 【lbl " is not invertible here: a reversible function may use x ⊞, x ⊟, x ⩡ (x a literal or ⍿ⁿ with n ≥ 1), ⊝, ⇋ calls and ⋔⇋ (§10)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ⇄ ¿
+    ⌫ ¿
+  ⌫ ¿
+  units ⇄ ¿
+↦ C ↦ ops ↦ ck_reversible ¿
+
 ⍝ ---- name resolution (§9, §9.1)
 
 ƒ
@@ -1402,6 +1485,10 @@
   ⌫ ¿
   it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → sigs ¿
   C "" "fn " name " " sigs "  start " S ⟪ ck_vtypes ⟫ ⟪ ck_show ⟫ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_note ⟫ ¿
+  it "rev" ⌈ ⌉ ⤴ ↵
+    C it "ops" ⌈ ⌉ ⟪ ck_reversible ⟫ ¿
+    C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  ⌫ ¿
   C it "ops" ⌈ ⌉ S 1 【】 "  " ⟪ ck_block ⟫ → r ¿
   C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
   r "dead" ⌈ ⌉ ¬ ⤴ ↵

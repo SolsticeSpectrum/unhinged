@@ -1,0 +1,309 @@
+⍝ Trith compile-time evaluator (spec §13 "eval", milestone 5)
+⍝ The only interpreter in the toolchain: it runs past-tense calls (§9.2) and
+⍝ decides prayers (§12) at compile time, and never appears in the output.
+⍝ s1 evaluates pure code over ℤ, ŧ and ◌ of those; integers must stay exact
+⍝ (|n| ≤ 2⁵³, the range of the doubles UNHINGED computes with).
+⍝ Values: ❴ty, n, ok, role❵ (n is ∅ for a failed ◌ or a bare ◌).
+
+ƒ
+  ❴"ty": ty, "n": n, "ok": ok❵ → v ¿
+  v "role" ← ∅ ¿
+  v ⇄ ¿
+↦ ty ↦ n ↦ ok ↦ ev_val ¿
+
+⍝ X: ❴err, fail, steps, budget❵ — fail means "unwinding a ◌ failure"
+ƒ
+  X "err" ⌈ ⌉ ∅ ≡ ⤴ ↵ X "err" ← msg ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ X ↦ msg ↦ ev_err ¿
+
+ƒ
+  X "err" ⌈ ⌉ ∅ ≢ X "fail" ⌈ ⌉ ∨ ⇄ ¿
+↦ X ↦ ev_stop ¿
+
+ƒ
+  n 9007199254740992 ≻ n 0 9007199254740992 ⊟ ≺ ∨ ⤴ ↵
+    X "an integer left the exact range of compile-time evaluation (2⁵³)" ⟪ ev_err ⟫ ¿
+  ⌫ ¿
+  n ⇄ ¿
+↦ X ↦ n ↦ ev_exact ¿
+
+⍝ ◌T used as T: a failed value unwinds the current function
+ƒ
+  v "ty" ⌈ ⌉ → t ¿
+  t ⟪ ck_head ⟫ "◌" ≢ t "◌" ≡ ∨ ⤴ ↵ v ⇄ ¿ ⌫ ¿
+  v "ok" ⌈ ⌉ ¬ ⤴ ↵ X "fail" ← ⊤ ¿ ∅ ⇄ ¿ ⌫ ¿
+  t ⟪ ck_tail ⟫ v "n" ⌈ ⌉ ⊤ ⟪ ev_val ⟫ ⇄ ¿
+↦ X ↦ v ↦ ev_unwrap ¿
+
+⍝ ⊘ rounds to nearest, exact halves toward zero; ⊜ is the matching remainder
+ƒ
+  a b ⊘ ⟪ int ⟫ → q ¿
+  a q b ⊠ ⊟ → r ¿
+  r 2 ⊠ → r2 ¿
+  r2 0 ≺ ⤴ ↵ 0 r2 ⊟ → r2 ¿ ⌫ ¿
+  b → ab ¿
+  ab 0 ≺ ⤴ ↵ 0 ab ⊟ → ab ¿ ⌫ ¿
+  r2 ab ≻ ⤴ ↵
+    a 0 ≺ b 0 ≺ ≢ ⤴ ↵ q 1 ⊟ → q ¿ ⌫ ⤵ ↵ q 1 ⊞ → q ¿ ⌫ ¿
+  ⌫ ¿
+  q ⇄ ¿
+↦ a ↦ b ↦ ev_div ¿
+
+ƒ
+  a b ≻ ⤴ ↵ 1 ⇄ ¿ ⌫ ¿
+  a b ≺ ⤴ ↵ 0 1 ⊟ ⇄ ¿ ⌫ ¿
+  0 ⇄ ¿
+↦ a ↦ b ↦ ev_cmp ¿
+
+⍝ A glyph operator on values; returns the results, or ∅ (X err set)
+ƒ
+  vals 0 ⌈ ⌉ → va ¿
+  va "ty" ⌈ ⌉ → ty ¿
+  va "n" ⌈ ⌉ → a ¿
+  ∅ → b ¿
+  vals ⟪ len ⟫ 1 ≻ ⤴ ↵ vals 1 ⌈ ⌉ "n" ⌈ ⌉ → b ¿ ⌫ ¿
+  ty "ℤ" ≢ ty "ŧ" ≢ ∧ ⤴ ↵
+    X 【"compile-time evaluation of " x " on " ty " is not supported in s1"】 ⟪ em_cat ⟫ ⟪ ev_err ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  x "⊞" ≡ ⤴ ↵ 【】 ty X a b ⊞ ⟪ ev_exact ⟫ ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+  x "⊟" ≡ ⤴ ↵ 【】 ty X a b ⊟ ⟪ ev_exact ⟫ ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+  x "⊠" ≡ ⤴ ↵ 【】 ty X a b ⊠ ⟪ ev_exact ⟫ ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+  x "⊘" ≡ x "⊜" ≡ ∨ ⤴ ↵
+    【"◌" ty】 ⟪ em_cat ⟫ → ft ¿
+    b 0 ≡ ⤴ ↵ 【】 ft ∅ ⊥ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+    a b ⟪ ev_div ⟫ → q ¿
+    x "⊜" ≡ ⤴ ↵ a q b ⊠ ⊟ → q ¿ ⌫ ¿
+    【】 ft q ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⊝" ≡ ⤴ ↵ 【】 ty 0 a ⊟ ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+  x "⚇" ≡ ⤴ ↵ 【】 ty a ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+  x "≶" ≡ ⤴ ↵ 【】 "ŧ" a b ⟪ ev_cmp ⟫ ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿ ⌫ ¿
+  x "⋏" ≡ ⤴ ↵
+    a → m ¿
+    b a ≺ ⤴ ↵ b → m ¿ ⌫ ¿
+    【】 "ŧ" m ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  x "⋎" ≡ ⤴ ↵
+    a → m ¿
+    b a ≻ ⤴ ↵ b → m ¿ ⌫ ¿
+    【】 "ŧ" m ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  X 【"compile-time evaluation of " x " is not supported in s1"】 ⟪ em_cat ⟫ ⟪ ev_err ⟫ ¿
+  ∅ ⇄ ¿
+↦ X ↦ x ↦ vals ↦ ev_glyph ¿
+
+⍝ Is function nm pure (and evaluable): no I/O, FFI, containers or future calls
+ƒ
+  nm seen ∈ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
+  seen nm ⟪ .append ⟫ ¿
+  E "fns" ⌈ ⌉ nm ⌈ ⌉ → f ¿
+  f "ffi" ⌈ ⌉ ⊤ ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  E "items" ⌈ ⌉ nm ⌈ ⌉ → it ¿
+  it ∅ ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  E it "ops" ⌈ ⌉ seen ⟪ ev_pure_ops ⟫ ⇄ ¿
+↦ E ↦ nm ↦ seen ↦ ev_pure ¿
+
+ƒ
+  0 → i ¿
+  ops ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ops i ⌈ ⌉ → op ¿
+    op "kind" ⌈ ⌉ → k ¿
+    op "tok" ⌈ ⌉ → tok ¿
+    k "op" ≡ ⤴ ↵
+      tok "text" ⌈ ⌉ → x ¿
+      "⎙⌁⟗⟖⌖⍈⍴⍆⫴⊛⊙⟜" x ⟪ .indexOf ⟫ 0 ≽ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    ⌫ ¿
+    k "lit" ≡ tok "kind" ⌈ ⌉ "string" ≡ ∧ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    k "array" ≡ k "anti-call" ≡ ∨ k "postselect" ≡ ∨ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    k "call" ≡ k "shape-call" ≡ ∨ ⤴ ↵
+      tok "marks" ⌈ ⌉ → ms ¿
+      ms ∅ ≢ ⤴ ↵ "future" ms ∈ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿ ⌫ ¿
+      E op ⟪ em_resolve ⟫ "name" ⌈ ⌉ → callee ¿
+      E callee seen ⟪ ev_pure ⟫ ¬ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    ⌫ ¿
+    k "select" ≡ k "rselect" ≡ ∨ ⤴ ↵
+      op "faces" ⌈ ⌉ → fs ¿
+      0 → q ¿
+      q 3 ≺ ⟲ ↵
+        fs q ⌈ ⌉ → f ¿
+        f "ops" ⌈ ⌉ ∅ ≢ ⤴ ↵ E f "ops" ⌈ ⌉ seen ⟪ ev_pure_ops ⟫ ¬ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿ ⌫ ¿
+        q 1 ⊞ → q ¿
+      ⌫ ¿
+    ⌫ ¿
+    k "loop" ≡ k "quote" ≡ ∨ k "prayer" ≡ ∨ ⤴ ↵
+      E op "block" ⌈ ⌉ "ops" ⌈ ⌉ seen ⟪ ev_pure_ops ⟫ ¬ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    ⌫ ¿
+    k "handle" ≡ ⤴ ↵
+      E op "ok" ⌈ ⌉ "ops" ⌈ ⌉ seen ⟪ ev_pure_ops ⟫ ¬ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+      E op "fail" ⌈ ⌉ "ops" ⌈ ⌉ seen ⟪ ev_pure_ops ⟫ ¬ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⊤ ⇄ ¿
+↦ E ↦ ops ↦ seen ↦ ev_pure_ops ¿
+
+⍝ Call function f (its info) on args; returns the output values or ∅
+ƒ
+  X "depth" ⌈ ⌉ 1 ⊞ → d ¿
+  d 200 ≻ ⤴ ↵ X "compile-time evaluation recursed more than 200 calls deep" ⟪ ev_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  X "depth" ← d ¿
+  f "name" ⌈ ⌉ → nm ¿
+  E "items" ⌈ ⌉ nm ⌈ ⌉ → it ¿
+  args ⟪ ck_copy ⟫ → S ¿
+  E X it "ops" ⌈ ⌉ S ⟪ ev_block ⟫ → S ¿
+  d 1 ⊟ → d0 ¿
+  X "depth" ← d0 ¿
+  f "outs" ⌈ ⌉ → outs ¿
+  X "err" ⌈ ⌉ ∅ ≢ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  X "fail" ⌈ ⌉ ⤴ ↵
+    ⍝ the function failed: its single ◌ output carries the failure
+    X "fail" ← ⊥ ¿
+    【】 outs 0 ⌈ ⌉ ∅ ⊥ ⟪ ev_val ⟫ ⟪ .append ⟫ ⇄ ¿
+  ⌫ ¿
+  【】 → out ¿
+  0 → i ¿
+  outs ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    outs i ⌈ ⌉ → o ¿
+    o "◌" ≡ S ⟪ len ⟫ 0 ≡ ∧ ⤴ ↵ out o ∅ ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ¿ ⌫ ⤵ ↵
+      S i ⌈ ⌉ → v ¿
+      o v "ty" ⌈ ⌉ ≢ ⤴ ↵ o v "n" ⌈ ⌉ ⊤ ⟪ ev_val ⟫ → v ¿ ⌫ ¿
+      out v ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out ⇄ ¿
+↦ E ↦ X ↦ f ↦ args ↦ ev_call ¿
+
+⍝ Run ops over stack S (a fresh strand); returns the final stack
+ƒ
+  【】 → strand ¿
+  0 → oi ¿
+  ops ⟪ len ⟫ → nops ¿
+  oi nops ≺ ⟲ ↵
+    X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    X "steps" ⌈ ⌉ 1 ⊞ → st ¿
+    X "steps" ← st ¿
+    st X "budget" ⌈ ⌉ ≻ ⤴ ↵ X "compile-time evaluation did not finish within its step budget" ⟪ ev_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+    ops oi ⌈ ⌉ → op ¿
+    op "kind" ⌈ ⌉ → k ¿
+    op "tok" ⌈ ⌉ → tok ¿
+    tok ⟪ ck_role ⟫ → role ¿
+    k "lit" ≡ ⤴ ↵
+      tok "kind" ⌈ ⌉ → lk ¿
+      lk "int" ≡ ⤴ ↵ "ℤ" tok "value" ⌈ ⌉ ⟪ int ⟫ ⊤ ⟪ ev_val ⟫ → v ¿
+      ⌫ ⤵ lk "trit" ≡ ⤴ ↵
+        tok "text" ⌈ ⌉ → tt ¿
+        0 → tn ¿
+        tt "⊖" ≡ ⤴ ↵ 0 1 ⊟ → tn ¿ ⌫ ¿
+        tt "⊕" ≡ ⤴ ↵ 1 → tn ¿ ⌫ ¿
+        "ŧ" tn ⊤ ⟪ ev_val ⟫ → v ¿
+      ⌫ ⤵ ↵
+        X "compile-time evaluation of reals and strings is not supported in s1" ⟪ ev_err ⟫ ¿ ⊗ ¿
+      ⌫ ¿
+      v "role" ← role ¿
+      S v ⟪ .append ⟫ ¿
+    ⌫ ⤵ k "call" ≡ k "shape-call" ≡ ∨ ⤴ ↵
+      E op ⟪ em_resolve ⟫ → f ¿
+      f "ins" ⌈ ⌉ ⟪ len ⟫ → ka ¿
+      S ka ⟪ em_pop ⟫ → args ¿
+      【】 → uargs ¿
+      0 → q ¿
+      q ka ≺ ⟲ ↵
+        args q ⌈ ⌉ → a ¿
+        f "ins" ⌈ ⌉ q ⌈ ⌉ ⟪ ck_head ⟫ "◌" ≢ ⤴ ↵ X a ⟪ ev_unwrap ⟫ → a ¿ ⌫ ¿
+        uargs a ⟪ .append ⟫ ¿
+        q 1 ⊞ → q ¿
+      ⌫ ¿
+      X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      E X f uargs ⟪ ev_call ⟫ → res ¿
+      X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      S res ⟪ em_concat_into ⟫ ¿
+    ⌫ ⤵ k "op" ≡ ⤴ ↵
+      tok "text" ⌈ ⌉ → x ¿
+      tok "idx" ⌈ ⌉ → idx ¿
+      x "⧖" ≡ ⤴ ↵
+        strand S ⟪ .pop ⟫ ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "⧗" ≡ ⤴ ↵
+        strand strand ⟪ len ⟫ 1 ⊟ idx ⊟ ⌈ ⌉ → v ¿
+        v "ty" ⌈ ⌉ v "n" ⌈ ⌉ v "ok" ⌈ ⌉ ⟪ ev_val ⟫ → w ¿
+        w "role" ← role ¿
+        S w ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "⍿" ≡ ⤴ ↵
+        S S ⟪ len ⟫ 1 ⊟ idx ⊟ ⌈ ⌉ → v ¿
+        v "ty" ⌈ ⌉ v "n" ⌈ ⌉ v "ok" ⌈ ⌉ ⟪ ev_val ⟫ → w ¿
+        w "role" ← role ¿
+        S w ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "↯" ≡ ⤴ ↵
+        X "fail" ← ⊤ ¿
+      ⌫ ⤵ ↵
+        x ⟪ ck_arity ⟫ → ar ¿
+        S ar ⟪ em_pop ⟫ → vals ¿
+        【】 → uv ¿
+        0 → q ¿
+        q ar ≺ ⟲ ↵
+          X vals q ⌈ ⌉ ⟪ ev_unwrap ⟫ → u ¿
+          uv u ⟪ .append ⟫ ¿
+          q 1 ⊞ → q ¿
+        ⌫ ¿
+        X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        X x uv ⟪ ev_glyph ⟫ → res ¿
+        X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        S res ⟪ em_concat_into ⟫ ¿
+      ⌫ ¿
+    ⌫ ⤵ k "select" ≡ ⤴ ↵
+      X S ⟪ .pop ⟫ ⟪ ev_unwrap ⟫ → c ¿
+      X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      c "n" ⌈ ⌉ → cn ¿
+      0 → fi ¿
+      cn 1 ≡ ⤴ ↵ 1 → fi ¿ ⌫ ¿
+      cn 0 1 ⊟ ≡ ⤴ ↵ 2 → fi ¿ ⌫ ¿
+      op "faces" ⌈ ⌉ → fs ¿
+      fs fi ⌈ ⌉ "kind" ⌈ ⌉ "same" ≡ fi 0 ≻ ∧ ⟲ ↵ fi 1 ⊟ → fi ¿ ⌫ ¿
+      fs fi ⌈ ⌉ → f ¿
+      f "kind" ⌈ ⌉ "identity" ≢ ⤴ ↵
+        E X f "ops" ⌈ ⌉ S ⟪ ev_block ⟫ → S ¿
+      ⌫ ¿
+    ⌫ ⤵ k "loop" ≡ ⤴ ↵
+      ⊤ → again ¿
+      again ⟲ ↵
+        E X op "block" ⌈ ⌉ "ops" ⌈ ⌉ S ⟪ ev_block ⟫ → S ¿
+        X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        X S ⟪ .pop ⟫ ⟪ ev_unwrap ⟫ → c ¿
+        X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        c "n" ⌈ ⌉ 1 ≡ → again ¿
+        c "n" ⌈ ⌉ 0 1 ⊟ ≡ ⤴ ↵ X "fail" ← ⊤ ¿ ⌫ ¿
+      ⌫ ¿
+    ⌫ ⤵ k "handle" ≡ ⤴ ↵
+      S ⟪ .pop ⟫ → fv ¿
+      fv "ok" ⌈ ⌉ ⤴ ↵
+        fv "ty" ⌈ ⌉ "◌" ≢ ⤴ ↵ S fv "ty" ⌈ ⌉ ⟪ ck_tail ⟫ fv "n" ⌈ ⌉ ⊤ ⟪ ev_val ⟫ ⟪ .append ⟫ ¿ ⌫ ¿
+        E X op "ok" ⌈ ⌉ "ops" ⌈ ⌉ S ⟪ ev_block ⟫ → S ¿
+      ⌫ ⤵ ↵
+        E X op "fail" ⌈ ⌉ "ops" ⌈ ⌉ S ⟪ ev_block ⟫ → S ¿
+      ⌫ ¿
+    ⌫ ⤵ k "quote" ≡ ⤴ ↵
+      X S ⟪ .pop ⟫ ⟪ ev_unwrap ⟫ → xv ¿
+      X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      E X op "block" ⌈ ⌉ "ops" ⌈ ⌉ 【xv】 ⟪ ev_block ⟫ → PS ¿
+      X ⟪ ev_stop ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      xv "ty" ⌈ ⌉ → xt ¿
+      【"◌" xt】 ⟪ em_cat ⟫ → rt ¿
+      S rt xv "n" ⌈ ⌉ PS 0 ⌈ ⌉ "n" ⌈ ⌉ 1 ≡ ⟪ ev_val ⟫ ⟪ .append ⟫ ¿
+      oi 1 ⊞ → oi ¿
+    ⌫ ⤵ k "prayer" ≡ ⤴ ↵
+      ⍝ prayers inside evaluated code are checked when the code itself is compiled
+    ⌫ ⤵ ↵
+      X 【"compile-time evaluation of " k " is not supported in s1"】 ⟪ em_cat ⟫ ⟪ ev_err ⟫ ¿
+    ⌫ ¿
+    oi 1 ⊞ → oi ¿
+  ⌫ ¿
+  S ⇄ ¿
+↦ E ↦ X ↦ ops ↦ S ↦ ev_block ¿
+
+ƒ
+  ❴"err": ∅, "fail": ⊥, "steps": 0, "budget": 10000000, "depth": 0❵ ⇄ ¿
+↦ ev_state ¿

@@ -1,0 +1,14 @@
+⍝ §10: reversible functions; ⇜ runs the generated inverse
+⸫ ᚱ ⟨ ℤ ⊸ ℤ ⟩ ⦃ ⩡ ○△ ⊝ ⊞ △ ⦄ ⇋
+⇋ ⦃ ⍿¹ ⊞ ⦄ ⟨ ℤ ℤ ⊸ ℤ ℤ ⟩ ᚹ ⸫
+⋔⇋: add 10 to positives, subtract 10 from negatives; the exit assertion ⍝
+⍝ (> 0 after the face) must agree with the face taken
+⸫ ᛊ ⟨ ℤ ⊸ ℤ ⟩ ⦃ ⦃ ≶ ○ ⦄ ⦃ ⊟ △○△ ⦄ ⦃ ⊞ △○△ ⦄ ∅ ⋔⇋ ≶ ○ ⍿⁰ ⦄ ⇋
+⇋ ⦃ ᚱ ᛊ ⦄ ⟨ ℤ ⊸ ℤ ⟩ ᛗ ⸫
+⦄
+  ▽○△ ᚱ ⍿⁰ ⎙ ⇜ᚱ ⎙
+  ⎙ ⎙ ⇜ᚹ ⎙ ⍿⁰ ᚹ ▽△ ○△
+  ▽○△ ᛊ ⍿⁰ ⎙ ⇜ᛊ ⎙
+  ⎙ ⇜ᛊ ⎙ ⍿⁰ ᛊ ⊟ ▽○△ ○
+  ○△○△ ᛗ ⍿⁰ ⎙ ⇜ᛗ ⎙
+⸱ ⸱ ⸫ ᛟ ⟨ ⊸ ⟩ ⦃

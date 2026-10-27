@@ -118,6 +118,13 @@ void trith_loop_failed(void) {
     exit(27);
 }
 
+/* a ⋔⇋ exit assertion disagreed with the face taken (§10) */
+void trith_reversal_failed(void) {
+    fflush(stdout);
+    fputs("trith: ⋔⇋ exit assertion does not match the face taken\n", stderr);
+    exit(27);
+}
+
 /* the entry point ᛟ failed (§7.3) */
 void trith_entry_failed(void) {
     fflush(stdout);

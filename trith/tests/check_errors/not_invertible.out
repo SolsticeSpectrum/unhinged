@@ -1,0 +1,2 @@
+fn ᚱ ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+trith/tests/check_errors/not_invertible.trh:1:5: error: ○△ is not invertible here: a reversible function may use x ⊞, x ⊟, x ⩡ (x a literal or ⍿ⁿ with n ≥ 1), ⊝, ⇋ calls and ⋔⇋ (§10)

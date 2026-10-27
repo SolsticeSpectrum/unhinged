@@ -125,6 +125,13 @@ void trith_reversal_failed(void) {
     exit(27);
 }
 
+/* ⊙⁻ or ⊙⁺ on a superposition with no live alternative (§8.3) */
+void trith_collapse_empty(void) {
+    fflush(stdout);
+    fputs("trith: collapse of an empty superposition\n", stderr);
+    exit(27);
+}
+
 /* the entry point ᛟ failed (§7.3) */
 void trith_entry_failed(void) {
     fflush(stdout);

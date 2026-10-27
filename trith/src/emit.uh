@@ -159,9 +159,11 @@
 ƒ
   t ⟪ em_llty ⟫ ∅ ≢ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
   t ⟪ ck_head ⟫ → h ¿
-  "5" → m ¿
-  h "ψ" ≡ ⤴ ↵ "5" → m ¿ ⌫ ¿
-  E tok 【"code generation for " t " arrives in milestone " m】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
+  h "ψ" ≡ ⤴ ↵
+    E tok 【"s1 keeps superpositions inside one block: " t " cannot be a parameter or a result"】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  E tok 【"code generation for " t " is not supported in s1"】 ⟪ em_cat ⟫ ⟪ em_err ⟫ ¿
   ∅ ⇄ ¿
 ↦ E ↦ t ↦ tok ↦ em_need_type ¿
 
@@ -176,7 +178,16 @@
   e "v" ⌈ ⌉ → v ¿
   e "ok" ⌈ ⌉ → ok ¿
   e "c" ⌈ ⌉ → c ¿
-  ❴"ty": ty, "v": v, "ok": ok, "role": role, "c": c❵ ⇄ ¿
+  ❴"ty": ty, "v": v, "ok": ok, "role": role, "c": c❵ → out ¿
+  e "slots" ⌈ ⌉ → sl ¿
+  sl ∅ ≢ ⤴ ↵
+    e "live" ⌈ ⌉ → lv ¿
+    e "neg" ⌈ ⌉ → ng ¿
+    out "slots" ← sl ¿
+    out "live" ← lv ¿
+    out "neg" ← ng ¿
+  ⌫ ¿
+  out ⇄ ¿
 ↦ e ↦ role ↦ em_with_role ¿
 
 ⍝ ---- compile-time values (milestone 5): entries with a known value carry c
@@ -748,6 +759,10 @@
   j limit ≺ ⟲ ↵
     m j ⌈ ⌉ → e0 ¿
     e0 "ty" ⌈ ⌉ → ty ¿
+    ty ⟪ ck_head ⟫ "ψ" ≡ ⤴ ↵
+      E ∅ "s1 keeps superpositions inside one block: a ψ cannot flow through ⋔, ⁇ or ⥀ (collapse it first)" ⟪ em_err ⟫ ¿
+      out ⇄ ¿
+    ⌫ ¿
     ∅ → v ¿
     ty ⟪ em_vty ⟫ → vt ¿
     vt ∅ ≢ ⤴ ↵ E ins key j "v" vt ⟪ em_phi ⟫ → v ¿ ⌫ ¿
@@ -787,6 +802,213 @@
   E ins "strand" proto ⟪ em_merge_list ⟫ → strand ¿
   S strand ⊥ ⟪ ck_result ⟫ ⇄ ¿
 ↦ E ↦ ins ↦ join ↦ em_join ¿
+
+⍝ ---- superpositions (§8.3–§8.5): one SSA value per alternative, plus
+⍝ i1 flags live and neg (phase −). Constant flags fold away in LLVM.
+
+ƒ
+  ❴"ty": ty, "v": ∅, "ok": ∅❵ → e ¿
+  e "role" ← ∅ ¿
+  e "slots" ← slots ¿
+  e "live" ← live ¿
+  e "neg" ← neg ¿
+  e ⇄ ¿
+↦ ty ↦ slots ↦ live ↦ neg ↦ em_psi_ent ¿
+
+⍝ a classical entry as a one-alternative superposition
+ƒ
+  e "slots" ⌈ ⌉ ∅ ≢ ⤴ ↵ e ⇄ ¿ ⌫ ¿
+  e "ty" ⌈ ⌉ → t ¿
+  e "v" ⌈ ⌉ → v ¿
+  1 t ⟪ ck_psi_type ⟫ 【v】 【"true"】 【"false"】 ⟪ em_psi_ent ⟫ ⇄ ¿
+↦ e ↦ em_psi_of ¿
+
+ƒ
+  E 【op " i1 " a ", " b】 ⟪ em_cat ⟫ ⟪ em_def ⟫ ⇄ ¿
+↦ E ↦ op ↦ a ↦ b ↦ em_bool ¿
+
+⍝ a ⫴ b, then interference: equal alternatives with the same phase merge,
+⍝ with opposite phases annihilate (§8.4)
+ƒ
+  a ⟪ em_psi_of ⟫ → A ¿
+  b ⟪ em_psi_of ⟫ → B ¿
+  A "slots" ⌈ ⌉ B "slots" ⌈ ⌉ ⊞⊞ → sl ¿
+  A "live" ⌈ ⌉ B "live" ⌈ ⌉ ⊞⊞ → lv ¿
+  A "neg" ⌈ ⌉ B "neg" ⌈ ⌉ ⊞⊞ → ng ¿
+  A "ty" ⌈ ⌉ ⟪ ck_psi_base ⟫ → base ¿
+  base ⟪ em_llty ⟫ → lt ¿
+  【"icmp eq " lt】 ⟪ em_cat ⟫ → eqop ¿
+  lt "double" ≡ ⤴ ↵ "fcmp oeq double" → eqop ¿ ⌫ ¿
+  sl ⟪ len ⟫ → n ¿
+  1 → j ¿
+  j n ≺ ⟲ ↵
+    0 → i ¿
+    i j ≺ ⟲ ↵
+      sl i ⌈ ⌉ → vi ¿
+      sl j ⌈ ⌉ → vj ¿
+      E 【eqop " " vi ", " vj】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → eq ¿
+      E "and" lv i ⌈ ⌉ lv j ⌈ ⌉ ⟪ em_bool ⟫ → both ¿
+      E "and" both eq ⟪ em_bool ⟫ → hit ¿
+      E "xor" ng i ⌈ ⌉ ng j ⌈ ⌉ ⟪ em_bool ⟫ → opposite ¿
+      E "xor" hit "true" ⟪ em_bool ⟫ → nothit ¿
+      E "and" lv j ⌈ ⌉ nothit ⟪ em_bool ⟫ → lj ¿
+      lv j ← lj ¿
+      E "and" hit opposite ⟪ em_bool ⟫ → kill ¿
+      E "xor" kill "true" ⟪ em_bool ⟫ → keep ¿
+      E "and" lv i ⌈ ⌉ keep ⟪ em_bool ⟫ → li ¿
+      lv i ← li ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    j 1 ⊞ → j ¿
+  ⌫ ¿
+  n base ⟪ ck_psi_type ⟫ sl lv ng ⟪ em_psi_ent ⟫ ⇄ ¿
+↦ E ↦ a ↦ b ↦ em_superpose ¿
+
+⍝ ⊙⁰ / ⊙⁻ / ⊙⁺: collapse (§8.3)
+ƒ
+  e "ty" ⌈ ⌉ ⟪ ck_psi_base ⟫ → base ¿
+  base ⟪ em_llty ⟫ → lt ¿
+  e "slots" ⌈ ⌉ → sl ¿
+  e "live" ⌈ ⌉ → lv ¿
+  sl ⟪ len ⟫ → n ¿
+  lt ⟪ em_zero ⟫ → acc ¿
+  idx "-" ≡ idx "+" ≡ ∨ ⤴ ↵
+    "slt" → p ¿
+    idx "+" ≡ ⤴ ↵ "sgt" → p ¿ ⌫ ¿
+    lt "double" ≡ ⤴ ↵ "olt" → p ¿ idx "+" ≡ ⤴ ↵ "ogt" → p ¿ ⌫ ¿ ⌫ ¿
+    "icmp" → cmpk ¿
+    lt "double" ≡ ⤴ ↵ "fcmp" → cmpk ¿ ⌫ ¿
+    "false" → has ¿
+    0 → i ¿
+    i n ≺ ⟲ ↵
+      sl i ⌈ ⌉ → vi ¿
+      E 【cmpk " " p " " lt " " vi ", " acc】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → better ¿
+      E "xor" has "true" ⟪ em_bool ⟫ → first ¿
+      E "or" first better ⟪ em_bool ⟫ → want ¿
+      E "and" lv i ⌈ ⌉ want ⟪ em_bool ⟫ → take ¿
+      E 【"select i1 " take ", " lt " " vi ", " lt " " acc】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → acc ¿
+      E "or" has lv i ⌈ ⌉ ⟪ em_bool ⟫ → has ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    E ⟪ em_label ⟫ → lgood ¿
+    E ⟪ em_label ⟫ → lbad ¿
+    E 【"br i1 " has ", label %" lgood ", label %" lbad】 ⟪ em_cat ⟫ ⟪ em_emit ⟫ ¿
+    E lbad ⟪ em_start ⟫ ¿
+    E "call void @trith_collapse_empty()" ⟪ em_emit ⟫ ¿
+    E "unreachable" ⟪ em_emit ⟫ ¿
+    E lgood ⟪ em_start ⟫ ¿
+    base acc ∅ ⟪ em_ent ⟫ ⇄ ¿
+  ⌫ ¿
+  "0" → count ¿
+  0 → i ¿
+  i n ≺ ⟲ ↵
+    lv i ⌈ ⌉ → li ¿
+    E 【"zext i1 " li " to i32"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → z ¿
+    E 【"add i32 " count ", " z】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → count ¿
+    sl i ⌈ ⌉ → vi ¿
+    E 【"select i1 " li ", " lt " " vi ", " lt " " acc】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → acc ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  E 【"icmp eq i32 " count ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → ok ¿
+  【"◌" base】 ⟪ em_cat ⟫ → rt ¿
+  rt acc ok ⟪ em_ent ⟫ ⇄ ¿
+↦ E ↦ e ↦ idx ↦ em_collapse ¿
+
+⍝ ⟜: keep the alternatives whose predicate yields ⊕
+ƒ
+  e "ty" ⌈ ⌉ → ty ¿
+  ty ⟪ ck_psi_base ⟫ → base ¿
+  e "slots" ⌈ ⌉ → sl ¿
+  e "live" ⌈ ⌉ ⟪ ck_copy ⟫ → lv ¿
+  0 → i ¿
+  sl ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    sl i ⌈ ⌉ → vi ¿
+    base vi ∅ ⟪ em_ent ⟫ → alt ¿
+    E ops 【alt】 ⟪ em_predicate ⟫ → t ¿
+    E 【"icmp eq i8 " t ", 1"】 ⟪ em_cat ⟫ ⟪ em_def ⟫ → keep ¿
+    E "and" lv i ⌈ ⌉ keep ⟪ em_bool ⟫ → li ¿
+    lv i ← li ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ty sl lv e "neg" ⌈ ⌉ ⟪ em_psi_ent ⟫ ⇄ ¿
+↦ E ↦ e ↦ ops ↦ em_postselect ¿
+
+⍝ an operator lifted over superpositions: every combination of alternatives
+ƒ
+  【】 → ps ¿
+  0 → i ¿
+  vals ⟪ len ⟫ → k ¿
+  i k ≺ ⟲ ↵ ps vals i ⌈ ⌉ ⟪ em_psi_of ⟫ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  【】 → sl ¿
+  【】 → lv ¿
+  【】 → ng ¿
+  ∅ → rbase ¿
+  ps 0 ⌈ ⌉ → P ¿
+  P "slots" ⌈ ⌉ ⟪ len ⟫ → na ¿
+  1 → nb ¿
+  k 1 ≻ ⤴ ↵ ps 1 ⌈ ⌉ "slots" ⌈ ⌉ ⟪ len ⟫ → nb ¿ ⌫ ¿
+  0 → i ¿
+  i na ≺ ⟲ ↵
+    0 → j ¿
+    j nb ≺ ⟲ ↵
+      P "ty" ⌈ ⌉ ⟪ ck_psi_base ⟫ → ta ¿
+      P "slots" ⌈ ⌉ i ⌈ ⌉ → va ¿
+      【】 ta va ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ → args ¿
+      P "live" ⌈ ⌉ i ⌈ ⌉ → l ¿
+      P "neg" ⌈ ⌉ i ⌈ ⌉ → g ¿
+      k 1 ≻ ⤴ ↵
+        ps 1 ⌈ ⌉ → Q ¿
+        Q "ty" ⌈ ⌉ ⟪ ck_psi_base ⟫ → tb ¿
+        Q "slots" ⌈ ⌉ j ⌈ ⌉ → vb ¿
+        args tb vb ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+        E "and" l Q "live" ⌈ ⌉ j ⌈ ⌉ ⟪ em_bool ⟫ → l ¿
+        E "xor" g Q "neg" ⌈ ⌉ j ⌈ ⌉ ⟪ em_bool ⟫ → g ¿
+      ⌫ ¿
+      E tok args ⟪ em_glyph_values ⟫ → res ¿
+      E ⟪ em_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+      res ⟪ len ⟫ 0 ≻ ⤴ ↵
+        res 0 ⌈ ⌉ → r0 ¿
+        r0 "ty" ⌈ ⌉ → rbase ¿
+        sl r0 "v" ⌈ ⌉ ⟪ .append ⟫ ¿
+        lv l ⟪ .append ⟫ ¿
+        ng g ⟪ .append ⟫ ¿
+      ⌫ ¿
+      j 1 ⊞ → j ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  rbase ∅ ≡ ⤴ ↵ 【】 ⇄ ¿ ⌫ ¿
+  sl ⟪ len ⟫ rbase ⟪ ck_psi_type ⟫ → rt ¿
+  【】 rt sl lv ng ⟪ em_psi_ent ⟫ ⟪ .append ⟫ ⇄ ¿
+↦ E ↦ tok ↦ vals ↦ em_lift ¿
+
+⍝ Retrocausality (§8.5): a ⧗ⁿ ⟜ later in this block that reads the moment
+⍝ just bound is applied here, at the definition, so every read sees it.
+⍝ Returns the (possibly filtered) entry.
+ƒ
+  0 → binds ¿
+  oi 1 ⊞ → j ¿
+  ops ⟪ len ⟫ → n ¿
+  j 1 ⊞ n ≺ ⟲ ↵
+    ops j ⌈ ⌉ → o ¿
+    o "kind" ⌈ ⌉ → k ¿
+    k "select" ≡ k "rselect" ≡ ∨ k "handle" ≡ ∨ k "loop" ≡ ∨ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    k "op" ≡ o "tok" ⌈ ⌉ "text" ⌈ ⌉ "⧖" ≡ ∧ ⤴ ↵ binds 1 ⊞ → binds ¿ ⌫ ¿
+    ops j 1 ⊞ ⌈ ⌉ → o2 ¿
+    k "op" ≡ o "tok" ⌈ ⌉ "text" ⌈ ⌉ "⧗" ≡ ∧ o2 "kind" ⌈ ⌉ "postselect" ≡ ∧ ⤴ ↵
+      o "tok" ⌈ ⌉ "idx" ⌈ ⌉ binds ≡ ⤴ ↵
+        E e o2 "block" ⌈ ⌉ "ops" ⌈ ⌉ ⟪ em_postselect ⟫ → e ¿
+        o2 "tok" ⌈ ⌉ → t2 ¿
+        t2 "line" ⌈ ⌉ ⍕ → ln ¿
+        t2 "col" ⌈ ⌉ ⍕ → cl ¿
+        E "hoisted" ⌈ ⌉ 【ln ":" cl】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
+      ⌫ ¿
+    ⌫ ¿
+    j 1 ⊞ → j ¿
+  ⌫ ¿
+  e ⇄ ¿
+↦ E ↦ e ↦ ops ↦ oi ↦ em_retro ¿
 
 ⍝ ---- three-way branches
 ⍝ Branch on trit entry c to t0 (⦶), t1 (⊕), t2 (⊖). A trit fresh from ≶
@@ -935,7 +1157,9 @@
       tok "text" ⌈ ⌉ → x ¿
       tok "idx" ⌈ ⌉ → idx ¿
       x "⧖" ≡ ⤴ ↵
-        strand S ⟪ .pop ⟫ ⟪ .append ⟫ ¿
+        S ⟪ .pop ⟫ → be ¿
+        be "slots" ⌈ ⌉ ∅ ≢ ⤴ ↵ E be ops oi ⟪ em_retro ⟫ → be ¿ ⌫ ¿
+        strand be ⟪ .append ⟫ ¿
       ⌫ ⤵ x "⧗" ≡ ⤴ ↵
         strand strand ⟪ len ⟫ 1 ⊟ idx ⊟ ⌈ ⌉ → e ¿
         S e role ⟪ em_with_role ⟫ ⟪ .append ⟫ ¿
@@ -960,6 +1184,22 @@
         e "v" ⌈ ⌉ → ev ¿
         【x et】 ⟪ em_cat ⟫ → st ¿
         S st ev ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "⫴" ≡ ⤴ ↵
+        S 2 ⟪ em_pop ⟫ → pv ¿
+        E pv 0 ⌈ ⌉ ⟪ em_unwrap ⟫ → a ¿
+        E pv 1 ⌈ ⌉ ⟪ em_unwrap ⟫ → b ¿
+        S E a b ⟪ em_superpose ⟫ ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "⊛" ≡ ⤴ ↵
+        S ⟪ .pop ⟫ → e ¿
+        【】 → ng ¿
+        0 → q ¿
+        e "neg" ⌈ ⌉ → ng0 ¿
+        ng0 ⟪ len ⟫ → nq ¿
+        q nq ≺ ⟲ ↵ ng E "xor" ng0 q ⌈ ⌉ "true" ⟪ em_bool ⟫ ⟪ .append ⟫ ¿ q 1 ⊞ → q ¿ ⌫ ¿
+        S e "ty" ⌈ ⌉ e "slots" ⌈ ⌉ e "live" ⌈ ⌉ ng ⟪ em_psi_ent ⟫ ⟪ .append ⟫ ¿
+      ⌫ ⤵ x "⊙" ≡ ⤴ ↵
+        S ⟪ .pop ⟫ → e ¿
+        S E e idx ⟪ em_collapse ⟫ ⟪ .append ⟫ ¿
       ⌫ ⤵ x "↯" ≡ ⤴ ↵
         E ⟪ em_fail_exit ⟫ ¿
         ⊤ → dead ¿
@@ -987,6 +1227,10 @@
             q nq ≺ ⟲ ↵ res fv q ⌈ ⌉ ⟪ em_from_val ⟫ ⟪ .append ⟫ ¿ q 1 ⊞ → q ¿ ⌫ ¿
           ⌫ ¿
         ⌫ ¿
+        ⊥ → anyPsi ¿
+        0 → q ¿
+        q ar ≺ ⟲ ↵ uv q ⌈ ⌉ "slots" ⌈ ⌉ ∅ ≢ ⤴ ↵ ⊤ → anyPsi ¿ ⌫ ¿ q 1 ⊞ → q ¿ ⌫ ¿
+        anyPsi ⤴ ↵ E tok uv ⟪ em_lift ⟫ → res ¿ ⌫ ¿
         res ∅ ≡ ⤴ ↵ E tok uv ⟪ em_glyph_values ⟫ → res ¿ ⌫ ¿
         E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
         S res ⟪ em_concat_into ⟫ ¿
@@ -1228,6 +1472,27 @@
       ⌫ ¿
       【"⟦" et "⟧"】 ⟪ em_cat ⟫ → at ¿
       S at arr ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
+    ⌫ ⤵ k "postselect" ≡ ⤴ ↵
+      tok "line" ⌈ ⌉ ⍕ → ln ¿
+      tok "col" ⌈ ⌉ ⍕ → cl ¿
+      【ln ":" cl】 ⟪ em_cat ⟫ → key ¿
+      ⊥ → retro ¿
+      oi 0 ≻ ⤴ ↵
+        ops oi 1 ⊟ ⌈ ⌉ → pv ¿
+        pv "kind" ⌈ ⌉ "op" ≡ pv "tok" ⌈ ⌉ "text" ⌈ ⌉ "⧗" ≡ ∧ → retro ¿
+      ⌫ ¿
+      S ⟪ .pop ⟫ → e ¿
+      key E "hoisted" ⌈ ⌉ ∈ ¬ ⤴ ↵
+        E e op "block" ⌈ ⌉ "ops" ⌈ ⌉ ⟪ em_postselect ⟫ → fe ¿
+        retro ⤴ ↵
+          ⍝ not hoisted (a join came first): filter the moment from here on
+          ops oi 1 ⊟ ⌈ ⌉ "tok" ⌈ ⌉ "idx" ⌈ ⌉ → n ¿
+          strand ⟪ len ⟫ 1 ⊟ n ⊟ → mi ¿
+          strand mi ← fe ¿
+        ⌫ ⤵ ↵
+          S fe ⟪ .append ⟫ ¿
+        ⌫ ¿
+      ⌫ ¿
     ⌫ ⤵ k "inverse-call" ≡ ⤴ ↵
       tok "text" ⌈ ⌉ → fwd ¿
       【"⇜" fwd】 ⟪ em_cat ⟫ → inv ¿
@@ -1512,6 +1777,7 @@
 ⍝ items (checked) → ❴ir, err❵
 ƒ
   ❴"err": ∅, "path": path, "sn": 0, "debug": debug❵ → E ¿
+  E "hoisted" ← 【】 ¿
   E "lines" ← 【】 ¿
   E "globals" ← 【】 ¿
   E "cur" ← "entry" ¿
@@ -1611,6 +1877,7 @@
   out "declare void @trith_print_f64(double)" ⟪ .append ⟫ ¿
   out "declare void @trith_loop_failed()" ⟪ .append ⟫ ¿
   out "declare void @trith_reversal_failed()" ⟪ .append ⟫ ¿
+  out "declare void @trith_collapse_empty()" ⟪ .append ⟫ ¿
   out "declare void @trith_entry_failed()" ⟪ .append ⟫ ¿
   out "declare void @llvm.assume(i1)" ⟪ .append ⟫ ¿
   out "declare void @llvm.trap()" ⟪ .append ⟫ ¿

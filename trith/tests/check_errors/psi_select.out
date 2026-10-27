@@ -1,0 +1,5 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  ⊕  ⊢ [ŧ]
+  ⊖  ⊢ [ŧ ŧ]
+  ⫴  ⊢ [ψ₂ŧ]
+trith/tests/check_errors/psi_select.trh:1:9: error: ⋔ on a superposition (running every live face) is not supported in s1; collapse it first

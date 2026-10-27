@@ -1,0 +1,13 @@
+⍝ superposition (§8.3–§8.5): interference, lifting, collapse, post-selection
+⸫ ᛈ ⟨ ⊸ ⁖◌ℤ ⟩ ⦃ ⦃ ⎙̵ «↵ytpme» ⦄ ⦃ ⎙ ⦄ ⁇ ⦄
+⦃
+  §8.4: equal values with opposite phase annihilate; the result is empty ⍝
+  △ ⧖ ⧗⁰ ⧗⁰ ⫴ ⧗⁰ ⧗⁰ ⫴ ⊛̰ ⫴̰ ⊙̰⁰ ᛈ
+  same phase merges: {1, 1} is one alternative ⍝
+  △ △ ⫴ ⊙̰⁰ ᛈ
+  lifting: {1 2} × 3 → {3 6}; {1 2} + {3 4} → {4 5 5 6} ⍝
+  △ ▽△ ⫴ ○△ ⊠̰ ⧖ ⧗⁰ ⊙̰⁻ ⎙ ⧗⁰ ⊙̰⁺ ⎙
+  ᛈ ⊙̰⁰ ⧗⁰ ⎙ ⊙̰⁺ ⧗⁰ ⧖ ⊞̰ ⫴ △△ ○△ ⫴ ▽△ △
+  ⍝ post-select then collapse: of {1 2 3 4} only 3 is > 2 and < 4
+  ᛈ ⊙̰⁰ ⦃ ⊝ ≶ △△ ⦄ ⟜̰ ⦃ ≶ ▽△ ⦄ ⟜̰ ⫴̰ ⫴ △△ ○△ ⫴ ▽△ △
+⦄ ⟨ ⊸ ⟩ ᛟ ⸫ ⸱

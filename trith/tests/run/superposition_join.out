@@ -1,0 +1,3 @@
+trith/tests/run/superposition_join.trh: error: s1 keeps superpositions inside one block: a ψ cannot flow through ⋔, ⁇ or ⥀ (collapse it first)
+sh: 1: output/trith-tests/prog: not found
+exit=127

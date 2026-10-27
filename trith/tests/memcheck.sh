@@ -8,6 +8,10 @@ mkdir -p "$OUT"
 status=0
 for src in trith/tests/run/*.trh; do
     name=$(basename "$src" .trh)
+    # tests that are meant to be rejected at compile time have nothing to run
+    if grep -q ': error: ' "trith/tests/run/$name.out" 2>/dev/null; then
+        continue
+    fi
     rm -f "$OUT/$name"
     "$TRITHC" "$src" -o "$OUT/$name" > "$OUT/$name.compile" 2>&1
     if [ ! -x "$OUT/$name" ]; then

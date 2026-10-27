@@ -1,0 +1,5 @@
+fn ᚠ ⟨ ⊸ ⁖ℤ⟩  start []
+  △  ⊢ [ℤ]
+  △  ⊢ [ℤ ℤ]
+  ⫴  ⊢ [ψ₂ℤ]
+trith/tests/check_errors/psi_mark.trh:1:9: error: disagreement: ⊙ on [ψ₂ℤ] needs ◌̰ superposed (§6.1)

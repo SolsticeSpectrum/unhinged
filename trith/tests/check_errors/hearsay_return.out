@@ -1,4 +1,4 @@
 fn ᚠ ⟨⸮ℤ ⊸ ℤ⟩  start [⸮ℤ]
   △  ⊢ [⸮ℤ ℤ]
   ⊞  ⊢ [⸮ℤ]
-trith/tests/check_errors/hearsay_return.trh:1:1: error: ᚠ returns a hearsay ⸮ value; declare the output ⸮ (or ⁖), or attest the value with ⊨ (§3.1)
+trith/tests/check_errors/hearsay_return.trh:1:1: error: ᚠ returns a value that is hearsay ⸮; declare the output ⸮ (or ⁖), or attest the value with ⊨ (§3.1)

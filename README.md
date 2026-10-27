@@ -75,8 +75,9 @@ Done so far:
 - Milestone 2: the check pass (stack effects, linearity, borrows, failure, case roles, agreement).
 - Milestone 3: native code through LLVM for integers, trits, reals, bytes, string literals, `⋔`, `⥀`, failure handling, prayers and future calls.
 - Milestone 4: arrays and strings, borrows at run time, particles, FFI through generated C glue, and checked evidentials and charges.
+- Milestone 5: superposition with phase and interference, retrocausal post-selection, reversible functions with generated inverses, past-tense calls evaluated at compile time, and prayer verdicts.
 
-Generated code runs within 0.95–1.06× of `clang -O2` C on all four benchmarks (fib, Collatz, n-body, Game of Life). Superposition is milestone 5.
+Generated code runs at C speed (within about 0.9–1.06× of `clang -O2`) on all four benchmarks: fib, Collatz, n-body and Game of Life. What remains is milestone 6, rewriting the compiler in Trith itself (see `docs/TRITH.md` §17).
 
 ```bash
 make trith          # builds build/trithc

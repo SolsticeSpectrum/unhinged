@@ -727,6 +727,22 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
     - An `ʃ` result is copied from a `char *`.
     - A `◌` result fails when it is negative (integers), NULL (strings) or NaN (reals).
   - The runtime and FFI glue are compiled to LLVM IR and linked into one module before optimising, so calls into them can inline.
+- **Compile-time evaluation (milestone 5).**
+  - The evaluator runs pure code over ℤ, ŧ and their `◌` forms. It refuses I/O, FFI, containers and future calls. Integers must stay within 2⁵³, and it gives up after 10⁷ steps or 200 nested calls.
+  - A past-tense call needs a pure callee and arguments known at compile time; literals and operators on them are folded. §15.4 compiles to a single `print(21)`.
+  - A prayer whose inputs are known is decided: true prayers are erased, false ones are "blasphemy", and `⦶` ones are "doubt". Other prayers become `llvm.assume` (or a trap with `--debug`).
+- **Reversible functions (milestone 5).**
+  - The s1 inverter accepts these units: `x ⊞`, `x ⊟`, `x ⩡` (x a literal or `⍿ⁿ` with n ≥ 1), `⊝`, calls to `⇋` functions and `⇜` calls, and `⍿⁰ x ≶ ⋔⇋ F₀ F₊ F₋ ⦃A⦄`.
+  - The exit assertion A is a predicate on the top value. A forward run checks that it agrees with the face taken, as in Janus, and stops with status 27 if it doesn't.
+  - The generated inverse reverses the units and inverts each one. For `⋔⇋`, the condition and the assertion swap roles.
+- **Superposition (milestone 5).**
+  - Alternatives are classical numbers or trits. A ψ of them can be copied. Each alternative is its own SSA value with i1 `live` and `neg` (phase) flags. When everything is known, LLVM folds the flags and the ψ is erased: §15.5 compiles to `print(1)`.
+  - `⫴` interferes in order: for each later alternative j and earlier i, equal values with the same phase merge (j dies), and with opposite phases both die.
+  - Lifting applies `⊞ ⊟ ⊠ ⊝ ≶ ⋏ ⋎` and the bitwise operators to every combination of alternatives. `⊘` and `⊜` do not lift in s1.
+  - `⊙⁻`/`⊙⁺` on an empty ψ stop the program with status 27; `⊙⁰` yields `◌⁖T`. All collapses are inferred.
+  - `⧗ⁿ ⟜ ⦃P⦄` filters the moment itself and leaves nothing on the stack. §15.5 only balances under this reading.
+  - The compiler applies the filter where the moment was bound, so earlier reads see it too (`trith/tests/run/retrocausal.trh`). If a `⋔`, `⁇` or `⥀` comes between the bind and the filter, s1 filters from the `⟜` onwards instead.
+  - Not in s1: `⋔` on a ψ, and a ψ crossing a join, a loop or a function boundary.
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
 - Mutable arrays inside `⥀`: keep threading a `⟖` through the loop stack, or allow region-scoped exclusive moments?
@@ -754,7 +770,7 @@ Milestones:
 2. Check pass: effects, linearity, agreement. **Done:** `trith/src/check.uh`, `trithc --check`, tests in `trith/tests/check*/`.
 3. Stack-to-SSA and LLVM emission for ℤ, ŧ, `⋔`, `⥀`, functions and inside-out scope. **Benchmark gate here.** **Done:** `trith/src/emit.uh`, `trith/runtime/trith_rt.c`; also ℝ, 𝔹, string literals with `⎙`, `◌`/`⁇`/`↯`, `⊨`, prayers, future calls and call by shape. `make trith-bench` passes: fib(35) 0.97× and Collatz to 10⁶ 1.03× of `clang -O2`.
 4. ◌, arrays, strings, FFI, particles, evidentials, charges. **Done.** Benchmarks: n-body 1.06× and Game of Life 0.95× of `clang -O2`. Life's grid-size prayer (§12) lets the optimiser remove every bounds check. SHA-256 is not written yet.
-5. ψ with phases, `⟜`, `⇋`, tense, prayers, call by shape.
+5. ψ with phases, `⟜`, `⇋`, tense, prayers, call by shape. **Done** within the s1 limits recorded in §16.1.
 6. Rewrite the compiler in Trith (s2), then pass the fixpoint (s3).
 7. Port the standard library modules.
 

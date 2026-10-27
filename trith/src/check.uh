@@ -79,8 +79,46 @@
   t ⟪ ck_head ⟫ → h ¿
   h "⟗" ≡ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
   h "◌" ≡ ⤴ ↵ t ⟪ ck_tail ⟫ ⟪ ck_copyable ⟫ ⇄ ¿ ⌫ ¿
+  h "ψ" ≡ ⤴ ↵ t ⟪ ck_psi_inner ⟫ ⟪ ck_copyable ⟫ ⇄ ¿ ⌫ ¿
   t ⟪ ck_class ⟫ "classical" ≡ ⇄ ¿
 ↦ t ↦ ck_copyable ¿
+
+⍝ ---- superpositions (§8.3)
+
+⍝ number of alternatives of ψₙT (1 for a classical type)
+ƒ
+  t ⟪ ck_head ⟫ "ψ" ≢ ⤴ ↵ 1 ⇄ ¿ ⌫ ¿
+  0 → n ¿
+  1 → i ¿
+  t ⟪ len ⟫ → m ¿
+  i m ≺ ⟲ ↵
+    t i ⟪ char_at ⟫ ⟪ tc_sub_digit ⟫ → d ¿
+    d ∅ ≡ ⤴ ↵ ⊗ ¿ ⌫ ¿
+    n 10 ⊠ d ⊞ → n ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  n ⇄ ¿
+↦ t ↦ ck_psi_count ¿
+
+ƒ
+  t ⟪ ck_head ⟫ "ψ" ≡ ⤴ ↵ t ⟪ ck_psi_inner ⟫ ⇄ ¿ ⌫ ¿
+  t ⇄ ¿
+↦ t ↦ ck_psi_base ¿
+
+ƒ
+  "₀₁₂₃₄₅₆₇₈₉" → digs ¿
+  n ⟪ lx_num_str ⟫ → ds ¿
+  【】 → out ¿
+  0 → i ¿
+  ds ⟪ len ⟫ → m ¿
+  i m ≺ ⟲ ↵
+    ds i ⟪ char_at ⟫ ⟪ int ⟫ → d ¿
+    out digs d ⟪ char_at ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  out "" ⟪ join ⟫ → sub ¿
+  【"ψ" sub base】 "" ⟪ join ⟫ ⇄ ¿
+↦ n ↦ base ↦ ck_psi_type ¿
 
 ƒ
   t "ℤ" ≡ t "ℝ" ≡ ∨ t "𝔹" ≡ ∨ ⇄ ¿
@@ -902,7 +940,7 @@
       C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
       C vals 0 ⌈ ⌉ "ty" ⌈ ⌉ tok ⟪ ck_unwrap ⟫ → ct ¿
       C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
-      ct ⟪ ck_head ⟫ "ψ" ≡ ⤴ ↵ C tok "⋔ on a superposition runs every live face; not implemented yet (milestone 5)" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      ct ⟪ ck_head ⟫ "ψ" ≡ ⤴ ↵ C tok "⋔ on a superposition (running every live face) is not supported in s1; collapse it first" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
       ct "ŧ" ≢ ⤴ ↵ C tok "⋔ selects on a trit ŧ, found " ct ⊞⊞ ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
       S strand locks ⟪ ck_live_locks ⟫ → inner ¿
       op "faces" ⌈ ⌉ → fs ¿
@@ -1065,7 +1103,28 @@
       S av ⟪ .append ⟫ ¿
       "⟦…⟧" → label ¿
     ⌫ ⤵ k "postselect" ≡ ⤴ ↵
-      C tok "⟜ post-selection is not implemented yet (milestone 5)" ⟪ ck_err ⟫ ¿ ⊗ ¿
+      ⍝ ⧗ⁿ ⟜ filters the moment itself (§8.5) and leaves nothing on the stack
+      ⊥ → retro ¿
+      oi 0 ≻ ⤴ ↵
+        ops oi 1 ⊟ ⌈ ⌉ → pv ¿
+        pv "kind" ⌈ ⌉ "op" ≡ pv "tok" ⌈ ⌉ "text" ⌈ ⌉ "⧗" ≡ ∧ → retro ¿
+      ⌫ ¿
+      C S 1 tok "⟜" ⟪ ck_pop ⟫ → vals ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      C tok vals ⟪ ck_agree ⟫ ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      vals 0 ⌈ ⌉ → pv0 ¿
+      pv0 "ty" ⌈ ⌉ → pt ¿
+      pt ⟪ ck_head ⟫ "ψ" ≢ ⤴ ↵ C tok 【"⟜ post-selects a superposition ψₙT, found " pt】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      C pt ⟪ ck_psi_base ⟫ tok depth 1 ⊞ ⟪ ck_val ⟫ → alt ¿
+      pv0 alt ⟪ ck_copy_annot ⟫ ¿
+      S strand locks ⟪ ck_live_locks ⟫ → inner ¿
+      C ind2 "post-select" ⟪ ck_note ⟫ ¿
+      C op "block" ⌈ ⌉ "ops" ⌈ ⌉ 【alt】 tok "the ⟜ predicate" depth inner ind2 "  " ⊞⊞ ⟪ ck_predicate ⟫ ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      retro ¬ ⤴ ↵ S pv0 ⟪ .append ⟫ ¿ ⌫ ¿
+      "⟜" → label ¿
+      retro ⤴ ↵ "⟜ (retrocausal: filters the moment)" → label ¿ ⌫ ¿
     ⌫ ⤵ ↵
       C tok "internal: unknown node " k ⊞⊞ ⟪ ck_err ⟫ ¿ ⊗ ¿
     ⌫ ¿
@@ -1205,7 +1264,49 @@
     ⊥ ⇄ ¿
   ⌫ ¿
   x "⊨" ≡ ⤴ ↵ C tok "⊨ needs its predicate block directly before it: x ⦃pred⦄ ⊨" ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
-  x "⫴" ≡ x "⊛" ≡ ∨ x "⊙" ≡ ∨ ⤴ ↵ C tok x " (superposition) is not implemented yet (milestone 5)" ⊞⊞ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+  x "⫴" ≡ x "⊛" ≡ ∨ x "⊙" ≡ ∨ ⤴ ↵
+    1 → k ¿
+    x "⫴" ≡ ⤴ ↵ 2 → k ¿ ⌫ ¿
+    C S k tok x ⟪ ck_pop ⟫ → vals ¿
+    C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    C tok vals ⟪ ck_agree ⟫ ¿
+    C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    【】 → ts ¿
+    "w" → ev ¿
+    0 → i ¿
+    i k ≺ ⟲ ↵
+      C vals i ⌈ ⌉ "ty" ⌈ ⌉ tok ⟪ ck_unwrap ⟫ → t ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+      ts t ⟪ .append ⟫ ¿
+      ev vals i ⌈ ⌉ ⟪ ck_ev ⟫ ⟪ ck_ev_max ⟫ → ev ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    ts 0 ⌈ ⌉ → a ¿
+    vals 0 ⌈ ⌉ ⟪ ck_ch ⟫ → ch ¿
+    x "⫴" ≡ ⤴ ↵
+      ts 1 ⌈ ⌉ → b ¿
+      a ⟪ ck_psi_base ⟫ → ba ¿
+      b ⟪ ck_psi_base ⟫ → bb ¿
+      ba bb ≢ ⤴ ↵ C tok 【"⫴ superposes values of one type, found " a " and " b】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+      ba ⟪ ck_numeric ⟫ ba "ŧ" ≡ ∨ ¬ ⤴ ↵ C tok 【"s1 superposes classical numbers and trits, found " ba】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+      a ⟪ ck_psi_count ⟫ b ⟪ ck_psi_count ⟫ ⊞ → n ¿
+      n 27 ≻ ⤴ ↵ C tok "decoherence cap: a superposition holds at most 27 alternatives (§8.3)" ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+      ch vals 1 ⌈ ⌉ ⟪ ck_ch ⟫ ⟪ ck_ch_same ⟫ → ch ¿
+      ch ∅ ≡ ⤴ ↵ C tok "charge violation: ⫴ needs equal charges (§3.2)" ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+      n ba ⟪ ck_psi_type ⟫ → rt ¿
+    ⌫ ⤵ ↵
+      a ⟪ ck_head ⟫ "ψ" ≢ ⤴ ↵ C tok 【x " works on a superposition ψₙT, found " a】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+      a → rt ¿
+      x "⊙" ≡ ⤴ ↵
+        a ⟪ ck_psi_base ⟫ → rt ¿
+        idx "-" ≢ idx "+" ≢ ∧ ⤴ ↵ 【"◌" rt】 ⟪ em_cat_ck ⟫ → rt ¿ ⌫ ¿
+        "i" ev ⟪ ck_ev_max ⟫ → ev ¿
+      ⌫ ¿
+    ⌫ ¿
+    C S 【rt】 tok depth ⟪ ck_push ⟫ ¿
+    S 1 【ev】 【ch】 ⟪ ck_annotate_top ⟫ ¿
+    ⊥ ⇄ ¿
+  ⌫ ¿
 
   x ⟪ ck_arity ⟫ → k ¿
   k ∅ ≡ ⤴ ↵ C tok "internal: no arity for " x ⊞⊞ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
@@ -1222,8 +1323,25 @@
     ts t ⟪ .append ⟫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
-  C tok ts ⟪ ck_glyph_types ⟫ → outs ¿
+  ⍝ lifting (§8.3): an operator on superpositions applies to every alternative
+  1 → lift ¿
+  ⊥ → lifted ¿
+  【】 → bts ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    ts i ⌈ ⌉ → t ¿
+    t ⟪ ck_head ⟫ "ψ" ≡ ⤴ ↵ ⊤ → lifted ¿ ⌫ ¿
+    lift t ⟪ ck_psi_count ⟫ ⊠ → lift ¿
+    bts t ⟪ ck_psi_base ⟫ ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  lifted ⤴ ↵
+    "⊞⊟⊠⊝≶⋏⋎⋒⋓⩡≪≫⌁" x ⟪ .indexOf ⟫ 0 ≺ ⤴ ↵ C tok 【x " does not lift over superpositions in s1"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+    lift 27 ≻ ⤴ ↵ C tok "decoherence cap: lifting would make more than 27 alternatives (§8.3)" ⟪ ck_err ⟫ ¿ ⊥ ⇄ ¿ ⌫ ¿
+  ⌫ ¿
+  C tok bts ⟪ ck_glyph_types ⟫ → outs ¿
   C ⟪ ck_failed ⟫ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  lifted outs ⟪ len ⟫ 1 ≡ ∧ ⤴ ↵ 【】 lift outs 0 ⌈ ⌉ ⟪ ck_psi_type ⟫ ⟪ .append ⟫ → outs ¿ ⌫ ¿
   S strand locks ⟪ ck_live_locks ⟫ → live ¿
   0 → i ¿
   i k ≺ ⟲ ↵
@@ -1521,7 +1639,7 @@
       f "outsEv" ⌈ ⌉ i ⌈ ⌉ → wev ¿
       have wev ⟪ ck_ev_ok ⟫ ¬ ⤴ ↵
         have ⟪ ck_ev_name ⟫ → hn ¿
-        C tok 【name " returns a " hn " value; declare the output ⸮ (or ⁖), or attest the value with ⊨ (§3.1)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ⇄ ¿
+        C tok 【name " returns a value that is " hn "; declare the output ⸮ (or ⁖), or attest the value with ⊨ (§3.1)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ⇄ ¿
       ⌫ ¿
       f "outsCh" ⌈ ⌉ i ⌈ ⌉ → wch ¿
       v ⟪ ck_ch ⟫ wch ⟪ ck_ch_same ⟫ ∅ ≡ ⤴ ↵

@@ -1,0 +1,1 @@
+trith/tests/check_errors/row_not_first.trh:2:19: error: a row variable stands for the bottom of an effect, so it comes first: ⟨ρ … ⊸ ρ …⟩ (§9.5)

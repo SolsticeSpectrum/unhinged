@@ -478,6 +478,25 @@ A signature may use the type variables `α β γ δ ε ζ η θ`, each standing 
 
 **Cost:** zero. Each instance is an ordinary function, named `ᚢ[ℤ ŧ]` in traces and in the IR.
 
+### 9.5 Quotations
+
+A block `⦃ … ⦄` inside a body that is not the predicate of a `⊨` is a **quotation**: a value that stands for its code. `⍎` applies the quotation on top of the stack to the stack below it.
+
+```
+▽△ ○△ ⦃ ⊠ ⦄ ⍎ ⎙                                 ⍝ 6
+⦃ ⍎ ⧗⁰ ⍎ ⧗⁰ ⧖ ⦄ ⟨ρ ⟨ρ ⊸ ρ⟩ ⊸ ρ⟩ ᚡᚠ ⸫             ⍝ apply f two times
+⦃ … ⦄ ⟨⟗⟦α⟧ α ⟨α α ⊸ α⟩ ⊸ α⟩ ᚡᚤ ⸫               ⍝ a fold
+```
+
+- A quotation is classical, so it can be copied, bound as a moment, read more than once and passed to a function. Its type names its block (`⦃21:7⦄`, the position of the `⦃` on disk), so two different blocks never have the same type. A function cannot return one, and one left on the stack at the end of a body is an error.
+- The body of a quotation sees **no moments** from outside it, not even borrowed ones (§5.1). It gets everything it uses from the stack, where `⍎` finds it.
+- A quotation's type is its **effect**, inferred from its body: `⦃ ⊠ ⦄` is `⟨ℤ ℤ ⊸ ℤ⟩`. The effect counts only what the body touches; what lies under that passes through untouched.
+- A function takes a quotation through a nested signature, `⟨ℤ ⊸ ⟨ℤ ⊸ ℤ⟩ ℤ⟩`. A quotation fits a parameter when its effect, widened by values that pass through, is the parameter's effect: `⦃ ⊞ ⦄` fits `⟨ℤ ℤ ⊸ ℤ⟩` and also `⟨ℤ ℤ ℤ ⊸ ℤ ℤ⟩`. Otherwise the error is **"the quotation has effect H, but ᚠ wants W"**.
+- **Row variables** `ρ` and `σ` stand for any run of stack entries, so `⟨ρ ⊸ ρ⟩` is "whatever the quotation does to the stack". A row variable comes first in an effect, at most one per side. A call fixes it from the quotation passed and the entries under the arguments, and binds type variables (§9.4) inside a nested signature too, so `ᚡᚤ` over `⟦ℝ⟧` with `⦃ ⊠ ⦄` is `ᚡᚤ[ℝ]`.
+- A quotation is a compile-time value. A function that takes one is checked and compiled **once per call site that passes a different quotation**, with the quotation's body inlined at each `⍎`. Its instances are named `ᚡᚠ[(ℤ ℤ) ⦃12:7⦄]`, after the row types and the line and column of each quotation's `⦃`.
+
+**Cost:** zero. A quotation has no run-time representation; every `⍎` is the quotation's code, inlined.
+
 ---
 
 ## 10. Reversible Functions `⇋`
@@ -791,12 +810,11 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
 - **Decided after milestone 7.**
   - Agreement applies to `⧗ⁿ` reads too (§6.1). `trx.py` writes the mark after a name: `⧗:C̵` reads the heap `C` by moving it.
   - Call by shape matches evidentials and charges as well (§9.1).
-  - Generics: type variables `α … θ` over classical types, monomorphised per call (§9.4). Row-polymorphic effects follow with quotations (open question below).
+  - Generics: type variables `α … θ` over classical types, monomorphised per call (§9.4). Step 2 is quotations with row-polymorphic effects, specialised per call site (§9.5).
   - Arrays inside `⥀`: borrowed moments are region-scoped (§5.1), so a loop body reads and writes an array through a `⟗`/`⟖` moment of an enclosing block instead of carrying it through the loop stack. Codegen is free: the shadow is a loop-invariant pointer. `trx.py` resolves `⧗:x̱` through the enclosing blocks.
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
 - Should the ψ cap be lower than 27 for quantum alternatives, to bound the drop logic?
-- Generics, step 2: quotations, i.e. blocks as values typed with row variables, `⟨ρ … ⊸ ρ …⟩`, with an apply glyph, specialised per call site. Row variables only mean something once blocks can be passed to functions; step 1, type variables, is §9.4.
 - Should scattered fragments be allowed across files within a module?
 
 ---
@@ -875,6 +893,9 @@ Benchmarks, each of which must run within 1.5× of `clang -O2`:
 | `⍤ⁿ` | — | prayer (assert or assume) |
 | `⎔` | — | FFI binding |
 | `α … θ` | — | type variable in a signature (§9.4) |
+| `⦃ ⦄` in a body | `⟨⊸ ⦃E⦄⟩` | quotation (§9.5) |
+| `⍎` | `⟨S ⦃S ⊸ S'⦄ ⊸ S'⟩` | apply a quotation |
+| `ρ σ` | — | row variable in an effect (§9.5) |
 | `⎙` | `⟨ʃ ⊸⟩` / `⟨ℤ ⊸⟩` | print |
 
 ---

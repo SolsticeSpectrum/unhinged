@@ -1,0 +1,6 @@
+fn ᚠ ⟨ℤ ⟨ℤ ⊸ ℤ⟩ ⊸ ℤ⟩  generic: checked for each instance (§9.4)
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  △  ⊢ [ℤ ℤ]
+  ⦃3:7⦄  ⊢ [ℤ ℤ ⦃3:7⦄]
+trith/tests/check_errors/quotation_needs_row.trh:3:13: error: the quotation ⦃3:7⦄ has effect ⟨ℤ ℤ ⊸ ℤ⟩, but ᚠ wants ⟨ℤ ⊸ ℤ⟩ (§9.5)

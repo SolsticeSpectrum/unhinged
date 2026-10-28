@@ -114,10 +114,12 @@
     op "tok" ⌈ ⌉ → tok ¿
     k "op" ≡ ⤴ ↵
       tok "text" ⌈ ⌉ → x ¿
-      "⎙⌁⟗⟖⌖⍈⍴⍆⫴⊛⊙⟜" x ⟪ .indexOf ⟫ 0 ≽ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+      "⎙⌁⟗⟖⌖⍈⍴⍆⫴⊛⊙⟜⍎" x ⟪ .indexOf ⟫ 0 ≽ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
     ⌫ ¿
     k "lit" ≡ tok "kind" ⌈ ⌉ "string" ≡ ∧ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
     k "array" ≡ k "anti-call" ≡ ∨ k "postselect" ≡ ∨ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+    ⍝ quotations are beyond s1's evaluator
+    k "quote" ≡ ops i ⟪ ck_is_attest ⟫ ¬ ∧ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
     k "call" ≡ k "shape-call" ≡ ∨ ⤴ ↵
       tok "marks" ⌈ ⌉ → ms ¿
       ms ∅ ≢ ⤴ ↵ "future" ms ∈ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿ ⌫ ¿

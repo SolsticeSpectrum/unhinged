@@ -90,7 +90,7 @@
   ⧗:C̵,t,h ⧗:h #10199# ᛖ ⧗:h #10198# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ △ ⦄
     ⦃ ⧖:C,t,h ⧗:C̵,t,h ⧗:h #968# ᛖ ⋔ ⦃ ⌁ ⌁ #2# ⦄
       ⦃ ⧖:C,t,h ⧗:C̵,t,h ⧗:h #9676# ᛖ ⋔ ⦃ ⌁ ‹stail› ‹tclass› ⦄
-        ⦃ ⧖:h ⌁ ⧗:h ⧗:h ‹isbasecp› ⧗:h #643# ᛖ ‹not› ⋎ ⋔ ⦃ ⌁ ○ ⦄ ⦃ ⌁ #3# ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+        ⦃ ⧖:h ⌁ ⧗:h ⧗:h ‹isbasecp› ⧗:h #643# ᛖ ‹not› ⋎ ⧗:h #10627# ᛖ ⋏ ⋔ ⦃ ⌁ ○ ⦄ ⦃ ⌁ #3# ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tclass1› ⸫
 
 ⍝ ‹tcopy› C t: values of type t may be copied freely

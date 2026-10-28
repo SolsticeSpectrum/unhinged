@@ -101,6 +101,15 @@
     P ⟪ ps_next ⟫ ¿
     【】 t "text" ⌈ ⌉ ⟪ ps_type_node ⟫ ⇄ ¿
   ⌫ ¿
+  t "bracket" "⟨" ⟪ ps_is ⟫ ⤴ ↵
+    ⍝ a quotation type (§9.5): its base is the signature as written, ⟨ρ ℤ ⊸ ρ ℤ⟩
+    P ⟪ ps_sig ⟫ → qs ¿
+    P ⟪ ps_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    qs ⟪ ps_sig_str ⟫ → qb ¿
+    【】 qb ⟪ ps_type_node ⟫ → n ¿
+    n "qsig" ← qs ¿
+    n ⇄ ¿
+  ⌫ ¿
   t "bracket" "⟦" ⟪ ps_is ⟫ ⤴ ↵
     P ⟪ ps_next ⟫ ¿
     P ⟪ ps_type ⟫ → elem ¿

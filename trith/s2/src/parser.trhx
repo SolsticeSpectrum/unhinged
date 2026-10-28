@@ -194,13 +194,21 @@
   ⋔ ⦃ ⧖:st,T,F,node,t ⧗:st̵ ⧗:node △ ⊞ ⧗:t ‹set› ‹adv› △ ‹setflag› ⦄
     ⦃ ⧖:st,T,F,node,t
       ⧗:st̵,Ṯ,F̱,node,t ⧗:Ṯ,t #11# #10214# ‹is1› ⋔ ⦃ ‹tyarray› ⦄
-        ⦃ ⧖:st,T,F,node,t ⧗:st̵,F̱,Ṯ,t ⧗:t #-1# ᛖ ⋔ ⦃ △ ‹fail1› ⦄ ⦃ △ ‹fail2› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+        ⦃ ⧖:st,T,F,node,t
+          ⧗:st̵,Ṯ,F̱,node,t ⧗:Ṯ,t #11# #10216# ‹is1› ⋔ ⦃ ‹tyquote› ⦄
+            ⦃ ⧖:st,T,F,node,t ⧗:st̵,F̱,Ṯ,t ⧗:t #-1# ᛖ ⋔ ⦃ △ ‹fail1› ⦄ ⦃ △ ‹fail2› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tybase› ⸫
 
 ⦃
   ⧖:st,T,F,node,t
   ⧗:st̵ ⧗:node △ ⊞ ⧗:t ‹set› ‹adv› ⧗:Ṯ,F̱ ‹type› ⧗:Ṯ,F̱ #11# #10215# ‹expect› △ ‹setflag›
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tyarray› ⸫
+
+⍝ ‹tyquote› st T F node t: a quotation type (§9.5): base ⟨, and the signature as its child
+⦃
+  ⧖:st,T,F,node,t
+  ⧗:st̵ ⧗:node △ ⊞ ⧗:t ‹set› ‹ok› ⧗:Ṯ,F̱ ‹sig› △ ‹setflag›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tyquote› ⸫
 
 ⍝ ‹typfx› st T F node t: prefix t; a bare ◌ before ⊸ or ⟩ is a whole type
 ⦃
@@ -855,7 +863,10 @@
   ⧗:Ṯ ⧗:base #9# ⊞ ⧗:copen ⊞ ⧗:base #7# ⊞ ⧗:n ⊞
   ⧗:k #9# ᛖ ⧗:copen ○ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ $⁽$ ⎙̵ ‹pcharge› $⁾$ ⎙̵ ⦄ ⦃ ⌁ ⌁ ⌁̱ ⦄ ⁼
   ⧗:sṯ,Ṯ ⧗:c #4# ⊞ ⧗:np ⊞
-  ⧗:k #11# ᛖ ⋔ ⦃ $⟦$ ⎙̵ ‹ptyp› ⌁ $⟧$ ⎙̵ ⦄ ⦃ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+  ⍝ 0: no child, 1: an array's element type, 2: a quotation type's signature
+  ⧗:Ṯ ⧗:base #8# ⊞ ᚳ ⧖:b0
+  ○ ⧗:k #11# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:k #11# ᛖ ⧗:b0 #10216# ᛖ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼
+  ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⦃ △ ᛖ ⋔ ⦃ $⟦$ ⎙̵ ‹ptyp› ⌁ $⟧$ ⎙̵ ⦄ ⦃ ‹psig› ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸⟩ ‹ptbase› ⸫
 
 ⍝ ‹ptyp› st T c: a type node, giving the slot after it

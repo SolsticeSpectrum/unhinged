@@ -70,6 +70,8 @@
   h "ψ" ≡ ⤴ ↵ "superposed" ⇄ ¿ ⌫ ¿
   h "◌" ≡ ⤴ ↵ t ⟪ ck_tail ⟫ ⟪ ck_class ⟫ ⇄ ¿ ⌫ ¿
   h ⟪ tc_base_type ⟫ h "ʃ" ≢ ∧ ⤴ ↵ "classical" ⇄ ¿ ⌫ ¿
+  ⍝ a quotation ⦃L:C⦄ is known statically and has no run-time size (§9.5)
+  h "⦃" ≡ ⤴ ↵ "classical" ⇄ ¿ ⌫ ¿
   "quantum" ⇄ ¿
 ↦ t ↦ ck_class ¿
 
@@ -988,8 +990,16 @@
       C op ⟪ ck_resolve ⟫ → f ¿
       C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
       f "generic" ⌈ ⌉ ⊤ ≡ ⤴ ↵
+        f "quotey" ⌈ ⌉ → qy ¿
         C f S tok ⟪ ck_instance ⟫ → f ¿
         C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+        ⍝ which instance this call makes, as seen from the function being checked (for the emitter)
+        qy ⊤ ≡ ⤴ ↵
+          op "insts" ⌈ ⌉ → im ¿
+          im ∅ ≡ ⤴ ↵ ❴❵ → im ¿ op "insts" ← im ¿ ⌫ ¿
+          C "fn" ⌈ ⌉ → encl ¿
+          im encl ← f ¿
+        ⌫ ¿
       ⌫ ¿
       tok "marks" ⌈ ⌉ → ms ¿
       ms ∅ ≢ ⤴ ↵
@@ -999,10 +1009,36 @@
       ⌫ ¿
       C S strand locks f tok label depth ⟪ ck_apply ⟫ ¿
       k "shape-call" ≡ ⤴ ↵ "shape-call → " f "name" ⌈ ⌉ ⊞⊞ → label ¿ ⌫ ¿
+    ⌫ ⤵ k "op" ≡ tok "text" ⌈ ⌉ "⍎" ≡ ∧ ⤴ ↵
+      ⍝ ⍎ applies the quotation on top: its body runs here, on this stack (§9.5)
+      C S 1 tok "⍎" ⟪ ck_pop ⟫ → vals ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      vals 0 ⌈ ⌉ "ty" ⌈ ⌉ → qt ¿
+      qt ⟪ ck_head ⟫ "⦃" ≢ ⤴ ↵ C tok "⍎ applies a quotation, found " qt ⊞⊞ ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
+      C "quotes" ⌈ ⌉ qt ⌈ ⌉ → qops ¿
+      S strand locks ⟪ ck_live_locks ⟫ → inner ¿
+      C "views" ⌈ ⌉ → vw0 ¿
+      C "views" ← 【】 ¿
+      C qops S depth inner ind2 ⟪ ck_sub ⟫ → r ¿
+      C "views" ← vw0 ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      C r "strand" ⌈ ⌉ 0 ⟪ ck_no_leak ⟫ ¬ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      r "stack" ⌈ ⌉ → S ¿
+      r "dead" ⌈ ⌉ → dead ¿
+      "⍎ " qt ⊞⊞ → label ¿
     ⌫ ⤵ k "op" ≡ ⤴ ↵
       C op S strand depth locks ind ⟪ ck_glyph ⟫ → skip ¿
       skip ⤴ ↵ oi 1 ⊞ → oi ¿ ⌫ ¿
       tok "text" ⌈ ⌉ "↯" ≡ ⤴ ↵ ⊤ → dead ¿ ⌫ ¿
+    ⌫ ⤵ k "quote" ≡ ops oi ⟪ ck_is_attest ⟫ ¬ ∧ ⤴ ↵
+      ⍝ a quotation (§9.5): a block as a value, typed by where it is written
+      tok ⟪ ck_quote_type ⟫ → qt ¿
+      C "quotes" ⌈ ⌉ → qtab ¿
+      op "block" ⌈ ⌉ "ops" ⌈ ⌉ → qops ¿
+      qtab qt ← qops ¿
+      C qt tok depth ⟪ ck_val ⟫ → v ¿
+      S v ⟪ .append ⟫ ¿
+      qt → label ¿
     ⌫ ⤵ k "quote" ≡ ⤴ ↵
       ⍝ x ⦃pred⦄ ⊨ (§3.1 rule 4)
       oi 1 ⊞ → nx ¿
@@ -1011,7 +1047,6 @@
         ops nx ⌈ ⌉ → nop ¿
         nop "kind" ⌈ ⌉ "op" ≡ nop "tok" ⌈ ⌉ "text" ⌈ ⌉ "⊨" ≡ ∧ → isAttest ¿
       ⌫ ¿
-      isAttest ¬ ⤴ ↵ C tok "a quoted block is only used directly before ⊨" ⟪ ck_err ⟫ ¿ ⊗ ¿ ⌫ ¿
       ops nx ⌈ ⌉ "tok" ⌈ ⌉ → atok ¿
       C S 1 atok "⊨" ⟪ ck_pop ⟫ → vals ¿
       C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
@@ -1618,6 +1653,11 @@
 ⍝ the actual types xs; a declared ◌ may meet a value that cannot fail
 ƒ
   ❴❵ → b ¿
+  ds xs b ⟪ ck_tbind_into ⟫ ¿
+  b ⇄ ¿
+↦ ds ↦ xs ↦ ck_tbind ¿
+
+ƒ
   0 → i ¿
   ds ⟪ len ⟫ → n ¿
   i n ≺ ⟲ ↵
@@ -1645,8 +1685,8 @@
     ⌫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
-  b ⇄ ¿
-↦ ds ↦ xs ↦ ck_tbind ¿
+  ∅ ⇄ ¿
+↦ ds ↦ xs ↦ b ↦ ck_tbind_into ¿
 
 ⍝ type t with its variables replaced by their bindings b
 ƒ
@@ -1703,15 +1743,54 @@
   g ⇄ ¿
 ↦ f ↦ vs ↦ b ↦ ck_inst_record ¿
 
-⍝ a call of generic f on the values on top of S: the instance's record, made and queued
-⍝ for checking the first time; ∅ after an error
+⍝ a call of generic f on the values on top of S: the instance's record, made and queued for
+⍝ checking the first time; ∅ after an error. Plain arguments fix the type variables; each
+⍝ quotation argument's effect fixes its row variable (§9.4, §9.5)
 ƒ
   f "ins" ⌈ ⌉ → ins ¿
-  ins ⟪ len ⟫ → k ¿
+  f "rowin" ⌈ ⌉ → rowin ¿
+  ins → fixed ¿
+  rowin ∅ ≢ ⤴ ↵ ins 1 ins ⟪ len ⟫ ⟪ lx_slice ⟫ → fixed ¿ ⌫ ¿
+  fixed ⟪ len ⟫ → k ¿
   ⍝ too few values: ck_apply reports it
   S ⟪ len ⟫ k ≺ ⤴ ↵ f ⇄ ¿ ⌫ ¿
   S k ⟪ ck_top_types ⟫ → xs ¿
-  ins xs ⟪ ck_tbind ⟫ → b ¿
+  f "name" ⌈ ⌉ → nm ¿
+  ❴❵ → b ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    fixed i ⌈ ⌉ → d ¿
+    xs i ⌈ ⌉ → x ¿
+    d ⟪ ck_head ⟫ "⟨" ≡ ⤴ ↵
+      x ⟪ ck_head ⟫ "⦃" ≢ ⤴ ↵
+        i 1 ⊞ ⍕ → is ¿
+        C tok 【"argument " is " of " nm " is a quotation " d ", found " x " (§9.5)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿
+        ∅ ⇄ ¿
+      ⌫ ¿
+    ⌫ ⤵ ↵
+      【d】 【x】 b ⟪ ck_tbind_into ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ❴❵ → rb ¿
+  S ⟪ len ⟫ k ⊟ → nb ¿
+  S 0 nb ⟪ lx_slice ⟫ → below ¿
+  f "qsigs" ⌈ ⌉ → qsigs ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    fixed i ⌈ ⌉ → d ¿
+    d ⟪ ck_head ⟫ "⟨" ≡ ⤴ ↵
+      xs i ⌈ ⌉ → x ¿
+      ⍝ qsigs count the row variable heading the inputs
+      i → ii ¿
+      rowin ∅ ≢ ⤴ ↵ i 1 ⊞ → ii ¿ ⌫ ¿
+      ii ⍕ → ik ¿
+      qsigs ik ⌈ ⌉ → qs ¿
+      C nm x qs below b rb tok ⟪ ck_qmatch ⟫ ¿
+      C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
   f "tvars" ⌈ ⌉ → vs ¿
   0 → i ¿
   vs ⟪ len ⟫ → nv ¿
@@ -1719,19 +1798,82 @@
     vs i ⌈ ⌉ → v ¿
     v b ∈ ¬ ⤴ ↵
       xs ⟪ ck_show ⟫ → shown ¿
-      f "name" ⌈ ⌉ → nm ¿
       C tok 【"cannot infer " v " for " nm " from " shown ": a type variable stands for a classical type ℤ ℝ ŧ 𝔹 (§9.4)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿
       ∅ ⇄ ¿
     ⌫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
-  f vs b ⟪ ck_inst_record ⟫ → g ¿
-  g "name" ⌈ ⌉ → key ¿
+  rowin ∅ ≢ ⤴ ↵
+    rowin rb ∈ ¬ ⤴ ↵
+      C tok 【"cannot infer " rowin " for " nm ": no quotation argument fixes it (§9.5)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿
+      ∅ ⇄ ¿
+    ⌫ ¿
+  ⌫ ¿
+  ⍝ the instance's name: the types, rows and quotations it was made for
+  【】 → bound ¿
+  0 → i ¿
+  i nv ≺ ⟲ ↵ bound b vs i ⌈ ⌉ ⌈ ⌉ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  f "rows" ⌈ ⌉ → rows ¿
+  0 → i ¿
+  rows ⟪ len ⟫ → nr ¿
+  i nr ≺ ⟲ ↵
+    rows i ⌈ ⌉ → rv ¿
+    rv rb ∈ ⤴ ↵
+      rb rv ⌈ ⌉ " " ⟪ join ⟫ → rs ¿
+      bound 【"(" rs ")"】 ⟪ em_cat_ck ⟫ ⟪ .append ⟫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  0 → i ¿
+  i k ≺ ⟲ ↵
+    fixed i ⌈ ⌉ ⟪ ck_head ⟫ "⟨" ≡ ⤴ ↵ bound xs i ⌈ ⌉ ⟪ .append ⟫ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  bound " " ⟪ join ⟫ → bs ¿
+  【nm "[" bs "]"】 ⟪ em_cat_ck ⟫ → key ¿
   C "fns" ⌈ ⌉ → fns ¿
   key fns ∈ ⤴ ↵ fns key ⌈ ⌉ ⇄ ¿ ⌫ ¿
+  ⍝ its types: rows expanded, quotation parameters replaced by the quotations
+  f "quotey" ⌈ ⌉ ⊤ ≡ → qy ¿
+  qy ¬ ⤴ ↵
+    f vs b ⟪ ck_inst_record ⟫ → g ¿
+    f "shape" ⌈ ⌉ b ⟪ ck_tsubst ⟫ → shp ¿
+  ⌫ ⤵ ↵
+    【】 → gi ¿
+    rowin ∅ ≢ ⤴ ↵ gi rb rowin ⌈ ⌉ ⟪ em_concat_into ⟫ ¿ ⌫ ¿
+    0 → i ¿
+    i k ≺ ⟲ ↵
+      fixed i ⌈ ⌉ → d ¿
+      d ⟪ ck_head ⟫ "⟨" ≡ ⤴ ↵ gi xs i ⌈ ⌉ ⟪ .append ⟫ ¿ ⌫ ⤵ ↵ gi d b ⟪ ck_tsubst ⟫ ⟪ .append ⟫ ¿ ⌫ ¿
+      i 1 ⊞ → i ¿
+    ⌫ ¿
+    f "outs" ⌈ ⌉ → outs ¿
+    【】 → go ¿
+    f "rowout" ⌈ ⌉ → ro ¿
+    ro ∅ ≢ ⤴ ↵
+      go rb ro ⌈ ⌉ ⟪ em_concat_into ⟫ ¿
+      outs 1 outs ⟪ len ⟫ ⟪ lx_slice ⟫ → outs ¿
+    ⌫ ¿
+    go outs b ⟪ ck_tsubst_list ⟫ ⟪ em_concat_into ⟫ ¿
+    ❴"ins": gi, "outs": go, "rev": ⊥, "name": key❵ → g ¿
+    【】 → ev0 ¿
+    【】 → ch0 ¿
+    【】 → ev1 ¿
+    【】 → ch1 ¿
+    0 → i ¿
+    gi ⟪ len ⟫ → ni ¿
+    i ni ≺ ⟲ ↵ ev0 "w" ⟪ .append ⟫ ¿ ch0 "" ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+    0 → i ¿
+    go ⟪ len ⟫ → no ¿
+    i no ≺ ⟲ ↵ ev1 "w" ⟪ .append ⟫ ¿ ch1 "" ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+    g "insEv" ← ev0 ¿
+    g "insCh" ← ch0 ¿
+    g "outsEv" ← ev1 ¿
+    g "outsCh" ← ch1 ¿
+    gi go ⟪ ck_effect_str ⟫ → shp ¿
+  ⌫ ¿
   fns key ← g ¿
   f "item" ⌈ ⌉ → it ¿
-  f "shape" ⌈ ⌉ b ⟪ ck_tsubst ⟫ → shp ¿
   it "tok" ⌈ ⌉ → itok ¿
   it "ops" ⌈ ⌉ → iops ¿
   tok "line" ⌈ ⌉ ⍕ → cl ¿
@@ -1741,6 +1883,115 @@
   C "insts" ⌈ ⌉ 【git g】 ⟪ .append ⟫ ¿
   g ⇄ ¿
 ↦ C ↦ f ↦ S ↦ tok ↦ ck_instance ¿
+
+
+⍝ ---- quotations (§9.5)
+
+⍝ is ops[oi], a quoted block, the predicate of a ⊨ right after it?
+ƒ
+  oi 1 ⊞ → nx ¿
+  nx ops ⟪ len ⟫ ≺ ¬ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+  ops nx ⌈ ⌉ → nop ¿
+  nop "kind" ⌈ ⌉ "op" ≡ nop "tok" ⌈ ⌉ "text" ⌈ ⌉ "⊨" ≡ ∧ ⇄ ¿
+↦ ops ↦ oi ↦ ck_is_attest ¿
+
+⍝ the type of the quotation whose ⦃ is token tok: its place, ⦃line:col⦄
+ƒ
+  tok "line" ⌈ ⌉ ⍕ → ql ¿
+  tok "col" ⌈ ⌉ ⍕ → qc ¿
+  【"⦃" ql ":" qc "⦄"】 ⟪ em_cat_ck ⟫ ⇄ ¿
+↦ tok ↦ ck_quote_type ¿
+
+⍝ the effect of quotation x run on the values T: the part of T it takes and what it leaves.
+⍝ The values it does not touch keep their ids, so they are the common prefix.
+ƒ
+  C "quotes" ⌈ ⌉ x ⌈ ⌉ → ops ¿
+  C "trace" ⌈ ⌉ → tr ¿
+  C "trace" ← ⊥ ¿
+  C "views" ⌈ ⌉ → vw0 ¿
+  C "views" ← 【】 ¿
+  C ops T 1 【】 "" ⟪ ck_sub ⟫ → r ¿
+  C "views" ← vw0 ¿
+  C "trace" ← tr ¿
+  C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  r "stack" ⌈ ⌉ → R ¿
+  0 → p ¿
+  ⊤ → same ¿
+  same ⟲ ↵
+    p T ⟪ len ⟫ ≺ p R ⟪ len ⟫ ≺ ∧ → same ¿
+    same ⤴ ↵ T p ⌈ ⌉ "id" ⌈ ⌉ R p ⌈ ⌉ "id" ⌈ ⌉ ≡ → same ¿ ⌫ ¿
+    same ⤴ ↵ p 1 ⊞ → p ¿ ⌫ ¿
+  ⌫ ¿
+  T p T ⟪ len ⟫ ⟪ lx_slice ⟫ ⟪ ck_types ⟫ → a ¿
+  R p R ⟪ len ⟫ ⟪ lx_slice ⟫ ⟪ ck_types ⟫ → o ¿
+  ❴"ins": a, "outs": o❵ ⇄ ¿
+↦ C ↦ x ↦ T ↦ tok ↦ ck_quote_effect ¿
+
+ƒ
+  a " " ⟪ join ⟫ → as ¿
+  b " " ⟪ join ⟫ → bs ¿
+  【"⟨" as " ⊸ " bs "⟩"】 ⟪ em_cat_ck ⟫ ⇄ ¿
+↦ a ↦ b ↦ ck_effect_str ¿
+
+⍝ match quotation x against parameter effect qs of function nm: run x on the values below and
+⍝ fresh values of qs's fixed inputs, then bind qs's row (in rb) and its type variables (in b)
+ƒ
+  qs "ins" ⌈ ⌉ → pi ¿
+  qs "outs" ⌈ ⌉ → po ¿
+  pi po ⟪ ck_effect_str ⟫ → want ¿
+  ∅ → prow ¿
+  pi ⟪ len ⟫ 0 ≻ ⤴ ↵
+    pi 0 ⌈ ⌉ ⟪ tc_row_var ⟫ ⤴ ↵ pi 0 ⌈ ⌉ → prow ¿ pi 1 pi ⟪ len ⟫ ⟪ lx_slice ⟫ → pi ¿ ⌫ ¿
+  ⌫ ¿
+  po ⟪ len ⟫ 0 ≻ ⤴ ↵
+    po 0 ⌈ ⌉ ⟪ tc_row_var ⟫ ⤴ ↵ po 1 po ⟪ len ⟫ ⟪ lx_slice ⟫ → po ¿ ⌫ ¿
+  ⌫ ¿
+  below ⟪ ck_copy ⟫ → T ¿
+  0 → i ¿
+  pi ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    pi i ⌈ ⌉ b ⟪ ck_tsubst ⟫ → t ¿
+    【t】 ⟪ ck_tvars ⟫ ⟪ len ⟫ 0 ≻ ⤴ ↵
+      C tok 【"cannot infer the types " want " of " nm "'s quotation: no other argument fixes them (§9.5)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿
+      ∅ ⇄ ¿
+    ⌫ ¿
+    C t tok 1 ⟪ ck_val ⟫ → v ¿
+    T v ⟪ .append ⟫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  C x T tok ⟪ ck_quote_effect ⟫ → eff ¿
+  eff ∅ ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  eff "ins" ⌈ ⌉ → ai ¿
+  eff "outs" ⌈ ⌉ → ao ¿
+  ⍝ a quotation that leaves some of the fixed inputs alone still has the wider effect
+  ai ⟪ len ⟫ n ≺ ⤴ ↵
+    T ⟪ len ⟫ n ⊟ → t0 ¿
+    T ⟪ len ⟫ ai ⟪ len ⟫ ⊟ → t1 ¿
+    T t0 t1 ⟪ lx_slice ⟫ ⟪ ck_types ⟫ → pad ¿
+    pad ai ⊞⊞ → ai ¿
+    pad ao ⊞⊞ → ao ¿
+  ⌫ ¿
+  ai ao ⟪ ck_effect_str ⟫ → have ¿
+  【"the quotation " x " has effect " have ", but " nm " wants " want " (§9.5)"】 ⟪ em_cat_ck ⟫ → bad ¿
+  ai ⟪ len ⟫ n ⊟ → rn ¿
+  rn 0 ≻ prow ∅ ≡ ∧ ⤴ ↵ C tok bad ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  ao ⟪ len ⟫ rn ≺ ⤴ ↵ C tok bad ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  ai 0 rn ⟪ lx_slice ⟫ → row ¿
+  ao 0 rn ⟪ lx_slice ⟫ → row2 ¿
+  row row2 ≢ ⤴ ↵ C tok bad ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  ao rn ao ⟪ len ⟫ ⟪ lx_slice ⟫ → bq ¿
+  bq ⟪ len ⟫ po ⟪ len ⟫ ≢ ⤴ ↵ C tok bad ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  po bq b ⟪ ck_tbind_into ⟫ ¿
+  po b ⟪ ck_tsubst_list ⟫ bq ≢ ⤴ ↵ C tok bad ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  prow ∅ ≢ ⤴ ↵
+    prow rb ∈ ⤴ ↵
+      rb prow ⌈ ⌉ row ≢ ⤴ ↵ C tok bad ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+    ⌫ ⤵ ↵
+      rb prow ← row ¿
+    ⌫ ¿
+  ⌫ ¿
+  ∅ ⇄ ¿
+↦ C ↦ nm ↦ x ↦ qs ↦ below ↦ b ↦ rb ↦ tok ↦ ck_qmatch ¿
 
 ⍝ ---- name resolution (§9, §9.1)
 
@@ -1786,15 +2037,65 @@
 
 ⍝ ---- signatures and functions
 
-⍝ mark f generic if its signature has type variables, and check where they may appear
+⍝ mark f generic if its signature has type variables, quotation parameters or row variables,
+⍝ and check where they may appear (§9.4, §9.5)
 ƒ
-  f "ins" ⌈ ⌉ ⟪ ck_tvars ⟫ → tv ¿
-  f "outs" ⌈ ⌉ ⟪ ck_tvars ⟫ → tvo ¿
-  tv ⟪ len ⟫ 0 ≡ tvo ⟪ len ⟫ 0 ≡ ∧ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  f "ins" ⌈ ⌉ → ins ¿
+  f "outs" ⌈ ⌉ → outs ¿
+  ins ⟪ ck_tvars ⟫ → tv ¿
+  outs ⟪ ck_tvars ⟫ → tvo ¿
+  ❴❵ → qsigs ¿
+  【】 → rows ¿
+  【】 → lists ¿
+  lists ins ⟪ .append ⟫ ¿
+  lists outs ⟪ .append ⟫ ¿
+  ⊥ → qy ¿
   it "tok" ⌈ ⌉ → tok ¿
   it "name" ⌈ ⌉ → name ¿
+  it "sig" ⌈ ⌉ "ins" ⌈ ⌉ → tins ¿
+  0 → i ¿
+  tins ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    tins i ⌈ ⌉ "qsig" ⌈ ⌉ → qs ¿
+    qs ∅ ≢ ⤴ ↵
+      ⊤ → qy ¿
+      qs "ins" ⌈ ⌉ ⟪ ck_canon_list ⟫ → qi ¿
+      qs "outs" ⌈ ⌉ ⟪ ck_canon_list ⟫ → qo ¿
+      i ⍕ → ik ¿
+      ❴"ins": qi, "outs": qo❵ → qe ¿
+      qsigs ik ← qe ¿
+      lists qi ⟪ .append ⟫ ¿
+      lists qo ⟪ .append ⟫ ¿
+      ⍝ a quotation type keeps its row on both sides
+      qi ⟪ ck_row_head ⟫ → r1 ¿
+      qo ⟪ ck_row_head ⟫ → r2 ¿
+      r1 r2 ≢ ⤴ ↵ C tok "a quotation type has the same row variable on both sides, or none: ⟨ρ … ⊸ ρ …⟩ (§9.5)" ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+      r1 ∅ ≢ r1 rows ∈ ¬ ∧ ⤴ ↵ rows r1 ⟪ .append ⟫ ¿ ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ins ⟪ ck_row_head ⟫ → rowin ¿
+  outs ⟪ ck_row_head ⟫ → rowout ¿
+  rowin ∅ ≢ ⤴ ↵ ⊤ → qy ¿ ⌫ ¿
+  rowout ∅ ≢ ⤴ ↵ ⊤ → qy ¿ ⌫ ¿
+  tv ⟪ len ⟫ 0 ≡ tvo ⟪ len ⟫ 0 ≡ ∧ qy ¬ ∧ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
   it "kind" ⌈ ⌉ "ffi" ≡ ⤴ ↵ C tok "an FFI binding cannot be generic (§9.4)" ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
   rev ⤴ ↵ C tok "a reversible function cannot be generic (§9.4)" ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  ⍝ a row variable stands for the bottom of an effect, so it comes first
+  0 → i ¿
+  lists ⟪ len ⟫ → nl ¿
+  i nl ≺ ⟲ ↵
+    lists i ⌈ ⌉ → ts ¿
+    1 → j ¿
+    ts ⟪ len ⟫ → m ¿
+    j m ≺ ⟲ ↵
+      ts j ⌈ ⌉ ⟪ tc_row_var ⟫ ⤴ ↵ C tok "a row variable stands for the bottom of an effect, so it comes first: ⟨ρ … ⊸ ρ …⟩ (§9.5)" ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+      j 1 ⊞ → j ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  rowin ∅ ≢ rowin rows ∈ ¬ ∧ ⤴ ↵ rows rowin ⟪ .append ⟫ ¿ ⌫ ¿
+  rowout ∅ ≢ rowout rows ∈ ¬ ∧ ⤴ ↵ C tok 【rowout " appears only in the outputs of " name "; every row variable must be fixed by an input (§9.5)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
   0 → i ¿
   tvo ⟪ len ⟫ → n ¿
   i n ≺ ⟲ ↵
@@ -1807,8 +2108,21 @@
   f "item" ← it ¿
   it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → shp ¿
   f "shape" ← shp ¿
+  f "quotey" ← qy ¿
+  f "qsigs" ← qsigs ¿
+  f "rows" ← rows ¿
+  f "rowin" ← rowin ¿
+  f "rowout" ← rowout ¿
   ∅ ⇄ ¿
 ↦ C ↦ it ↦ f ↦ rev ↦ ck_generic ¿
+
+⍝ the row variable heading a list of types, or ∅
+ƒ
+  ts ⟪ len ⟫ 0 ≡ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  ts 0 ⌈ ⌉ ⟪ tc_row_var ⟫ ⤴ ↵ ts 0 ⌈ ⌉ ⇄ ¿ ⌫ ¿
+  ∅ ⇄ ¿
+↦ ts ↦ ck_row_head ¿
+
 
 ƒ
   sig "ins" ⌈ ⌉ ⟪ ck_canon_list ⟫ → ins ¿
@@ -1842,9 +2156,11 @@
       h "◌" ≡ h "⟗" ≡ ∨ h "⟖" ≡ ∨ ⤴ ↵ b ⟪ ck_tail ⟫ → b ¿ ⊕ ¿ ⌫ ¿
       h "ψ" ≡ ⤴ ↵ b ⟪ ck_psi_inner ⟫ → b ¿ ⊕ ¿ ⌫ ¿
       h "⟦" ≡ ⤴ ↵ b 1 b ⟪ len ⟫ 2 ⊟ ⟪ substr ⟫ → b ¿ ⊕ ¿ ⌫ ¿
+      h "⟨" ≡ ⤴ ↵ "" → b ¿ ⊥ → going ¿ ⊕ ¿ ⌫ ¿
       ⊥ → going ¿
     ⌫ ¿
-    b "" ≢ b ⟪ ck_head ⟫ ⟪ tc_base_type ⟫ ¬ ∧ b ⟪ tc_type_var ⟫ ¬ ∧ ⤴ ↵
+    outputs t ⟪ ck_head ⟫ "⟨" ≡ ∧ ⤴ ↵ C tok "a function cannot return a quotation " t " (§9.5)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+    b "" ≢ b ⟪ ck_head ⟫ ⟪ tc_base_type ⟫ ¬ ∧ b ⟪ tc_type_var ⟫ ¬ ∧ b ⟪ tc_row_var ⟫ ¬ ∧ ⤴ ↵
       b C "particles" ⌈ ⌉ ∈ ¬ ⤴ ↵ C tok "unknown type " b " (Ogham type names must be declared with ⚛, §8.6)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
     ⌫ ¿
     outputs t ⟪ ck_head ⟫ "⟗" ≡ t ⟪ ck_head ⟫ "⟖" ≡ ∨ ∧ ⤴ ↵ C tok "a function cannot return a shadow " t " (shadows never leave their block, §8.2)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
@@ -1892,6 +2208,7 @@
     S v ⟪ .append ⟫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
+  C "fn" ← name ¿
   it "shape" ⌈ ⌉ → sigs ¿
   sigs ∅ ≡ ⤴ ↵ it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → sigs ¿ ⌫ ¿
   C "" "fn " name " " sigs "  start " S ⟪ ck_vtypes ⟫ ⟪ ck_show ⟫ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_note ⟫ ¿
@@ -1952,6 +2269,8 @@
   C "lines" ← 【】 ¿
   C "views" ← 【】 ¿
   C "insts" ← 【】 ¿
+  ❴❵ → quotes ¿
+  C "quotes" ← quotes ¿
   ❴❵ → fns ¿
   ❴❵ → shapes ¿
   ❴❵ → particles ¿

@@ -247,11 +247,13 @@
 ⍝ ‹sappbase› C e bt k full elem: append the base of a type (token bt of kind k)
 ⦃
   ⧖:C,e,bt,k,full,elem
+  ⧗:C̵,bt #8# ‹tf› ⧖:C,b0
   ⧗:C̵,bt #6# ‹tf› ⧖:C,copen ⧗:C̵,bt #7# ‹tf› ⧖:C,n
   ⧗:n ⧗:copen ⧗:copen ○ ≶ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⦃ ⌁ ⦄ ⧖:end
   ⧗:C̵,e,bt,end,full ⧗:k #9# ᛖ ⋔ ⦃ ⧖:C,e,bt,end,full ⧗:C̵,e,bt ○ ⧗:end,full ‹sapptok› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:e,bt,n,full ⧗:k #2# ᛖ ⋔ ⦃ ⧖:e,bt,n,full ⧗:e,bt ○ ⧗:n,full ‹sapptok› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
-  ⧗:e,elem ⧗:k #11# ᛖ ⋔ ⦃ ⧖:e,elem ⧗:e #10214# ‹scp› ⧗:e,elem ‹sapp› ⧗:e #10215# ‹scp› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:e,elem ⧗:k #11# ᛖ ⧗:b0 #10216# ᛖ ⋎ ⋔ ⦃ ‹sapp› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:e,elem ⧗:k #11# ᛖ ⧗:b0 #10216# ᛖ ‹not› ⋎ ⋔ ⦃ ⧖:e,elem ⧗:e #10214# ‹scp› ⧗:e,elem ‹sapp› ⧗:e #10215# ‹scp› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sappbase› ⸫
 
 ⍝ ‹canon› C i full: the type of type node i (full: with ⸮ ⁖ and the charge, for shapes)
@@ -261,7 +263,10 @@
   ⧗:C̵,i #3# ‹nd› ⧖:C,np
   ⧗:C̵,bt ‹tkd› ⧖:C,k
   ⍝ the element type and the charge first: strings are built one at a time
-  ⧗:C̵ ⧗:i #4# ⊞ ⧗:np ⊞ ⧗:full ⧗:k #11# ᛖ ⋔ ⦃ ‹canon› ⦄ ⦃ ⌁ ⌁ #-1# ⦄ ⁼ ⧖:C,elem
+  ⧗:C̵,bt #8# ‹tf› ⧖:C,b0
+  ⍝ 0: no element, 1: an array's element type, 2: a quotation type's signature (§9.5)
+  ○ ⧗:k #11# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:k #11# ᛖ ⧗:b0 #10216# ᛖ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:ek
+  ⧗:C̵ ⧗:i #4# ⊞ ⧗:np ⊞ ⧗:full ⧗:ek ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ #-1# ⦄ ⦃ △ ᛖ ⋔ ⦃ ‹canon› ⦄ ⦃ ⌁ ‹qsigcanon› ⦄ ⁼ ⦄ ⁼ ⧖:C,elem
   ⧗:C̵,bt ⧗:k #9# ᛖ ⧗:full △ ᛖ ⋎ ⋔ ⦃ ‹tokcharge› ⦄ ⦃ ⌁ #16# ‹reg› ⦄ ⁼ ⧖:C,ch
   ⧗:C̵ ‹sbeg› ⧖:C,e
   ⧗:C̵,e,i,np,full ‹sapppfx›
@@ -391,7 +396,8 @@
   ⧗:C̵ ⧗:c ⧗:sz ⊞ ⧗:end ⧗:k △ ⊞ ⧗:nin,full,ins2,outs2,iev2,ich2,oev2,och2
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹sigtype1› ⸫
 
-⍝ ‹fninfo› C s rev name: a function record [name ins outs rev iev ich oev och tvars item shape at];
+⍝ ‹fninfo› C s rev name: a function record [name ins outs rev iev ich oev och tvars item shape at
+⍝ quotey qsigs rows rowin rowout];
 ⍝ tvars are the type variables of the inputs (§9.4); a generic function's item and shape, and an
 ⍝ instance's "ᚠ[ℤ], first called at …", are set later (−1 until then)
 ⦃
@@ -399,7 +405,7 @@
   ⧗:C̵,s ○ ‹sigtypes› ⧖:C,ins,outs,iev,ich,oev,och
   ⧗:C̵,ins ‹tvars› ⧖:C,tv
   ⧗:C̵ ‹len› ⧖:C,f
-  ⧗:C̵ ⧗:name ⍆̵ ⧗:ins ⍆̵ ⧗:outs ⍆̵ ⧗:rev ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:tv ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧗:f
+  ⧗:C̵ ⧗:name ⍆̵ ⧗:ins ⍆̵ ⧗:outs ⍆̵ ⧗:rev ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:tv ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧗:f
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹fninfo› ⸫
 
 ⍝ ---- type variables (§9.4): a generic function is checked and emitted once per instance
@@ -435,10 +441,9 @@
 ⍝ ‹tbind› C ds xs: the bindings of the variables of the declared types ds to the classical types
 ⍝ they meet in the actual types xs (8 slots for α … θ, −1 while free); a declared ◌ may meet a
 ⍝ value that cannot fail
+⦃ ⧖:C,ds,xs ⧗:C̵ ‹tbnew› ⧖:C,b ⧗:C̵,ds,xs,b ‹tbindinto› ⧗:b ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tbind› ⸫
 ⦃
-  ⧖:C,ds,xs
-  ⧗:C̵ ‹lbeg› ⧖:C,b
-  ⧗:C̵,b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧖:C
+  ⧖:C,ds,xs,b
   ⧗:C̵,ds ‹llen› ⧖:C,n
   ⧗:C̵,ds,xs,b ○ ⧗:n
   ⥀ ⦃
@@ -446,8 +451,8 @@
     ⧗:C̵,ds,xs,b,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
       ⦃ ⧖:C,ds,xs,b,j,n ⧗:C̵,ds,j ‹lget› ⧖:C,d ⧗:C̵,xs,j ‹lget› ⧖:C,x ⧗:C̵,d,x,b ‹tbind1› ⧗:ds,xs,b ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
-  ⧖:C,ds,xs,b,j,n ⧗:C̵,b
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tbind› ⸫
+  ⌁ ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹tbindinto› ⸫
 ⦃
   ⧖:C,d,x,b
   ⧗:C̵,d ‹slen› ⧖:C,dn ⧗:C̵,x ‹slen› ⧖:C,xn
@@ -547,68 +552,274 @@
   ⧗:C̵,f #4# ‹vf› ⧖:C,iev ⧗:C̵,f #5# ‹vf› ⧖:C,ich ⧗:C̵,f #6# ‹vf› ⧖:C,oev ⧗:C̵,f #7# ‹vf› ⧖:C,och
   ⧗:C̵,f #9# ‹vf› ⧖:C,it
   ⧗:C̵ ‹len› ⧖:C,g
-  ⧗:C̵ ⧗:key ⍆̵ ⧗:gi ⍆̵ ⧗:go ⍆̵ ○ ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:none ⍆̵ ⧗:it ⍆̵ ⧗:gshp ⍆̵ ⧗:at ⍆̵ ⧗:g
+  ⧗:C̵ ⧗:key ⍆̵ ⧗:gi ⍆̵ ⧗:go ⍆̵ ○ ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:none ⍆̵ ⧗:it ⍆̵ ⧗:gshp ⍆̵ ⧗:at ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧗:g
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹instrec› ⸫
-⍝ ‹isgeneric› C f: f has type variables
-⦃ ⧖:C,f ⧗:C̵,f #8# ‹vf› ⧖:C,tv ⧗:C̵,tv ‹llen› ⧖:C,n ⧗:C̵ ⧗:n ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isgeneric› ⸫
-⍝ ‹cinstance› C f S tok: a call of generic f on the values on top of S: the instance's record,
-⍝ made and queued for checking (register 57) the first time
-⦃
-  ⧖:C,f,S,tok
-  ⧗:C̵,f △ ‹vf› ⧖:C,ins
-  ⧗:C̵,ins ‹llen› ⧖:C,k ⧗:C̵,S ‹llen› ⧖:C,n
-  ⍝ too few values: ‹apply› reports it
-  ⧗:C̵,f,S,tok,k ⧗:n ⧗:k ≶ ⋔ ⦃ ‹cinstance1› ⦄ ⁼ ⦃ ⌁ ⌁ ⌁ ⦄
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cinstance› ⸫
-⦃
-  ⧖:C,f,S,tok,k
-  ⧗:C̵,S,k ‹toptys› ⧖:C,xs
-  ⧗:C̵,f △ ‹vf› ⧖:C,ins
-  ⧗:C̵,ins,xs ‹tbind› ⧖:C,b
-  ⧗:C̵,f #8# ‹vf› ⧖:C,vs
-  ⧗:C̵,vs ‹llen› ⧖:C,nv
-  ⧗:C̵,f,tok,xs,vs,b ○ ⧗:nv
-  ⥀ ⦃
-    ⧖:C,f,tok,xs,vs,b,j,n
-    ⧗:C̵,f,tok,xs,vs,b,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,f,tok,xs,vs,b,j,n ⧗:C̵,vs,j ‹lget› ⧖:C,v ⧗:C̵,b ⧗:v #945# ⊟ ‹lget› ⧖:C,w
-        ⧗:C̵,f,tok,xs,v ⧗:w #-1# ᛖ ⋔ ⦃ ‹noinfer› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
-        ⧗:C̵,f,tok,xs,vs,b ⧗:j △ ⊞ ⧗:n ⊕ ⦄
-  ⦄
-  ⧖:C,f,tok,xs,vs,b,j,n
-  ⧗:C̵,tok △ ‹tf› ⧖:C,ln ⧗:C̵,tok #2# ‹tf› ⧖:C,cl
-  ⧗:C̵,f,b #-1# ‹instrec› ⧖:C,g
-  ⧗:C̵,g ‹rd› ⧖:C,key
-  ⧗:C̵,key ‹fnfind› ⧖:C,old
-  ⧗:C̵,g,key,ln,cl,old ⧗:old #-1# ᛖ ⋔ ⦃ ‹cinstnew› ⦄ ⦃ ⧖:C,g,key,ln,cl,old ⧗:C̵,old ⦄ ⁼
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cinstance1› ⸫
-⦃
-  ⧖:C,g,key,ln,cl,old
-  ⧗:C̵ %%{key}, first called at {#ln}:{#cl}%% ⧖:C,at
-  ⧗:C̵,g #11# ⧗:at ‹vset› ⧖:C
-  ⧗:C̵ #7# ‹reg› ⧖:C,fns ⧗:C̵,fns,g ‹lpush› ⧖:C,fns2 ⧗:C̵ #7# ⧗:fns2 ‹wr› ⧖:C
-  ⧗:C̵ #57# ‹reg› ⧖:C,q ⧗:C̵,q,g ‹lpush› ⧖:C,q2 ⧗:C̵ #57# ⧗:q2 ‹wr› ⧖:C
-  ⧗:C̵,g
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cinstnew› ⸫
+⍝ ‹isgeneric› C f: f has type variables, quotation parameters or rows
+⦃ ⧖:C,f ⧗:C̵,f #8# ‹vf› ⧖:C,tv ⧗:C̵,tv ‹llen› ⧖:C,n ⧗:C̵,f #12# ‹vf› ⧖:C,qy ⧗:C̵ ⧗:n ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:qy △ ᛖ ⋏ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isgeneric› ⸫
 ⦃
   ⧖:C,f,tok,xs,v
   ⧗:C̵,f ‹rd› ⧖:C,name
   ⧗:C̵,tok ‹cerr› $cannot infer $ ⎙̵ ⧗:v ᚢ $ for $ ⎙̵ ⧗:name ‹spr› $ from $ ⎙̵ ⧗:xs ○ ‹plist›
   $: a type variable stands for a classical type ℤ ℝ ŧ 𝔹 (§9.4)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹noinfer› ⸫
-⍝ ‹cgeneric› C f i tok rev ffi sig: check where f's type variables may appear; keep a generic
-⍝ function's item and shape
+⦃
+  ⧖:C,f,tok,v
+  ⧗:C̵,f ‹rd› ⧖:C,name
+  ⧗:C̵,tok ‹cerr› ⧗:v ᚢ $ appears only in the outputs of $ ⎙̵ ⧗:name ‹spr› $; every type variable must be fixed by an input (§9.4)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹outvar› ⸫
+
+⍝ ---- quotations (§9.5): a block as a value, typed ⦃line:col⦄ by where it is written; ⍎ runs
+⍝ its body where it is applied. Register 58 maps quotation types to their nodes; 59 records
+⍝ which instance a call makes, as seen from the function being checked (register 55).
+
+⍝ ‹qtype› C tok: the type of the quotation whose ⦃ is token tok
+⦃ ⧖:C,tok ⧗:C̵,tok △ ‹tf› ⧖:C,l ⧗:C̵,tok #2# ‹tf› ⧖:C,c ⧗:C̵ %%!⦃{#l}:{#c}⦄%% ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qtype› ⸫
+⍝ ‹pair› C a b: the list [a b]
+⦃ ⧖:C,a,b ⧗:C̵ ‹lbeg› ⧖:C,e ⧗:C̵,e,a ‹ladd› ⧗:e,b ‹ladd› ⧗:e ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pair› ⸫
+⍝ ‹regpush› C r v: append v to the list in register r
+⦃ ⧖:C,r,v ⧗:C̵,r ‹reg› ⧖:C,L ⧗:C̵,L,v ‹lpush› ⧖:C,L2 ⧗:C̵,r,L2 ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹regpush› ⸫
+⍝ ‹qset› C qt node: remember the quotation's node
+⦃ ⧖:C,qt,node ⧗:C̵,qt,node ‹pair› ⧖:C,e ⧗:C̵ #58# ⧗:e ‹regpush› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹qset› ⸫
+⍝ ‹qget› C qt: the node of quotation type qt (the latest remembered)
+⦃
+  ⧖:C,qt
+  ⧗:C̵ #58# ‹reg› ⧖:C,L
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,L,qt ○ ⧗:n #-1#
+  ⥀ ⦃
+    ⧖:C,L,qt,j,n,found
+    ⧗:C̵,L,qt,j,n,found ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,qt,j,n,found ⧗:C̵,L,j ‹lget› ⧖:C,e ⧗:C̵,e ○ ‹lget› ⧖:C,ek ⧗:C̵,e △ ‹lget› ⧖:C,en
+        ⧗:C̵,L,qt ⧗:j △ ⊞ ⧗:n ⧗:found ⧗:en ⧗:ek ⧗:qt ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⊕ ⦄
+  ⦄
+  ⧖:C,L,qt,j,n,found ⧗:C̵,found
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qget› ⸫
+⍝ ‹isattest› C op to: is quoted block op the predicate of a ⊨ right after it?
+⦃
+  ⧖:C,op,to
+  ⧗:C̵,op #2# ‹nd› ⧖:C,sz
+  ⧗:op ⧗:sz ⊞ ⧖:nx
+  ⧗:C̵,nx,to ⧗:nx ⧗:to ≶ ⋔ ⦃ ⌁ ⌁ ⊕ ⦄ ⁼ ⦃ ‹isattest1› ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isattest› ⸫
+⦃
+  ⧖:C,nx,to
+  ⧗:C̵,nx ○ ‹nd› ⧖:C,nk ⧗:C̵,nx ‹ndt› ⧖:C,atok
+  ⧗:C̵,atok #8# #8872# ‹tis1› ⧖:C,isat
+  ⧗:C̵ ⧗:nk #5# ᛖ ⧗:isat ⋎
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isattest1› ⸫
+⍝ ‹isrow› c: ρ or σ
+⦃ ⧖:c ⧗:c #961# ᛖ ⧗:c #963# ᛖ ⋏ ⦄ ⟨ℤ ⊸ ŧ⟩ ‹isrow› ⸫
+⍝ ‹rowslot› c: ρ 0, σ 1
+⦃ ⧖:c ○ ⧗:c #963# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⦄ ⟨ℤ ⊸ ℤ⟩ ‹rowslot› ⸫
+⍝ ‹rowof› C t: the row variable type t is (its code point), or −1
+⦃
+  ⧖:C,t
+  ⧗:C̵,t ‹slen› ⧖:C,n ⧗:C̵,t ‹shead› ⧖:C,h
+  ⧗:C̵ #-1# ⧗:h ⧗:n △ ᛖ ⧗:h ‹isrow› ⋎ ⋔ ⦃ ⧖:hh ⌁ ⧗:hh ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rowof› ⸫
+⍝ ‹rowhead› C ts: the row variable heading a list of types, or −1
+⦃
+  ⧖:C,ts
+  ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵,ts ⧗:n ○ ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ⦃ ○ ‹lget› ‹rowof› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rowhead› ⸫
+⍝ ‹rowtail› C ts: ts without its heading row variable, if it has one
+⦃
+  ⧖:C,ts
+  ⧗:C̵,ts ‹rowhead› ⧖:C,r ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵,ts,n ⧗:r #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:L,m ⧗:L △ ⧗:m ‹lslice› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rowtail› ⸫
+⍝ ‹effstr› C a b: "⟨a ⊸ b⟩", the types joined by spaces
+⦃
+  ⧖:C,a,b
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:C̵,e #10216# ‹scp› ⧗:e,a ‹sappj› ⧗:e #32# ‹scp› ⧗:e #8888# ‹scp› ⧗:e #32# ‹scp› ⧗:e,b ‹sappj› ⧗:e #10217# ‹scp› ⧗:e ‹send›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹effstr› ⸫
+⍝ ‹qsigcanon› C s: the type of a quotation type with signature node s, as written: ⟨a ⊸ b⟩
+⦃
+  ⧖:C,s
+  ⧗:C̵,s △ ‹sigtypes› ⧖:C,ins,outs,a,b,c,d
+  ⧗:C̵,ins ‹llen› ⧖:C,ni ⧗:C̵,outs ‹llen› ⧖:C,no
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:C̵,e #10216# ‹scp› ⧗:e,ins ‹sappj›
+  ⧗:e ⧗:ni ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ #32# ‹scp› ⦄ ⦃ ⌁ ⦄
+  ⧗:e #8888# ‹scp›
+  ⧗:e ⧗:no ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ #32# ‹scp› ⦄ ⦃ ⌁ ⦄
+  ⧗:e,outs ‹sappj› ⧗:e #10217# ‹scp› ⧗:e ‹send›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qsigcanon› ⸫
+⍝ ‹qeffect› C x T tok: the effect of quotation x run on the values T: the types of the part of T
+⍝ it takes and of what it leaves. Untouched values keep their ids: they are the common prefix.
+⦃
+  ⧖:C,x,T,tok
+  ⧗:C̵,x ‹qget› ⧖:C,qn
+  ⧗:C̵ △ ‹reg› ⧖:C,tr ⧗:C̵ △ ○ ‹wr› ⧖:C
+  ⧗:C̵ #60# ‹reg› ⧖:C,vw0 ⧗:C̵ #60# ○ ‹wr› ⧖:C
+  ⧗:C̵ ‹lnew0› ⧖:C,e
+  ⧗:C̵ ⧗:qn #3# ⊞ ⧗:T △ ⧗:e ○ ‹subb› ⧖:C,R,rst,rdead
+  ⧗:C̵ #60# ⧗:vw0 ‹wr› ⧖:C
+  ⧗:C̵ △ ⧗:tr ‹wr› ⧖:C
+  ⧗:C̵,T ‹llen› ⧖:C,nt ⧗:C̵,R ‹llen› ⧖:C,nr
+  ⧗:C̵,T,R,nt,nr ○
+  ⥀ ⦃
+    ⧖:C,T,R,nt,nr,p
+    ⧗:C̵,T,R,nt,nr,p ⧗:p ⧗:nt ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:p ⧗:nr ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⋔ ⦃ ‹qprefix1› ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:C,T,R,nt,nr,p
+  ⧗:C̵,T ⧗:nt ⧗:p ⊟ ‹toptys› ⧖:C,a
+  ⧗:C̵,R ⧗:nr ⧗:p ⊟ ‹toptys› ⧖:C,o
+  ⧗:C̵,a,o
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹qeffect› ⸫
+⦃
+  ⧖:C,T,R,nt,nr,p
+  ⧗:C̵,T,p ‹lget› △ ‹vf› ⧖:C,a ⧗:C̵,R,p ‹lget› △ ‹vf› ⧖:C,b
+  ⧗:C̵,T,R,nt,nr,p ⧗:a ⧗:b ᛖ ⋔ ⦃ △ ⊞ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ŧ⟩ ‹qprefix1› ⸫
+⍝ ‹qbad› C tok x have nm want: the quotation does not have the effect the parameter names
+⦃
+  ⧖:C,tok,x,have,nm,want
+  ⧗:C̵,tok ‹cerr› $the quotation $ ⎙̵ ⧗:x ‹spr› $ has effect $ ⎙̵ ⧗:have ‹spr› $, but $ ⎙̵ ⧗:nm ‹spr›
+  $ wants $ ⎙̵ ⧗:want ‹spr› $ (§9.5)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹qbad› ⸫
+⦃ ⧖:C,tok,x,have,nm,want,bad ⧗:C̵,tok,x,have,nm,want ⧗:bad ⋔ ⦃ ‹qbad› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧⟩ ‹qbadif› ⸫
+⦃
+  ⧖:C,tok,want,nm
+  ⧗:C̵,tok ‹cerr› $cannot infer the types $ ⎙̵ ⧗:want ‹spr› $ of $ ⎙̵ ⧗:nm ‹spr› $'s quotation: no other argument fixes them (§9.5)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹qnoinfer› ⸫
+⍝ ‹qwiden› C T ai ao n: widen the effect ⟨ai ⊸ ao⟩ to take all n fixed inputs on top of T
+⦃
+  ⧖:C,T,ai,ao,n
+  ⧗:C̵,ai ‹llen› ⧖:C,na ⧗:C̵,T ‹llen› ⧖:C,nt
+  ⧗:C̵,T,ai,ao ⧗:nt ⧗:n ⊟ ⧗:nt ⧗:na ⊟ ⧗:na ⧗:n ≶ ⋔ ⦃ ‹qkeep› ⦄ ⁼ ⦃ ‹qpad› ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹qwiden› ⸫
+⦃ ⧖:C,T,ai,ao,t0,t1 ⧗:C̵,ai,ao ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹qkeep› ⸫
+⦃
+  ⧖:C,T,ai,ao,t0,t1
+  ⧗:C̵,T,t0,t1 ‹lslice› ⧖:C,ps ⧗:C̵,ps ‹ltypes› ⧖:C,pad
+  ⧗:C̵,pad,ai ‹lcat› ⧖:C,ai2 ⧗:C̵,pad,ao ‹lcat› ⧖:C,ao2
+  ⧗:C̵,ai2,ao2
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹qpad› ⸫
+⍝ ‹qmatch› C nm x qs below b rb tok: match quotation x against parameter effect qs = [ins outs]
+⍝ of function nm: run x on the values below and fresh values of the fixed inputs, then bind the
+⍝ row (rb: ρ and σ) and the type variables (b)
+⦃
+  ⧖:C,nm,x,qs,below,b,rb,tok
+  ⧗:C̵,qs ○ ‹lget› ⧖:C,pi0 ⧗:C̵,qs △ ‹lget› ⧖:C,po0
+  ⧗:C̵,pi0,po0 ‹effstr› ⧖:C,want
+  ⧗:C̵,pi0 ‹rowhead› ⧖:C,prow
+  ⧗:C̵,pi0 ‹rowtail› ⧖:C,pi ⧗:C̵,po0 ‹rowtail› ⧖:C,po
+  ⧗:C̵,pi ‹llen› ⧖:C,n
+  ⧗:C̵,pi,b,below,nm,want,tok ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,pi,b,T,nm,want,tok,j,n
+    ⧗:C̵,pi,b,T,nm,want,tok,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,pi,b,T,nm,want,tok,j,n ⧗:C̵,pi,j ‹lget› ⧖:C,t0 ⧗:C̵,t0,b ‹tsubst› ⧖:C,t
+        ⧗:C̵,t ‹l1› ⧖:C,tl ⧗:C̵,tl ‹tvars› ⧖:C,tv ⧗:C̵,tv ‹llen› ⧖:C,nv
+        ⧗:C̵,tok,want,nm ⧗:nv ○ ≶ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹qnoinfer› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⧖:C
+        ⧗:C̵,t,tok △ ‹vnew› ⧖:C,v ⧗:C̵,T,v ‹lpush› ⧖:C,T2
+        ⧗:C̵,pi,b,T2,nm,want,tok ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,pi,b,T,nm,want,tok,j,n
+  ⧗:C̵,x,T,tok ‹qeffect› ⧖:C,ai0,ao0
+  ⧗:C̵,T,ai0,ao0,n ‹qwiden› ⧖:C,ai,ao
+  ⧗:C̵,ai,ao ‹effstr› ⧖:C,have
+  ⧗:C̵,ai ‹llen› ⧖:C,na ⧗:C̵,ao ‹llen› ⧖:C,no
+  ⧗:na ⧗:n ⊟ ⧖:rn
+  ⍝ it takes values from below its inputs without a row to take them from, or leaves too few
+  ⧗:C̵,tok,x,have,nm,want ⧗:rn ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:prow #-1# ᛖ ⋎ ⧗:no ⧗:rn ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋏ ‹qbadif› ⧖:C
+  ⧗:C̵,ai ○ ⧗:rn ‹lslice› ⧖:C,row
+  ⧗:C̵,ao ○ ⧗:rn ‹lslice› ⧖:C,row2
+  ⧗:C̵,ao,rn,no ‹lslice› ⧖:C,bq
+  ⧗:C̵,bq ‹llen› ⧖:C,nbq ⧗:C̵,po ‹llen› ⧖:C,npo
+  ⧗:C̵,row,row2 ‹leq› ⧖:C,same
+  ⧗:C̵,tok,x,have,nm,want ⧗:same ‹not› ⧗:nbq ⧗:npo ᛖ ‹not› ⋏ ‹qbadif› ⧖:C
+  ⍝ the outputs fix more variables, and must then agree
+  ⧗:C̵,po,bq,b ‹tbindinto› ⧖:C
+  ⧗:C̵,po,b ‹tsubstl› ⧖:C,pob ⧗:C̵,pob,bq ‹leq› ⧖:C,same2
+  ⧗:C̵,tok,x,have,nm,want ⧗:same2 ‹not› ‹qbadif› ⧖:C
+  ⧗:C̵,rb,row,prow,tok,x,have,nm,want ⧗:prow #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹qrow› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹qmatch› ⸫
+⍝ ‹qrow› C rb row prow tok x have nm want: fix row variable prow to row (once)
+⦃
+  ⧖:C,rb,row,prow,tok,x,have,nm,want
+  ⧗:prow ‹rowslot› ⧖:slot
+  ⧗:C̵,rb,slot ‹lget› ⧖:C,old
+  ⧗:C̵,rb,slot,row,old,tok,x,have,nm,want ⧗:old #-1# ᛖ ⋔ ⦃ ‹qrowset› ⦄ ⦃ ‹qrowsame› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹qrow› ⸫
+⦃ ⧖:C,rb,slot,row,old,tok,x,have,nm,want ⧗:C̵,rb,slot,row ‹lset› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹qrowset› ⸫
+⦃
+  ⧖:C,rb,slot,row,old,tok,x,have,nm,want
+  ⧗:C̵,old,row ‹leq› ⧖:C,same
+  ⧗:C̵,tok,x,have,nm,want ⧗:same ‹not› ‹qbadif›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹qrowsame› ⸫
+
+⍝ ‹c_quote› dispatches: a quotation, or the predicate of x ⦃pred⦄ ⊨
+⦃
+  ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
+  ⧗:C̵,op,to ‹isattest› ⧖:C,at
+  ⧗:C̵,op,S,strand,dead,depth,locks,ind,prev,to ⧗:at ⋔ ⦃ ‹c_attest› ⦄ ⦃ ‹c_quotation› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_quote› ⸫
+⍝ a quotation: a value whose type is its place (§9.5)
+⦃
+  ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok ‹qtype› ⧖:C,qt
+  ⧗:C̵,qt,op ‹qset› ⧖:C
+  ⧗:C̵,qt,tok,depth ‹vnew› ⧖:C,v
+  ⧗:C̵,S,v ‹lpush› ⧗:strand,dead ○ #10# ⧗:qt
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_quotation› ⸫
+⍝ ⍎ applies the quotation on top: its body runs here, on this stack (§9.5)
+⦃
+  ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,S △ ⧗:tok ○ ‹pop› ⧖:C,S2,vals
+  ⧗:C̵,vals ○ ‹lget› ‹vty› ⧖:C,qt
+  ⧗:C̵,qt ‹shead› ⧖:C,qh
+  ⧗:C̵,tok,qt ⧗:qh #10627# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹notquote› ⦄ ⁼ ⧖:C
+  ⧗:C̵,qt ‹qget› ⧖:C,qn
+  ⧗:C̵,S2,strand,locks ‹locks› ⧖:C,inner
+  ⧗:C̵ #60# ‹reg› ⧖:C,vw0 ⧗:C̵ #60# ○ ‹wr› ⧖:C
+  ⧗:C̵ ⧗:qn #3# ⊞ ⧗:S2,depth,inner ⧗:ind △ ⊞ ‹subb› ⧖:C,S3,qst,qdead
+  ⧗:C̵ #60# ⧗:vw0 ‹wr› ⧖:C
+  ⧗:C̵,qst ○ ‹noleak› ⧖:C
+  ⧗:C̵,S3,strand,qdead ○ #11# ⧗:qt
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_apply› ⸫
+⦃
+  ⧖:C,tok,qt
+  ⧗:C̵,tok ‹cerr› $⍎ applies a quotation, found $ ⎙̵ ⧗:qt ‹spr› ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹notquote› ⸫
+⍝ ‹trquote› C ind tok S lab larg: the trace line of a quotation (10) or ⍎ (11)
+⦃
+  ⧖:C,ind,tok,S,lab,larg
+  ⧗:C̵ ‹tron› ⧖:C,on
+  ⧗:C̵,ind,S,lab,larg ⧗:on ⋔ ⦃ ⧖:C,ind,S,lab,larg ⧗:ind ‹pind› ⧗:lab #11# ᛖ ⋔ ⦃ $⍎ $ ⎙̵ ⦄ ∅ ⁼ ⧗:C̵,larg ‹spr› ⧗:S ‹trtail› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹trquote› ⸫
+
+⍝ ‹cgeneric› C f i tok rev ffi sig: mark f generic if its signature has type variables,
+⍝ quotation parameters or row variables, and check where they may appear (§9.4, §9.5)
 ⦃
   ⧖:C,f,i,tok,rev,ffi,sig
-  ⧗:C̵,f #8# ‹vf› ⧖:C,tv
-  ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs ‹tvars› ⧖:C,tvo
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,f #2# ‹vf› ⧖:C,outs
+  ⧗:C̵,f #8# ‹vf› ⧖:C,tv ⧗:C̵,outs ‹tvars› ⧖:C,tvo
+  ⍝ the quotation parameters: [ins outs] per input (−1 for the others), and their rows
+  ⧗:C̵,sig,tok ‹qsigsof› ⧖:C,qsigs,rows,qy0
+  ⧗:C̵,ins ‹rowhead› ⧖:C,rowin ⧗:C̵,outs ‹rowhead› ⧖:C,rowout
+  ⧗:qy0 ⧗:rowin #-1# ᛖ ‹not› ⋏ ⧗:rowout #-1# ᛖ ‹not› ⋏ ⧖:qy
   ⧗:C̵,tv ‹llen› ⧖:C,nv ⧗:C̵,tvo ‹llen› ⧖:C,nvo
-  ⧗:C̵,f,i,tok,rev,ffi,sig,tv,tvo ⧗:nv ○ ᛖ ⧗:nvo ○ ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹cgeneric1› ⦄ ⁼
+  ⧗:C̵,f,i,tok,rev,ffi,sig,tv,tvo,qsigs,rows,rowin,rowout,qy ⧗:nv ○ ᛖ ⧗:nvo ○ ᛖ ⋎ ⧗:qy ‹not› ⋎
+  ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹cgeneric1› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cgeneric› ⸫
 ⦃
-  ⧖:C,f,i,tok,rev,ffi,sig,tv,tvo
+  ⧖:C,f,i,tok,rev,ffi,sig,tv,tvo,qsigs,rows,rowin,rowout,qy
   ⧗:C̵ ⧗:ffi ‹not› ⧗:tok #26# ‹cfailunless› ⧖:C
   ⧗:C̵ ⧗:rev ‹not› ⧗:tok #27# ‹cfailunless› ⧖:C
+  ⍝ a row variable stands for the bottom of an effect, so it comes first
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,ins,tok ‹rowsfirst› ⧖:C
+  ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs,tok ‹rowsfirst› ⧖:C
+  ⧗:C̵,qsigs,tok ‹rowsfirstq› ⧖:C
+  ⧗:C̵,rows,rowin ‹lhas› ⧖:C,hasin
+  ⧗:C̵,rows,rowin ⧗:rowin #-1# ᛖ ‹not› ⧗:hasin ‹not› ⋎ ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,rows2
+  ⧗:C̵,rows2,rowout ‹lhas› ⧖:C,hasout
+  ⧗:C̵,f,tok,rowout ⧗:rowout #-1# ᛖ ‹not› ⧗:hasout ‹not› ⋎ ⋔ ⦃ ‹outrow› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
   ⍝ every variable of the outputs must be fixed by an input
   ⧗:C̵,tvo ‹llen› ⧖:C,n
   ⧗:C̵,f,tok,tv,tvo ○ ⧗:n
@@ -621,13 +832,302 @@
   ⦄
   ⧖:C,f,tok,tv,tvo,j,n
   ⧗:C̵,sig ‹cshape› ⧖:C,shp
-  ⧗:C̵,f #9# ⧗:i ‹vset› ⧗:f #10# ⧗:shp ‹vset›
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cgeneric1› ⸫
+  ⧗:C̵,f #9# ⧗:i ‹vset› ⧗:f #10# ⧗:shp ‹vset› ⧖:C
+  ○ ⧗:qy ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:qyn
+  ⧗:C̵,f #12# ⧗:qyn ‹vset› ⧗:f #13# ⧗:qsigs ‹vset› ⧗:f #14# ⧗:rows2 ‹vset› ⧗:f #15# ⧗:rowin ‹vset› ⧗:f #16# ⧗:rowout ‹vset›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧⟩ ‹cgeneric1› ⸫
+⍝ ‹qsigsof› C sig tok: for each input of signature node sig, its quotation type's [ins outs] or −1;
+⍝ the rows of the quotation types; whether there are any
+⦃
+  ⧖:C,sig,tok
+  ⧗:C̵,sig #3# ‹nd› ⧖:C,nin
+  ⧗:C̵ ‹lnew0› ⧖:C,qs ⧗:C̵ ‹lnew0› ⧖:C,rows
+  ⍝ the loop carries [C c tok qs rows qy j nin]
+  ⧗:C̵ ⧗:sig #5# ⊞ ⧗:tok,qs,rows ⊕ ○ ⧗:nin
+  ⥀ ⦃
+    ⧖:C,c,tok,qs,rows,qy,j,nin
+    ⧗:C̵,c,tok,qs,rows,qy,j,nin ⧗:j ⧗:nin ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹qsigs1› ⊕ ⦄
+  ⦄
+  ⧖:C,c,tok,qs,rows,qy,j,nin ⧗:C̵,qs,rows,qy
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ŧ⟩ ‹qsigsof› ⸫
+⦃
+  ⧖:C,c,tok,qs,rows,qy,j,nin
+  ⧗:C̵,c △ ‹nd› ‹tabs› ⧖:C,bt
+  ⧗:C̵,bt #11# #10216# ‹tis1› ⧖:C,isq
+  ⧗:C̵,c,tok,qs,rows,qy ⧗:isq ⋔ ⦃ ‹qsigs2› ⦄ ⦃ ⧖:C,cc,tk,q,r,y ⧗:C̵,q #-1# ‹lpush› ⧖:C,q2 ⧗:C̵,q2,r,y ⦄ ⁼ ⧖:C,qs2,rows2,qy2
+  ⧗:C̵,c #2# ‹nd› ⧖:C,sz
+  ⧗:C̵ ⧗:c ⧗:sz ⊞ ⧗:tok,qs2,rows2,qy2 ⧗:j △ ⊞ ⧗:nin
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ŧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ŧ ℤ ℤ⟩ ‹qsigs1› ⸫
+⦃
+  ⧖:C,c,tok,qs,rows,qy
+  ⧗:C̵,c #3# ‹nd› ⧖:C,np
+  ⧗:C̵ ⧗:c #4# ⊞ ⧗:np ⊞ ○ ‹sigtypes› ⧖:C,qi,qo,a,b,d,e
+  ⧗:C̵,qi,qo ‹pair› ⧖:C,qe
+  ⧗:C̵,qs,qe ‹lpush› ⧖:C,qs2
+  ⍝ a quotation type keeps its row on both sides
+  ⧗:C̵,qi ‹rowhead› ⧖:C,r1 ⧗:C̵,qo ‹rowhead› ⧖:C,r2
+  ⧗:C̵ ⧗:r1 ⧗:r2 ᛖ ⧗:tok #28# ‹cfailunless› ⧖:C
+  ⧗:C̵,rows,r1 ‹lhas› ⧖:C,has
+  ⧗:C̵,rows,r1 ⧗:r1 #-1# ᛖ ‹not› ⧗:has ‹not› ⋎ ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,rows2
+  ⧗:C̵,qs2,rows2 ⦶
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ŧ⟩ ‹qsigs2› ⸫
+⍝ ‹rowsfirst› C ts tok: no row variable after the first type
+⦃
+  ⧖:C,ts,tok
+  ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵,ts,tok △ ⧗:n
+  ⥀ ⦃
+    ⧖:C,ts,tok,j,n
+    ⧗:C̵,ts,tok,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,ts,tok,j,n ⧗:C̵,ts,j ‹lget› ‹rowof› ⧖:C,r ⧗:C̵ ⧗:r #-1# ᛖ ⧗:tok #29# ‹cfailunless› ⧖:C ⧗:C̵,ts,tok ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹rowsfirst› ⸫
+⦃
+  ⧖:C,qs,tok
+  ⧗:C̵,qs ‹llen› ⧖:C,n
+  ⧗:C̵,qs,tok ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,qs,tok,j,n
+    ⧗:C̵,qs,tok,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,qs,tok,j,n ⧗:C̵,qs,j ‹lget› ⧖:C,e
+        ⧗:C̵,e,tok ⧗:e #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹rowsfirste› ⦄ ⁼ ⧖:C
+        ⧗:C̵,qs,tok ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹rowsfirstq› ⸫
+⦃ ⧖:C,e,tok ⧗:C̵,e ○ ‹lget› ⧖:C,a ⧗:C̵,a,tok ‹rowsfirst› ⧗:e △ ‹lget› ⧖:C,b ⧗:C̵,b,tok ‹rowsfirst› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹rowsfirste› ⸫
 ⦃
   ⧖:C,f,tok,v
   ⧗:C̵,f ‹rd› ⧖:C,name
-  ⧗:C̵,tok ‹cerr› ⧗:v ᚢ $ appears only in the outputs of $ ⎙̵ ⧗:name ‹spr› $; every type variable must be fixed by an input (§9.4)$ ⎙̵ ‹die›
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹outvar› ⸫
+  ⧗:C̵,tok ‹cerr› ⧗:v ᚢ $ appears only in the outputs of $ ⎙̵ ⧗:name ‹spr› $; every row variable must be fixed by an input (§9.5)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹outrow› ⸫
+
+⍝ ‹tbnew› C: 8 free slots for α … θ
+⦃ ⧖:C ⧗:C̵ ‹lbeg› ⧖:C,b ⧗:C̵,b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tbnew› ⸫
+⍝ ‹cinstance› C f S tok: a call of generic f on the values on top of S: the instance's record,
+⍝ made and queued for checking (register 57) the first time. Plain arguments fix the type
+⍝ variables; each quotation argument's effect fixes its row variable (§9.4, §9.5)
+⦃
+  ⧖:C,f,S,tok
+  ⧗:C̵,f △ ‹vf› ‹rowtail› ⧖:C,fixed
+  ⧗:C̵,fixed ‹llen› ⧖:C,k ⧗:C̵,S ‹llen› ⧖:C,n
+  ⍝ too few values: ‹apply› reports it
+  ⧗:C̵,f,S,tok,fixed,k ⧗:n ⧗:k ≶ ⋔ ⦃ ‹cinstance1› ⦄ ⁼ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cinstance› ⸫
+⦃
+  ⧖:C,f,S,tok,fixed,k
+  ⧗:C̵,S,k ‹toptys› ⧖:C,xs
+  ⧗:C̵,f ‹rd› ⧖:C,nm
+  ⧗:C̵ ‹tbnew› ⧖:C,b
+  ⍝ plain arguments fix type variables; a quotation parameter needs a quotation
+  ⧗:C̵,fixed,xs,b,nm,tok ○ ⧗:k
+  ⥀ ⦃
+    ⧖:C,fixed,xs,b,nm,tok,j,k
+    ⧗:C̵,fixed,xs,b,nm,tok,j,k ⧗:j ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹cplain1› ⊕ ⦄
+  ⦄
+  ⧖:C,fixed,xs,b,nm,tok,j,k
+  ⧗:C̵ ‹lbeg› ⧖:C,rb ⧗:C̵,rb #-1# ‹ladd› ⧗:rb #-1# ‹ladd› ⧖:C
+  ⧗:C̵,S ‹llen› ⧖:C,ns ⧗:C̵,S ○ ⧗:ns ⧗:k ⊟ ‹lslice› ⧖:C,below
+  ⧗:C̵,f #15# ‹vf› ⧖:C,rowin
+  ○ ⧗:rowin #-1# ᛖ ⋔ ∅ ⦃ ⌁ △ ⦄ ⁼ ⧖:off
+  ⧗:C̵,f #13# ‹vf› ⧖:C,qsigs
+  ⧗:C̵,fixed,xs,b,rb,nm,tok,below,qsigs,off ○ ⧗:k
+  ⥀ ⦃
+    ⧖:C,fixed,xs,b,rb,nm,tok,below,qsigs,off,j,k
+    ⧗:C̵,fixed,xs,b,rb,nm,tok,below,qsigs,off,j,k ⧗:j ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹cquote1› ⊕ ⦄
+  ⦄
+  ⧖:C,fixed,xs,b,rb,nm,tok,below,qsigs,off,j,k
+  ⍝ every type variable and the heading row must now be fixed
+  ⧗:C̵,f #8# ‹vf› ⧖:C,vs
+  ⧗:C̵,vs ‹llen› ⧖:C,nv
+  ⧗:C̵,f,tok,xs,vs,b ○ ⧗:nv
+  ⥀ ⦃
+    ⧖:C,f,tok,xs,vs,b,j,n
+    ⧗:C̵,f,tok,xs,vs,b,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,f,tok,xs,vs,b,j,n ⧗:C̵,vs,j ‹lget› ⧖:C,v ⧗:C̵,b ⧗:v #945# ⊟ ‹lget› ⧖:C,w
+        ⧗:C̵,f,tok,xs,v ⧗:w #-1# ᛖ ⋔ ⦃ ‹noinfer› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+        ⧗:C̵,f,tok,xs,vs,b ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,f,tok,xs,vs,b,j,n
+  ⧗:C̵,f,tok,rb,rowin ⧗:rowin #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹rowfixed› ⦄ ⁼ ⧖:C
+  ⍝ the instance's name: the types, rows and quotations it was made for
+  ⧗:C̵,f,b,rb,xs,fixed ‹instkey› ⧖:C,key
+  ⧗:C̵,tok △ ‹tf› ⧖:C,ln ⧗:C̵,tok #2# ‹tf› ⧖:C,cl
+  ⧗:C̵,key ‹fnfind› ⧖:C,old
+  ⧗:C̵,f,b,rb,xs,fixed,key,ln,cl,old ⧗:old #-1# ᛖ ⋔ ⦃ ‹cinstmake› ⦄ ⦃ ⧖:C,f,b,rb,xs,fixed,key,ln,cl,old ⧗:C̵,old ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cinstance1› ⸫
+⦃
+  ⧖:C,fixed,xs,b,nm,tok,j,k
+  ⧗:C̵,fixed,j ‹lget› ⧖:C,d ⧗:C̵,xs,j ‹lget› ⧖:C,x
+  ⧗:C̵,d ‹shead› ⧖:C,dh ⧗:C̵,x ‹shead› ⧖:C,xh
+  ⍝ 0 a plain parameter, 1 a quotation for a quotation parameter, 2 something else for one
+  ○ ⧗:dh #10216# ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:dh #10216# ᛖ ⧗:xh #10627# ᛖ ⋎ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:kk
+  ⧗:C̵,d,x,b,nm,tok,j ⧗:kk ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⧖:C,d,x,b,nm,tok,j ⧗:C̵,d,x,b ‹tbind1› ⦄
+    ⦃ △ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:C,d,x,b,nm,tok,j ⧗:C̵,d,x,nm,tok,j ‹notqarg› ⦄ ⁼ ⦄ ⁼ ⧖:C
+  ⧗:C̵,fixed,xs,b,nm,tok ⧗:j △ ⊞ ⧗:k
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cplain1› ⸫
+⦃
+  ⧖:C,d,x,nm,tok,j
+  ⧗:C̵,tok ‹cerr› $argument $ ⎙̵ ⧗:j △ ⊞ ᛁ $ of $ ⎙̵ ⧗:nm ‹spr› $ is a quotation $ ⎙̵ ⧗:d ‹spr› $, found $ ⎙̵ ⧗:x ‹spr› $ (§9.5)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹notqarg› ⸫
+⦃
+  ⧖:C,fixed,xs,b,rb,nm,tok,below,qsigs,off,j,k
+  ⧗:C̵,fixed,j ‹lget› ‹shead› ⧖:C,dh
+  ⧗:C̵,xs,b,rb,nm,tok,below,qsigs,off,j ⧗:dh #10216# ᛖ ⋔ ⦃ ‹cquote2› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,fixed,xs,b,rb,nm,tok,below,qsigs,off ⧗:j △ ⊞ ⧗:k
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cquote1› ⸫
+⦃
+  ⧖:C,xs,b,rb,nm,tok,below,qsigs,off,j
+  ⧗:C̵,xs,j ‹lget› ⧖:C,x
+  ⍝ the quotation signatures count the row variable heading the inputs
+  ⧗:C̵,qsigs ⧗:j ⧗:off ⊞ ‹lget› ⧖:C,qs
+  ⧗:C̵,nm,x,qs,below,b,rb,tok ‹qmatch›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cquote2› ⸫
+⦃
+  ⧖:C,f,tok,rb,rowin
+  ⧗:C̵,rb ⧗:rowin ‹rowslot› ‹lget› ⧖:C,w
+  ⧗:C̵,f,tok,rowin ⧗:w #-1# ᛖ ⋔ ⦃ ‹rownoinfer› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹rowfixed› ⸫
+⦃
+  ⧖:C,f,tok,v
+  ⧗:C̵,f ‹rd› ⧖:C,name
+  ⧗:C̵,tok ‹cerr› $cannot infer $ ⎙̵ ⧗:v ᚢ $ for $ ⎙̵ ⧗:name ‹spr› $: no quotation argument fixes it (§9.5)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹rownoinfer› ⸫
+⍝ ‹instkey› C f b rb xs fixed: ᚠ[the bound types, (each bound row), the quotations]
+⦃
+  ⧖:C,f,b,rb,xs,fixed
+  ⧗:C̵,f ‹rd› ⧖:C,name
+  ⧗:C̵,f #8# ‹vf› ⧖:C,vs ⧗:C̵,f #14# ‹vf› ⧖:C,rows
+  ⧗:C̵,vs ‹llen› ⧖:C,nv ⧗:C̵,rows ‹llen› ⧖:C,nr ⧗:C̵,fixed ‹llen› ⧖:C,k
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:C̵,e,name ‹sapp› ⧗:e #91# ‹scp›
+  ⍝ the loops carry [C e … first]: first is ⦶ until a part is written
+  ⧗:e,vs,b ○ ⧗:nv ⦶
+  ⥀ ⦃
+    ⧖:C,e,vs,b,j,n,first
+    ⧗:C̵,e,vs,b,j,n,first ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,e,vs,b,j,n,first ⧗:C̵,e ⧗:first ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:ee ⧗:ee #32# ‹scp› ⦄ ⁼
+        ⧗:vs,j ‹lget› ⧖:C,v ⧗:C̵,b ⧗:v #945# ⊟ ‹lget› ⧖:C,t ⧗:C̵,e,t ‹scp›
+        ⧗:e,vs,b ⧗:j △ ⊞ ⧗:n ⊕ ⊕ ⦄
+  ⦄
+  ⧖:C,e,vs,b,j,n,first
+  ⧗:C̵,e,rows,rb ○ ⧗:nr,first
+  ⥀ ⦃
+    ⧖:C,e,rows,rb,j,n,first
+    ⧗:C̵,e,rows,rb,j,n,first ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹instkeyrow› ⊕ ⦄
+  ⦄
+  ⧖:C,e,rows,rb,j,n,first
+  ⧗:C̵,e,fixed,xs ○ ⧗:k,first
+  ⥀ ⦃
+    ⧖:C,e,fixed,xs,j,n,first
+    ⧗:C̵,e,fixed,xs,j,n,first ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹instkeyq› ⊕ ⦄
+  ⦄
+  ⧖:C,e,fixed,xs,j,n,first
+  ⧗:C̵,e #93# ‹scp› ⧗:e ‹send›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹instkey› ⸫
+⦃
+  ⧖:C,e,rows,rb,j,n,first
+  ⧗:C̵,rows,j ‹lget› ⧖:C,rv
+  ⧗:C̵,rb ⧗:rv ‹rowslot› ‹lget› ⧖:C,rl
+  ⧗:C̵,e,rl,first ⧗:rl #-1# ᛖ ⋔ ⦃ ⧖:C,e,rl,first ⧗:C̵,first ⦄ ⦃ ‹instkeyrow1› ⦄ ⁼ ⧖:C,first2
+  ⧗:C̵,e,rows,rb ⧗:j △ ⊞ ⧗:n,first2
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ŧ⟩ ‹instkeyrow› ⸫
+⦃
+  ⧖:C,e,rl,first
+  ⧗:C̵,e ⧗:first ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:ee ⧗:ee #32# ‹scp› ⦄ ⁼
+  ⧗:e #40# ‹scp› ⧗:e,rl ‹sappj› ⧗:e #41# ‹scp› ⊕
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ŧ⟩ ‹instkeyrow1› ⸫
+⦃
+  ⧖:C,e,fixed,xs,j,n,first
+  ⧗:C̵,fixed,j ‹lget› ‹shead› ⧖:C,dh
+  ⧗:C̵,xs,j ‹lget› ⧖:C,x
+  ⧗:C̵,e,x,first ⧗:dh #10216# ᛖ ⋔ ⦃ ‹instkeyq1› ⦄ ⦃ ⧖:C,e,x,first ⧗:C̵,first ⦄ ⁼ ⧖:C,first2
+  ⧗:C̵,e,fixed,xs ⧗:j △ ⊞ ⧗:n,first2
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ŧ⟩ ‹instkeyq› ⸫
+⦃
+  ⧖:C,e,x,first
+  ⧗:C̵,e ⧗:first ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:ee ⧗:ee #32# ‹scp› ⦄ ⁼
+  ⧗:e,x ‹sapp› ⊕
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ŧ⟩ ‹instkeyq1› ⸫
+⍝ ‹cinstmake› …: a new instance's record, registered and queued for checking
+⦃
+  ⧖:C,f,b,rb,xs,fixed,key,ln,cl,old
+  ⧗:C̵ %%{key}, first called at {#ln}:{#cl}%% ⧖:C,at
+  ⧗:C̵,f #12# ‹vf› ⧖:C,qy
+  ⧗:C̵,f,b,rb,xs,fixed,key,at ⧗:qy ○ ᛖ ⋔ ⦃ ⧖:C,f,b,rb,xs,fixed,key,at ⧗:C̵,f,b,at ‹instrec› ⦄ ⦃ ‹qinstrec› ⦄ ⁼ ⧖:C,g
+  ⧗:C̵ #7# ⧗:g ‹regpush› ⧖:C
+  ⧗:C̵ #57# ⧗:g ‹regpush› ⧖:C
+  ⧗:C̵,g
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cinstmake› ⸫
+⍝ ‹lrep› C v n: the list of n copies of v
+⦃
+  ⧖:C,v,n
+  ⧗:C̵ ‹lnew0› ⧖:C,L
+  ⧗:C̵,L,v ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,L,v,j,n
+    ⧗:C̵,L,v,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:C,L,v,j,n ⧗:C̵,L,v ‹lpush› ⧖:C,L2 ⧗:C̵,L2,v ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,L,v,j,n ⧗:C̵,L
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹lrep› ⸫
+⍝ ‹qinstrec› C f b rb xs fixed key at: the record of an instance that takes quotations or rows:
+⍝ its rows expanded, its quotation parameters replaced by the quotations
+⦃
+  ⧖:C,f,b,rb,xs,fixed,key,at
+  ⧗:C̵ ‹lnew0› ⧖:C,gi0
+  ⧗:C̵,f #15# ‹vf› ⧖:C,rowin
+  ⧗:C̵,gi0,rb,rowin ⧗:rowin #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹qrowcat› ⦄ ⁼ ⧖:C,gi1
+  ⧗:C̵,fixed ‹llen› ⧖:C,k
+  ⧗:C̵,gi1,fixed,xs,b ○ ⧗:k
+  ⥀ ⦃
+    ⧖:C,gi,fixed,xs,b,j,k
+    ⧗:C̵,gi,fixed,xs,b,j,k ⧗:j ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,gi,fixed,xs,b,j,k ⧗:C̵,fixed,j ‹lget› ⧖:C,d ⧗:C̵,d ‹shead› ⧖:C,dh
+        ⧗:C̵,xs,j,d,b ⧗:dh #10216# ᛖ ⋔ ⦃ ⧖:C,xx,jj,dd,bb ⧗:C̵,xx,jj ‹lget› ⦄ ⦃ ⧖:C,xx,jj,dd,bb ⧗:C̵,dd,bb ‹tsubst› ⦄ ⁼ ⧖:C,t
+        ⧗:C̵,gi,t ‹lpush› ⧖:C,gi2 ⧗:C̵,gi2,fixed,xs,b ⧗:j △ ⊞ ⧗:k ⊕ ⦄
+  ⦄
+  ⧖:C,gi,fixed,xs,b,j,k
+  ⧗:C̵ ‹lnew0› ⧖:C,go0
+  ⧗:C̵,f #16# ‹vf› ⧖:C,rowout
+  ⧗:C̵,go0,rb,rowout ⧗:rowout #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹qrowcat› ⦄ ⁼ ⧖:C,go1
+  ⧗:C̵,f #2# ‹vf› ‹rowtail› ⧖:C,outs
+  ⧗:C̵,outs,b ‹tsubstl› ⧖:C,os ⧗:C̵,go1,os ‹lcat› ⧖:C,go
+  ⧗:C̵,gi ‹llen› ⧖:C,ni ⧗:C̵,go ‹llen› ⧖:C,no
+  ⧗:C̵ #16# ‹reg› ⧖:C,neutral
+  ⧗:C̵ ○ ⧗:ni ‹lrep› ⧖:C,iev ⧗:C̵,neutral,ni ‹lrep› ⧖:C,ich
+  ⧗:C̵ ○ ⧗:no ‹lrep› ⧖:C,oev ⧗:C̵,neutral,no ‹lrep› ⧖:C,och
+  ⧗:C̵,gi,go ‹effstr› ⧖:C,shp
+  ⧗:C̵ ‹lnew0› ⧖:C,none
+  ⧗:C̵,f #9# ‹vf› ⧖:C,it
+  ⧗:C̵ ‹len› ⧖:C,g
+  ⧗:C̵ ⧗:key ⍆̵ ⧗:gi ⍆̵ ⧗:go ⍆̵ ○ ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:none ⍆̵ ⧗:it ⍆̵ ⧗:shp ⍆̵ ⧗:at ⍆̵
+  ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧗:g
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qinstrec› ⸫
+⦃ ⧖:C,g0,rb,r ⧗:C̵,rb ⧗:r ‹rowslot› ‹lget› ⧖:C,rl ⧗:C̵,g0,rl ‹lcat› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qrowcat› ⸫
+⍝ ‹crecord› C op f: call op makes instance f, seen from the function being checked
+⦃
+  ⧖:C,op,f
+  ⧗:C̵ #55# ‹reg› ⧖:C,encl
+  ⧗:C̵ ‹lbeg› ⧖:C,e ⧗:C̵,e,encl ‹ladd› ⧗:e,op ‹ladd› ⧗:e,f ‹ladd› ⧖:C
+  ⧗:C̵ #59# ⧗:e ‹regpush›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹crecord› ⸫
+⍝ ‹crecall› C op: the instance call op makes from the function being emitted (register 55)
+⦃
+  ⧖:C,op
+  ⧗:C̵ #55# ‹reg› ⧖:C,encl
+  ⧗:C̵ #59# ‹reg› ⧖:C,L
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,L,op,encl ○ ⧗:n #-1#
+  ⥀ ⦃
+    ⧖:C,L,op,encl,j,n,found
+    ⧗:C̵,L,op,encl,j,n,found ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,op,encl,j,n,found ⧗:C̵,L,j ‹lget› ⧖:C,e
+        ⧗:C̵,e ○ ‹lget› ⧖:C,ee ⧗:C̵,e △ ‹lget› ⧖:C,eo ⧗:C̵,e #2# ‹lget› ⧖:C,ef
+        ⧗:C̵,L,op,encl ⧗:j △ ⊞ ⧗:n ⧗:found ⧗:ef ⧗:ee ⧗:encl ᛖ ⧗:eo ⧗:op ᛖ ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⊕ ⦄
+  ⦄
+  ⧖:C,L,op,encl,j,n,found ⧗:C̵,found
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹crecall› ⸫
 
 ⍝ ‹pjoin› C L sep: print a list of strings joined by sep (0 a space, 1 ", ")
 ⦃
@@ -860,6 +1360,8 @@
   ⍿⁰ #25# ᛖ ⋔ ⦃ $the entry point ᛟ has signature ⟨⊸⟩ or ⟨⊸ ◌⟩ (§9)$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #26# ᛖ ⋔ ⦃ $an FFI binding cannot be generic (§9.4)$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #27# ᛖ ⋔ ⦃ $a reversible function cannot be generic (§9.4)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #28# ᛖ ⋔ ⦃ $a quotation type has the same row variable on both sides, or none: ⟨ρ … ⊸ ρ …⟩ (§9.5)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #29# ᛖ ⋔ ⦃ $a row variable stands for the bottom of an effect, so it comes first: ⟨ρ … ⊸ ρ …⟩ (§9.5)$ ⎙̵ ⦄ ∅ ⁼
   ⌁
 ⦄ ⟨ℤ ⊸⟩ ‹pmsg› ⸫
 
@@ -2010,6 +2512,9 @@
   ⧗:C̵,op ‹resolve› ⧖:C,f0
   ⧗:C̵,f0 ‹isgeneric› ⧖:C,gen
   ⧗:C̵,f0,S,tok ⧗:gen ⋔ ⦃ ‹cinstance› ⦄ ⦃ ⧖:C,ff,SS,tk ⧗:C̵,ff ⦄ ⁼ ⧖:C,f
+  ⍝ which instance this call makes, as seen from the function being checked (for the emitter)
+  ⧗:C̵,f0 #12# ‹vf› ⧖:C,qy
+  ⧗:C̵,op,f ⧗:qy ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹crecord› ⦄ ⁼ ⧖:C
   ⧗:C̵,tok #2# ‹tmark› ⧖:C,fut
   ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs ‹llen› ⧖:C,no
   ⧗:C̵ ⧗:fut ⧗:no ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ‹not› ⧗:tok #11# ‹cfailunless›
@@ -2020,10 +2525,15 @@
 
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
+  ⧗:C̵,op ‹ndt› ⧖:C,tok0 ⧗:C̵,tok0 ‹tc0› ⧖:C,x0
+  ⧗:C̵,op,S,strand,dead,depth,locks,ind,prev,to ⧗:x0 #9038# ᛖ ⋔ ⦃ ‹c_apply› ⦄ ⦃ ‹c_op1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_op› ⸫
+⦃
+  ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
   ⧗:C̵,op,S,strand,depth,locks ‹glyph› ⧖:C,S2,strand2
   ⧗:C̵,op ‹ndt› ⧖:C,tok ⧗:C̵,tok ‹tc0› ⧖:C,x
   ⧗:C̵,S2,strand2 ⧗:dead ⧗:x #8623# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ○ ○ ○
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_op› ⸫
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_op1› ⸫
 
 ⍝ x ⦃pred⦄ ⊨ (§3.1 rule 4)
 ⦃
@@ -2045,7 +2555,7 @@
   ⧗:C̵,rt,atok,depth ‹vnew› ⧖:C,res
   ⧗:C̵,x,res ‹vannot› ⧗:res #6# ○ ‹vset›
   ⧗:S2,res ‹lpush› ⧗:strand,dead △ #5# ○
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_quote› ⸫
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_attest› ⸫
 
 ⍝ ⋔ and ⋔⇋
 ⦃
@@ -2291,7 +2801,7 @@
 ⍝ ‹btrace› C ind tok lab larg S: the trace line after an op
 ⦃
   ⧖:C,ind,tok,lab,larg,S
-  ⧗:C̵,ind,tok,S,lab,larg ⧗:lab ○ ᛖ ⋔ ⦃ ⌁ ⌁ ‹trace› ⦄ ⦃ ⍿¹ #9# ᛖ ⋔ ⦃ ‹trshape› ⦄ ⦃ ‹trfix› ⦄ ⁼ ⦄ ⁼
+  ⧗:C̵,ind,tok,S,lab,larg ⧗:lab ○ ᛖ ⋔ ⦃ ⌁ ⌁ ‹trace› ⦄ ⦃ ⍿¹ #9# ᛖ ⋔ ⦃ ‹trshape› ⦄ ⦃ ⍿¹ #10# #11# ᛦ ⋔ ⦃ ‹trquote› ⦄ ⦃ ‹trfix› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹btrace› ⸫
 ⦃
   ⧖:C,ind,tok,S,lab,larg
@@ -2469,7 +2979,10 @@
   ⧗:C̵,t ‹tbase› ⧖:C,b
   ⧗:C̵,b ‹slen› ⧖:C,bl ⧗:C̵,b ‹shead› ⧖:C,bh
   ⧗:C̵,b ‹ptfind› ⧖:C,rep
-  ⧗:C̵,tok,b ⧗:bl ○ ᛖ ‹not› ⧗:bh ‹isbasecp› ‹not› ⋎ ⧗:rep #-1# ᛖ ⋎ ⧗:bh ‹istvar› ‹not› ⋎ ⋔
+  ⧗:C̵,t ‹shead› ⧖:C,h0
+  ⧗:C̵,tok,t ⧗:outputs △ ᛖ ⧗:h0 #10216# ᛖ ⋎ ⋔
+    ⦃ ⧖:tk,tt ⧗:tk ‹cerr› $a function cannot return a quotation $ ⎙̵ ⧗:tt ‹spr› $ (§9.5)$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,tok,b ⧗:bl ○ ᛖ ‹not› ⧗:bh ‹isbasecp› ‹not› ⋎ ⧗:rep #-1# ᛖ ⋎ ⧗:bh ‹istvar› ‹not› ⋎ ⧗:bh ‹isrow› ‹not› ⋎ ⧗:bh #10216# ᛖ ‹not› ⋎ ⋔
     ⦃ ⧖:tk,bb ⧗:tk ‹cerr› $unknown type $ ⎙̵ ⧗:bb ‹spr› $ (Ogham type names must be declared with ⚛, §8.6)$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
   ⧗:C̵,t ‹shead› ⧖:C,h
   ⧗:C̵,tok,t ⧗:outputs △ ᛖ ⧗:h #10199# ᛖ ⧗:h #10198# ᛖ ⋏ ⋎ ⋔
@@ -2512,6 +3025,7 @@
   ⧖:C,it,f
   ⧗:C̵,it ‹ndt› ⧖:C,tok
   ⧗:C̵,f ‹rd› ⧖:C,name
+  ⧗:C̵ #55# ⧗:name ‹wr› ⧖:C
   ⧗:C̵,f #2# ‹vf› ⧖:C,outs
   ⧗:C̵,outs ‹llen› ⧖:C,no
   ⧗:C̵,outs ○ ‹lget› ‹shead› ⧖:C,oh
@@ -2695,7 +3209,7 @@
   #10199# #643# ‹str2› ⧖:C,s ⧗:C̵ #18# ⧗:s ‹wr›
   #10198# #643# ‹str2› ⧖:C,s ⧗:C̵ #19# ⧗:s ‹wr›
   #9676# #120121# ‹str2› ⧖:C,s ⧗:C̵ #20# ⧗:s ‹wr›
-  ‹lnew0› ⧖:C,e ⧗:C̵ #7# ⧗:e ‹wr› #8# ⧗:e ‹wr› #9# ⧗:e ‹wr› #57# ⧗:e ‹wr› #56# #-1# ‹wr›
+  ‹lnew0› ⧖:C,e ⧗:C̵ #7# ⧗:e ‹wr› #8# ⧗:e ‹wr› #9# ⧗:e ‹wr› #57# ⧗:e ‹wr› #58# ⧗:e ‹wr› #59# ⧗:e ‹wr› #56# #-1# ‹wr›
 ⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cinit› ⸫
 
 ⍝ ‹ccopyst› st C: copy the tree into the heap (register 5: its base; 24, 25: the tangled items)

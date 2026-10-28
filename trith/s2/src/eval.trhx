@@ -136,14 +136,21 @@
   ⦄
   ⧖:C,i,to,seen,ok ⧗:C̵,ok
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evpureops› ⸫
-⦃ ⧖:C,i,to,seen,ok ⧗:C̵,i,seen ‹evpureop› ⧖:C,p ⧗:C̵,i ‹nextn› ⧖:C,nx ⧗:C̵,nx,to,seen,p ⊕ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ⟩ ‹evpure2› ⸫
+⍝ quotations are beyond s1's evaluator (a quoted block before ⊨ is its predicate)
+⦃
+  ⧖:C,i,to,seen,ok
+  ⧗:C̵,i,seen ‹evpureop› ⧖:C,p0
+  ⧗:C̵,i ○ ‹nd› ⧖:C,k ⧗:C̵,i,to ‹isattest› ⧖:C,at
+  ⧗:k #7# ᛖ ⧗:at ‹not› ⋎ ‹not› ⧗:p0 ⋎ ⧖:p
+  ⧗:C̵,i ‹nextn› ⧖:C,nx ⧗:C̵,nx,to,seen,p ⊕
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ⟩ ‹evpure2› ⸫
 ⍝ ‹evpureop› C op seen: one op is pure
 ⦃
   ⧖:C,op,seen
   ⧗:C̵,op ○ ‹nd› ⧖:C,k
   ⧗:C̵,op ‹ndt› ⧖:C,tok
   ⧗:C̵,op,seen,tok,k
-  ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ⧖:o,s,t ⧗:t ‹tc0› ⧖:x ⧗:x ⧖ @any(9113,8961,10199,10198,8982,9032,9076,9030,10996,8859,8857,10204)@ ‹not› ⦄ ⦃
+  ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ⧖:o,s,t ⧗:t ‹tc0› ⧖:x ⧗:x ⧖ @any(9113,8961,10199,10198,8982,9032,9076,9030,10996,8859,8857,10204,9038)@ ‹not› ⦄ ⦃
   ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ⧖:o,s,t ⧗:t ‹tkd› #12# ᛖ ‹not› ⦄ ⦃
   ⍿⁰ #8# ᛖ ⍿¹ #3# ᛖ ⋏ ⍿¹ #15# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⊕ ⦄ ⦃
   ⍿⁰ #2# ᛖ ⍿¹ #6# ᛖ ⋏ ⋔ ⦃ ⌁ ‹evpurecall› ⦄ ⦃
@@ -297,7 +304,7 @@
 ⦃
   ⧖:C,op,S,strand,tok,role
   ⧗:C̵,op ‹eresolve› ⧖:C,f0
-  ⧗:C̵,f0,S ‹egencall› ⧖:C,f
+  ⧗:C̵,f0,S,op ‹egencall› ⧖:C,f
   ⧗:C̵,f #3# ‹vf› △ ‹vf› ⧖:C,ins
   ⧗:C̵,ins ‹llen› ⧖:C,ka
   ⧗:C̵,S,ka ‹epop› ⧖:C,S2,args

@@ -1,0 +1,5 @@
+fn ᚠ ⟨ℤ ⟨ℤ ⊸ ℤ⟩ ⊸ ℤ⟩  generic: checked for each instance (§9.4)
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  ⦃3:5⦄  ⊢ [ℤ ⦃3:5⦄]
+trith/tests/check_errors/quotation_wrong_effect.trh:3:11: error: the quotation ⦃3:5⦄ has effect ⟨ℤ ⊸ ⟩, but ᚠ wants ⟨ℤ ⊸ ℤ⟩ (§9.5)

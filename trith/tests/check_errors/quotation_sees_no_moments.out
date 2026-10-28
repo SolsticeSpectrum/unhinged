@@ -1,0 +1,5 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  ⧖  ⊢ []
+  ⦃2:24⦄  ⊢ [⦃2:24⦄]
+trith/tests/check_errors/quotation_sees_no_moments.trh:2:21: error: ⧗⁰ reads 1 moment(s) back, but only 0 are visible here (data enters a block only through the stack, §5.1)

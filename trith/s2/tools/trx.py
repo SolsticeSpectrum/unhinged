@@ -33,7 +33,7 @@ def bt(n):
 
 class Scope:
     def __init__(self, kind):
-        self.kind = kind      # 'fn', 'loop', 'face', 'prayer'
+        self.kind = kind      # 'fn', 'loop', 'face', 'prayer', 'quote'
         self.names = []       # oldest first; None for anonymous moments
         self.group = None     # for faces: the group being filled
 
@@ -86,7 +86,7 @@ def process(src):
                 elif awaiting:
                     s = Scope('face'); s.group = pending[-1]; stack.append(s)
                 else:
-                    fail(lineno, 'block in an unknown context')
+                    stack.append(Scope('quote'))  # a quotation (or ⊨'s predicate): its moments stay inside
             elif t == '⦄':
                 s = stack.pop()
                 if s.kind == 'loop':

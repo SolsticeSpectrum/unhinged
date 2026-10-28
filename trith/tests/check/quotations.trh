@@ -1,0 +1,34 @@
+⍝ quotations (§9.5): blocks as values, applied with ⍎ and passed to functions; each use is
+specialised, so a quotation costs nothing at run time ⍝
+⍝ ᚡᚠ f: apply f two times, to whatever part of the stack it works on
+⸫ ᚡᚠ ⟨ ρ ⊸ ⟨ ρ ⊸ ρ ⟩ ρ ⟩ ⦃ ⍎ ⧗⁰ ⍎ ⧗⁰ ⧖ ⦄
+⍝ ᚡᚢ x f: f on x, for an f from ℤ to ℤ
+⸫ ᚡᚢ ⟨ ℤ ⊸ ⟨ ℤ ⊸ ℤ ⟩ ℤ ⟩ ⦃ ⍎ ⦄
+⍝ ᚡᚤ a z f: f applied along the array a, starting from z, for any classical element type
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ⍴̱ ⧗̱⁰
+  ⧗² ⧗³ ⧗⁰ ○ ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖
+    ⧗¹ ⧗⁰ ⧗̱⁵ ⧗³ ⧗² △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⍿² ⍎ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄
+    ≶ ⍿¹ ⧗³ ⊞ △ ⧗⁴ ⧗³ ⧗²
+  ⦄
+  ⌁ ⌁ ⌁
+⦄ ⟨ ⟗ ⟦ α ⟧ α ⟨ α α ⊸ α ⟩ ⊸ α ⟩ ᚡᚤ ⸫
+ᚡᚥ a b: a generic function a quotation can call ⍝
+⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⧗¹ ≶ ⋔ ⦃ ⌁ ⦄ ⁼ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦄ ⟨ α α ⊸ α ⟩ ᚡᚥ ⸫
+⦄
+  ▽▽△ ⦃ ○△ ⊞ ⦄ ᚡᚠ ⎙
+  ⎙ ᚡᚢ ⦃ ⊠ ⧗⁰ ⧗⁰ ⧖ ⦄ △△
+  ▽△ ○△ ⦃ ⊠ ⦄ ⍎ ⎙
+  a quotation in a moment, applied twice; one that swaps, passed to ᚡᚠ ⍝
+  ⦃ △▽△ ⎙ ⦄ ⧖ ⧗⁰ ⍎ ⧗⁰ ⍎
+  ⎙ ⎙ ᚡᚠ ⦃ ⧗⁰ ⧗¹ ⧖ ⧖ ⦄ ▽△ △
+  ⍝ folds: a sum, a maximum through a generic function, a product of reals
+  ⌁̵ ⎙ ᚡᚤ ⦃ ⊞ ⦄ ○ ⟗ ⟦ ▽▽△ △ △△ △ ○△ ⟧
+  ⟦ ○△ △ △△ △ ▽▽△ ⟧ ⟗ ○ ⦃ ᚡᚥ ⦄ ᚡᚤ ⎙ ⌁̵
+  ⌁̵ ⎙ ᚡᚤ ⦃ ⊠ ⦄ △⁝○ ⟗ ⟦ △⁝▽ ▽△⁝○ △⁝△ ⟧
+  ⍝ quotations inside quotations
+  ⎙ ⍎ ⦃ ᚡᚠ ⦃ ⊠ ▽△ ⦄ ⦄ ○△
+⦄ ⟨ ⊸ ⟩ ᛟ ⸫ ⸱
+

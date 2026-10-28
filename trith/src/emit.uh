@@ -86,6 +86,8 @@
     "ptr" ⇄ ¿
   ⌫ ¿
   t EM_PARTICLES ∈ ⤴ ↵ EM_PARTICLES t ⌈ ⌉ ⟪ em_llty ⟫ ⇄ ¿ ⌫ ¿
+  ⍝ a quotation is known statically; it travels as a byte the optimiser drops (§9.5)
+  t ⟪ ck_head ⟫ "⦃" ≡ ⤴ ↵ "i8" ⇄ ¿ ⌫ ¿
   ∅ ⇄ ¿
 ↦ t ↦ em_llty ¿
 
@@ -1113,6 +1115,46 @@
   g ⇄ ¿
 ↦ E ↦ f ↦ S ↦ em_instance ¿
 
+⍝ does a signature take quotations or rows (§9.5)?
+ƒ
+  0 → i ¿
+  ins ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ins i ⌈ ⌉ ⟪ ck_head ⟫ "⟨" ≡ ⤴ ↵ ⊤ ⇄ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ins ⟪ ck_row_head ⟫ ∅ ≢ outs ⟪ ck_row_head ⟫ ∅ ≢ ∨ ⇄ ¿
+↦ ins ↦ outs ↦ em_is_quotey ¿
+
+⍝ the instance g the checker made for a call of f (§9.5): its emit record, queued the first time
+ƒ
+  g "name" ⌈ ⌉ → key ¿
+  E "fns" ⌈ ⌉ → fns ¿
+  key fns ∈ ⤴ ↵ fns key ⌈ ⌉ ⇄ ¿ ⌫ ¿
+  g "ins" ⌈ ⌉ → gi ¿
+  g "outs" ⌈ ⌉ → go ¿
+  ❴"ins": gi, "outs": go, "rev": ⊥, "name": key❵ → h ¿
+  g "insEv" ⌈ ⌉ → x0 ¿
+  g "insCh" ⌈ ⌉ → x1 ¿
+  g "outsEv" ⌈ ⌉ → x2 ¿
+  g "outsCh" ⌈ ⌉ → x3 ¿
+  h "insEv" ← x0 ¿
+  h "insCh" ← x1 ¿
+  h "outsEv" ← x2 ¿
+  h "outsCh" ← x3 ¿
+  【"@\"trith." key "\""】 ⟪ em_cat ⟫ → hsym ¿
+  h "sym" ← hsym ¿
+  fns key ← h ¿
+  E "items" ⌈ ⌉ → byn ¿
+  byn f "name" ⌈ ⌉ ⌈ ⌉ → it ¿
+  byn key ← it ¿
+  it "tok" ⌈ ⌉ → itok ¿
+  it "ops" ⌈ ⌉ → iops ¿
+  ❴"kind": "fn", "name": key, "tok": itok, "ops": iops, "rev": ⊥❵ → git ¿
+  E "insts" ⌈ ⌉ 【git h】 ⟪ .append ⟫ ¿
+  h ⇄ ¿
+↦ E ↦ f ↦ g ↦ em_inst_from ¿
+
 ⍝ Run ops on a copy of S inside its own future-call frame
 ƒ
   S ⟪ ck_copy ⟫ → S2 ¿
@@ -1223,7 +1265,15 @@
       S e ⟪ .append ⟫ ¿
     ⌫ ⤵ k "call" ≡ k "shape-call" ≡ ∨ ⤴ ↵
       E op ⟪ em_resolve ⟫ → f ¿
-      f "generic" ⌈ ⌉ ⊤ ≡ ⤴ ↵ E f S ⟪ em_instance ⟫ → f ¿ ⌫ ¿
+      f "quotey" ⌈ ⌉ ⊤ ≡ ⤴ ↵
+        ⍝ the checker recorded which instance this call makes from the function being emitted
+        op "insts" ⌈ ⌉ → im ¿
+        E "fname" ⌈ ⌉ → encl ¿
+        im encl ⌈ ⌉ → g ¿
+        E f g ⟪ em_inst_from ⟫ → f ¿
+      ⌫ ⤵ f "generic" ⌈ ⌉ ⊤ ≡ ⤴ ↵
+        E f S ⟪ em_instance ⟫ → f ¿
+      ⌫ ¿
       ⊥ → future ¿
       ⊥ → past ¿
       tok "marks" ⌈ ⌉ → ms ¿
@@ -1233,6 +1283,24 @@
       ⌫ ⤵ ↵
         E S f future ⟪ em_call ⟫ ¿
       ⌫ ¿
+    ⌫ ⤵ k "op" ≡ tok "text" ⌈ ⌉ "⍎" ≡ ∧ ⤴ ↵
+      ⍝ ⍎: the quotation's body, inlined on this stack (§9.5)
+      S ⟪ .pop ⟫ → qe ¿
+      E "quotes" ⌈ ⌉ qe "ty" ⌈ ⌉ ⌈ ⌉ → qops ¿
+      E "views" ⌈ ⌉ → vw0 ¿
+      E "views" ← 【】 ¿
+      E qops S ⟪ em_sub ⟫ → r ¿
+      E "views" ← vw0 ¿
+      E ⟪ em_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      r "stack" ⌈ ⌉ → S ¿
+      r "dead" ⌈ ⌉ → dead ¿
+    ⌫ ⤵ k "quote" ≡ ops oi ⟪ ck_is_attest ⟫ ¬ ∧ ⤴ ↵
+      ⍝ a quotation: nothing at run time
+      tok ⟪ ck_quote_type ⟫ → qt ¿
+      E "quotes" ⌈ ⌉ → qtab ¿
+      op "block" ⌈ ⌉ "ops" ⌈ ⌉ → qops ¿
+      qtab qt ← qops ¿
+      S qt "0" ∅ ⟪ em_ent ⟫ ⟪ .append ⟫ ¿
     ⌫ ⤵ k "op" ≡ ⤴ ↵
       tok "text" ⌈ ⌉ → x ¿
       tok "idx" ⌈ ⌉ → idx ¿
@@ -1676,6 +1744,7 @@
   params ", " ⟪ join ⟫ → pt ¿
   outs ⟪ em_ret_ty ⟫ → rt ¿
   it "name" ⌈ ⌉ → nm ¿
+  E "fname" ← nm ¿
   E "lines" ⌈ ⌉ 【"; " nm】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
   E "lines" ⌈ ⌉ 【"define internal " rt " " sym "(" pt ") {"】 ⟪ em_cat ⟫ ⟪ .append ⟫ ¿
   E "entry" ⟪ em_start ⟫ ¿
@@ -1888,6 +1957,8 @@
   E "lines" ← 【】 ¿
   E "views" ← 【】 ¿
   E "insts" ← 【】 ¿
+  ❴❵ → quotes ¿
+  E "quotes" ← quotes ¿
   E "globals" ← 【】 ¿
   E "cur" ← "entry" ¿
   ❴❵ → fns ¿
@@ -1917,6 +1988,7 @@
     it "sig" ⌈ ⌉ it "rev" ⌈ ⌉ it "name" ⌈ ⌉ ⟪ ck_fn_info ⟫ → f ¿
     f "ins" ⌈ ⌉ ⟪ ck_tvars ⟫ → tv ¿
     tv ⟪ len ⟫ 0 ≻ ⤴ ↵ f "generic" ← ⊤ ¿ f "tvars" ← tv ¿ ⌫ ¿
+    f "ins" ⌈ ⌉ f "outs" ⌈ ⌉ ⟪ em_is_quotey ⟫ ⤴ ↵ f "generic" ← ⊤ ¿ f "quotey" ← ⊤ ¿ ⌫ ¿
     it "name" ⌈ ⌉ → nm ¿
     【"@\"trith." nm "\""】 ⟪ em_cat ⟫ → fsym ¿
     f "sym" ← fsym ¿

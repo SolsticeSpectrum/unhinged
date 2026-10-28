@@ -1,0 +1,1 @@
+trith/tests/check_errors/quotation_returned.trh:2:23: error: a function cannot return a quotation ⟨⊸⟩ (§9.5)

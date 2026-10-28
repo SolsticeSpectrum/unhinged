@@ -47,6 +47,8 @@
   ⧗:h #10199# ᛖ ⧗:h #10198# ᛖ ⋏ ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
   ⧗:h #10214# ᛖ ⋔ ⦃ ⌁ #8# ⦄ ∅ ⁼
   ⧗:h #9676# ᛖ ⋔ ⦃ ⌁ #7# ⦄ ∅ ⁼
+  ⍝ a quotation is known statically; it travels as a byte the optimiser drops (§9.5)
+  ⧗:h #10627# ᛖ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼
   ⧗:g ⋔ ⦃ ⌁ #6# ⦄ ∅ ⁼ ⧗:f ⋔ ⦃ ⌁ #5# ⦄ ∅ ⁼ ⧗:e ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼ ⧗:d ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼
   ⧗:c ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:b ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:a ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tcode› ⸫
@@ -932,12 +934,23 @@
   ⧗:C̵,key,sym ○ ⧗:g,node,from,to ‹efnadd› ⧖:C
   ⧗:C̵,key ‹efind›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹einstnew› ⸫
-⍝ ‹egencall› C ef S: ef itself, or its instance when it is generic
+⍝ ‹egencall› C ef S op: ef itself, or its instance when it is generic; for one that takes
+⍝ quotations or rows, the instance the checker recorded for call op (§9.5)
 ⦃
-  ⧖:C,ef,S
+  ⧖:C,ef,S,op
   ⧗:C̵,ef #3# ‹vf› ‹isgeneric› ⧖:C,gen
-  ⧗:C̵,ef,S ⧗:gen ⋔ ⦃ ‹einstS› ⦄ ⦃ ⧖:C,ff,SS ⧗:C̵,ff ⦄ ⁼
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹egencall› ⸫
+  ⧗:C̵,ef #3# ‹vf› #12# ‹vf› ⧖:C,qy
+  ⍝ 0 not generic, 1 generic in type variables only, 2 taking quotations or rows
+  ○ ⧗:gen ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:qy △ ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:gk
+  ⧗:C̵,ef,S,op ⧗:gk ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⧖:C,ff,SS,oo ⧗:C̵,ff ⦄ ⦃ △ ᛖ ⋔ ⦃ ⌁ ‹einstS› ⦄ ⦃ ‹einstrec› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹egencall› ⸫
+⦃
+  ⧖:C,ef,S,op
+  ⧗:C̵,op ‹crecall› ⧖:C,g
+  ⧗:C̵,g ‹rd› ⧖:C,key
+  ⧗:C̵,key ‹efind› ⧖:C,old
+  ⧗:C̵,ef,g,key,old ⧗:old #-1# ᛖ ⋔ ⦃ ‹einstnew› ⦄ ⦃ ⧖:C,ef,g,key,old ⧗:C̵,old ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹einstrec› ⸫
 
 ⍝ ‹eresolve› C op: the emit record of the function a call node names
 ⦃ ⧖:C,op ⧗:C̵,op ‹resolve› ‹rd› ‹efind› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eresolve› ⸫
@@ -1056,7 +1069,7 @@
   ⧖:C,op,S,strand,dead,prev,to
   ⧗:C̵,op ‹ndt› ⧖:C,tok
   ⧗:C̵,op ‹eresolve› ⧖:C,f0
-  ⧗:C̵,f0,S ‹egencall› ⧖:C,f
+  ⧗:C̵,f0,S,op ‹egencall› ⧖:C,f
   ⧗:C̵,tok #2# ‹tmark› ⧖:C,fut ⧗:C̵,tok #4# ‹tmark› ⧖:C,past
   ⧗:C̵,S,f,tok,fut ⧗:past ⋔ ⦃ ⌁ ‹epast› ⦄ ⦃ ⧖:SS,ff,tk,fu ⧗:SS,ff,fu ‹ecall› ⦄ ⁼ ⧖:C,S2
   ⧗:C̵,S2,strand,dead ○
@@ -1083,13 +1096,15 @@
   ⧗:C̵,tok ‹trole› ⧖:C,role
   ⧗:C̵,S,strand,dead,tok,x,idx,role,op,to
   ⍿⁴ #10710# ᛖ ⋔ ⦃ ‹eo_bind› ⦄ ⦃
+  ⍿⁴ #9038# ᛖ ⋔ ⦃ ‹eo_apply› ⦄ ⦃
   ⍿⁴ #10711# ᛖ ⋔ ⦃ ‹eo_read› ⦄ ⦃
   ⍿⁴ #9087# ᛖ ⋔ ⦃ ‹eo_pick› ⦄ ⦃
   ⍿⁴ #10199# ᛖ ⍿⁵ #10198# ᛖ ⋏ ⋔ ⦃ ‹eo_shadow› ⦄ ⦃
   ⍿⁴ ⧖ @any(10996,8859,8857)@ ⋔ ⦃ ‹eo_psi› ⦄ ⦃
-  ⍿⁴ #8623# ᛖ ⋔ ⦃ ‹eo_fail› ⦄ ⦃ ‹eo_glyph› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ⍿⁴ #8623# ᛖ ⋔ ⦃ ‹eo_fail› ⦄ ⦃ ‹eo_glyph› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
   ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_op› ⸫
+⦃ ⧖:C,S,strand,dead,tok,x,idx,role,op,to ⧗:C̵,op,S,strand,dead ○ ⧗:to ‹el_apply› ⌁ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eo_apply› ⸫
 
 ⍝ the op handlers: C S strand dead tok x idx role op to → C S strand dead
 ⦃
@@ -1543,6 +1558,7 @@
 ⦃
   ⧖:C,r
   ⧗:C̵,r ‹rd› ⧖:C,name ⧗:C̵,r △ ‹vf› ⧖:C,sym ⧗:C̵,r #3# ‹vf› ⧖:C,f
+  ⧗:C̵ #55# ⧗:name ‹wr› ⧖:C
   ⧗:C̵,r #4# ‹vf› ⧖:C,node ⧗:C̵,r #5# ‹vf› ⧖:C,from ⧗:C̵,r #6# ‹vf› ⧖:C,to
   ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,f #2# ‹vf› ⧖:C,outs
   ⧗:C̵,node ‹ndt› ⧖:C,tok
@@ -1853,7 +1869,8 @@
 ⍝ ‹einverse› C r: emit ⇜name for the emit record r (its node is the original function)
 ⦃
   ⧖:C,r
-  ⧗:C̵,r ‹rd› ⧖:C,name ⧗:C̵,r △ ‹vf› ⧖:C,sym ⧗:C̵,r #3# ‹vf› ⧖:C,f ⧗:C̵,r #4# ‹vf› ⧖:C,i
+  ⧗:C̵,r ‹rd› ⧖:C,name ⧗:C̵,r △ ‹vf› ⧖:C,sym ⧗:C̵,r #3# ‹vf› ⧖:C,f
+  ⧗:C̵ #55# ⧗:name ‹wr› ⧖:C ⧗:C̵,r #4# ‹vf› ⧖:C,i
   ⧗:C̵,i #5# ‹nd› ⧖:C,nfr
   ⧗:i #6# ⊞ ⧗:nfr ⊞ ⧖:sig
   ⧗:C̵,sig #2# ‹nd› ⧖:C,ssz ⧗:C̵,i #2# ‹nd› ⧖:C,isz
@@ -2097,7 +2114,31 @@
   ⧗:C̵ #9676# ⧗:xt ‹spre› ⧖:C,rt
   ⧗:C̵,rt,xv,ok ‹ent› ⧖:C,e
   ⧗:C̵,S2,e ‹lpush› ⧗:strand,dead △
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_attest› ⸫
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C̵,op,to ‹isattest› ⧖:C,at
+  ⧗:C̵,op,S,strand,dead,prev,to ⧗:at ⋔ ⦃ ‹el_attest› ⦄ ⦃ ‹el_quotation› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_quote› ⸫
+⍝ a quotation: nothing at run time (§9.5)
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C̵,op ‹ndt› ⧖:C,tok ⧗:C̵,tok ‹qtype› ⧖:C,qt
+  ⧗:C̵ #48# ‹reg› ⧖:C,zero
+  ⧗:C̵,qt,zero #-1# ‹ent› ⧖:C,e
+  ⧗:C̵,S,e ‹lpush› ⧗:strand,dead ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_quotation› ⸫
+⍝ ⍎: the quotation's body, inlined on this stack (§9.5)
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C̵,S △ ‹epop› ⧖:C,S2,qv
+  ⧗:C̵,qv ○ ‹lget› ‹ety› ⧖:C,qt
+  ⧗:C̵,qt ‹qget› ⧖:C,qn
+  ⧗:C̵ #61# ‹reg› ⧖:C,vw0 ⧗:C̵ #61# ○ ‹wr› ⧖:C
+  ⧗:C̵ ⧗:qn #3# ⊞ ⧗:S2 ‹esubb› ⧖:C,R,qst,qdead
+  ⧗:C̵ #61# ⧗:vw0 ‹wr› ⧖:C
+  ⧗:C̵,R,strand,qdead ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_apply› ⸫
 
 ⍝ ‹ersel› C op S c k dead: ⋔⇋ checks its exit assertion against the condition (§10)
 ⦃

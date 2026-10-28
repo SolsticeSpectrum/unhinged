@@ -281,7 +281,7 @@
     t "prefixes" ← prefixes ¿
     t ⇄ ¿
   ⌫ ¿
-  rest ⟪ len ⟫ 1 ≡ rest ⟪ tc_base_type ⟫ rest ⟪ tc_type_var ⟫ ∨ ∧ rest "ogham" ⟪ lx_all ⟫ ∨ ⤴ ↵
+  rest ⟪ len ⟫ 1 ≡ rest ⟪ tc_base_type ⟫ rest ⟪ tc_type_var ⟫ ∨ rest ⟪ tc_row_var ⟫ ∨ ∧ rest "ogham" ⟪ lx_all ⟫ ∨ ⤴ ↵
     "type" b line col ⟪ lx_tok ⟫ → t ¿
     t "prefixes" ← prefixes ¿
     t "base" ← rest ¿

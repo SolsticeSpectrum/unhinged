@@ -7,184 +7,184 @@
 ⍝ ‹streq2› a b: the strings are equal
 ⦃
   ⧖:a,b
-  ⧗:a,b ○ ⦶
+  ⧗:a̱,ḇ ○ ⦶
   ⍝ the loop carries [a b i acc]
   ⥀ ⦃
     ⧖:a,b,i,acc
-    ⧗:a,i ᛒ ⧖:x
-    ⧗:a,b ⧗:i △ ⊞ ⧗:acc ⧗:x ⧗:b,i ᛒ ᛖ ⋎
+    ⧗:a̱,i ᛒ ⧖:x
+    ⧗:a̱,ḇ ⧗:i △ ⊞ ⧗:acc ⧗:x ⧗:ḇ,i ᛒ ᛖ ⋎
     ⧗:x #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼
   ⦄
   ⧖:a,b,i,acc ⧗:acc
 ⦄ ⟨⟗ʃ ⟗ʃ ⊸ ŧ⟩ ‹streq2› ⸫
 
-⦃ ⧖:a,b ⧗:b ⟗ ⧗:a ‹streq2› ⧖:r ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ŧ⟩ ‹streqo› ⸫
+⦃ ⧖:a,b ⧗:b̵ ⟗ ⧗:a̱ ‹streq2› ⧖:r ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ŧ⟩ ‹streqo› ⸫
 
 ⦃
   ⧖:path,out,count,rem
-  ⧗:path ⎙̵ $: error: imbalance: $ ⎙̵ ⧗:count ᛁ $ tokens, $ ⎙̵ ⧗:rem ᛁ $ too many for the Ternary Balance Law\n$ ⎙̵
-  ⧗:out ⌁̵ △ ‹exit›
+  ⧗:path̵ ⎙̵ $: error: imbalance: $ ⎙̵ ⧗:count ᛁ $ tokens, $ ⎙̵ ⧗:rem ᛁ $ too many for the Ternary Balance Law\n$ ⎙̵
+  ⧗:out̵ ⌁̵ △ ‹exit›
 ⦄ ⟨ʃ ⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹imbal› ⸫
 
-⦃ ⧖:T,st ⧗:st ⟗ ⧗:T ‹adump› ⌁̵ ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸⟩ ‹dumpw› ⸫
+⦃ ⧖:T,st ⧗:st̵ ⟗ ⧗:Ṯ ‹adump› ⌁̵ ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸⟩ ‹dumpw› ⸫
 
 ⍝ ‹astw› path toks: parse, tangle and print the item tree
 ⦃
   ⧖:path,toks
-  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:st ‹dumpw› ⌁̵
+  ⧗:toks̵ ‹tindex› ‹ok› ⟗ ⧗:patẖ ‹parse› ⧖:st ⟗ ⧗:st̵ ‹dumpw› ⌁̵
 ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹astw› ⸫
 
 ⍝ ‹checkw› path toks: parse, tangle and check (printing the trace), then "ok"
 ⦃
   ⧖:path,toks
-  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st △ ‹cinit› ‹check› ⌁̵ $ok\n$ ⎙̵ ⌁̵
+  ⧗:toks̵ ‹tindex› ‹ok› ⟗ ⧗:patẖ ‹parse› ⧖:st ⟗ ⧗:patẖ,st̵ △ ‹cinit› ‹check› ⌁̵ $ok\n$ ⎙̵ ⌁̵
 ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹checkw› ⸫
 
 ⍝ ‹emitw› path toks debug: parse, tangle, check and print the LLVM IR
 ⦃
   ⧖:path,toks,dbg
-  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st ○ ‹cinit› ‹check› ⧗:dbg ‹egen› ⌁̵ ⌁̵
+  ⧗:toks̵ ‹tindex› ‹ok› ⟗ ⧗:patẖ ‹parse› ⧖:st ⟗ ⧗:patẖ,st̵ ○ ‹cinit› ‹check› ⧗:dbg ‹egen› ⌁̵ ⌁̵
 ⦄ ⟨⟗ʃ ⟦ℤ⟧ ℤ ⊸ ◌⟩ ‹emitw› ⸫
 
 ⍝ ‹compilew› path toks mode: compile to an executable, as trithc does (5: next to the source, 6: -o)
 ⦃
   ⧖:path,toks,mode
   ⧗:mode #10# ≶ ⋔ ⦃ △ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⧖:dbg
-  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st ○ ‹cinit› ‹check› ⧗:dbg ‹eir› ⧖:C,q
-  ⧗:C,q,mode,dbg ‹ebuild› ⌁̵ ⌁̵
+  ⧗:toks̵ ‹tindex› ‹ok› ⟗ ⧗:patẖ ‹parse› ⧖:st ⟗ ⧗:patẖ,st̵ ○ ‹cinit› ‹check› ⧗:dbg ‹eir› ⧖:C,q
+  ⧗:C̵,q,mode,dbg ‹ebuild› ⌁̵ ⌁̵
 ⦄ ⟨⟗ʃ ⟦ℤ⟧ ℤ ⊸ ◌⟩ ‹compilew› ⸫
 
 ⍝ ‹eheapstr› cps C: code points (after a sentinel) as a heap string
 ⦃
   ⧖:pc,C
-  ⧗:C ‹sbeg› ⧖:C,e
-  ⧗:pc,C,e ○ ⧗:pc ᚴ
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:pc̱,C̵,e ○ ⧗:pc̱ ᚴ
   ⥀ ⦃
     ⧖:pc,C,e,j,n
-    ⧗:pc,C,e,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:pc,C,e,j,n ⧗:pc ⧗:C,e ⧗:pc,j ᚳ ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:pc̱,C̵,e,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:pc,C,e,j,n ⧗:pc̱ ⧗:C̵,e ⧗:pc̱,j ᚳ ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
-  ⌁ ⌁ ⧖:e ⧖:C ⌁̱ ⧗:C,e
+  ⌁ ⌁ ⧖:e ⧖:C ⌁̱ ⧗:C̵,e
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eheapstr› ⸫
 ⍝ ‹bargs› C: what the arguments say for the build: the output path (−1: next to the source),
 ⍝ the #include lines for --include, and the C files of --link
 ⦃
   ⧖:C
-  ⧗:C ‹qnew› ⧖:C,inc ⧗:C ‹qnew› ⧖:C,lnk
-  ⧗:C,inc,lnk #-1# △
+  ⧗:C̵ ‹qnew› ⧖:C,inc ⧗:C̵ ‹qnew› ⧖:C,lnk
+  ⧗:C̵,inc,lnk #-1# △
   ⥀ ⦃
     ⧖:C,inc,lnk,out,i
     ⧗:i ‹argcode› ⧖:k
-    ⧗:C,inc,lnk,out,i,k ⧗:k #-1# ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ‹bargs1› ⊕ ⦄ ⁼
+    ⧗:C̵,inc,lnk,out,i,k ⧗:k #-1# ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ‹bargs1› ⊕ ⦄ ⁼
   ⦄
-  ⌁ ⧖:C,inc,lnk,out ⧗:C,out,inc,lnk
+  ⌁ ⧖:C,inc,lnk,out ⧗:C̵,out,inc,lnk
 ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹bargs› ⸫
 ⦃
   ⧖:C,inc,lnk,out,i,k
-  ⧗:C ⧗:i △ ⊞ ‹eargheap› ⧖:C,v
-  ⧗:C,out,v ⧗:k #6# ᛖ ⋔ ⦃ ⧖:o,vv ⧗:vv ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,out2
-  ⧗:C,inc,v ⧗:k #7# ᛖ ⋔ ⦃ ⧖:q,vv %%#include "{vv}"%% ⧖:l ⧗:q,l ‹qadd› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵ ⧗:i △ ⊞ ‹eargheap› ⧖:C,v
+  ⧗:C̵,out,v ⧗:k #6# ᛖ ⋔ ⦃ ⧖:o,vv ⧗:vv ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,out2
+  ⧗:C̵,inc,v ⧗:k #7# ᛖ ⋔ ⦃ ⧖:q,vv %%#include "{vv}"%% ⧖:l ⧗:q,l ‹qadd› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
   ⧗:lnk,v ⧗:k #8# ᛖ ⋔ ⦃ ‹qadd› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
   ⧗:inc,lnk,out2 ⧗:i ⧗:k #6# #8# ᛦ ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ⊞
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹bargs1› ⸫
 ⍝ ‹eargheap› C i: argument i as a heap string (−1 if there is none)
 ⦃
   ⧖:C,i
-  ⧗:C ⧗:i ᚨ ⁇ ⦃ ⟗ ᛞ ⧖:oc ⌁̵ ⧖:CC ⧗:oc ⟗ ⧗:CC ‹eheapstr› ⧖:CC2,s ⌁̵ ⧗:CC2,s ⦄ ⦃ #-1# ⦄
+  ⧗:C̵ ⧗:i ᚨ ⁇ ⦃ ⟗ ᛞ ⧖:oc ⌁̵ ⧖:CC ⧗:oc̵ ⟗ ⧗:CC̵ ‹eheapstr› ⧖:CC2,s ⌁̵ ⧗:CC2̵,s ⦄ ⦃ #-1# ⦄
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eargheap› ⸫
 ⦃
   ⧖:C
-  ⧗:C #6# ‹reg› ⧖:C,p
-  ⧗:C,p ‹slen› ⧖:C,n
-  ⧗:C,p ⧗:n #4# ⊟ ‹sat› ⧖:C,dot
-  ⧗:C,p ○ ⧗:n #2# ⊟ ⧗:n #4# ⊟ ⧗:dot #46# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ‹ssub›
+  ⧗:C̵ #6# ‹reg› ⧖:C,p
+  ⧗:C̵,p ‹slen› ⧖:C,n
+  ⧗:C̵,p ⧗:n #4# ⊟ ‹sat› ⧖:C,dot
+  ⧗:C̵,p ○ ⧗:n #2# ⊟ ⧗:n #4# ⊟ ⧗:dot #46# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ‹ssub›
 ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹estripext› ⸫
 ⍝ ‹etextof› C s: a heap string as text
-⦃ ⧖:C,s ⧗:C »« ⧗:s ‹estext› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ʃ⟩ ‹etextof› ⸫
+⦃ ⧖:C,s ⧗:C̵ »« ⧗:s ‹estext› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ʃ⟩ ‹etextof› ⸫
 ⍝ ‹ewrite› C path q: write the lines of q to the file path (both heap strings)
 ⦃
   ⧖:C,path,q
-  ⧗:C,q »« ‹eqtext› ⧖:C,text
-  ⧗:C,path ‹etextof› ⧖:C,pt
-  ⧗:pt ⟗ ⧗:text ‹wfile2› ⧖:r ⌁̵
-  ⧗:C,path ⧗:r ○ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹spr› $: error: cannot write\n$ ⎙̵ △ ‹exit› ⦄ ⁼
+  ⧗:C̵,q »« ‹eqtext› ⧖:C,text
+  ⧗:C̵,path ‹etextof› ⧖:C,pt
+  ⧗:pt̵ ⟗ ⧗:text̵ ‹wfile2› ⧖:r ⌁̵
+  ⧗:C̵,path ⧗:r ○ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹spr› $: error: cannot write\n$ ⎙̵ △ ‹exit› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ewrite› ⸫
-⦃ ⧖:p,t ⧗:t ⟗ ⧗:p ⍿¹ ‹wfile› ⧖:r ⌁̱ ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ℤ⟩ ‹wfile2› ⸫
+⦃ ⧖:p,t ⧗:t̵ ⟗ ⧗:p̱ ⍿¹ ‹wfile› ⧖:r ⌁̱ ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ℤ⟩ ‹wfile2› ⸫
 ⍝ ‹esys› C cmd: run a shell command (a heap string); stop if it fails
 ⦃
   ⧖:C,cmd
-  ⧗:C,cmd ‹etextof› ⧖:C,ct
-  ⧗:ct ⟗ ‹system› ⧖:r ⌁̵
-  ⧗:C ⧗:r ○ ᛖ ⋔ ⦃ ⦄ ⦃ △ ‹exit› ⦄ ⁼
+  ⧗:C̵,cmd ‹etextof› ⧖:C,ct
+  ⧗:ct̵ ⟗ ‹system› ⧖:r ⌁̵
+  ⧗:C̵ ⧗:r ○ ᛖ ⋔ ⦃ ⦄ ⦃ △ ‹exit› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹esys› ⸫
 ⍝ ‹ebuild› C q mode dbg: write the IR (and the FFI glue), then let clang and llvm-link make the
 ⍝ executable: the runtime, the glue and every --link file become IR and are linked into one module
 ⦃
   ⧖:C,q,mode,dbg
-  ⧗:C ‹bargs› ⧖:C,out0,inc,lnk
-  ⧗:C,out0 ⧗:out0 #-1# ᛖ ⋔ ⦃ ⌁ ‹estripext› ⦄ ∅ ⁼ ⧖:C,out
-  ⧗:C %%{out}.ll%% ⧖:C,ll
-  ⧗:C,ll,q ‹ewrite› ⧖:C
-  ⧗:C,inc ‹eglue› ⧖:C,gq
-  ⧗:C ⧗:gq #2# ⊞ ‹rd› ⧖:C,ng
-  ⧗:C ⧗:dbg △ ᛖ ⋔ ⦃ %%-O0 -g%% ⦄ ⦃ %%-O2%% ⦄ ⁼ ⧖:C,opt
-  ⧗:C %%clang -S -emit-llvm {opt} -w -I . -o {out}.c0.ll trith/runtime/trith_rt.c 2>&1%% ‹esys› ⧖:C
-  ⧗:C,out,gq,opt ⧗:ng ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ %%%% △ ⦄ ⦃ ‹eglueb› ⦄ ⁼ ⧖:C,more,ci
-  ⧗:C,lnk ‹rd› ⧖:C,nd
-  ⧗:C,out,opt,more,ci,nd
+  ⧗:C̵ ‹bargs› ⧖:C,out0,inc,lnk
+  ⧗:C̵,out0 ⧗:out0 #-1# ᛖ ⋔ ⦃ ⌁ ‹estripext› ⦄ ∅ ⁼ ⧖:C,out
+  ⧗:C̵ %%{out}.ll%% ⧖:C,ll
+  ⧗:C̵,ll,q ‹ewrite› ⧖:C
+  ⧗:C̵,inc ‹eglue› ⧖:C,gq
+  ⧗:C̵ ⧗:gq #2# ⊞ ‹rd› ⧖:C,ng
+  ⧗:C̵ ⧗:dbg △ ᛖ ⋔ ⦃ %%-O0 -g%% ⦄ ⦃ %%-O2%% ⦄ ⁼ ⧖:C,opt
+  ⧗:C̵ %%clang -S -emit-llvm {opt} -w -I . -o {out}.c0.ll trith/runtime/trith_rt.c 2>&1%% ‹esys› ⧖:C
+  ⧗:C̵,out,gq,opt ⧗:ng ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ %%%% △ ⦄ ⦃ ‹eglueb› ⦄ ⁼ ⧖:C,more,ci
+  ⧗:C̵,lnk ‹rd› ⧖:C,nd
+  ⧗:C̵,out,opt,more,ci,nd
   ⥀ ⦃
     ⧖:C,out,opt,more,ci,nd
-    ⧗:C,out,opt,more,ci,nd ⧗:nd #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹elink1› ⊕ ⦄ ⁼
+    ⧗:C̵,out,opt,more,ci,nd ⧗:nd #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹elink1› ⊕ ⦄ ⁼
   ⦄
   ⌁ ⌁ ⧖:C,out,opt,more
-  ⧗:C %%llvm-link -o {out}.bc {ll} {out}.c0.ll{more} 2>&1%% ‹esys› ⧖:C
-  ⧗:C %%clang {opt} -w -o {out} {out}.bc -lm 2>&1%% ‹esys›
+  ⧗:C̵ %%llvm-link -o {out}.bc {ll} {out}.c0.ll{more} 2>&1%% ‹esys› ⧖:C
+  ⧗:C̵ %%clang {opt} -w -o {out} {out}.bc -lm 2>&1%% ‹esys›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebuild› ⸫
 ⍝ the FFI glue as C: written, compiled, and named for the link
 ⦃
   ⧖:C,out,gq,opt
-  ⧗:C %%{out}.ffi.c%% ⧖:C,gp
-  ⧗:C,gp,gq ‹ewrite› ⧖:C
-  ⧗:C %%clang -S -emit-llvm {opt} -w -I . -o {out}.c1.ll {gp} 2>&1%% ‹esys› ⧖:C
-  ⧗:C %% {out}.c1.ll%% #2#
+  ⧗:C̵ %%{out}.ffi.c%% ⧖:C,gp
+  ⧗:C̵,gp,gq ‹ewrite› ⧖:C
+  ⧗:C̵ %%clang -S -emit-llvm {opt} -w -I . -o {out}.c1.ll {gp} 2>&1%% ‹esys› ⧖:C
+  ⧗:C̵ %% {out}.c1.ll%% #2#
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹eglueb› ⸫
 ⍝ one --link file: compiled to IR and named for the link
 ⦃
   ⧖:C,out,opt,more,ci,nd
-  ⧗:C ⧗:nd △ ⊞ ‹rd› ⧖:C,src
-  ⧗:C %%clang -S -emit-llvm {opt} -w -I . -o {out}.c{#ci}.ll {src} 2>&1%% ‹esys› ⧖:C
-  ⧗:C %%{more} {out}.c{#ci}.ll%% ⧖:C,more2
-  ⧗:C,nd ‹rd› ⧖:C,nx
-  ⧗:C,out,opt,more2 ⧗:ci △ ⊞ ⧗:nx
+  ⧗:C̵ ⧗:nd △ ⊞ ‹rd› ⧖:C,src
+  ⧗:C̵ %%clang -S -emit-llvm {opt} -w -I . -o {out}.c{#ci}.ll {src} 2>&1%% ‹esys› ⧖:C
+  ⧗:C̵ %%{more} {out}.c{#ci}.ll%% ⧖:C,more2
+  ⧗:C̵,nd ‹rd› ⧖:C,nx
+  ⧗:C̵,out,opt,more2 ⧗:ci △ ⊞ ⧗:nx
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ⟩ ‹elink1› ⸫
 
 ⦃
   ⧖:path,out,mode
-  ⧗:path,out,mode ⍿⁰ △ ᛖ
-  ⋔ ⦃ ⌁ ⧖:o ⧗:o ⟗ ‹dump› ⌁̵ ⌁̵ ⦄
-    ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⧖:o ⟗ ⧗:o ‹astw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
-      ⦃ ⍿⁰ #3# ᛖ ⋔ ⦃ ⌁ ⧖:o ⟗ ⧗:o ‹checkw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
-        ⦃ ⍿⁰ #4# ᛖ ⍿¹ #14# ᛖ ⋏ ⋔ ⦃ #14# ᛖ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧖:d ⧖:o ⟗ ⧗:o,d ‹emitw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
-          ⦃ ⧖:o,m ⟗ ⧗:o,m ‹compilew› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ⧗:path̵,out̵,mode ⍿⁰ △ ᛖ
+  ⋔ ⦃ ⌁ ⧖:o ⧗:o̵ ⟗ ‹dump› ⌁̵ ⌁̵ ⦄
+    ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⧖:o ⟗ ⧗:o̵ ‹astw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
+      ⦃ ⍿⁰ #3# ᛖ ⋔ ⦃ ⌁ ⧖:o ⟗ ⧗:o̵ ‹checkw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
+        ⦃ ⍿⁰ #4# ᛖ ⍿¹ #14# ᛖ ⋏ ⋔ ⦃ #14# ᛖ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧖:d ⧖:o ⟗ ⧗:o̵,d ‹emitw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
+          ⦃ ⧖:o,m ⟗ ⧗:o̵,m ‹compilew› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹run› ⸫
 
 ⦃
   ⧖:path,mode,out
-  ⧗:out ⟗ ○ ᚳ ⧖:count ⧖:out
+  ⧗:out̵ ⟗ ○ ᚳ ⧖:count ⧖:out
   ⧗:count #3# ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ #3# ⊞ ⦄ ⧖:rem
-  ⧗:path,out,count,rem,mode
+  ⧗:path̵,out̵,count,rem,mode
   ⧗:rem ○ ᛖ ⋔ ⦃ ⧖:m ⌁ ⌁ ⧗:m ‹run› ⦄ ⦃ ⌁ ‹imbal› ⦄ ⁼
 ⦄ ⟨ʃ ℤ ⟦ℤ⟧ ⊸⟩ ‹main3› ⸫
 
 ⦃
   ⧖:path,mode,src
-  ⧗:src ⟗ ᛞ ⧖:cps ⌁̵
-  ⧗:path ⟗ ⧗:cps ‹lexw› ⧗:mode ⍿¹ ⁇ ⦃ ‹main3› ⦄ ⦃ ⌁ ⌁̵ △ ‹exit› ⦄
+  ⧗:src̵ ⟗ ᛞ ⧖:cps ⌁̵
+  ⧗:path̵ ⟗ ⧗:cps̵ ‹lexw› ⧗:mode ⍿¹ ⁇ ⦃ ‹main3› ⦄ ⦃ ⌁ ⌁̵ △ ‹exit› ⦄
 ⦄ ⟨ʃ ℤ ʃ ⊸⟩ ‹main2› ⸫
 
 ⦃
   ⧖:path,mode
-  ⧗:path ⟗ ᚠ ⧗:mode ⍿¹ ⁇
+  ⧗:path̵ ⟗ ᚠ ⧗:mode ⍿¹ ⁇
     ⦃ ⟗ ⍴̱ ○ ᛖ ⋔ ⦃ ⌁̵ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄ ⦃ ‹main2› ⦄ ⁼ ⦄
     ⦃ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄
 ⦄ ⟨ʃ ℤ ⊸⟩ ‹main1› ⸫
@@ -194,7 +194,7 @@
 ⍝ ---- arguments, as trithc reads them: flags in any order, the first other argument is the source
 
 ⍝ ‹argeq› s i: argument i is the literal s
-⦃ ⧖:s,i ⧗:s ⧗:i ᚨ ⁇ ⦃ ⟗ ⍿² ‹streqo› ⧖:r ⌁̵ ⧗:r ⦄ ⦃ ⌁̵ ⊕ ⦄ ⦄ ⟨ʃ ℤ ⊸ ŧ⟩ ‹argeq› ⸫
+⦃ ⧖:s,i ⧗:s̵ ⧗:i ᚨ ⁇ ⦃ ⟗ ⍿² ‹streqo› ⧖:r ⌁̵ ⧗:r ⦄ ⦃ ⌁̵ ⊕ ⦄ ⦄ ⟨ʃ ℤ ⊸ ŧ⟩ ‹argeq› ⸫
 ⍝ ‹argcode› i: −1 none, 1 --tokens, 2 --ast, 3 --check, 4 --emit-llvm, 5 --debug, 6 -o, 7 --include,
 ⍝ 8 --link, 9 --plough or --unplough (s1 only), 0 anything else
 ⦃
@@ -232,7 +232,7 @@
   ⧖:mode,dbg,in
   ⧗:mode ⧗:mode ○ ᛖ ⋔ ⦃ ⌁ #5# ⦄ ∅ ⁼ ⧖:m
   ⧗:m ⧗:m #4# ᛖ ⧗:m #5# ᛖ ⋏ ⧗:dbg △ ᛖ ⋎ ⋔ ⦃ #10# ⊞ ⦄ ∅ ⁼ ⧖:fm
-  ⧗:fm ⧗:in ᚨ ⁇ ⦃ ⧖:p ⧖:f ⧗:p,f ‹main1› ⦄ ⦃ ⌁ ‹usage› ⦄
+  ⧗:fm ⧗:in ᚨ ⁇ ⦃ ⧖:p ⧖:f ⧗:p̵,f ‹main1› ⦄ ⦃ ⌁ ‹usage› ⦄
 ⦄ ⟨ℤ ℤ ℤ ⊸⟩ ‹main0› ⸫
 
 ⦃

@@ -105,9 +105,9 @@ Marks attach to the token's **last base character**. Several marks may stack on 
 | ◌̂ circumflex | U+0302 | value token | case role γ | §6 |
 | ◌̈ diaeresis | U+0308 | call | **past tense** | §9.2 |
 | ◌̃ tilde | U+0303 | call | **future tense** | §9.2 |
-| ◌̵ short stroke | U+0335 | operator | agreement: quantum | §6.1 |
-| ◌̰ tilde below | U+0330 | operator | agreement: superposed | §6.1 |
-| ◌̱ macron below | U+0331 | operator | agreement: borrowed | §6.1 |
+| ◌̵ short stroke | U+0335 | operator, `⧗ⁿ` | agreement: quantum | §6.1 |
+| ◌̰ tilde below | U+0330 | operator, `⧗ⁿ` | agreement: superposed | §6.1 |
+| ◌̱ macron below | U+0331 | operator, `⧗ⁿ` | agreement: borrowed | §6.1 |
 
 ---
 
@@ -235,8 +235,9 @@ Operators must **agree with the class** of their operands, the way verbs agree w
   - `◌̱` if any operand is borrowed
 - Classical operands need no mark.
 - A missing or extra mark is a compile error, **disagreement**.
+- A moment read `⧗ⁿ` agrees in the same way with the class of the value it reads. Reading a string moves it, so it is written `⧗̵ⁿ`; a shadow is read `⧗̱ⁿ`, a ψ `⧗̰ⁿ`, and an ℤ plain `⧗ⁿ`. A read then shows whether it moves, borrows or copies without looking back at the binding. `⍿ⁿ` takes no mark.
 
-For example, `⎙` applied to a string is written `⎙̵`.
+For example, `⎙` applied to a string is written `⎙̵`, and `»ih« ⧖ ⧗̵⁰ ⎙̵` prints a string read back from a moment.
 
 **Cost:** type-check only.
 
@@ -638,7 +639,7 @@ The binary contains only `print(21)`. The line has 10 tokens, so two breaths bri
 This is a complete, balanced file of 27 tokens.
 
 ```
-⦃ ⊕ ⊖ ⫴ ⧖ ⧗⁰ ⟜̰ ⦃ ⦶ ≶ ⦄ ⧗⁰ ⊙̰⁰ ⁇ ⦃ ⎙ ⦄ ⦃ ⦄ ⦄ ⟨⊸⟩ ᛟ ⸫ ⸱ ⸱
+⦃ ⊕ ⊖ ⫴ ⧖ ⧗̰⁰ ⟜̰ ⦃ ⦶ ≶ ⦄ ⧗̰⁰ ⊙̰⁰ ⁇ ⦃ ⎙ ⦄ ⦃ ⦄ ⦄ ⟨⊸⟩ ᛟ ⸫ ⸱ ⸱
 ```
 
 1. It superposes {+, −} and binds the result.
@@ -686,7 +687,7 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
 - **Comments on even lines** cover everything to the left of the `⍝`, so a full-line comment on an even line is written `text ⍝`.
 - **Marks** may appear anywhere after the first base character of a token and apply to the whole token. Marks written directly after a string's last delimiter belong to the string. Case marks attach to literals, `⧗ⁿ` and `⍿ⁿ`; tense marks attach to calls; agreement marks attach to operator glyphs. A token takes at most one case mark and one tense mark. Unknown combining marks are an error.
 - **NFC.** s1 canonicalises marks by sorting them per token, which is all NFC changes for code tokens. Full NFC composition inside strings is not applied yet.
-- **Superscript indices** are decimal (open question below still stands). `⊙⁻` and `⊙⁺` take `⁻`/`⁺` as their index.
+- **Superscript indices** are decimal. They stay decimal (decided after milestone 7): they count positions on the compiler's stack and strand, not values, and decimal superscripts are what fonts provide. `⊙⁻` and `⊙⁺` take `⁻`/`⁺` as their index.
 - **Fragments.** A definition without `⸾` is fragment `○`. It may omit the signature when another fragment of the same function carries it. Two definitions without `⸾` for the same name are "defined twice".
 - **Numerals** are exact up to 2⁵³ in s1, because s1 runs on UNHINGED doubles.
 - **Check pass (milestone 2).** These are also choices the spec left open:
@@ -759,14 +760,14 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
   - The generated inverse of a `⇋` function is new tree nodes appended to the heap: the units of the body reversed, each one inverted. The faces of a `⋔⇋` are inverted first, so each new node's children stay contiguous. Kind 18 is an op whose `⊞` and `⊟` swap places, so inverting an update needs no new token.
   - The compile-time evaluator is a direct port of s1's, including its limit of 2⁵³ on integers; 2⁵³ itself is computed with a shift, since s1's lexer reads that literal through a double and would round it.
   - `trx.py`'s `%%text {x} {#n}%%` builds a heap string from the `C` on the stack, which keeps the IR templates close to s1's text.
+- **Decided after milestone 7.**
+  - Agreement applies to `⧗ⁿ` reads too (§6.1). `trx.py` writes the mark after a name: `⧗:C̵` reads the heap `C` by moving it.
+  - Call by shape matches evidentials and charges as well (§9.1).
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
 - Mutable arrays inside `⥀`: keep threading a `⟖` through the loop stack, or allow region-scoped exclusive moments?
 - Should the ψ cap be lower than 27 for quantum alternatives, to bound the drop logic?
 - Generics: monomorphised, stack-polymorphic signatures (Kitten-style row variables), or none in Trith 1.0?
-- Should superscript indices be balanced ternary for consistency (`⧗▽△` instead of `⧗²`)?
-- Does agreement apply to `⧗ⁿ` reads, or only to operators?
-- Should call-by-shape also consider evidentials and charges when matching signatures? This document assumes yes.
 - Should scattered fragments be allowed across files within a module?
 
 ---

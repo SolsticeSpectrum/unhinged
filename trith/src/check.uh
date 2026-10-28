@@ -1201,6 +1201,8 @@
       ⊥ ⇄ ¿
     ⌫ ¿
     m "ty" ⌈ ⌉ → t ¿
+    ⍝ a read agrees with the class of the moment's value, like an operator (§6.1)
+    C tok 【❴"ty": t❵】 ⟪ ck_agree ⟫ ¿
     t ⟪ ck_copyable ⟫ ⤴ ↵
       ⍝ a copy of a shadow belongs to the region where the shadow was made
       m "region" ⌈ ⌉ → rg ¿

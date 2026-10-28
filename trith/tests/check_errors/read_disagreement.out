@@ -1,0 +1,4 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  »ih«  ⊢ [ʃ]
+  ⧖  ⊢ []
+trith/tests/check_errors/read_disagreement.trh:2:18: error: disagreement: ⧗ on [ʃ] needs ◌̵ quantum (§6.1)

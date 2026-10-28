@@ -24,7 +24,7 @@
 ⸫ ᚡᚬ ⟨ ⊸ ℤ ⟩ ⦃ ⌁ ᚡᚨ ⧗⁰ ⦃ ⦄ ⦃ ᚡᚫ ⦄ ⁇ ᚡᚤ ⧗⁰ ⧖ ⦄
 
 ᚡᚭ conn text: send text and print what comes back ⍝
-⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ᚡᚦ ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⧗⁰ ᚡᚧ ᚡᚪ ⎙̵ »↵« ⎙̵ ⦄ ⟨ ℤ ʃ ⊸ ⟩ ᚡᚭ ⸫
+⦃ ⧖ ⧖ ⧗⁰ ⧗̵¹ ᚡᚦ ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⧗⁰ ᚡᚧ ᚡᚪ ⎙̵ »↵« ⎙̵ ⦄ ⟨ ℤ ʃ ⊸ ⟩ ᚡᚭ ⸫
 
 ⍝ ᚡᚮ conn: the client's side of the conversation
 ⦄

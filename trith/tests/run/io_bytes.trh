@@ -4,10 +4,10 @@
 
 ⍝ ---- bytes and code points
 ᛒ s i: byte i of s (from 0) as ℤ, or −1 past either end ⍝
-⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⍴̱ △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⚇ ⦄ ⦃ ▽ ⦄ ⦄ ⟨ ⟗ʃ ℤ ⊸ ℤ ⟩ ᛒ ⸫
+⦃ ⧖ ⧖ ⧗̱⁰ ⧗¹ ⧗̱⁰ ⍴̱ △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⚇ ⦄ ⦃ ▽ ⦄ ⦄ ⟨ ⟗ʃ ℤ ⊸ ℤ ⟩ ᛒ ⸫
 
 ⍝ ᚳ a i: element i (from 0) of an array whose element 0 is a sentinel; −1 past the end
-⸫ ᚳ ⟨ ℤ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃ ⦃ ▽ ⦄ ⦃ ⦄ ⁇ ⌖̱ ⊟ ≫ △ ⍴̱ ⧗⁰ ⊞ △ ⧗¹ ⧗⁰ ⧖ ⧖ ⦄
+⸫ ᚳ ⟨ ℤ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃ ⦃ ▽ ⦄ ⦃ ⦄ ⁇ ⌖̱ ⊟ ≫ △ ⍴̱ ⧗̱⁰ ⊞ △ ⧗¹ ⧗̱⁰ ⧖ ⧖ ⦄
 
 ᚴ a: number of elements after the sentinel ⍝
 ⦃ ⍴̱ △ ⊟ ⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ⟩ ᚴ ⸫
@@ -19,12 +19,12 @@
   ⧗² △▽△▽○△ ≶ ⋔ ⦃ ▽△ ⦄ ⦃ ○△ ⦄ ⦃ ▽△ ⦄
   ⧖ ⊞ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⋔ ≶ ▽▽○○○△ ⧗²
   ⍝ ⧗⁰ n  ⧗¹ s  ⧗² i  ⧗³ b0; the loop carries [s i n k cp]
-  ⋒ ≫ ⧗⁰ △○▽▽▽△ ⧗³ △ ⧗⁰ ⧗² ⧗¹
+  ⋒ ≫ ⧗⁰ △○▽▽▽△ ⧗³ △ ⧗⁰ ⧗² ⧗̱¹
   ⥀ ⦃
     ⧖ ⧖ ⧖ ⧖ ⧖
     ⍝ ⧗⁰ s  ⧗¹ i  ⧗² n  ⧗³ k  ⧗⁴ cp
-    ⊞ △ ⧗³ ⧗² ⧗¹ ⧗⁰
-    ⧗⁴ ○▽△ ≪ ⧗⁰ ⧗¹ ⧗³ ⊞ ᛒ ○○△▽△ ⋒ ⋓
+    ⊞ △ ⧗³ ⧗² ⧗¹ ⧗̱⁰
+    ⧗⁴ ○▽△ ≪ ⧗̱⁰ ⧗¹ ⧗³ ⊞ ᛒ ○○△▽△ ⋒ ⋓
     ≶ ⊞ △ ⧗³ ⧗²
   ⦄
   ⧗⁰ ⧗¹ ⌁̱ ⌁ ⧖ ⌁ ⧖
@@ -32,7 +32,7 @@
 
 ⍝ ᛑ s i: the code point starting at byte i, and its length in bytes
 ⦄
-  ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⧗¹ ᛒ △○▽▽▽△ ⍿¹ ≶ ⋔
+  ⧖ ⧖ ⧗̱⁰ ⧗¹ ⧗̱⁰ ⧗¹ ᛒ △○▽▽▽△ ⍿¹ ≶ ⋔
     ⦃ △ ⧗⁰ ⌁̱ ⌁ ⧖ ⦄
     ⁼
     ⦃ ᛝ ⦄
@@ -44,7 +44,7 @@
     the loop carries [s cps i] ⍝
     ⧖ ⍿¹ ⧗⁰ ᛑ ⧖ ⍆̵ ⧗¹ ⧗⁰ ⊞ ⍿² ⍴̱ ⍿¹ ≶
   ⦃
-  ⌁ ⧖ ⌁̱ ⧗⁰
+  ⌁ ⧖ ⌁̱ ⧗̵⁰
 ⸫ ᛞ ⟨ ⟦ ℤ ⟧ ⊸ ⟗ʃ ⟩ ⦃
 
 ᚦ str cp: append the UTF-8 encoding of cp ≥ 128 ⍝
@@ -85,7 +85,7 @@
 ⍝ ᛦ cp lo hi: lo ≤ cp ≤ hi
 ⸫ ᛦ ⟨ ŧ ⊸ ℤ ℤ ℤ ⟩ ⦃ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ⋏ ≶ ⧗⁰ ⧗² ≶ ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⦄
 ⍝ ᛈ cps: print every code point
-⸫ ᛈ ⟨ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃ ⌁̱ ⌁ ⦃ ≶ ⍿¹ ᚴ ⍿¹ ⊞ △ ⧗¹ ⧗⁰ ᚢ ᚳ ⧗¹ ⧗⁰ ⧖ ⧖ ⦄ ⥀ ○ ⦄
+⸫ ᛈ ⟨ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃ ⌁̱ ⌁ ⦃ ≶ ⍿¹ ᚴ ⍿¹ ⊞ △ ⧗¹ ⧗̱⁰ ᚢ ᚳ ⧗¹ ⧗̱⁰ ⧖ ⧖ ⦄ ⥀ ○ ⦄
 ⍝ ᛟ: decode a string with multi-byte code points, print it back and count them,
 then fail to read a file that does not exist ⍝
 ⦃

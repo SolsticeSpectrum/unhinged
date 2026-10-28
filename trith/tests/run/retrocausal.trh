@@ -1,3 +1,3 @@
 ⍝ retrocausality (§8.5): the ⊙⁻ read comes before the post-selection,
 yet it already sees only the alternatives above 0, so it prints 1, not −1 ⍝
-⦃ ⊕ ⊖ ⫴ ⧖ ⧗⁰ ⊙̰⁻ ⎙ ⧗⁰ ⟜̰ ⦃ ⦶ ≶ ⦄ ⦄ ⟨ ⊸ ⟩ ᛟ ⸫ ⸱
+⦃ ⊕ ⊖ ⫴ ⧖ ⧗̰⁰ ⊙̰⁻ ⎙ ⧗̰⁰ ⟜̰ ⦃ ⦶ ≶ ⦄ ⦄ ⟨ ⊸ ⟩ ᛟ ⸫ ⸱

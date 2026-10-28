@@ -6,10 +6,10 @@
 
 ⍝ ---- bytes and code points
 ⍝ ᛒ s i: byte i of s (from 0) as ℤ, or −1 past either end
-⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⍴̱ △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⚇ ⦄ ⦃ #-1# ⦄ ⦄ ⟨⟗ʃ ℤ ⊸ ℤ⟩ ᛒ ⸫
+⦃ ⧖ ⧖ ⧗̱⁰ ⧗¹ ⧗̱⁰ ⍴̱ △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⚇ ⦄ ⦃ #-1# ⦄ ⦄ ⟨⟗ʃ ℤ ⊸ ℤ⟩ ᛒ ⸫
 
 ⍝ ᚳ a i: element i (from 0) of an array whose element 0 is a sentinel; −1 past the end
-⦃ ⧖ ⧖ ⧗⁰ ⧗¹ △ ⊞ ⧗⁰ ⍴̱ △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⦄ ⦃ #-1# ⦄ ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ᚳ ⸫
+⦃ ⧖ ⧖ ⧗̱⁰ ⧗¹ △ ⊞ ⧗̱⁰ ⍴̱ △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⦄ ⦃ #-1# ⦄ ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ᚳ ⸫
 
 ⍝ ᚴ a: number of elements after the sentinel
 ⦃ ⍴̱ △ ⊟ ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ⟩ ᚴ ⸫
@@ -21,12 +21,12 @@
   ⧗² #223# ≶ ⋔ ⦃ #2# ⦄ ⦃ #3# ⦄ ⦃ #2# ⦄
   ⧗² #239# ≶ ⋔ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⊞ ⧖
   ⍝ ⧗⁰ n  ⧗¹ s  ⧗² i  ⧗³ b0; the loop carries [s i n k cp]
-  ⧗¹ ⧗² ⧗⁰ △ ⧗³ #127# ⧗⁰ ≫ ⋒
+  ⧗̱¹ ⧗² ⧗⁰ △ ⧗³ #127# ⧗⁰ ≫ ⋒
   ⥀ ⦃
     ⧖ ⧖ ⧖ ⧖ ⧖
     ⍝ ⧗⁰ s  ⧗¹ i  ⧗² n  ⧗³ k  ⧗⁴ cp
-    ⧗⁰ ⧗¹ ⧗² ⧗³ △ ⊞
-    ⧗⁴ #6# ≪ ⧗⁰ ⧗¹ ⧗³ ⊞ ᛒ #63# ⋒ ⋓
+    ⧗̱⁰ ⧗¹ ⧗² ⧗³ △ ⊞
+    ⧗⁴ #6# ≪ ⧗̱⁰ ⧗¹ ⧗³ ⊞ ᛒ #63# ⋒ ⋓
     ⧗² ⧗³ △ ⊞ ≶
   ⦄
   ⧖ ⌁ ⧖ ⌁ ⌁̱ ⧗¹ ⧗⁰
@@ -34,7 +34,7 @@
 
 ⍝ ᛑ s i: the code point starting at byte i, and its length in bytes
 ⦃
-  ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⧗¹ ᛒ #127# ⍿¹ ≶ ⋔
+  ⧖ ⧖ ⧗̱⁰ ⧗¹ ⧗̱⁰ ⧗¹ ᛒ #127# ⍿¹ ≶ ⋔
     ⦃ ⧖ ⌁ ⌁̱ ⧗⁰ △ ⦄
     ⁼
     ⦃ ᛝ ⦄
@@ -46,7 +46,7 @@
     ⍝ the loop carries [s cps i]
     ⧖ ⍿¹ ⧗⁰ ᛑ ⧖ ⍆̵ ⧗¹ ⧗⁰ ⊞ ⍿² ⍴̱ ⍿¹ ≶
   ⦄
-  ⌁ ⧖ ⌁̱ ⧗⁰
+  ⌁ ⧖ ⌁̱ ⧗̵⁰
 ⦄ ⟨⟗ʃ ⊸ ⟦ℤ⟧⟩ ᛞ ⸫
 
 ⍝ ᚦ str cp: append the UTF-8 encoding of cp ≥ 128

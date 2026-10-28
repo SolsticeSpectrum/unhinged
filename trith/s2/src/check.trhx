@@ -8,21 +8,21 @@
 
 ⦃
   ⧖:C,t
-  ⧗:C #4# ‹rd› ⧖:C,tb
-  ⧗:C ⧗:t ⧗:tb ⊞ ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼
+  ⧗:C̵ #4# ‹rd› ⧖:C,tb
+  ⧗:C̵ ⧗:t ⧗:tb ⊞ ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tabs› ⸫
 
-⦃ ⧖:C,i,k ⧗:C #5# ‹rd› ⧖:C,ab ⧗:C ⧗:ab ⧗:i ⊞ ⧗:k ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹nd› ⸫
+⦃ ⧖:C,i,k ⧗:C̵ #5# ‹rd› ⧖:C,ab ⧗:C̵ ⧗:ab ⧗:i ⊞ ⧗:k ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹nd› ⸫
 ⍝ ‹ndt› C i: the absolute token of node i
-⦃ ⧖:C,i ⧗:C,i △ ‹nd› ‹tabs› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ndt› ⸫
-⦃ ⧖:C,t,k ⧗:C ⧗:t ⧗:k ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tf› ⸫
+⦃ ⧖:C,i ⧗:C̵,i △ ‹nd› ‹tabs› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ndt› ⸫
+⦃ ⧖:C,t,k ⧗:C̵ ⧗:t ⧗:k ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tf› ⸫
 ⍝ ‹tkd› C t: the kind of token t, 0 for none
-⦃ ⧖:C,t ⧗:C,t ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ ○ ⦄ ⦃ ○ ‹tf› ⦄ ⁼ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tkd› ⸫
+⦃ ⧖:C,t ⧗:C̵,t ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ ○ ⦄ ⦃ ○ ‹tf› ⦄ ⁼ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tkd› ⸫
 ⍝ ‹tis1› C t kind cp: token t has this kind and the one-code-point text cp
 ⦃
   ⧖:C,t,kind,cp
-  ⧗:C,t ‹tkd› ⧖:C,k ⧗:C,t #7# ‹tf› ⧖:C,n ⧗:C,t #8# ‹tf› ⧖:C,c
-  ⧗:C ⧗:k ⧗:kind ᛖ ⧗:n △ ᛖ ⋎ ⧗:c ⧗:cp ᛖ ⋎
+  ⧗:C̵,t ‹tkd› ⧖:C,k ⧗:C̵,t #7# ‹tf› ⧖:C,n ⧗:C̵,t #8# ‹tf› ⧖:C,c
+  ⧗:C̵ ⧗:k ⧗:kind ᛖ ⧗:n △ ᛖ ⋎ ⧗:c ⧗:cp ᛖ ⋎
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹tis1› ⸫
 ⍝ ‹tc0› C t: the first code point of token t's text
 ⦃ #8# ‹tf› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tc0› ⸫
@@ -30,11 +30,11 @@
 ⍝ ‹ptx› C t: print the text of token t
 ⦃
   ⧖:C,t
-  ⧗:C,t #7# ‹tf› ⧖:C,n
-  ⧗:C ⧗:t #8# ⊞ ⧗:t #8# ⊞ ⧗:n ⊞
+  ⧗:C̵,t #7# ‹tf› ⧖:C,n
+  ⧗:C̵ ⧗:t #8# ⊞ ⧗:t #8# ⊞ ⧗:n ⊞
   ⥀ ⦃
     ⧖:C,j,end
-    ⧗:C,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:C,j,end ⧗:C,j ‹rd› ᚢ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+    ⧗:C̵,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:C,j,end ⧗:C̵,j ‹rd› ᚢ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
   ⦄
   ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹ptx› ⸫
@@ -42,16 +42,16 @@
 ⍝ ‹plab› C t: print token t as written (s1's ck_label), or ? for none
 ⦃
   ⧖:C,t
-  ⧗:C,t ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ $?$ ⎙̵ ⦄ ⦃ ‹plab1› ⦄ ⁼
+  ⧗:C̵,t ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ $?$ ⎙̵ ⦄ ⦃ ‹plab1› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹plab› ⸫
 ⦃
   ⧖:C,t
-  ⧗:C,t #7# ‹tf› ⧖:C,n
-  ⧗:C ⧗:t #8# ⊞ ⧗:n ⊞ ‹rd› ⧖:C,rn
-  ⧗:C ⧗:t #9# ⊞ ⧗:n ⊞ ⧗:t #9# ⊞ ⧗:n ⊞ ⧗:rn ⊞
+  ⧗:C̵,t #7# ‹tf› ⧖:C,n
+  ⧗:C̵ ⧗:t #8# ⊞ ⧗:n ⊞ ‹rd› ⧖:C,rn
+  ⧗:C̵ ⧗:t #9# ⊞ ⧗:n ⊞ ⧗:t #9# ⊞ ⧗:n ⊞ ⧗:rn ⊞
   ⥀ ⦃
     ⧖:C,j,end
-    ⧗:C,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:C,j,end ⧗:C,j ‹rd› ᚢ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+    ⧗:C̵,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:C,j,end ⧗:C̵,j ‹rd› ᚢ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
   ⦄
   ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹plab1› ⸫
@@ -59,27 +59,27 @@
 ⍝ ‹trole› C t: the case role of token t: α β γ → 0 1 2, or −1
 ⦃
   ⧖:C,t
-  ⧗:C,t ‹tkd› ⧖:C,k
-  ⧗:C ⧗:t #3# ⊞ ‹rd› ⧖:C,m
-  ⧗:C #-1# ⧗:m #128# ⋒ ○ ᛖ ‹not› ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:m #64# ⋒ ○ ᛖ ‹not› ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:m #32# ⋒ ○ ᛖ ‹not› ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼
+  ⧗:C̵,t ‹tkd› ⧖:C,k
+  ⧗:C̵ ⧗:t #3# ⊞ ‹rd› ⧖:C,m
+  ⧗:C̵ #-1# ⧗:m #128# ⋒ ○ ᛖ ‹not› ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:m #64# ⋒ ○ ᛖ ‹not› ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:m #32# ⋒ ○ ᛖ ‹not› ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼
   ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹trole› ⸫
 
 ⍝ ‹tmark› C t bit: token t carries the mark bit
-⦃ ⧖:C,t,bit ⧗:C,t #3# ‹tf› ⧖:C,m ⧗:C ⧗:m ⧗:bit ⋒ ○ ᛖ ‹not› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹tmark› ⸫
+⦃ ⧖:C,t,bit ⧗:C̵,t #3# ‹tf› ⧖:C,m ⧗:C̵ ⧗:m ⧗:bit ⋒ ○ ᛖ ‹not› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹tmark› ⸫
 
 ⍝ ‹tname› C t: the name string of a function name token (⌁ before an antiparticle's)
 ⦃
   ⧖:C,t
-  ⧗:C,t ‹tkd› ⧖:C,k
-  ⧗:C,t #7# ‹tf› ⧖:C,n
-  ⧗:C ‹sbeg› ⧖:C,e
-  ⧗:C,e ⧗:k #3# ᛖ ⋔ ⦃ #8961# ‹scp› ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:C̵,t ‹tkd› ⧖:C,k
+  ⧗:C̵,t #7# ‹tf› ⧖:C,n
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:C̵,e ⧗:k #3# ᛖ ⋔ ⦃ #8961# ‹scp› ⦄ ⦃ ⌁ ⦄ ⁼
   ⧗:e ⧗:t #8# ⊞ ⧗:t #8# ⊞ ⧗:n ⊞
   ⥀ ⦃
     ⧖:C,e,j,end
-    ⧗:C,e,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,e,j,end ⧗:C,j ‹rd› ⧖:C,c ⧗:C,e,c ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+    ⧗:C̵,e,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,e,j,end ⧗:C̵,j ‹rd› ⧖:C,c ⧗:C̵,e,c ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:end ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⧗:e ‹send›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tname› ⸫
@@ -88,7 +88,7 @@
 
 ⦃
   ⧖:C,t
-  ⧗:C #6# ‹rd› ⧖:C,path ⧗:C,path ‹spr›
+  ⧗:C̵ #6# ‹rd› ⧖:C,path ⧗:C̵,path ‹spr›
   ⧗:t ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:t2 $:$ ⎙̵ ⧗:t2 △ ‹tf› ᛁ $:$ ⎙̵ ⧗:t2 #2# ‹tf› ᛁ ⦄ ⁼
   $: error: $ ⎙̵
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cerr› ⸫
@@ -102,26 +102,26 @@
 ⍝ ‹pvstr› C v: a value's type with its evidential and charge
 ⦃
   ⧖:C,v
-  ⧗:C ⧗:v #6# ⊞ ‹rd› ⧖:C,ev
+  ⧗:C̵ ⧗:v #6# ⊞ ‹rd› ⧖:C,ev
   ⧗:ev #2# ᛖ ⋔ ⦃ $⸮$ ⎙̵ ⦄ ∅ ⁼ ⧗:ev △ ᛖ ⋔ ⦃ $⁖$ ⎙̵ ⦄ ∅ ⁼
-  ⧗:C,v ‹rd› ‹spr›
+  ⧗:C̵,v ‹rd› ‹spr›
   ⧗:v #7# ⊞ ‹rd› ⧖:C,ch
-  ⧗:C,ch #16# ‹tis› ⧖:C,e ⧗:C,ch #17# ‹tis› ⧖:C,g
-  ⧗:C,ch ⧗:e ⧗:g ⋏ ⋔ ⦃ ⌁ ⦄ ⦃ $⁽$ ⎙̵ ‹spr› $⁾$ ⎙̵ ⦄ ⁼
+  ⧗:C̵,ch #16# ‹tis› ⧖:C,e ⧗:C̵,ch #17# ‹tis› ⧖:C,g
+  ⧗:C̵,ch ⧗:e ⧗:g ⋏ ⋔ ⦃ ⌁ ⦄ ⦃ $⁽$ ⎙̵ ‹spr› $⁾$ ⎙̵ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹pvstr› ⸫
 
 ⍝ ‹plist› C L kind: "[a b]" of values (kind 1) or of types (kind 0)
 ⦃
   ⧖:C,L,kind
   $[$ ⎙̵
-  ⧗:C,L ‹llen› ⧖:C,n
-  ⧗:C,L,kind ○ ⧗:n
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,L,kind ○ ⧗:n
   ⥀ ⦃
     ⧖:C,L,kind,j,n
-    ⧗:C,L,kind,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+    ⧗:C̵,L,kind,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
       ⦃ ⧖:C,L,kind,j,n
         ⧗:j ○ ≶ ⋔ ∅ ⦃ $ $ ⎙̵ ⦄ ∅
-        ⧗:C,L,j ‹lget› ⧗:kind △ ᛖ ⋔ ⦃ ‹pvstr› ⦄ ⦃ ‹spr› ⦄ ⁼
+        ⧗:C̵,L,j ‹lget› ⧗:kind △ ᛖ ⋔ ⦃ ‹pvstr› ⦄ ⦃ ‹spr› ⦄ ⁼
         ⧗:L,kind ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁
@@ -131,17 +131,17 @@
 ⍝ ‹trace› C ind t S: "label  ⊢ [stack]" for an op whose label is its token
 ⦃
   ⧖:C,ind,t,S
-  ⧗:C ‹tron› ⧖:C,on
-  ⧗:C,ind,t,S ⧗:on ⋔ ⦃ ⧖:C,ind,t,S ⧗:ind ‹pind› ⧗:C,t ‹plab› ⧗:S ‹trtail› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵ ‹tron› ⧖:C,on
+  ⧗:C̵,ind,t,S ⧗:on ⋔ ⦃ ⧖:C,ind,t,S ⧗:ind ‹pind› ⧗:C̵,t ‹plab› ⧗:S ‹trtail› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹trace› ⸫
-⦃ ⧖:C,S $  ⊢ $ ⎙̵ ⧗:C,S △ ‹plist› $\n$ ⎙̵ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹trtail› ⸫
+⦃ ⧖:C,S $  ⊢ $ ⎙̵ ⧗:C̵,S △ ‹plist› $\n$ ⎙̵ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹trtail› ⸫
 
 ⍝ ‹tracek› C ind code S: a trace line with a fixed label: 1 ⋔ (join), 2 ⋔⇋ (join),
 ⍝ 3 ⥀ (exit), 4 ⁇ (join), 5 ⊨, 6 ⟦…⟧, 7 ⟜, 8 ⟜ (retrocausal: filters the moment)
 ⦃
   ⧖:C,ind,code,S
-  ⧗:C ‹tron› ⧖:C,on
-  ⧗:C,S,ind,code ⧗:on ⋔ ⦃ ⧖:C,S,ind,code ⧗:ind ‹pind› ⧗:code ‹pcodelab› ⧗:C,S ‹trtail› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵ ‹tron› ⧖:C,on
+  ⧗:C̵,S,ind,code ⧗:on ⋔ ⦃ ⧖:C,S,ind,code ⧗:ind ‹pind› ⧗:code ‹pcodelab› ⧗:C̵,S ‹trtail› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹tracek› ⸫
 ⦃
   ⍿⁰ △ ᛖ ⋔ ⦃ $⋔ (join)$ ⎙̵ ⦄ ∅ ⁼
@@ -158,9 +158,9 @@
 ⍝ 5 assert, 6 body, 7 ok, 8 fail, 9 prayer, 10 elements, 11 post-select
 ⦃
   ⧖:C,ind,code
-  ⧗:C ‹tron› ⧖:C,on
+  ⧗:C̵ ‹tron› ⧖:C,on
   ⧗:ind,code ⧗:on ⋔ ⦃ ⧖:ind,code ⧗:ind ‹pind› ⧗:code ‹pnote› $\n$ ⎙̵ ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
-  ⧗:C
+  ⧗:C̵
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹note› ⸫
 ⦃
   ⍿⁰ △ ᛖ ⋔ ⦃ $attest$ ⎙̵ ⦄ ∅ ⁼
@@ -181,12 +181,12 @@
 ⍝ ‹sapptok› C e t from to full: append text code points from … to−1 of token t (dropping ⸮ ⁖ unless full)
 ⦃
   ⧖:C,e,t,from,to,full
-  ⧗:C,e,full ⧗:t #8# ⊞ ⧗:from ⊞ ⧗:t #8# ⊞ ⧗:to ⊞
+  ⧗:C̵,e,full ⧗:t #8# ⊞ ⧗:from ⊞ ⧗:t #8# ⊞ ⧗:to ⊞
   ⥀ ⦃
     ⧖:C,e,full,j,end
-    ⧗:C,e,full,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,e,full,j,end ⧗:C,j ‹rd› ⧖:C,c
-        ⧗:C,e,c ⧗:full △ ᛖ ⧗:c #11822# ᛖ ‹not› ⧗:c #8278# ᛖ ‹not› ⋎ ⋏ ⋔ ⦃ ‹scp› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+    ⧗:C̵,e,full,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,e,full,j,end ⧗:C̵,j ‹rd› ⧖:C,c
+        ⧗:C̵,e,c ⧗:full △ ᛖ ⧗:c #11822# ᛖ ‹not› ⧗:c #8278# ᛖ ‹not› ⋎ ⋏ ⋔ ⦃ ‹scp› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
         ⧗:e,full ⧗:j △ ⊞ ⧗:end ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁
@@ -195,9 +195,9 @@
 ⍝ ‹tcfactor› C i to e1 … e6: one charge factor of a type token
 ⦃
   ⧖:C,i,to,e1,e2,e3,e4,e5,e6
-  ⧗:C ⟗ ⧗:i,to ‹chparse› ⧖:i2,f,sgn,e,have ⧖:C
+  ⧗:C̵ ⟗ ⧗:i,to ‹chparse› ⧖:i2,f,sgn,e,have ⧖:C
   ⧗:sgn ⧗:e ⧗:have △ ᛖ ⋔ ⦃ ⊠ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:x
-  ⧗:C,i2,to
+  ⧗:C̵,i2,to
   ⧗:e1 ⧗:x ⧗:f △ ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
   ⧗:e2 ⧗:x ⧗:f #2# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
   ⧗:e3 ⧗:x ⧗:f #3# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
@@ -209,30 +209,30 @@
 ⍝ ‹tokcharge› C bt: the canonical charge of type token bt ("" when it has none)
 ⦃
   ⧖:C,bt
-  ⧗:C,bt #6# ‹tf› ⧖:C,copen ⧗:C,bt #7# ‹tf› ⧖:C,n
-  ⧗:C,bt ⧗:copen ○ ≶ ⋔ ⦃ ‹tokcharge1› ⦄ ⁼ ⦃ ⌁ #16# ‹reg› ⦄
+  ⧗:C̵,bt #6# ‹tf› ⧖:C,copen ⧗:C̵,bt #7# ‹tf› ⧖:C,n
+  ⧗:C̵,bt ⧗:copen ○ ≶ ⋔ ⦃ ‹tokcharge1› ⦄ ⁼ ⦃ ⌁ #16# ‹reg› ⦄
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tokcharge› ⸫
 ⦃
   ⧖:C,bt
-  ⧗:C,bt #6# ‹tf› ⧖:C,copen ⧗:C,bt #7# ‹tf› ⧖:C,n
-  ⧗:C ⧗:bt #9# ⊞ ⧗:copen ⊞ ⧗:bt #7# ⊞ ⧗:n ⊞ ○ ○ ○ ○ ○ ○
+  ⧗:C̵,bt #6# ‹tf› ⧖:C,copen ⧗:C̵,bt #7# ‹tf› ⧖:C,n
+  ⧗:C̵ ⧗:bt #9# ⊞ ⧗:copen ⊞ ⧗:bt #7# ⊞ ⧗:n ⊞ ○ ○ ○ ○ ○ ○
   ⥀ ⦃
     ⧖:C,i,to,e1,e2,e3,e4,e5,e6
-    ⧗:C,i,to,e1,e2,e3,e4,e5,e6 ⧗:i ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹tcfactor› ⊕ ⦄
+    ⧗:C̵,i,to,e1,e2,e3,e4,e5,e6 ⧗:i ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹tcfactor› ⊕ ⦄
   ⦄
-  ⧖:C,i,to,e1,e2,e3,e4,e5,e6 ⧗:C,e1,e2,e3,e4,e5,e6 ‹chfmt›
+  ⧖:C,i,to,e1,e2,e3,e4,e5,e6 ⧗:C̵,e1,e2,e3,e4,e5,e6 ‹chfmt›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tokcharge1› ⸫
 
 ⍝ ‹sapppfx› C e i np full: append the prefix tokens of type node i
 ⦃
   ⧖:C,e,i,np,full
-  ⧗:C,e,i,full ○ ⧗:np
+  ⧗:C̵,e,i,full ○ ⧗:np
   ⥀ ⦃
     ⧖:C,e,i,full,j,np
-    ⧗:C,e,i,full,j,np ⧗:j ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+    ⧗:C̵,e,i,full,j,np ⧗:j ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
       ⦃ ⧖:C,e,i,full,j,np
-        ⧗:C,i ⧗:j #4# ⊞ ‹nd› ‹tabs› ⧖:C,t ⧗:C,t #7# ‹tf› ⧖:C,n
-        ⧗:C,e,t ○ ⧗:n ⧗:full ‹sapptok›
+        ⧗:C̵,i ⧗:j #4# ⊞ ‹nd› ‹tabs› ⧖:C,t ⧗:C̵,t #7# ‹tf› ⧖:C,n
+        ⧗:C̵,e,t ○ ⧗:n ⧗:full ‹sapptok›
         ⧗:e,i,full ⧗:j △ ⊞ ⧗:np ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁
@@ -241,9 +241,9 @@
 ⍝ ‹sappbase› C e bt k full elem: append the base of a type (token bt of kind k)
 ⦃
   ⧖:C,e,bt,k,full,elem
-  ⧗:C,bt #6# ‹tf› ⧖:C,copen ⧗:C,bt #7# ‹tf› ⧖:C,n
+  ⧗:C̵,bt #6# ‹tf› ⧖:C,copen ⧗:C̵,bt #7# ‹tf› ⧖:C,n
   ⧗:n ⧗:copen ⧗:copen ○ ≶ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⦃ ⌁ ⦄ ⧖:end
-  ⧗:C,e,bt,end,full ⧗:k #9# ᛖ ⋔ ⦃ ⧖:C,e,bt,end,full ⧗:C,e,bt ○ ⧗:end,full ‹sapptok› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,e,bt,end,full ⧗:k #9# ᛖ ⋔ ⦃ ⧖:C,e,bt,end,full ⧗:C̵,e,bt ○ ⧗:end,full ‹sapptok› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:e,bt,n,full ⧗:k #2# ᛖ ⋔ ⦃ ⧖:e,bt,n,full ⧗:e,bt ○ ⧗:n,full ‹sapptok› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:e,elem ⧗:k #11# ᛖ ⋔ ⦃ ⧖:e,elem ⧗:e #10214# ‹scp› ⧗:e,elem ‹sapp› ⧗:e #10215# ‹scp› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sappbase› ⸫
@@ -251,56 +251,56 @@
 ⍝ ‹canon› C i full: the type of type node i (full: with ⸮ ⁖ and the charge, for shapes)
 ⦃
   ⧖:C,i,full
-  ⧗:C,i △ ‹nd› ‹tabs› ⧖:C,bt
-  ⧗:C,i #3# ‹nd› ⧖:C,np
-  ⧗:C,bt ‹tkd› ⧖:C,k
+  ⧗:C̵,i △ ‹nd› ‹tabs› ⧖:C,bt
+  ⧗:C̵,i #3# ‹nd› ⧖:C,np
+  ⧗:C̵,bt ‹tkd› ⧖:C,k
   ⍝ the element type and the charge first: strings are built one at a time
-  ⧗:C ⧗:i #4# ⊞ ⧗:np ⊞ ⧗:full ⧗:k #11# ᛖ ⋔ ⦃ ‹canon› ⦄ ⦃ ⌁ ⌁ #-1# ⦄ ⁼ ⧖:C,elem
-  ⧗:C,bt ⧗:k #9# ᛖ ⧗:full △ ᛖ ⋎ ⋔ ⦃ ‹tokcharge› ⦄ ⦃ ⌁ #16# ‹reg› ⦄ ⁼ ⧖:C,ch
-  ⧗:C ‹sbeg› ⧖:C,e
-  ⧗:C,e,i,np,full ‹sapppfx›
+  ⧗:C̵ ⧗:i #4# ⊞ ⧗:np ⊞ ⧗:full ⧗:k #11# ᛖ ⋔ ⦃ ‹canon› ⦄ ⦃ ⌁ ⌁ #-1# ⦄ ⁼ ⧖:C,elem
+  ⧗:C̵,bt ⧗:k #9# ᛖ ⧗:full △ ᛖ ⋎ ⋔ ⦃ ‹tokcharge› ⦄ ⦃ ⌁ #16# ‹reg› ⦄ ⁼ ⧖:C,ch
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:C̵,e,i,np,full ‹sapppfx›
   ⧗:e,bt,k,full,elem ‹sappbase›
   ⧗:ch #16# ‹tis› ⧖:C,neutral
-  ⧗:C,e,ch ⧗:neutral ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:e,ch ⧗:e #8317# ‹scp› ⧗:e,ch ‹sapp› ⧗:e #8318# ‹scp› ⦄ ⁼
+  ⧗:C̵,e,ch ⧗:neutral ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:e,ch ⧗:e #8317# ‹scp› ⧗:e,ch ‹sapp› ⧗:e #8318# ‹scp› ⦄ ⁼
   ⧗:e ‹send›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹canon› ⸫
 
 ⍝ ‹annot› C i: the evidential and charge written on type node i
 ⦃
   ⧖:C,i
-  ⧗:C,i △ ‹nd› ‹tabs› ⧖:C,bt
-  ⧗:C,i #3# ‹nd› ⧖:C,np
-  ⧗:C,bt ‹tkd› ⧖:C,k
+  ⧗:C̵,i △ ‹nd› ‹tabs› ⧖:C,bt
+  ⧗:C̵,i #3# ‹nd› ⧖:C,np
+  ⧗:C̵,bt ‹tkd› ⧖:C,k
   ⍝ evidential: scan the prefix tokens and the type token
-  ⧗:C,i,np,bt,k ‹tyev› ⧖:C,ev
-  ⧗:C,bt ⧗:k #9# ᛖ ⋔ ⦃ ‹tokcharge› ⦄ ⦃ ⌁ #16# ‹reg› ⦄ ⁼ ⧖:C,ch
-  ⧗:C,ev,ch
+  ⧗:C̵,i,np,bt,k ‹tyev› ⧖:C,ev
+  ⧗:C̵,bt ⧗:k #9# ᛖ ⋔ ⦃ ‹tokcharge› ⦄ ⦃ ⌁ #16# ‹reg› ⦄ ⁼ ⧖:C,ch
+  ⧗:C̵,ev,ch
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹annot› ⸫
 
 ⍝ ‹tokev› C t ev: ev raised by the ⸮ (hearsay) or ⁖ (inferred) in token t's text
 ⦃
   ⧖:C,t,ev
-  ⧗:C,t #7# ‹tf› ⧖:C,n
-  ⧗:C ⧗:t #8# ⊞ ⧗:t #8# ⊞ ⧗:n ⊞ ⧗:ev
+  ⧗:C̵,t #7# ‹tf› ⧖:C,n
+  ⧗:C̵ ⧗:t #8# ⊞ ⧗:t #8# ⊞ ⧗:n ⊞ ⧗:ev
   ⥀ ⦃
     ⧖:C,j,end,ev
-    ⧗:C,j,end,ev ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,j,end,ev ⧗:C,j ‹rd› ⧖:C,c ⧗:C ⧗:j △ ⊞ ⧗:end
+    ⧗:C̵,j,end,ev ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,j,end,ev ⧗:C̵,j ‹rd› ⧖:C,c ⧗:C̵ ⧗:j △ ⊞ ⧗:end
         ⧗:ev ⧗:c #8278# ᛖ ⋔ ⦃ △ ‹evmax› ⦄ ∅ ⁼ ⧗:c #11822# ᛖ ⋔ ⦃ #2# ‹evmax› ⦄ ∅ ⁼ ⊕ ⦄
   ⦄
-  ⧖:C,j,end,ev ⧗:C,ev
+  ⧖:C,j,end,ev ⧗:C̵,ev
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tokev› ⸫
 
 ⦃
   ⧖:C,i,np,bt,k
-  ⧗:C,i ○ ○ ⧗:np
+  ⧗:C̵,i ○ ○ ⧗:np
   ⥀ ⦃
     ⧖:C,i,ev,j,np
-    ⧗:C,i,ev,j,np ⧗:j ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,i,ev,j,np ⧗:C,i ⧗:j #4# ⊞ ‹nd› ‹tabs› ⧖:C,t ⧗:C,t,ev ‹tokev› ⧖:C,ev2 ⧗:C,i,ev2 ⧗:j △ ⊞ ⧗:np ⊕ ⦄
+    ⧗:C̵,i,ev,j,np ⧗:j ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,i,ev,j,np ⧗:C̵,i ⧗:j #4# ⊞ ‹nd› ‹tabs› ⧖:C,t ⧗:C̵,t,ev ‹tokev› ⧖:C,ev2 ⧗:C̵,i,ev2 ⧗:j △ ⊞ ⧗:np ⊕ ⦄
   ⦄
   ⧖:C,i,ev,j,np
-  ⧗:C,bt,ev ⧗:k #9# ᛖ ⋔ ⦃ ‹tokev› ⦄ ⦃ ⧖:e ⌁ ⧗:e ⦄ ⁼
+  ⧗:C̵,bt,ev ⧗:k #9# ᛖ ⋔ ⦃ ‹tokev› ⦄ ⦃ ⧖:e ⌁ ⧗:e ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tyev› ⸫
 
 ⍝ ---- values: [type id token region of role ev ch]; a moment has void in place of role
@@ -308,46 +308,46 @@
 ⍝ ‹vnew› C ty tok region: a new value with a fresh identity
 ⦃
   ⧖:C,ty,tok,region
-  ⧗:C ○ ‹inc› ⧖:C,id
-  ⧗:C #16# ‹reg› ⧖:C,ch
-  ⧗:C ‹len› ⧖:C,v
-  ⧗:C ⧗:ty ⍆̵ ⧗:id △ ⊞ ⍆̵ ⧗:tok ⍆̵ ⧗:region ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ ⧗:ch ⍆̵ ⧗:v
+  ⧗:C̵ ○ ‹inc› ⧖:C,id
+  ⧗:C̵ #16# ‹reg› ⧖:C,ch
+  ⧗:C̵ ‹len› ⧖:C,v
+  ⧗:C̵ ⧗:ty ⍆̵ ⧗:id △ ⊞ ⍆̵ ⧗:tok ⍆̵ ⧗:region ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ ⧗:ch ⍆̵ ⧗:v
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vnew› ⸫
 ⍝ ‹vrec› C ty id tok region of x ev ch: a value (or moment) record
 ⦃
   ⧖:C,ty,id,tok,region,of,x,ev,ch
-  ⧗:C ‹len› ⧖:C,v
-  ⧗:C ⧗:ty ⍆̵ ⧗:id ⍆̵ ⧗:tok ⍆̵ ⧗:region ⍆̵ ⧗:of ⍆̵ ⧗:x ⍆̵ ⧗:ev ⍆̵ ⧗:ch ⍆̵ ⧗:v
+  ⧗:C̵ ‹len› ⧖:C,v
+  ⧗:C̵ ⧗:ty ⍆̵ ⧗:id ⍆̵ ⧗:tok ⍆̵ ⧗:region ⍆̵ ⧗:of ⍆̵ ⧗:x ⍆̵ ⧗:ev ⍆̵ ⧗:ch ⍆̵ ⧗:v
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vrec› ⸫
-⦃ ⧖:C,v,k ⧗:C ⧗:v ⧗:k ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vf› ⸫
-⦃ ⧖:C,v,k,x ⧗:C ⧗:v ⧗:k ⊞ ⧗:x ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹vset› ⸫
+⦃ ⧖:C,v,k ⧗:C̵ ⧗:v ⧗:k ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vf› ⸫
+⦃ ⧖:C,v,k,x ⧗:C̵ ⧗:v ⧗:k ⊞ ⧗:x ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹vset› ⸫
 ⍝ ‹vall› C v: all eight fields
 ⦃
   ⧖:C,v
-  ⧗:C,v ○ ‹vf› ⧖:C,a ⧗:C,v △ ‹vf› ⧖:C,b ⧗:C,v #2# ‹vf› ⧖:C,c ⧗:C,v #3# ‹vf› ⧖:C,d
-  ⧗:C,v #4# ‹vf› ⧖:C,e ⧗:C,v #5# ‹vf› ⧖:C,f ⧗:C,v #6# ‹vf› ⧖:C,g ⧗:C,v #7# ‹vf› ⧖:C,h
-  ⧗:C,a,b,c,d,e,f,g,h
+  ⧗:C̵,v ○ ‹vf› ⧖:C,a ⧗:C̵,v △ ‹vf› ⧖:C,b ⧗:C̵,v #2# ‹vf› ⧖:C,c ⧗:C̵,v #3# ‹vf› ⧖:C,d
+  ⧗:C̵,v #4# ‹vf› ⧖:C,e ⧗:C̵,v #5# ‹vf› ⧖:C,f ⧗:C̵,v #6# ‹vf› ⧖:C,g ⧗:C̵,v #7# ‹vf› ⧖:C,h
+  ⧗:C̵,a,b,c,d,e,f,g,h
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹vall› ⸫
 ⍝ ‹vrole› C v role: a copy of v with another role (s1's ck_with_role)
-⦃ ⧖:C,v,role ⧗:C,v ‹vall› ⧖:C,a,b,c,d,e,f,g,h ⧗:C,a,b,c,d,e,role,g,h ‹vrec› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vrole› ⸫
+⦃ ⧖:C,v,role ⧗:C̵,v ‹vall› ⧖:C,a,b,c,d,e,f,g,h ⧗:C̵,a,b,c,d,e,role,g,h ‹vrec› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vrole› ⸫
 ⍝ ‹vannot› C from to: copy ev and ch from one value to another
 ⦃
   ⧖:C,from,to
-  ⧗:C,from #6# ‹vf› ⧖:C,ev ⧗:C,from #7# ‹vf› ⧖:C,ch
-  ⧗:C,to #6# ⧗:ev ‹vset› ⧗:to #7# ⧗:ch ‹vset›
+  ⧗:C̵,from #6# ‹vf› ⧖:C,ev ⧗:C̵,from #7# ‹vf› ⧖:C,ch
+  ⧗:C̵,to #6# ⧗:ev ‹vset› ⧗:to #7# ⧗:ch ‹vset›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹vannot› ⸫
 ⍝ ‹vty› C v
 ⦃ ○ ‹vf› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vty› ⸫
 ⍝ ‹ltypes› C L: the list of the values' types
 ⦃
   ⧖:C,L
-  ⧗:C,L ‹llen› ⧖:C,n
-  ⧗:C ‹lnew0› ⧖:C,M
-  ⧗:C,L,M ○ ⧗:n
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵ ‹lnew0› ⧖:C,M
+  ⧗:C̵,L,M ○ ⧗:n
   ⥀ ⦃
     ⧖:C,L,M,j,n
-    ⧗:C,L,M,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,L,M,j,n ⧗:C,L,j ‹lget› ‹vty› ⧖:C,t ⧗:C,M,t ‹lpush› ⧖:C,M2 ⧗:C,L,M2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,L,M,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,M,j,n ⧗:C̵,L,j ‹lget› ‹vty› ⧖:C,t ⧗:C̵,M,t ‹lpush› ⧖:C,M2 ⧗:C̵,L,M2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⧖:M ⌁ ⧗:M
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ltypes› ⸫
@@ -357,53 +357,53 @@
 ⍝ ‹sigtypes› C s full: the signature's input and output types (canonical) and annotations
 ⦃
   ⧖:C,s,full
-  ⧗:C,s #3# ‹nd› ⧖:C,nin
-  ⧗:C,s #2# ‹nd› ⧖:C,sz
-  ⧗:C ‹lnew0› ⧖:C,e0
+  ⧗:C̵,s #3# ‹nd› ⧖:C,nin
+  ⧗:C̵,s #2# ‹nd› ⧖:C,sz
+  ⧗:C̵ ‹lnew0› ⧖:C,e0
   ⍝ the loop carries [C c end k nin full ins outs iev ich oev och]
-  ⧗:C ⧗:s #5# ⊞ ⧗:s ⧗:sz ⊞ ○ ⧗:nin,full,e0,e0,e0,e0,e0,e0
+  ⧗:C̵ ⧗:s #5# ⊞ ⧗:s ⧗:sz ⊞ ○ ⧗:nin,full,e0,e0,e0,e0,e0,e0
   ⥀ ⦃
     ⧖:C,c,end,k,nin,full,ins,outs,iev,ich,oev,och
-    ⧗:C,c,end,k,nin,full,ins,outs,iev,ich,oev,och ⧗:c ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹sigtype1› ⊕ ⦄
+    ⧗:C̵,c,end,k,nin,full,ins,outs,iev,ich,oev,och ⧗:c ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹sigtype1› ⊕ ⦄
   ⦄
   ⧖:C,c,end,k,nin,full,ins,outs,iev,ich,oev,och
-  ⧗:C,ins,outs,iev,ich,oev,och
+  ⧗:C̵,ins,outs,iev,ich,oev,och
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹sigtypes› ⸫
 
 ⦃
   ⧖:C,c,end,k,nin,full,ins,outs,iev,ich,oev,och
-  ⧗:C,c,full ‹canon› ⧖:C,t
-  ⧗:C,c ‹annot› ⧖:C,ev,ch
-  ⧗:C,c #2# ‹nd› ⧖:C,sz
+  ⧗:C̵,c,full ‹canon› ⧖:C,t
+  ⧗:C̵,c ‹annot› ⧖:C,ev,ch
+  ⧗:C̵,c #2# ‹nd› ⧖:C,sz
   ⧗:k ⧗:nin ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⧖:isin
-  ⧗:C,ins,t ⧗:isin ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,ins2
-  ⧗:C,outs,t ⧗:isin ⋔ ⦃ ⌁ ⦄ ⦃ ‹lpush› ⦄ ⁼ ⧖:C,outs2
-  ⧗:C,iev,ev ⧗:isin ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,iev2
-  ⧗:C,ich,ch ⧗:isin ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,ich2
-  ⧗:C,oev,ev ⧗:isin ⋔ ⦃ ⌁ ⦄ ⦃ ‹lpush› ⦄ ⁼ ⧖:C,oev2
-  ⧗:C,och,ch ⧗:isin ⋔ ⦃ ⌁ ⦄ ⦃ ‹lpush› ⦄ ⁼ ⧖:C,och2
-  ⧗:C ⧗:c ⧗:sz ⊞ ⧗:end ⧗:k △ ⊞ ⧗:nin,full,ins2,outs2,iev2,ich2,oev2,och2
+  ⧗:C̵,ins,t ⧗:isin ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,ins2
+  ⧗:C̵,outs,t ⧗:isin ⋔ ⦃ ⌁ ⦄ ⦃ ‹lpush› ⦄ ⁼ ⧖:C,outs2
+  ⧗:C̵,iev,ev ⧗:isin ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,iev2
+  ⧗:C̵,ich,ch ⧗:isin ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,ich2
+  ⧗:C̵,oev,ev ⧗:isin ⋔ ⦃ ⌁ ⦄ ⦃ ‹lpush› ⦄ ⁼ ⧖:C,oev2
+  ⧗:C̵,och,ch ⧗:isin ⋔ ⦃ ⌁ ⦄ ⦃ ‹lpush› ⦄ ⁼ ⧖:C,och2
+  ⧗:C̵ ⧗:c ⧗:sz ⊞ ⧗:end ⧗:k △ ⊞ ⧗:nin,full,ins2,outs2,iev2,ich2,oev2,och2
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹sigtype1› ⸫
 
 ⍝ ‹fninfo› C s rev name: a function record
 ⦃
   ⧖:C,s,rev,name
-  ⧗:C,s ○ ‹sigtypes› ⧖:C,ins,outs,iev,ich,oev,och
-  ⧗:C ‹len› ⧖:C,f
-  ⧗:C ⧗:name ⍆̵ ⧗:ins ⍆̵ ⧗:outs ⍆̵ ⧗:rev ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:f
+  ⧗:C̵,s ○ ‹sigtypes› ⧖:C,ins,outs,iev,ich,oev,och
+  ⧗:C̵ ‹len› ⧖:C,f
+  ⧗:C̵ ⧗:name ⍆̵ ⧗:ins ⍆̵ ⧗:outs ⍆̵ ⧗:rev ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:f
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹fninfo› ⸫
 
 ⍝ ‹pjoin› C L sep: print a list of strings joined by sep (0 a space, 1 ", ")
 ⦃
   ⧖:C,L,sep
-  ⧗:C,L ‹llen› ⧖:C,n
-  ⧗:C,L,sep ○ ⧗:n
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,L,sep ○ ⧗:n
   ⥀ ⦃
     ⧖:C,L,sep,j,n
-    ⧗:C,L,sep,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+    ⧗:C̵,L,sep,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
       ⦃ ⧖:C,L,sep,j,n
         ⧗:sep ⧗:j ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ○ ᛖ ⋔ ⦃ $ $ ⎙̵ ⦄ ⦃ $, $ ⎙̵ ⦄ ⁼ ⦄ ⦃ ⌁ ⦄
-        ⧗:C,L,j ‹lget› ‹spr›
+        ⧗:C̵,L,j ‹lget› ‹spr›
         ⧗:L,sep ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁
@@ -412,14 +412,14 @@
 ⍝ ‹sappj› C e L: append the strings of L joined by spaces
 ⦃
   ⧖:C,e,L
-  ⧗:C,L ‹llen› ⧖:C,n
-  ⧗:C,e,L ○ ⧗:n
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,e,L ○ ⧗:n
   ⥀ ⦃
     ⧖:C,e,L,j,n
-    ⧗:C,e,L,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+    ⧗:C̵,e,L,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
       ⦃ ⧖:C,e,L,j,n
-        ⧗:C,e ⧗:j ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:ee ⧗:ee #32# ‹scp› ⦄ ⦃ ⌁ ⦄
-        ⧗:L,j ‹lget› ⧖:C,x ⧗:C,e,x ‹sapp›
+        ⧗:C̵,e ⧗:j ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:ee ⧗:ee #32# ‹scp› ⦄ ⦃ ⌁ ⦄
+        ⧗:L,j ‹lget› ⧖:C,x ⧗:C̵,e,x ‹sapp›
         ⧗:e,L ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁
@@ -428,9 +428,9 @@
 ⍝ ‹cshape› C s: the call-by-shape key of signature node s (§9.1)
 ⦃
   ⧖:C,s
-  ⧗:C,s △ ‹sigtypes› ⧖:C,ins,outs,a,b,c,d
-  ⧗:C ‹sbeg› ⧖:C,e
-  ⧗:C,e #10216# ‹scp› ⧗:e,ins ‹sappj› ⧗:e #32# ‹scp› ⧗:e #8888# ‹scp› ⧗:e #32# ‹scp›
+  ⧗:C̵,s △ ‹sigtypes› ⧖:C,ins,outs,a,b,c,d
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:C̵,e #10216# ‹scp› ⧗:e,ins ‹sappj› ⧗:e #32# ‹scp› ⧗:e #8888# ‹scp› ⧗:e #32# ‹scp›
   ⧗:e,outs ‹sappj› ⧗:e #10217# ‹scp› ⧗:e ‹send›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cshape› ⸫
 
@@ -439,44 +439,44 @@
 ⍝ ‹pwhat› C t mode: what an error names: 0 token t's text, 1 its label, 2 ⋔
 ⦃
   ⧖:C,t,mode
-  ⧗:C,t,mode ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ‹ptx› ⦄ ⦃ △ ᛖ ⋔ ⦃ ‹plab› ⦄ ⦃ ⌁ $⋔$ ⎙̵ ⦄ ⁼ ⦄ ⁼
+  ⧗:C̵,t,mode ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ‹ptx› ⦄ ⦃ △ ᛖ ⋔ ⦃ ‹plab› ⦄ ⦃ ⌁ $⋔$ ⎙̵ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pwhat› ⸫
 
 ⍝ ‹pop› C S k tok wm: pop k values (deepest first) and order them by role
 ⦃
   ⧖:C,S,k,tok,wm
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,S,k,tok,wm,n ⧗:n ⧗:k ≶ ⋔ ⦃ ‹pop2› ⦄ ⁼ ⦃ ‹poperr› ⦄
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S,k,tok,wm,n ⧗:n ⧗:k ≶ ⋔ ⦃ ‹pop2› ⦄ ⁼ ⦃ ‹poperr› ⦄
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹pop› ⸫
 
 ⦃
   ⧖:C,S,k,tok,wm,n
-  ⧗:C,tok ‹cerr› ⧗:tok,wm ‹pwhat› $ needs $ ⎙̵ ⧗:k ᛁ $ value(s) but the stack holds $ ⎙̵ ⧗:n ᛁ ‹die›
+  ⧗:C̵,tok ‹cerr› ⧗:tok,wm ‹pwhat› $ needs $ ⎙̵ ⧗:k ᛁ $ value(s) but the stack holds $ ⎙̵ ⧗:n ᛁ ‹die›
   ⧗:S ⧗:S
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹poperr› ⸫
 
 ⦃
   ⧖:C,S,k,tok,wm,n
-  ⧗:C,S ⧗:n ⧗:k ⊟ ⧗:n ‹lslice› ⧖:C,vals
-  ⧗:C,S ○ ⧗:n ⧗:k ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵,S ⧗:n ⧗:k ⊟ ⧗:n ‹lslice› ⧖:C,vals
+  ⧗:C̵,S ○ ⧗:n ⧗:k ⊟ ‹lslice› ⧖:C,S2
   ⍝ the slots, filled first by the marked values
-  ⧗:C ‹lbeg› ⧖:C,slots
-  ⧗:C,slots ○ ⧗:k
+  ⧗:C̵ ‹lbeg› ⧖:C,slots
+  ⧗:C̵,slots ○ ⧗:k
   ⥀ ⦃
     ⧖:C,slots,i,k
-    ⧗:C,slots,i,k ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:C,slots,i,k ⧗:C,slots #-1# ‹ladd› ⧗:slots ⧗:i △ ⊞ ⧗:k ⊕ ⦄
+    ⧗:C̵,slots,i,k ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:C,slots,i,k ⧗:C̵,slots #-1# ‹ladd› ⧗:slots ⧗:i △ ⊞ ⧗:k ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁
   ⧗:vals,slots,k,tok,wm ○
   ⥀ ⦃
     ⧖:C,vals,slots,k,tok,wm,i
-    ⧗:C,vals,slots,k,tok,wm,i ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹poprole› ⧖:i2 ⧗:i2 △ ⊞ ⊕ ⦄
+    ⧗:C̵,vals,slots,k,tok,wm,i ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹poprole› ⧖:i2 ⧗:i2 △ ⊞ ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁ ⌁
   ⧗:vals,slots,k ○
   ⥀ ⦃
     ⧖:C,vals,slots,k,i
-    ⧗:C,vals,slots,k,i ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹popfill› ⧖:i2 ⧗:i2 △ ⊞ ⊕ ⦄
+    ⧗:C̵,vals,slots,k,i ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹popfill› ⧖:i2 ⧗:i2 △ ⊞ ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁
   ⧗:S2,slots
@@ -485,10 +485,10 @@
 ⍝ ‹poprole› C vals slots k tok wm i: place a marked value
 ⦃
   ⧖:C,vals,slots,k,tok,wm,i
-  ⧗:C,vals,i ‹lget› ⧖:C,v
-  ⧗:C,v #5# ‹vf› ⧖:C,r
-  ⧗:C,slots,r ⧗:r ○ ≶ ⋔ ⦃ ‹lget› ⦄ ⦃ ‹lget› ⦄ ⦃ ⌁ ⌁ #-1# ⦄ ⧖:C,cur
-  ⧗:C,tok,wm,k ⧗:r #-1# ᛖ ‹not› ⧗:r ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ △ ‹roleerr› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,vals,i ‹lget› ⧖:C,v
+  ⧗:C̵,v #5# ‹vf› ⧖:C,r
+  ⧗:C̵,slots,r ⧗:r ○ ≶ ⋔ ⦃ ‹lget› ⦄ ⦃ ‹lget› ⦄ ⦃ ⌁ ⌁ #-1# ⦄ ⧖:C,cur
+  ⧗:C̵,tok,wm,k ⧗:r #-1# ᛖ ‹not› ⧗:r ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ △ ‹roleerr› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:tok,wm,k ⧗:r #-1# ᛖ ‹not› ⧗:cur #-1# ᛖ ‹not› ⋎ ⋔ ⦃ #2# ‹roleerr› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:slots,r,v ⧗:r #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹lset› ⦄ ⁼
   ⧗:vals,slots,k,tok,wm,i
@@ -496,7 +496,7 @@
 
 ⦃
   ⧖:C,tok,wm,k,code
-  ⧗:C,tok ‹cerr›
+  ⧗:C̵,tok ‹cerr›
   ⧗:tok,wm,k ⧗:code △ ᛖ ⋔
     ⦃ ⧖:tok,wm,k $impossible case role: $ ⎙̵ ⧗:tok,wm ‹pwhat› $ has only $ ⎙̵ ⧗:k ᛁ $ operand(s)$ ⎙̵ ⦄
     ⦃ ⧖:tok,wm,k $two operands of $ ⎙̵ ⧗:tok,wm ‹pwhat› $ carry the same case role$ ⎙̵ ⦄ ⁼
@@ -506,53 +506,53 @@
 ⍝ ‹popfill› C vals slots k i: an unmarked value takes the first free slot
 ⦃
   ⧖:C,vals,slots,k,i
-  ⧗:C,vals,i ‹lget› ⧖:C,v
-  ⧗:C,v #5# ‹vf› ⧖:C,r
-  ⧗:C,slots,v ⧗:r #-1# ᛖ ⋔ ⦃ ‹freeslot› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,vals,i ‹lget› ⧖:C,v
+  ⧗:C̵,v #5# ‹vf› ⧖:C,r
+  ⧗:C̵,slots,v ⧗:r #-1# ᛖ ⋔ ⦃ ‹freeslot› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
   ⧗:vals,slots,k,i
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹popfill› ⸫
 ⦃
   ⧖:C,slots,v
-  ⧗:C,slots ○
-  ⥀ ⦃ ⧖:C,slots,j ⧗:C,slots,j ‹lget› ⧖:C,x ⧗:C,slots ⧗:j △ ⊞ ⧗:x #-1# ᛖ ⋔ ⦃ △ ⊟ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼ ⦄
+  ⧗:C̵,slots ○
+  ⥀ ⦃ ⧖:C,slots,j ⧗:C̵,slots,j ‹lget› ⧖:C,x ⧗:C̵,slots ⧗:j △ ⊞ ⧗:x #-1# ᛖ ⋔ ⦃ △ ⊟ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼ ⦄
   ⧖:j ⌁ ⧗:slots,j,v ‹lset›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹freeslot› ⸫
 
 ⍝ ‹unwrap› C t tok: ◌T used where T is expected: propagate (§7.3) when the function may fail
 ⦃
   ⧖:C,t,tok
-  ⧗:C,t ‹shead› ⧖:C,h ⧗:C,t #15# ‹tis› ⧖:C,bare
-  ⧗:C,t,tok ⧗:h #9676# ᛖ ⧗:bare ‹not› ⋎ ⋔ ⦃ ‹unwrap1› ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:C̵,t ‹shead› ⧖:C,h ⧗:C̵,t #15# ‹tis› ⧖:C,bare
+  ⧗:C̵,t,tok ⧗:h #9676# ᛖ ⧗:bare ‹not› ⋎ ⋔ ⦃ ‹unwrap1› ⦄ ⦃ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹unwrap› ⸫
 ⦃
   ⧖:C,t,tok
-  ⧗:C #2# ‹reg› ⧖:C,cf
-  ⧗:C,t,tok ⧗:cf ○ ᛖ ⋔
-    ⦃ ⧖:C,t,tok ⧗:C,tok ‹cerr› $a possibly-failed $ ⎙̵ ⧗:t ‹spr› $ is used here; handle it with ⁇ or declare a ◌ output so the failure propagates (§7.3)$ ⎙̵ ‹die› ⧗:t ⦄
+  ⧗:C̵ #2# ‹reg› ⧖:C,cf
+  ⧗:C̵,t,tok ⧗:cf ○ ᛖ ⋔
+    ⦃ ⧖:C,t,tok ⧗:C̵,tok ‹cerr› $a possibly-failed $ ⎙̵ ⧗:t ‹spr› $ is used here; handle it with ⁇ or declare a ◌ output so the failure propagates (§7.3)$ ⎙̵ ‹die› ⧗:t ⦄
     ⦃ ⌁ ‹stail› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹unwrap1› ⸫
 
 ⍝ ‹agree› C tok vals: the operator's agreement marks are exactly its operands' classes (§6.1)
 ⦃
   ⧖:C,tok,vals
-  ⧗:C,vals ‹llen› ⧖:C,n
-  ⧗:C,vals ○ ⧗:n ○
+  ⧗:C̵,vals ‹llen› ⧖:C,n
+  ⧗:C̵,vals ○ ⧗:n ○
   ⍝ want: borrowed 1, quantum 8, superposed 16 (the mark bits)
   ⥀ ⦃
     ⧖:C,vals,i,n,want
-    ⧗:C,vals,i,n,want ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,vals,i,n,want ⧗:C,vals,i ‹lget› ‹vty› ‹tclass› ⧖:C,c
-        ⧗:C,vals ⧗:i △ ⊞ ⧗:n ⧗:want
+    ⧗:C̵,vals,i,n,want ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,i,n,want ⧗:C̵,vals,i ‹lget› ‹vty› ‹tclass› ⧖:C,c
+        ⧗:C̵,vals ⧗:i △ ⊞ ⧗:n ⧗:want
         ⧗:c △ ᛖ ⋔ ⦃ △ ⋓ ⦄ ∅ ⁼ ⧗:c #2# ᛖ ⋔ ⦃ #16# ⋓ ⦄ ∅ ⁼ ⧗:c #3# ᛖ ⋔ ⦃ #8# ⋓ ⦄ ∅ ⁼ ⊕ ⦄
   ⦄
   ⧖:C,vals,i,n,want
-  ⧗:C,tok #3# ‹tf› #25# ⋒ ⧖:C,have
-  ⧗:C,tok,vals,want ⧗:have ⧗:want ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹disagree› ⦄ ⁼
+  ⧗:C̵,tok #3# ‹tf› #25# ⋒ ⧖:C,have
+  ⧗:C̵,tok,vals,want ⧗:have ⧗:want ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹disagree› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹agree› ⸫
 ⦃
   ⧖:C,tok,vals,want
-  ⧗:C,tok ‹cerr› $disagreement: $ ⎙̵ ⧗:tok ‹ptx› $ on $ ⎙̵
-  ⧗:vals ‹ltypes› ⧖:C,ts ⧗:C,ts ○ ‹plist› $ needs $ ⎙̵
+  ⧗:C̵,tok ‹cerr› $disagreement: $ ⎙̵ ⧗:tok ‹ptx› $ on $ ⎙̵
+  ⧗:vals ‹ltypes› ⧖:C,ts ⧗:C̵,ts ○ ‹plist› $ needs $ ⎙̵
   ⧗:want #8# ⋒ ○ ᛖ ‹not› ⧖:q ⧗:want #16# ⋒ ○ ᛖ ‹not› ⧖:sp ⧗:want △ ⋒ ○ ᛖ ‹not› ⧖:b
   ⧗:want ○ ᛖ ⋔ ⦃ $no agreement mark$ ⎙̵ ⦄ ∅ ⁼
   ⧗:q ⋔ ⦃ $◌̵ quantum$ ⎙̵ ⦄ ∅ ⁼
@@ -568,7 +568,7 @@
 ⍝ 6 a number  7 ʃ, ⟗ʃ or a number  8 ⟗⟦T⟧ or ⟗ʃ  9 ℤ  10 𝔹  11 ⟖⟦T⟧ or ⟖ʃ  12 𝔹 or ℤ  13 ⟦T⟧ or ʃ
 ⦃
   ⧖:C,tok,i,code,wt,got
-  ⧗:C,tok ‹cerr› $operand $ ⎙̵ ⧗:i △ ⊞ ᛁ $ of $ ⎙̵ ⧗:tok ‹ptx› $: expected $ ⎙̵
+  ⧗:C̵,tok ‹cerr› $operand $ ⎙̵ ⧗:i △ ⊞ ᛁ $ of $ ⎙̵ ⧗:tok ‹ptx› $: expected $ ⎙̵
   ⧗:wt ⧗:code ○ ᛖ ⋔ ⦃ ‹spr› ⦄ ⦃ ⌁ ⦄ ⁼
   ⧗:code △ ᛖ ⋔ ⦃ $ℤ, ℝ or 𝔹$ ⎙̵ ⦄ ∅ ⁼
   ⧗:code #2# ᛖ ⋔ ⦃ $ℤ or 𝔹$ ⎙̵ ⦄ ∅ ⁼
@@ -589,12 +589,12 @@
 ⍝ ‹chk› C ok tok i code wt got: ‹operr› unless ok
 ⦃
   ⧖:C,ok,tok,i,code,wt,got
-  ⧗:C,tok,i,code,wt,got ⧗:ok ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹operr› ⦄ ⁼
+  ⧗:C̵,tok,i,code,wt,got ⧗:ok ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹operr› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ŧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹chk› ⸫
 
 ⍝ ‹cfail› C tok code: a fixed message at tok, and stop (codes in ‹pmsg›)
-⦃ ⧖:C,tok,code ⧗:C,tok ‹cerr› ⧗:code ‹pmsg› ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cfail› ⸫
-⦃ ⧖:C,ok,tok,code ⧗:C,tok,code ⧗:ok ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹cfail› ⦄ ⁼ ⦄ ⟨⟦ℤ⟧ ŧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cfailunless› ⸫
+⦃ ⧖:C,tok,code ⧗:C̵,tok ‹cerr› ⧗:code ‹pmsg› ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cfail› ⸫
+⦃ ⧖:C,ok,tok,code ⧗:C̵,tok,code ⧗:ok ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹cfail› ⦄ ⁼ ⦄ ⟨⟦ℤ⟧ ŧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cfailunless› ⸫
 
 ⦃
   ⍿⁰ △ ᛖ ⋔ ⦃ $indexing an array of quantum values would clone one; not supported (§8.1)$ ⎙̵ ⦄ ∅ ⁼
@@ -626,152 +626,152 @@
 ⦄ ⟨ℤ ⊸⟩ ‹pmsg› ⸫
 
 ⍝ ‹elemof› C a skip: the element type of ⟗⟦T⟧ (skip 2) or ⟦T⟧ (skip 1)
-⦃ ⧖:C,a,skip ⧗:C,a ‹slen› ⧖:C,n ⧗:C,a,skip ⧗:n ⧗:skip ⊟ △ ⊟ ‹ssub› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹elemof› ⸫
+⦃ ⧖:C,a,skip ⧗:C̵,a ‹slen› ⧖:C,n ⧗:C̵,a,skip ⧗:n ⧗:skip ⊟ △ ⊟ ‹ssub› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹elemof› ⸫
 
 ⍝ ‹gtypes› C tok ts: the result types of glyph tok on operand types ts
 ⦃
   ⧖:C,tok,ts
-  ⧗:C,tok ‹tc0› ⧖:C,x
-  ⧗:C,ts ‹llen› ⧖:C,n
-  ⧗:C,ts ○ ‹lget› ⧖:C,a
-  ⧗:C,ts △ ‹lget› ⧖:C,b
-  ⧗:C,ts #2# ‹lget› ⧖:C,c
+  ⧗:C̵,tok ‹tc0› ⧖:C,x
+  ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵,ts ○ ‹lget› ⧖:C,a
+  ⧗:C̵,ts △ ‹lget› ⧖:C,b
+  ⧗:C̵,ts #2# ‹lget› ⧖:C,c
   ⧗:b ⧗:n △ ≶ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼ ⧖:b
   ⧗:c ⧗:n #2# ≶ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼ ⧖:c
-  ⧗:C,tok,x,a,b,c ‹gtypes1›
+  ⧗:C̵,tok,x,a,b,c ‹gtypes1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gtypes› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,tok,x,a,b,c
+  ⧗:C̵,tok,x,a,b,c
   ⧗:x ⧖ @any(8862,8863,8864,8856,8860)@ ⋔ ⦃ ‹gt_arith› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x ⧖ @any(8914,8915,10849,8810,8811)@ ⋔ ⦃ ‹gt_bits› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #8822# ᛖ ⋔ ⦃ ‹gt_cmp› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #8911# ᛖ ⧗:x #8910# ᛖ ⋏ ⋔ ⦃ ‹gt_logic› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #8861# ᛖ ⋔ ⦃ ‹gt_neg› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #9863# ᛖ ⋔ ⦃ ‹gt_neut› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #8961# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ‹lnew0› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #9113# ᛖ ⋔ ⦃ ‹gt_print› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #9076# ᛖ ⋔ ⦃ ‹gt_len› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #8982# ᛖ ⋔ ⦃ ‹gt_index› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #9032# ᛖ ⋔ ⦃ ‹gt_store› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok,x,a,b,c ⧗:x #9030# ᛖ ⋔ ⦃ ‹gt_append› ⦄
-  ⦃ ⧖:C,tok,x,a,b,c ⧗:C,tok ‹cerr› $internal: no rule for $ ⎙̵ ⧗:tok ‹ptx› ‹die› ‹lnew0› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x ⧖ @any(8914,8915,10849,8810,8811)@ ⋔ ⦃ ‹gt_bits› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #8822# ᛖ ⋔ ⦃ ‹gt_cmp› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #8911# ᛖ ⧗:x #8910# ᛖ ⋏ ⋔ ⦃ ‹gt_logic› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #8861# ᛖ ⋔ ⦃ ‹gt_neg› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #9863# ᛖ ⋔ ⦃ ‹gt_neut› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #8961# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ‹lnew0› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #9113# ᛖ ⋔ ⦃ ‹gt_print› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #9076# ᛖ ⋔ ⦃ ‹gt_len› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #8982# ᛖ ⋔ ⦃ ‹gt_index› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #9032# ᛖ ⋔ ⦃ ‹gt_store› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok,x,a,b,c ⧗:x #9030# ᛖ ⋔ ⦃ ‹gt_append› ⦄
+  ⦃ ⧖:C,tok,x,a,b,c ⧗:C̵,tok ‹cerr› $internal: no rule for $ ⎙̵ ⧗:tok ‹ptx› ‹die› ‹lnew0› ⦄
   ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gtypes1› ⸫
 
 ⍝ ‹gt_*› C tok x a b c: one family of operators (b and c are −1 when absent)
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,a ‹tnum› ⧖:C,ok ⧗:C,ok,tok ○ △ ○ ⧗:a ‹chk›
+  ⧗:C̵,a ‹tnum› ⧖:C,ok ⧗:C̵,ok,tok ○ △ ○ ⧗:a ‹chk›
   ⧗:a ⧗:b ᛖ ⧗:tok △ ○ ⧗:a ⧗:b ‹chk›
   ⧗:a ⧗:x #8856# ᛖ ⧗:x #8860# ᛖ ⋏ ⋔ ⦃ ⧖:aa #9676# ⧗:aa ‹spre› ‹l1› ⦄ ⦃ ‹l1› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_arith› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,a #11# ‹tis› ⧖:C,i ⧗:C,a #13# ‹tis› ⧖:C,y
-  ⧗:C ⧗:i ⧗:y ⋏ ⧗:tok ○ #2# ○ ⧗:a ‹chk›
+  ⧗:C̵,a #11# ‹tis› ⧖:C,i ⧗:C̵,a #13# ‹tis› ⧖:C,y
+  ⧗:C̵ ⧗:i ⧗:y ⋏ ⧗:tok ○ #2# ○ ⧗:a ‹chk›
   ⧗:a ⧗:b ᛖ ⧗:tok △ ○ ⧗:a ⧗:b ‹chk›
   ⧗:a ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_bits› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,a ‹tnum› ⧖:C,i ⧗:C,a #10# ‹tis› ⧖:C,y
-  ⧗:C ⧗:i ⧗:y ⋏ ⧗:tok ○ #3# ○ ⧗:a ‹chk›
+  ⧗:C̵,a ‹tnum› ⧖:C,i ⧗:C̵,a #10# ‹tis› ⧖:C,y
+  ⧗:C̵ ⧗:i ⧗:y ⋏ ⧗:tok ○ #3# ○ ⧗:a ‹chk›
   ⧗:a ⧗:b ᛖ ⧗:tok △ ○ ⧗:a ⧗:b ‹chk›
   #10# ‹reg› ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_cmp› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,a #10# ‹tis› ⧖:C,i ⧗:C,b #10# ‹tis› ⧖:C,y
-  ⧗:C,i,tok ○ #4# ○ ⧗:a ‹chk›
+  ⧗:C̵,a #10# ‹tis› ⧖:C,i ⧗:C̵,b #10# ‹tis› ⧖:C,y
+  ⧗:C̵,i,tok ○ #4# ○ ⧗:a ‹chk›
   ⧗:y,tok △ #4# ○ ⧗:b ‹chk›
   #10# ‹reg› ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_logic› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,a #11# ‹tis› ⧖:C,i ⧗:C,a #12# ‹tis› ⧖:C,r ⧗:C,a #10# ‹tis› ⧖:C,y
-  ⧗:C ⧗:i ⧗:r ⋏ ⧗:y ⋏ ⧗:tok ○ #5# ○ ⧗:a ‹chk›
+  ⧗:C̵,a #11# ‹tis› ⧖:C,i ⧗:C̵,a #12# ‹tis› ⧖:C,r ⧗:C̵,a #10# ‹tis› ⧖:C,y
+  ⧗:C̵ ⧗:i ⧗:r ⋏ ⧗:y ⋏ ⧗:tok ○ #5# ○ ⧗:a ‹chk›
   ⧗:a ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_neg› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,a ‹tnum› ⧖:C,i ⧗:C,i,tok ○ #6# ○ ⧗:a ‹chk›
+  ⧗:C̵,a ‹tnum› ⧖:C,i ⧗:C̵,i,tok ○ #6# ○ ⧗:a ‹chk›
   ⍝ s1 extension: ⚇ also widens a byte to an integer
   ⧗:a #13# ‹tis› ⧖:C,y
-  ⧗:C,a ⧗:y ⋔ ⦃ ⌁ #11# ‹reg› ⦄ ∅ ⁼ ‹l1›
+  ⧗:C̵,a ⧗:y ⋔ ⦃ ⌁ #11# ‹reg› ⦄ ∅ ⁼ ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_neut› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,a ‹tnum› ⧖:C,i ⧗:C,a #10# ‹tis› ⧖:C,y ⧗:C,a #14# ‹tis› ⧖:C,z ⧗:C,a #18# ‹tis› ⧖:C,w
-  ⧗:C ⧗:i ⧗:y ⋏ ⧗:z ⋏ ⧗:w ⋏ ⧗:tok ○ #7# ○ ⧗:a ‹chk›
+  ⧗:C̵,a ‹tnum› ⧖:C,i ⧗:C̵,a #10# ‹tis› ⧖:C,y ⧗:C̵,a #14# ‹tis› ⧖:C,z ⧗:C̵,a #18# ‹tis› ⧖:C,w
+  ⧗:C̵ ⧗:i ⧗:y ⋏ ⧗:z ⋏ ⧗:w ⋏ ⧗:tok ○ #7# ○ ⧗:a ‹chk›
   ‹lnew0›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_print› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,a #18# ‹tis› ⧖:C,i ⧗:C,a #10199# #10214# ‹spfx2› ⧖:C,y
-  ⧗:C ⧗:i ⧗:y ⋏ ⧗:tok ○ #8# ○ ⧗:a ‹chk›
+  ⧗:C̵,a #18# ‹tis› ⧖:C,i ⧗:C̵,a #10199# #10214# ‹spfx2› ⧖:C,y
+  ⧗:C̵ ⧗:i ⧗:y ⋏ ⧗:tok ○ #8# ○ ⧗:a ‹chk›
   #11# ‹reg› ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_len› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,b #11# ‹tis› ⧖:C,i ⧗:C,i,tok △ #9# ○ ⧗:b ‹chk›
+  ⧗:C̵,b #11# ‹tis› ⧖:C,i ⧗:C̵,i,tok △ #9# ○ ⧗:b ‹chk›
   ⧗:a #18# ‹tis› ⧖:C,s
-  ⧗:C,tok,a ⧗:s ⋔ ⦃ ⌁ ⌁ #20# ‹reg› ‹l1› ⦄ ⦃ ‹gt_index2› ⦄ ⁼
+  ⧗:C̵,tok,a ⧗:s ⋔ ⦃ ⌁ ⌁ #20# ‹reg› ‹l1› ⦄ ⦃ ‹gt_index2› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_index› ⸫
 ⦃
   ⧖:C,tok,a
-  ⧗:C,a #10199# #10214# ‹spfx2› ⧖:C,y ⧗:C,y,tok ○ #8# ○ ⧗:a ‹chk›
+  ⧗:C̵,a #10199# #10214# ‹spfx2› ⧖:C,y ⧗:C̵,y,tok ○ #8# ○ ⧗:a ‹chk›
   ⧗:a #2# ‹elemof› ⧖:C,el
-  ⧗:C,el ‹tcopy› ⧖:C,cp ⧗:C,cp,tok △ ‹cfailunless›
+  ⧗:C̵,el ‹tcopy› ⧖:C,cp ⧗:C̵,cp,tok △ ‹cfailunless›
   #9676# ⧗:el ‹spre› ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_index2› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,b #11# ‹tis› ⧖:C,i ⧗:C,i,tok △ #9# ○ ⧗:b ‹chk›
+  ⧗:C̵,b #11# ‹tis› ⧖:C,i ⧗:C̵,i,tok △ #9# ○ ⧗:b ‹chk›
   ⧗:a #19# ‹tis› ⧖:C,s
-  ⧗:C,tok,a,c ⧗:s ⋔ ⦃ ‹gt_store1› ⦄ ⦃ ‹gt_store2› ⦄ ⁼
+  ⧗:C̵,tok,a,c ⧗:s ⋔ ⦃ ‹gt_store1› ⦄ ⦃ ‹gt_store2› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_store› ⸫
 ⦃
   ⧖:C,tok,a,c
-  ⧗:C,c #13# ‹tis› ⧖:C,y ⧗:C,y,tok #2# #10# ○ ⧗:c ‹chk›
+  ⧗:C̵,c #13# ‹tis› ⧖:C,y ⧗:C̵,y,tok #2# #10# ○ ⧗:c ‹chk›
   #15# ‹reg› ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_store1› ⸫
 ⦃
   ⧖:C,tok,a,c
-  ⧗:C,a #10198# #10214# ‹spfx2› ⧖:C,y ⧗:C,y,tok ○ #11# ○ ⧗:a ‹chk›
+  ⧗:C̵,a #10198# #10214# ‹spfx2› ⧖:C,y ⧗:C̵,y,tok ○ #11# ○ ⧗:a ‹chk›
   ⧗:a #2# ‹elemof› ⧖:C,el
-  ⧗:C ⧗:c ⧗:el ᛖ ⧗:tok #2# ○ ⧗:el,c ‹chk›
-  ⧗:el ‹tcopy› ⧖:C,cp ⧗:C,cp,tok #2# ‹cfailunless›
+  ⧗:C̵ ⧗:c ⧗:el ᛖ ⧗:tok #2# ○ ⧗:el,c ‹chk›
+  ⧗:el ‹tcopy› ⧖:C,cp ⧗:C̵,cp,tok #2# ‹cfailunless›
   #15# ‹reg› ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_store2› ⸫
 
 ⦃
   ⧖:C,tok,x,a,b,c
-  ⧗:C,a #14# ‹tis› ⧖:C,s
-  ⧗:C,tok,a,b ⧗:s ⋔ ⦃ ‹gt_app1› ⦄ ⦃ ‹gt_app2› ⦄ ⁼
+  ⧗:C̵,a #14# ‹tis› ⧖:C,s
+  ⧗:C̵,tok,a,b ⧗:s ⋔ ⦃ ‹gt_app1› ⦄ ⦃ ‹gt_app2› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_append› ⸫
 ⦃
   ⧖:C,tok,a,b
   ⍝ s1 extension: appending an integer stores its low byte
-  ⧗:C,b #13# ‹tis› ⧖:C,y ⧗:C,b #11# ‹tis› ⧖:C,i
-  ⧗:C ⧗:y ⧗:i ⋏ ⧗:tok △ #12# ○ ⧗:b ‹chk›
+  ⧗:C̵,b #13# ‹tis› ⧖:C,y ⧗:C̵,b #11# ‹tis› ⧖:C,i
+  ⧗:C̵ ⧗:y ⧗:i ⋏ ⧗:tok △ #12# ○ ⧗:b ‹chk›
   #14# ‹reg› ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_app1› ⸫
 ⦃
   ⧖:C,tok,a,b
-  ⧗:C,a ‹shead› ⧖:C,h ⧗:C ⧗:h #10214# ᛖ ⧗:tok ○ #13# ○ ⧗:a ‹chk›
+  ⧗:C̵,a ‹shead› ⧖:C,h ⧗:C̵ ⧗:h #10214# ᛖ ⧗:tok ○ #13# ○ ⧗:a ‹chk›
   ⧗:a △ ‹elemof› ⧖:C,el
-  ⧗:C ⧗:b ⧗:el ᛖ ⧗:tok △ ○ ⧗:el,b ‹chk›
+  ⧗:C̵ ⧗:b ⧗:el ᛖ ⧗:tok △ ○ ⧗:el,b ‹chk›
   ⧗:a ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gt_app2› ⸫
 
@@ -789,21 +789,21 @@
 ⍝ ‹locks› C S strand locks: identities of values with a live shadow
 ⦃
   ⧖:C,S,strand,locks
-  ⧗:C,locks ‹lcopy› ⧖:C,out
-  ⧗:C,S,out ○ ‹addofs› ⧖:C,out2
-  ⧗:C,strand,out2 △ ‹addofs›
+  ⧗:C̵,locks ‹lcopy› ⧖:C,out
+  ⧗:C̵,S,out ○ ‹addofs› ⧖:C,out2
+  ⧗:C̵,strand,out2 △ ‹addofs›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹locks› ⸫
 ⍝ ‹addofs› C L out moments: out with the "of" of every value of L (of every non-void moment)
 ⦃
   ⧖:C,L,out,moments
-  ⧗:C,L ‹llen› ⧖:C,n
-  ⧗:C,L,out,moments ○ ⧗:n
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,L,out,moments ○ ⧗:n
   ⥀ ⦃
     ⧖:C,L,out,moments,j,n
-    ⧗:C,L,out,moments,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,L,out,moments,j,n ⧗:C,L,j ‹lget› ⧖:C,v ⧗:C,v #4# ‹vf› ⧖:C,of ⧗:C,v #5# ‹vf› ⧖:C,x
-        ⧗:C,out,of ⧗:of #-1# ᛖ ⧗:moments △ ᛖ ⧗:x △ ᛖ ⋎ ⋏ ⋔ ⦃ ⌁ ⦄ ⦃ ‹lpush› ⦄ ⁼ ⧖:C,out2
-        ⧗:C,L,out2,moments ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,L,out,moments,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,out,moments,j,n ⧗:C̵,L,j ‹lget› ⧖:C,v ⧗:C̵,v #4# ‹vf› ⧖:C,of ⧗:C̵,v #5# ‹vf› ⧖:C,x
+        ⧗:C̵,out,of ⧗:of #-1# ᛖ ⧗:moments △ ᛖ ⧗:x △ ᛖ ⋎ ⋏ ⋔ ⦃ ⌁ ⦄ ⦃ ‹lpush› ⦄ ⁼ ⧖:C,out2
+        ⧗:C̵,L,out2,moments ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⧖:out ⌁ ⧗:out
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹addofs› ⸫
@@ -811,28 +811,28 @@
 ⍝ ‹moveok› C v live tok: moving v out is allowed (no live shadow of it)
 ⦃
   ⧖:C,v,live,tok
-  ⧗:C,v ‹vty› ‹tcopy› ⧖:C,cp
-  ⧗:C,v △ ‹vf› ⧖:C,id
-  ⧗:C,live,id ‹lhas› ⧖:C,locked
-  ⧗:C,v,tok ⧗:cp ‹not› ⧗:locked ⋎ ⋔ ⦃ ‹moveerr› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,v ‹vty› ‹tcopy› ⧖:C,cp
+  ⧗:C̵,v △ ‹vf› ⧖:C,id
+  ⧗:C̵,live,id ‹lhas› ⧖:C,locked
+  ⧗:C̵,v,tok ⧗:cp ‹not› ⧗:locked ⋎ ⋔ ⦃ ‹moveerr› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹moveok› ⸫
 ⦃
   ⧖:C,v,tok
-  ⧗:C,v #2# ‹vf› ⧖:C,vt
-  ⧗:C,tok ‹cerr› $cannot move the $ ⎙̵ ⧗:v ‹vty› ‹spr› $ made at $ ⎙̵ ⧗:vt △ ‹tf› ᛁ $:$ ⎙̵ ⧗:vt #2# ‹tf› ᛁ
+  ⧗:C̵,v #2# ‹vf› ⧖:C,vt
+  ⧗:C̵,tok ‹cerr› $cannot move the $ ⎙̵ ⧗:v ‹vty› ‹spr› $ made at $ ⎙̵ ⧗:vt △ ‹tf› ᛁ $:$ ⎙̵ ⧗:vt #2# ‹tf› ᛁ
   $ while it is entangled: a ⟗/⟖ shadow of it is still alive (§8.2)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹moveerr› ⸫
 
 ⍝ ‹push› C S outs tok depth: new values of types outs on S
 ⦃
   ⧖:C,S,outs,tok,depth
-  ⧗:C,outs ‹llen› ⧖:C,n
-  ⧗:C,S,outs,tok,depth ○ ⧗:n
+  ⧗:C̵,outs ‹llen› ⧖:C,n
+  ⧗:C̵,S,outs,tok,depth ○ ⧗:n
   ⥀ ⦃
     ⧖:C,S,outs,tok,depth,j,n
-    ⧗:C,S,outs,tok,depth,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,S,outs,tok,depth,j,n ⧗:C,outs,j ‹lget› ⧖:C,t ⧗:C,t,tok,depth ‹vnew› ⧖:C,v ⧗:C,S,v ‹lpush› ⧖:C,S2
-        ⧗:C,S2,outs,tok,depth ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,S,outs,tok,depth,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,S,outs,tok,depth,j,n ⧗:C̵,outs,j ‹lget› ⧖:C,t ⧗:C̵,t,tok,depth ‹vnew› ⧖:C,v ⧗:C̵,S,v ‹lpush› ⧖:C,S2
+        ⧗:C̵,S2,outs,tok,depth ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹push› ⸫
@@ -840,12 +840,12 @@
 ⍝ ‹annot1› C S n ev ch: set ev and ch on the top n values
 ⦃
   ⧖:C,S,n,ev,ch
-  ⧗:C,S ‹llen› ⧖:C,len
-  ⧗:C,S,ev,ch ⧗:len ⧗:n ⊟ ⧗:len
+  ⧗:C̵,S ‹llen› ⧖:C,len
+  ⧗:C̵,S,ev,ch ⧗:len ⧗:n ⊟ ⧗:len
   ⥀ ⦃
     ⧖:C,S,ev,ch,j,len
-    ⧗:C,S,ev,ch,j,len ⧗:j ⧗:len ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,S,ev,ch,j,len ⧗:C,S,j ‹lget› ⧖:C,v ⧗:C,v #6# ⧗:ev ‹vset› ⧗:v #7# ⧗:ch ‹vset›
+    ⧗:C̵,S,ev,ch,j,len ⧗:j ⧗:len ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,S,ev,ch,j,len ⧗:C̵,S,j ‹lget› ⧖:C,v ⧗:C̵,v #6# ⧗:ev ‹vset› ⧗:v #7# ⧗:ch ‹vset›
         ⧗:S,ev,ch ⧗:j △ ⊞ ⧗:len ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁
@@ -854,14 +854,14 @@
 ⍝ ‹annotl› C S n evs chs: set ev and ch on the top n values from lists
 ⦃
   ⧖:C,S,n,evs,chs
-  ⧗:C,S ‹llen› ⧖:C,len
-  ⧗:C,S,evs,chs,n ○ ⧗:len ⧗:n ⊟
+  ⧗:C̵,S ‹llen› ⧖:C,len
+  ⧗:C̵,S,evs,chs,n ○ ⧗:len ⧗:n ⊟
   ⥀ ⦃
     ⧖:C,S,evs,chs,n,j,base
-    ⧗:C,S,evs,chs,n,j,base ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,S,evs,chs,n,j,base ⧗:C,S ⧗:base ⧗:j ⊞ ‹lget› ⧖:C,v
-        ⧗:C,evs,j ‹lget› ⧖:C,ev ⧗:C,chs,j ‹lget› ⧖:C,ch
-        ⧗:C,v #6# ⧗:ev ‹vset› ⧗:v #7# ⧗:ch ‹vset›
+    ⧗:C̵,S,evs,chs,n,j,base ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,S,evs,chs,n,j,base ⧗:C̵,S ⧗:base ⧗:j ⊞ ‹lget› ⧖:C,v
+        ⧗:C̵,evs,j ‹lget› ⧖:C,ev ⧗:C̵,chs,j ‹lget› ⧖:C,ch
+        ⧗:C̵,v #6# ⧗:ev ‹vset› ⧗:v #7# ⧗:ch ‹vset›
         ⧗:S,evs,chs,n ⧗:j △ ⊞ ⧗:base ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁ ⌁
@@ -872,21 +872,21 @@
 ⍝ ‹chsame› C a b: the common charge of a and b (a gluon takes the other), or −1
 ⦃
   ⧖:C,a,b
-  ⧗:C,a #17# ‹tis› ⧖:C,ga ⧗:C,b #17# ‹tis› ⧖:C,gb
-  ⧗:C #-1# ⧗:a ⧗:a ⧗:b ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧗:a ⧗:gb ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧗:b ⧗:ga ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:C̵,a #17# ‹tis› ⧖:C,ga ⧗:C̵,b #17# ‹tis› ⧖:C,gb
+  ⧗:C̵ #-1# ⧗:a ⧗:a ⧗:b ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧗:a ⧗:gb ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧗:b ⧗:ga ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹chsame› ⸫
 
 ⍝ ‹chcomb› C a b sign: product (sign 1) or quotient (sign −1) of charges; gluons count as neutral
 ⦃
   ⧖:C,a,b,sign
-  ⧗:C,a #17# ‹tis› ⧖:C,ga ⧗:C,b #17# ‹tis› ⧖:C,gb
-  ⧗:C,a,b,sign ⧗:ga ⧗:gb ⋎ ⋔ ⦃ ⌁ ⌁ ⌁ #17# ‹reg› ⦄ ⦃ ‹chcomb1› ⦄ ⁼
+  ⧗:C̵,a #17# ‹tis› ⧖:C,ga ⧗:C̵,b #17# ‹tis› ⧖:C,gb
+  ⧗:C̵,a,b,sign ⧗:ga ⧗:gb ⋎ ⋔ ⦃ ⌁ ⌁ ⌁ #17# ‹reg› ⦄ ⦃ ‹chcomb1› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹chcomb› ⸫
 ⦃
   ⧖:C,a,b,sign
-  ⧗:C,a ‹chvec› ⧖:C,a1,a2,a3,a4,a5,a6
-  ⧗:C,b ‹chvec› ⧖:C,b1,b2,b3,b4,b5,b6
-  ⧗:C ⧗:a1 ⧗:b1 ⧗:sign ⊠ ⊞ ⧗:a2 ⧗:b2 ⧗:sign ⊠ ⊞ ⧗:a3 ⧗:b3 ⧗:sign ⊠ ⊞
+  ⧗:C̵,a ‹chvec› ⧖:C,a1,a2,a3,a4,a5,a6
+  ⧗:C̵,b ‹chvec› ⧖:C,b1,b2,b3,b4,b5,b6
+  ⧗:C̵ ⧗:a1 ⧗:b1 ⧗:sign ⊠ ⊞ ⧗:a2 ⧗:b2 ⧗:sign ⊠ ⊞ ⧗:a3 ⧗:b3 ⧗:sign ⊠ ⊞
   ⧗:a4 ⧗:b4 ⧗:sign ⊠ ⊞ ⧗:a5 ⧗:b5 ⧗:sign ⊠ ⊞ ⧗:a6 ⧗:b6 ⧗:sign ⊠ ⊞ ‹chfmt›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹chcomb1› ⸫
 
@@ -895,130 +895,132 @@
 ⍝ ⧖: bind the top of the stack as a moment
 ⦃
   ⧖:C,tok,S,strand,depth,locks
-  ⧗:C,S △ ⧗:tok ○ ‹pop› ⧖:C,S2,vals
-  ⧗:C,vals ○ ‹lget› ⧖:C,v
-  ⧗:C,v ‹vall› ⧖:C,ty,id,vtok,rg,of,role,ev,ch
-  ⧗:C,ty,id,tok,rg,of ○ ⧗:ev,ch ‹vrec› ⧖:C,m
-  ⧗:C,strand,m ‹lpush› ⧖:C,strand2
-  ⧗:C,S2,strand2
+  ⧗:C̵,S △ ⧗:tok ○ ‹pop› ⧖:C,S2,vals
+  ⧗:C̵,vals ○ ‹lget› ⧖:C,v
+  ⧗:C̵,v ‹vall› ⧖:C,ty,id,vtok,rg,of,role,ev,ch
+  ⧗:C̵,ty,id,tok,rg,of ○ ⧗:ev,ch ‹vrec› ⧖:C,m
+  ⧗:C̵,strand,m ‹lpush› ⧖:C,strand2
+  ⧗:C̵,S2,strand2
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_bind› ⸫
 
 ⍝ ⧗ⁿ: read a moment
 ⦃
   ⧖:C,tok,S,strand,depth,locks
-  ⧗:C,tok #4# ‹tf› ⧖:C,idx
-  ⧗:C,strand ‹llen› ⧖:C,n
-  ⧗:C,tok,idx,n ⧗:idx ⧗:n ≶ ⋔ ⦃ ‹readerr› ⦄ ⁼ ⦃ ⌁ ⌁ ⌁ ⦄ ⧖:C
+  ⧗:C̵,tok #4# ‹tf› ⧖:C,idx
+  ⧗:C̵,strand ‹llen› ⧖:C,n
+  ⧗:C̵,tok,idx,n ⧗:idx ⧗:n ≶ ⋔ ⦃ ‹readerr› ⦄ ⁼ ⦃ ⌁ ⌁ ⌁ ⦄ ⧖:C
   ⧗:n △ ⊟ ⧗:idx ⊟ ⧖:mi
-  ⧗:C,strand,mi ‹lget› ⧖:C,m
-  ⧗:C,m ‹vall› ⧖:C,ty,id,mtok,rg,of,void,ev,ch
-  ⧗:C,tok,ty,mtok ⧗:void △ ᛖ ⋔ ⦃ ‹voiderr› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C,ty ‹tcopy› ⧖:C,cp
-  ⧗:C,tok,depth,strand,mi,m ⧗:cp ⋔ ⦃ ‹rd_copy› ⦄ ⦃ ‹rd_move› ⦄ ⁼ ⧖:C,v,strand2
-  ⧗:C,tok ‹trole› ⧖:C,role
-  ⧗:C,v,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹vrole› ⦄ ⁼ ⧖:C,v2
-  ⧗:C,S,v2 ‹lpush› ⧖:C,S2
-  ⧗:C,S2,strand2
+  ⧗:C̵,strand,mi ‹lget› ⧖:C,m
+  ⧗:C̵,m ‹vall› ⧖:C,ty,id,mtok,rg,of,void,ev,ch
+  ⧗:C̵,tok,ty,mtok ⧗:void △ ᛖ ⋔ ⦃ ‹voiderr› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⍝ a read agrees with the class of the moment's value, like an operator (§6.1)
+  ⧗:C̵,m ‹l1› ⧖:C,vs ⧗:C̵,tok,vs ‹agree› ⧖:C
+  ⧗:C̵,ty ‹tcopy› ⧖:C,cp
+  ⧗:C̵,tok,depth,strand,mi,m ⧗:cp ⋔ ⦃ ‹rd_copy› ⦄ ⦃ ‹rd_move› ⦄ ⁼ ⧖:C,v,strand2
+  ⧗:C̵,tok ‹trole› ⧖:C,role
+  ⧗:C̵,v,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹vrole› ⦄ ⁼ ⧖:C,v2
+  ⧗:C̵,S,v2 ‹lpush› ⧖:C,S2
+  ⧗:C̵,S2,strand2
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_read› ⸫
 
 ⦃
   ⧖:C,tok,idx,n
-  ⧗:C,tok ‹cerr› ⧗:tok ‹plab› $ reads $ ⎙̵ ⧗:idx △ ⊞ ᛁ $ moment(s) back, but only $ ⎙̵ ⧗:n ᛁ
+  ⧗:C̵,tok ‹cerr› ⧗:tok ‹plab› $ reads $ ⎙̵ ⧗:idx △ ⊞ ᛁ $ moment(s) back, but only $ ⎙̵ ⧗:n ᛁ
   $ are visible here (data enters a block only through the stack, §5.1)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹readerr› ⸫
 ⦃
   ⧖:C,tok,ty,mtok
-  ⧗:C,tok ‹cerr› ⧗:tok ‹plab› $ reads a void moment: its $ ⎙̵ ⧗:ty ‹spr› $ was already moved out (bound at $ ⎙̵
+  ⧗:C̵,tok ‹cerr› ⧗:tok ‹plab› $ reads a void moment: its $ ⎙̵ ⧗:ty ‹spr› $ was already moved out (bound at $ ⎙̵
   ⧗:mtok △ ‹tf› ᛁ $:$ ⎙̵ ⧗:mtok #2# ‹tf› ᛁ $)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹voiderr› ⸫
 
 ⍝ a copy of a shadow belongs to the region where the shadow was made
 ⦃
   ⧖:C,tok,depth,strand,mi,m
-  ⧗:C,m ‹vall› ⧖:C,ty,id,mtok,rg,of,void,ev,ch
+  ⧗:C̵,m ‹vall› ⧖:C,ty,id,mtok,rg,of,void,ev,ch
   ⧗:rg ⧗:depth ⧗:of #-1# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:rg2
-  ⧗:C,ty,tok,rg2 ‹vnew› ⧖:C,v
-  ⧗:C,v #4# ⧗:of ‹vset› ⧗:m,v ‹vannot›
+  ⧗:C̵,ty,tok,rg2 ‹vnew› ⧖:C,v
+  ⧗:C̵,v #4# ⧗:of ‹vset› ⧗:m,v ‹vannot›
   ⧗:v,strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹rd_copy› ⸫
 ⍝ quantum: move out, the moment becomes void
 ⦃
   ⧖:C,tok,depth,strand,mi,m
-  ⧗:C,m ‹vall› ⧖:C,ty,id,mtok,rg,of,void,ev,ch
-  ⧗:C,ty,id,tok,rg,of #-1# ⧗:ev,ch ‹vrec› ⧖:C,v
-  ⧗:C,ty,id,mtok,rg,of △ ⧗:ev,ch ‹vrec› ⧖:C,m2
-  ⧗:C,strand,mi,m2 ‹lset›
+  ⧗:C̵,m ‹vall› ⧖:C,ty,id,mtok,rg,of,void,ev,ch
+  ⧗:C̵,ty,id,tok,rg,of #-1# ⧗:ev,ch ‹vrec› ⧖:C,v
+  ⧗:C̵,ty,id,mtok,rg,of △ ⧗:ev,ch ‹vrec› ⧖:C,m2
+  ⧗:C̵,strand,mi,m2 ‹lset›
   ⧗:v,strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹rd_move› ⸫
 
 ⍝ ⍿ⁿ: pick (copy) or move from depth n
 ⦃
   ⧖:C,tok,S,strand,depth,locks
-  ⧗:C,tok #4# ‹tf› ⧖:C,idx
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,tok,n ⧗:idx ⧗:n ≶ ⋔ ⦃ ‹pickerr› ⦄ ⁼ ⦃ ⌁ ⌁ ⦄ ⧖:C
+  ⧗:C̵,tok #4# ‹tf› ⧖:C,idx
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,tok,n ⧗:idx ⧗:n ≶ ⋔ ⦃ ‹pickerr› ⦄ ⁼ ⦃ ⌁ ⌁ ⦄ ⧖:C
   ⧗:n △ ⊟ ⧗:idx ⊟ ⧖:si
-  ⧗:C,S,si ‹lget› ⧖:C,v
-  ⧗:C,v ‹vty› ‹tcopy› ⧖:C,cp
-  ⧗:C,tok,depth,S,si,v ⧗:cp ⋔ ⦃ ‹pk_copy› ⦄ ⦃ ‹pk_move› ⦄ ⁼ ⧖:C,S2,w
-  ⧗:C,tok ‹trole› ⧖:C,role
-  ⧗:C,w,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹vrole› ⦄ ⁼ ⧖:C,w2
-  ⧗:C,S2,w2 ‹lpush› ⧗:strand
+  ⧗:C̵,S,si ‹lget› ⧖:C,v
+  ⧗:C̵,v ‹vty› ‹tcopy› ⧖:C,cp
+  ⧗:C̵,tok,depth,S,si,v ⧗:cp ⋔ ⦃ ‹pk_copy› ⦄ ⦃ ‹pk_move› ⦄ ⁼ ⧖:C,S2,w
+  ⧗:C̵,tok ‹trole› ⧖:C,role
+  ⧗:C̵,w,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹vrole› ⦄ ⁼ ⧖:C,w2
+  ⧗:C̵,S2,w2 ‹lpush› ⧗:strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_pick› ⸫
 ⦃
   ⧖:C,tok,n
-  ⧗:C,tok ‹cerr› ⧗:tok ‹plab› $ reaches below the stack (depth $ ⎙̵ ⧗:n ᛁ $)$ ⎙̵ ‹die›
+  ⧗:C̵,tok ‹cerr› ⧗:tok ‹plab› $ reaches below the stack (depth $ ⎙̵ ⧗:n ᛁ $)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pickerr› ⸫
 ⦃
   ⧖:C,tok,depth,S,si,v
-  ⧗:C,v ‹vall› ⧖:C,ty,id,vtok,rg,of,role,ev,ch
+  ⧗:C̵,v ‹vall› ⧖:C,ty,id,vtok,rg,of,role,ev,ch
   ⧗:rg ⧗:depth ⧗:of #-1# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:rg2
-  ⧗:C,ty,tok,rg2 ‹vnew› ⧖:C,w
-  ⧗:C,w #4# ⧗:of ‹vset› ⧗:v,w ‹vannot›
+  ⧗:C̵,ty,tok,rg2 ‹vnew› ⧖:C,w
+  ⧗:C̵,w #4# ⧗:of ‹vset› ⧗:v,w ‹vannot›
   ⧗:S,w
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹pk_copy› ⸫
 ⦃
   ⧖:C,tok,depth,S,si,v
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,S ○ ⧗:si ‹lslice› ⧖:C,A
-  ⧗:C,S ⧗:si △ ⊞ ⧗:n ‹lslice› ⧖:C,B
-  ⧗:C,A,B ‹lcat› ⧖:C,S2
-  ⧗:C,v #-1# ‹vrole› ⧖:C,w
-  ⧗:C,S2,w
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ○ ⧗:si ‹lslice› ⧖:C,A
+  ⧗:C̵,S ⧗:si △ ⊞ ⧗:n ‹lslice› ⧖:C,B
+  ⧗:C̵,A,B ‹lcat› ⧖:C,S2
+  ⧗:C̵,v #-1# ‹vrole› ⧖:C,w
+  ⧗:C̵,S2,w
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹pk_move› ⸫
 
 ⍝ ⟗ ⟖: entangle (shared or exclusive shadow)
 ⦃
   ⧖:C,tok,S,strand,depth,locks
-  ⧗:C,tok ‹tc0› ⧖:C,x
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,tok,x ⧗:n ○ ᛖ ⋔ ⦃ ‹enterr0› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C,S ⧗:n △ ⊟ ‹lget› ⧖:C,v
-  ⧗:C,v ‹vty› ⧖:C,t
-  ⧗:C,t ‹tclass› ⧖:C,cl ⧗:C,t ‹shead› ⧖:C,h
-  ⧗:C,tok,t ⧗:cl △ ᛖ ⧗:h #9676# ᛖ ⋏ ⋔ ⦃ ‹enterr1› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C,S,strand,locks ‹locks› ⧖:C,live
-  ⧗:C,v △ ‹vf› ⧖:C,id
-  ⧗:C,live,id ‹lhas› ⧖:C,locked
-  ⧗:C ⧗:x #10198# ᛖ ⧗:locked ⋎ ‹not› ⧗:tok #8# ‹cfailunless›
+  ⧗:C̵,tok ‹tc0› ⧖:C,x
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,tok,x ⧗:n ○ ᛖ ⋔ ⦃ ‹enterr0› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,v
+  ⧗:C̵,v ‹vty› ⧖:C,t
+  ⧗:C̵,t ‹tclass› ⧖:C,cl ⧗:C̵,t ‹shead› ⧖:C,h
+  ⧗:C̵,tok,t ⧗:cl △ ᛖ ⧗:h #9676# ᛖ ⋏ ⋔ ⦃ ‹enterr1› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,S,strand,locks ‹locks› ⧖:C,live
+  ⧗:C̵,v △ ‹vf› ⧖:C,id
+  ⧗:C̵,live,id ‹lhas› ⧖:C,locked
+  ⧗:C̵ ⧗:x #10198# ᛖ ⧗:locked ⋎ ‹not› ⧗:tok #8# ‹cfailunless›
   ⧗:S,id,tok ‹excl› 
   ⧗:x,t ‹spre› ⧖:C,sht
-  ⧗:C,sht,tok,depth ‹vnew› ⧖:C,sh
-  ⧗:C,sh #4# ⧗:id ‹vset› ⧗:v,sh ‹vannot›
+  ⧗:C̵,sht,tok,depth ‹vnew› ⧖:C,sh
+  ⧗:C̵,sh #4# ⧗:id ‹vset› ⧗:v,sh ‹vannot›
   ⧗:S,sh ‹lpush› ⧗:strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_entangle› ⸫
-⦃ ⧖:C,tok,x ⧗:C,tok ‹cerr› ⧗:x ᚢ $ needs a value to entangle$ ⎙̵ ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹enterr0› ⸫
-⦃ ⧖:C,tok,t ⧗:C,tok ‹cerr› $cannot entangle a $ ⎙̵ ⧗:t ‹spr› ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹enterr1› ⸫
+⦃ ⧖:C,tok,x ⧗:C̵,tok ‹cerr› ⧗:x ᚢ $ needs a value to entangle$ ⎙̵ ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹enterr0› ⸫
+⦃ ⧖:C,tok,t ⧗:C̵,tok ‹cerr› $cannot entangle a $ ⎙̵ ⧗:t ‹spr› ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹enterr1› ⸫
 ⍝ ‹excl› C S id tok: an exclusive shadow of id must be unique
 ⦃
   ⧖:C,S,id,tok
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,S,id,tok ○ ⧗:n
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S,id,tok ○ ⧗:n
   ⥀ ⦃
     ⧖:C,S,id,tok,j,n
-    ⧗:C,S,id,tok,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,S,id,tok,j,n ⧗:C,S,j ‹lget› ⧖:C,w ⧗:C,w #4# ‹vf› ⧖:C,of ⧗:C,w ‹vty› ‹shead› ⧖:C,h
-        ⧗:C ⧗:of ⧗:id ᛖ ⧗:h #10198# ᛖ ⋎ ‹not› ⧗:tok #9# ‹cfailunless›
+    ⧗:C̵,S,id,tok,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,S,id,tok,j,n ⧗:C̵,S,j ‹lget› ⧖:C,w ⧗:C̵,w #4# ‹vf› ⧖:C,of ⧗:C̵,w ‹vty› ‹shead› ⧖:C,h
+        ⧗:C̵ ⧗:of ⧗:id ᛖ ⧗:h #10198# ᛖ ⋎ ‹not› ⧗:tok #9# ‹cfailunless›
         ⧗:S,id,tok ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁
@@ -1027,87 +1029,87 @@
 ⍝ ⫴ ⊛ ⊙: superpose, flip a phase, collapse (§8.3)
 ⦃
   ⧖:C,tok,S,strand,depth,locks
-  ⧗:C,tok ‹tc0› ⧖:C,x
-  ⧗:C,tok #4# ‹tf› ⧖:C,idx
+  ⧗:C̵,tok ‹tc0› ⧖:C,x
+  ⧗:C̵,tok #4# ‹tf› ⧖:C,idx
   ⧗:x #10996# ᛖ ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ⧖:k
-  ⧗:C,S,k,tok ○ ‹pop› ⧖:C,S2,vals
-  ⧗:C,tok,vals ‹agree› ⧖:C
-  ⧗:C,vals ○ ‹lget› ⧖:C,v0 ⧗:C,v0 ‹vty› ⧖:C,t0 ⧗:C,t0,tok ‹unwrap› ⧖:C,a
-  ⧗:C,v0 #6# ‹vf› ⧖:C,ev0 ⧗:C,v0 #7# ‹vf› ⧖:C,ch
-  ⧗:C,tok,vals,a,ev0,ch,x,idx ⧗:k #2# ᛖ ⋔ ⦃ ⌁ ⌁ ‹sp_sup› ⦄ ⦃ ⧖:tk,vl,aa,ee,cc,xx,ii ⧗:tk,xx,ii,aa,ee ‹sp_one› ⧗:cc ⦄ ⁼ ⧖:C,rt,ev,ch2
-  ⧗:C,rt ‹l1› ⧖:C,outs
-  ⧗:C,S2,outs,tok,depth ‹push› ⧖:C,S3
-  ⧗:C,S3 △ ⧗:ev,ch2 ‹annot1›
+  ⧗:C̵,S,k,tok ○ ‹pop› ⧖:C,S2,vals
+  ⧗:C̵,tok,vals ‹agree› ⧖:C
+  ⧗:C̵,vals ○ ‹lget› ⧖:C,v0 ⧗:C̵,v0 ‹vty› ⧖:C,t0 ⧗:C̵,t0,tok ‹unwrap› ⧖:C,a
+  ⧗:C̵,v0 #6# ‹vf› ⧖:C,ev0 ⧗:C̵,v0 #7# ‹vf› ⧖:C,ch
+  ⧗:C̵,tok,vals,a,ev0,ch,x,idx ⧗:k #2# ᛖ ⋔ ⦃ ⌁ ⌁ ‹sp_sup› ⦄ ⦃ ⧖:tk,vl,aa,ee,cc,xx,ii ⧗:tk,xx,ii,aa,ee ‹sp_one› ⧗:cc ⦄ ⁼ ⧖:C,rt,ev,ch2
+  ⧗:C̵,rt ‹l1› ⧖:C,outs
+  ⧗:C̵,S2,outs,tok,depth ‹push› ⧖:C,S3
+  ⧗:C̵,S3 △ ⧗:ev,ch2 ‹annot1›
   ⧗:S3,strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_psi› ⸫
 
 ⍝ ‹sp_sup› C tok vals a ev ch: ⫴ on a and the second value
 ⦃
   ⧖:C,tok,vals,a,ev,ch
-  ⧗:C,vals △ ‹lget› ⧖:C,v1 ⧗:C,v1 ‹vty› ⧖:C,t1 ⧗:C,t1,tok ‹unwrap› ⧖:C,b
-  ⧗:C,v1 #6# ‹vf› ⧖:C,ev1 ⧗:C,v1 #7# ‹vf› ⧖:C,ch1
-  ⧗:C,a ‹psibase› ⧖:C,ba ⧗:C,b ‹psibase› ⧖:C,bb
-  ⧗:C,tok,a,b ⧗:ba ⧗:bb ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:tok,a,b ⧗:tok ‹cerr› $⫴ superposes values of one type, found $ ⎙̵ ⧗:a ‹spr› $ and $ ⎙̵ ⧗:b ‹spr› ‹die› ⦄ ⁼ ⧖:C
-  ⧗:C,ba ‹tnum› ⧖:C,num ⧗:C,ba #10# ‹tis› ⧖:C,tr
-  ⧗:C,tok,ba ⧗:num ⧗:tr ⋏ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tok,ba ⧗:tok ‹cerr› $s1 superposes classical numbers and trits, found $ ⎙̵ ⧗:ba ‹spr› ‹die› ⦄ ⁼ ⧖:C
-  ⧗:C,a ‹psicount› ⧖:C,na ⧗:C,b ‹psicount› ⧖:C,nb
-  ⧗:C ⧗:na ⧗:nb ⊞ #27# ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⧗:tok #5# ‹cfailunless›
+  ⧗:C̵,vals △ ‹lget› ⧖:C,v1 ⧗:C̵,v1 ‹vty› ⧖:C,t1 ⧗:C̵,t1,tok ‹unwrap› ⧖:C,b
+  ⧗:C̵,v1 #6# ‹vf› ⧖:C,ev1 ⧗:C̵,v1 #7# ‹vf› ⧖:C,ch1
+  ⧗:C̵,a ‹psibase› ⧖:C,ba ⧗:C̵,b ‹psibase› ⧖:C,bb
+  ⧗:C̵,tok,a,b ⧗:ba ⧗:bb ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:tok,a,b ⧗:tok ‹cerr› $⫴ superposes values of one type, found $ ⎙̵ ⧗:a ‹spr› $ and $ ⎙̵ ⧗:b ‹spr› ‹die› ⦄ ⁼ ⧖:C
+  ⧗:C̵,ba ‹tnum› ⧖:C,num ⧗:C̵,ba #10# ‹tis› ⧖:C,tr
+  ⧗:C̵,tok,ba ⧗:num ⧗:tr ⋏ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tok,ba ⧗:tok ‹cerr› $s1 superposes classical numbers and trits, found $ ⎙̵ ⧗:ba ‹spr› ‹die› ⦄ ⁼ ⧖:C
+  ⧗:C̵,a ‹psicount› ⧖:C,na ⧗:C̵,b ‹psicount› ⧖:C,nb
+  ⧗:C̵ ⧗:na ⧗:nb ⊞ #27# ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⧗:tok #5# ‹cfailunless›
   ⧗:ch,ch1 ‹chsame› ⧖:C,ch2
-  ⧗:C ⧗:ch2 #-1# ᛖ ‹not› ⧗:tok #6# ‹cfailunless›
+  ⧗:C̵ ⧗:ch2 #-1# ᛖ ‹not› ⧗:tok #6# ‹cfailunless›
   ⧗:na ⧗:nb ⊞ ⧗:ba ‹psitype› ⧖:C,rt
-  ⧗:C,rt ⧗:ev ⧗:ev1 ‹evmax› ⧗:ch2
+  ⧗:C̵,rt ⧗:ev ⧗:ev1 ‹evmax› ⧗:ch2
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹sp_sup› ⸫
 
 ⍝ ‹sp_one› C tok x idx a ev: ⊛ or ⊙ on a
 ⦃
   ⧖:C,tok,x,idx,a,ev
-  ⧗:C,a ‹shead› ⧖:C,h
-  ⧗:C,tok,x,a ⧗:h #968# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:tok,x,a ⧗:tok ‹cerr› ⧗:x ᚢ $ works on a superposition ψₙT, found $ ⎙̵ ⧗:a ‹spr› ‹die› ⦄ ⁼ ⧖:C
-  ⧗:C,a,idx,ev ⧗:x #8857# ᛖ ⋔ ⦃ ‹sp_collapse› ⦄ ∅ ⁼ ⧖:r,i,e ⧗:r,e
+  ⧗:C̵,a ‹shead› ⧖:C,h
+  ⧗:C̵,tok,x,a ⧗:h #968# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:tok,x,a ⧗:tok ‹cerr› ⧗:x ᚢ $ works on a superposition ψₙT, found $ ⎙̵ ⧗:a ‹spr› ‹die› ⦄ ⁼ ⧖:C
+  ⧗:C̵,a,idx,ev ⧗:x #8857# ᛖ ⋔ ⦃ ‹sp_collapse› ⦄ ∅ ⁼ ⧖:r,i,e ⧗:r,e
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹sp_one› ⸫
 ⦃
   ⧖:C,a,idx,ev
-  ⧗:C,a ‹psibase› ⧖:C,rt
-  ⧗:C,rt ⧗:idx #-1# ᛖ ⧗:idx #-2# ᛖ ⋏ ⋔ ∅ ⦃ ⧖:r #9676# ⧗:r ‹spre› ⦄ ⁼
+  ⧗:C̵,a ‹psibase› ⧖:C,rt
+  ⧗:C̵,rt ⧗:idx #-1# ᛖ ⧗:idx #-2# ᛖ ⋏ ⋔ ∅ ⦃ ⧖:r #9676# ⧗:r ‹spre› ⦄ ⁼
   ⧗:idx △ ⧗:ev ‹evmax›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹sp_collapse› ⸫
 
 ⍝ ‹islit› C v: v is an integer literal (still a gluon)
 ⦃
   ⧖:C,v
-  ⧗:C,v #2# ‹vf› ⧖:C,t ⧗:C,t ‹tkd› ⧖:C,k ⧗:C,v #7# ‹vf› ⧖:C,ch ⧗:C,ch #17# ‹tis› ⧖:C,g
-  ⧗:C ⧗:k #5# ᛖ ⧗:g ⋎
+  ⧗:C̵,v #2# ‹vf› ⧖:C,t ⧗:C̵,t ‹tkd› ⧖:C,k ⧗:C̵,v #7# ‹vf› ⧖:C,ch ⧗:C̵,ch #17# ‹tis› ⧖:C,g
+  ⧗:C̵ ⧗:k #5# ᛖ ⧗:g ⋎
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹islit› ⸫
 
 ⍝ ‹g_types1› C vals tok x: the operand types (unwrapped unless x is ⌁)
 ⦃
   ⧖:C,vals,tok,x
-  ⧗:C,vals ‹llen› ⧖:C,n
-  ⧗:C ‹lnew0› ⧖:C,ts
-  ⧗:C,vals,tok,x,ts ○ ⧗:n
+  ⧗:C̵,vals ‹llen› ⧖:C,n
+  ⧗:C̵ ‹lnew0› ⧖:C,ts
+  ⧗:C̵,vals,tok,x,ts ○ ⧗:n
   ⥀ ⦃
     ⧖:C,vals,tok,x,ts,j,n
-    ⧗:C,vals,tok,x,ts,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,vals,tok,x,ts,j,n ⧗:C,vals,j ‹lget› ‹vty› ⧖:C,t
-        ⧗:C,t,tok ⧗:x #8961# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹unwrap› ⦄ ⁼ ⧖:C,t2
-        ⧗:C,ts,t2 ‹lpush› ⧖:C,ts2
-        ⧗:C,vals,tok,x,ts2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,vals,tok,x,ts,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,tok,x,ts,j,n ⧗:C̵,vals,j ‹lget› ‹vty› ⧖:C,t
+        ⧗:C̵,t,tok ⧗:x #8961# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹unwrap› ⦄ ⁼ ⧖:C,t2
+        ⧗:C̵,ts,t2 ‹lpush› ⧖:C,ts2
+        ⧗:C̵,vals,tok,x,ts2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
-  ⧖:C,vals,tok,x,ts,j,n ⧗:C,ts
+  ⧖:C,vals,tok,x,ts,j,n ⧗:C̵,ts
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹g_types1› ⸫
 
 ⍝ ‹g_bytes› C vals ts x: an integer literal next to a byte is a byte (literals are gluons, §3.2)
 ⦃
   ⧖:C,vals,ts,x
-  ⧗:C,ts ‹llen› ⧖:C,n
-  ⧗:C #13# ‹reg› ⧖:C,byte ⧗:C #18# ‹reg› ⧖:C,r18 ⧗:C #19# ‹reg› ⧖:C,r19
-  ⧗:C,ts,byte ‹lhas› ⧖:C,h1 ⧗:C,ts,r18 ‹lhas› ⧖:C,h2 ⧗:C,ts,r19 ‹lhas› ⧖:C,h3
-  ⧗:C,vals,ts,x,byte ○ ⧗:n ⧗:h1 ⧗:h2 ⋏ ⧗:h3 ⋏ ⋔ ∅ ⦃ ⌁ ○ ⦄ ⁼
+  ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵ #13# ‹reg› ⧖:C,byte ⧗:C̵ #18# ‹reg› ⧖:C,r18 ⧗:C̵ #19# ‹reg› ⧖:C,r19
+  ⧗:C̵,ts,byte ‹lhas› ⧖:C,h1 ⧗:C̵,ts,r18 ‹lhas› ⧖:C,h2 ⧗:C̵,ts,r19 ‹lhas› ⧖:C,h3
+  ⧗:C̵,vals,ts,x,byte ○ ⧗:n ⧗:h1 ⧗:h2 ⋏ ⧗:h3 ⋏ ⋔ ∅ ⦃ ⌁ ○ ⦄ ⁼
   ⥀ ⦃
     ⧖:C,vals,ts,x,byte,j,n
-    ⧗:C,vals,ts,x,byte,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,vals,ts,x,byte,j,n ⧗:C,ts,j ‹lget› #11# ‹tis› ⧖:C,isz ⧗:C,vals,j ‹lget› ‹islit› ⧖:C,lit
-        ⧗:C,ts,j,byte ⧗:isz ⧗:lit ⋎ ⧗:x #8982# ᛖ ‹not› ⋎ ⧗:x #9032# ᛖ ⧗:j △ ᛖ ⋎ ‹not› ⋎
+    ⧗:C̵,vals,ts,x,byte,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,ts,x,byte,j,n ⧗:C̵,ts,j ‹lget› #11# ‹tis› ⧖:C,isz ⧗:C̵,vals,j ‹lget› ‹islit› ⧖:C,lit
+        ⧗:C̵,ts,j,byte ⧗:isz ⧗:lit ⋎ ⧗:x #8982# ᛖ ‹not› ⋎ ⧗:x #9032# ᛖ ⧗:j △ ᛖ ⋎ ‹not› ⋎
         ⋔ ⦃ ‹lset› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
         ⧗:vals,ts,x,byte ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
@@ -1117,42 +1119,42 @@
 ⍝ ‹g_lift› C ts: the product of the alternative counts, whether any is ψ, and the base types
 ⦃
   ⧖:C,ts
-  ⧗:C,ts ‹llen› ⧖:C,n
-  ⧗:C ‹lnew0› ⧖:C,bts
-  ⧗:C,ts,bts △ ⊕ ○ ⧗:n
+  ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵ ‹lnew0› ⧖:C,bts
+  ⧗:C̵,ts,bts △ ⊕ ○ ⧗:n
   ⥀ ⦃
     ⧖:C,ts,bts,lift,lifted,j,n
-    ⧗:C,ts,bts,lift,lifted,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,ts,bts,lift,lifted,j,n ⧗:C,ts,j ‹lget› ⧖:C,t
-        ⧗:C,t ‹shead› ⧖:C,h ⧗:C,t ‹psicount› ⧖:C,c ⧗:C,t ‹psibase› ⧖:C,b
-        ⧗:C,bts,b ‹lpush› ⧖:C,bts2
-        ⧗:C,ts,bts2 ⧗:lift ⧗:c ⊠ ⧗:lifted ⧗:h #968# ᛖ ⋏ ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,ts,bts,lift,lifted,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ts,bts,lift,lifted,j,n ⧗:C̵,ts,j ‹lget› ⧖:C,t
+        ⧗:C̵,t ‹shead› ⧖:C,h ⧗:C̵,t ‹psicount› ⧖:C,c ⧗:C̵,t ‹psibase› ⧖:C,b
+        ⧗:C̵,bts,b ‹lpush› ⧖:C,bts2
+        ⧗:C̵,ts,bts2 ⧗:lift ⧗:c ⊠ ⧗:lifted ⧗:h #968# ᛖ ⋏ ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
-  ⧖:C,ts,bts,lift,lifted,j,n ⧗:C,lift,lifted,bts
+  ⧖:C,ts,bts,lift,lifted,j,n ⧗:C̵,lift,lifted,bts
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ŧ ℤ⟩ ‹g_lift› ⸫
 
 ⍝ ‹evof› C vals: the strongest evidential of the values
 ⦃
   ⧖:C,vals
-  ⧗:C,vals ‹llen› ⧖:C,n
-  ⧗:C,vals ○ ○ ⧗:n
+  ⧗:C̵,vals ‹llen› ⧖:C,n
+  ⧗:C̵,vals ○ ○ ⧗:n
   ⥀ ⦃
     ⧖:C,vals,ev,j,n
-    ⧗:C,vals,ev,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,vals,ev,j,n ⧗:C,vals,j ‹lget› #6# ‹vf› ⧖:C,e ⧗:C,vals ⧗:ev ⧗:e ‹evmax› ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,vals,ev,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,ev,j,n ⧗:C̵,vals,j ‹lget› #6# ‹vf› ⧖:C,e ⧗:C̵,vals ⧗:ev ⧗:e ‹evmax› ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
-  ⧖:C,vals,ev,j,n ⧗:C,ev
+  ⧖:C,vals,ev,j,n ⧗:C̵,ev
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evof› ⸫
 
 ⍝ ‹allmove› C vals live tok
 ⦃
   ⧖:C,vals,live,tok
-  ⧗:C,vals ‹llen› ⧖:C,n
-  ⧗:C,vals,live,tok ○ ⧗:n
+  ⧗:C̵,vals ‹llen› ⧖:C,n
+  ⧗:C̵,vals,live,tok ○ ⧗:n
   ⥀ ⦃
     ⧖:C,vals,live,tok,j,n
-    ⧗:C,vals,live,tok,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,vals,live,tok,j,n ⧗:C,vals,j ‹lget› ⧖:C,v ⧗:C,v,live,tok ‹moveok› ⧗:vals,live,tok ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,vals,live,tok,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,live,tok,j,n ⧗:C̵,vals,j ‹lget› ⧖:C,v ⧗:C̵,v,live,tok ‹moveok› ⧗:vals,live,tok ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹allmove› ⸫
@@ -1160,9 +1162,9 @@
 ⍝ ‹g_charge› C tok x vals k: the result charge (conservation laws, §3.2)
 ⦃
   ⧖:C,tok,x,vals,k
-  ⧗:C,vals ○ ‹lget› #7# ‹vf› ⧖:C,ca
-  ⧗:C,vals △ ‹lget› #7# ‹vf› ⧖:C,cb1
-  ⧗:C #16# ‹reg› ⧖:C,neutral
+  ⧗:C̵,vals ○ ‹lget› #7# ‹vf› ⧖:C,ca
+  ⧗:C̵,vals △ ‹lget› #7# ‹vf› ⧖:C,cb1
+  ⧗:C̵ #16# ‹reg› ⧖:C,neutral
   ⧗:neutral ⧗:cb1 ⧗:k △ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⧖:cb
   ⍝ 1 equal charges, 2 product, 3 quotient, 4 the first operand's, 0 neutral
   ○
@@ -1171,66 +1173,66 @@
   ⧗:x #8856# ᛖ ⧗:x #8860# ᛖ ⋏ ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼
   ⧗:x ⧖ @any(8861,8810,8811)@ ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼
   ⧖:code
-  ⧗:C,tok,x,vals,ca,cb,neutral,code
+  ⧗:C̵,tok,x,vals,ca,cb,neutral,code
   ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ⌁ ‹gc_same› ⦄ ⦃
   ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⌁ ⧖:a,b ⌁ ⌁ ⌁ ⧗:a,b △ ‹chcomb› ⦄ ⦃
   ⍿⁰ #3# ᛖ ⋔ ⦃ ⌁ ⌁ ⧖:a,b ⌁ ⌁ ⌁ ⧗:a,b #-1# ‹chcomb› ⦄ ⦃
   #4# ᛖ ⋔ ⦃ ⌁ ⌁ ⧖:a ⌁ ⌁ ⌁ ⧗:a ⦄ ⦃ ⧖:z ⌁ ⌁ ⌁ ⌁ ⌁ ⧗:z ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
   ⧖:C,ch
-  ⧗:C,tok,vals ⧗:x #9032# ᛖ ⋔ ⦃ ‹gc_launder› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,tok,vals ⧗:x #9032# ᛖ ⋔ ⦃ ‹gc_launder› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
   ⧗:ch
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹g_charge› ⸫
 ⦃
   ⧖:C,tok,x,vals,ca,cb
-  ⧗:C,ca,cb ‹chsame› ⧖:C,ch
-  ⧗:C,tok,x,vals ⧗:ch #-1# ᛖ ⋔ ⦃ ‹gc_err› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C ⧗:ch ⧗:x ⧖ @any(8822,8911,8910)@ ⋔ ⦃ ⌁ #16# ‹reg› ⦄ ∅ ⁼
+  ⧗:C̵,ca,cb ‹chsame› ⧖:C,ch
+  ⧗:C̵,tok,x,vals ⧗:ch #-1# ᛖ ⋔ ⦃ ‹gc_err› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵ ⧗:ch ⧗:x ⧖ @any(8822,8911,8910)@ ⋔ ⦃ ⌁ #16# ‹reg› ⦄ ∅ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gc_same› ⸫
 ⦃
   ⧖:C,tok,x,vals
-  ⧗:C,tok ‹cerr› $charge violation: $ ⎙̵ ⧗:x ᚢ $ needs equal charges, found $ ⎙̵ ⧗:vals △ ‹plist› $ (§3.2)$ ⎙̵ ‹die›
+  ⧗:C̵,tok ‹cerr› $charge violation: $ ⎙̵ ⧗:x ᚢ $ needs equal charges, found $ ⎙̵ ⧗:vals △ ‹plist› $ (§3.2)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹gc_err› ⸫
 ⦃
   ⧖:C,tok,vals
-  ⧗:C,vals #2# ‹lget› #6# ‹vf› ⧖:C,sev ⧗:C,vals ○ ‹lget› #6# ‹vf› ⧖:C,aev
-  ⧗:C,tok,sev,aev ⧗:sev ⧗:aev ‹evok› ⋔ ⦃ ⌁ ⌁ ⌁ ⦄
+  ⧗:C̵,vals #2# ‹lget› #6# ‹vf› ⧖:C,sev ⧗:C̵,vals ○ ‹lget› #6# ‹vf› ⧖:C,aev
+  ⧗:C̵,tok,sev,aev ⧗:sev ⧗:aev ‹evok› ⋔ ⦃ ⌁ ⌁ ⌁ ⦄
     ⦃ ⧖:tok,sev,aev ⧗:tok ‹cerr› $storing a $ ⎙̵ ⧗:sev ‹evname› $ value into a $ ⎙̵ ⧗:aev ‹evname› $ array would launder it (§3.1)$ ⎙̵ ‹die› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹gc_launder› ⸫
 
-⦃ ⧖:C,tok,x ⧗:C,tok ‹cerr› ⧗:x ᚢ $ does not lift over superpositions in s1$ ⎙̵ ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹liferr› ⸫
+⦃ ⧖:C,tok,x ⧗:C̵,tok ‹cerr› ⧗:x ᚢ $ does not lift over superpositions in s1$ ⎙̵ ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹liferr› ⸫
 
 ⍝ the other operators
 ⦃
   ⧖:C,tok,S,strand,depth,locks
-  ⧗:C,tok ‹tc0› ⧖:C,x
+  ⧗:C̵,tok ‹tc0› ⧖:C,x
   ⧗:x ‹arity› ⧖:k
-  ⧗:C,tok ⧗:k #-1# ᛖ ⋔ ⦃ ⧖:tk ⧗:tk ‹cerr› $internal: no arity for $ ⎙̵ ⧗:tk ‹ptx› ‹die› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C,S,k,tok ○ ‹pop› ⧖:C,S2,vals
-  ⧗:C,tok,vals ‹agree› ⧖:C
-  ⧗:C,vals,tok,x ‹g_types1› ⧖:C,ts
-  ⧗:C,vals,ts,x ‹g_bytes› ⧖:C
-  ⧗:C,ts ‹g_lift› ⧖:C,lift,lifted,bts
-  ⧗:C,tok,x ⧗:lifted ⋔ ⦃ ⧖:tk,xx ⧗:tk,xx ⧗:xx ⧖ @any(8862,8863,8864,8861,8822,8911,8910,8914,8915,10849,8810,8811,8961)@ ‹not› ⋔
+  ⧗:C̵,tok ⧗:k #-1# ᛖ ⋔ ⦃ ⧖:tk ⧗:tk ‹cerr› $internal: no arity for $ ⎙̵ ⧗:tk ‹ptx› ‹die› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,S,k,tok ○ ‹pop› ⧖:C,S2,vals
+  ⧗:C̵,tok,vals ‹agree› ⧖:C
+  ⧗:C̵,vals,tok,x ‹g_types1› ⧖:C,ts
+  ⧗:C̵,vals,ts,x ‹g_bytes› ⧖:C
+  ⧗:C̵,ts ‹g_lift› ⧖:C,lift,lifted,bts
+  ⧗:C̵,tok,x ⧗:lifted ⋔ ⦃ ⧖:tk,xx ⧗:tk,xx ⧗:xx ⧖ @any(8862,8863,8864,8861,8822,8911,8910,8914,8915,10849,8810,8811,8961)@ ‹not› ⋔
       ⦃ ‹liferr› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C ⧗:lifted ⧗:lift #27# ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ‹not› ⧗:tok #7# ‹cfailunless›
+  ⧗:C̵ ⧗:lifted ⧗:lift #27# ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ‹not› ⧗:tok #7# ‹cfailunless›
   ⧗:tok,bts ‹gtypes› ⧖:C,outs
-  ⧗:C,outs ‹llen› ⧖:C,no
-  ⧗:C,outs,lift ⧗:lifted ⧗:no △ ᛖ ⋎ ⋔ ⦃ ⧖:o,l ⧗:o ○ ‹lget› ⧖:C,t ⧗:C,l,t ‹psitype› ‹l1› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,outs2
-  ⧗:C,S2,strand,locks ‹locks› ⧖:C,live
-  ⧗:C,vals,live,tok ‹allmove› ⧖:C
-  ⧗:C,vals ‹evof› ⧖:C,ev
-  ⧗:C,tok,x,vals,k ‹g_charge› ⧖:C,ch
-  ⧗:C,S2,outs2,tok,depth ‹push› ⧖:C,S3
-  ⧗:C,S3,no,ev,ch ‹annot1›
+  ⧗:C̵,outs ‹llen› ⧖:C,no
+  ⧗:C̵,outs,lift ⧗:lifted ⧗:no △ ᛖ ⋎ ⋔ ⦃ ⧖:o,l ⧗:o ○ ‹lget› ⧖:C,t ⧗:C̵,l,t ‹psitype› ‹l1› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,outs2
+  ⧗:C̵,S2,strand,locks ‹locks› ⧖:C,live
+  ⧗:C̵,vals,live,tok ‹allmove› ⧖:C
+  ⧗:C̵,vals ‹evof› ⧖:C,ev
+  ⧗:C̵,tok,x,vals,k ‹g_charge› ⧖:C,ch
+  ⧗:C̵,S2,outs2,tok,depth ‹push› ⧖:C,S3
+  ⧗:C̵,S3,no,ev,ch ‹annot1›
   ⧗:S3,strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_op› ⸫
 
 ⍝ ‹glyph› C op S strand depth locks: a glyph operator node
 ⦃
   ⧖:C,op,S,strand,depth,locks
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,tok ‹tc0› ⧖:C,x
-  ⧗:C,tok,S,strand,depth,locks,x
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok ‹tc0› ⧖:C,x
+  ⧗:C̵,tok,S,strand,depth,locks,x
   ⍿⁰ #10710# ᛖ ⋔ ⦃ ⌁ ‹g_bind› ⦄ ⦃
   ⍿⁰ #10711# ᛖ ⋔ ⦃ ⌁ ‹g_read› ⦄ ⦃
   ⍿⁰ #9087# ᛖ ⋔ ⦃ ⌁ ‹g_pick› ⦄ ⦃
@@ -1243,59 +1245,59 @@
 
 ⦃
   ⧖:C,tok,S,strand,depth,locks
-  ⧗:C #2# ‹reg› ⧖:C,cf
-  ⧗:C ⧗:cf △ ᛖ ⧗:tok #3# ‹cfailunless› ⧗:S,strand
+  ⧗:C̵ #2# ‹reg› ⧖:C,cf
+  ⧗:C̵ ⧗:cf △ ᛖ ⧗:tok #3# ‹cfailunless› ⧗:S,strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_fail› ⸫
 ⦃
   ⧖:C,tok,S,strand,depth,locks
-  ⧗:C,tok #4# ‹cfail› ⧗:S,strand
+  ⧗:C̵,tok #4# ‹cfail› ⧗:S,strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_attest› ⸫
 
 ⍝ ---- block results [S strand dead], leaks and escapes
 
-⦃ ⧖:C,S,strand,dead ⧗:C ‹len› ⧖:C,r ⧗:C ⧗:S ⍆̵ ⧗:strand ⍆̵ ⧗:dead ⍆̵ ⧗:r ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rnew› ⸫
-⦃ ⧖:C,r ⧗:C,r ‹rd› ⧖:C,S ⧗:C ⧗:r △ ⊞ ‹rd› ⧖:C,st ⧗:C ⧗:r #2# ⊞ ‹rd› ⧖:C,d ⧗:C,S,st,d ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹rget› ⸫
+⦃ ⧖:C,S,strand,dead ⧗:C̵ ‹len› ⧖:C,r ⧗:C̵ ⧗:S ⍆̵ ⧗:strand ⍆̵ ⧗:dead ⍆̵ ⧗:r ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rnew› ⸫
+⦃ ⧖:C,r ⧗:C̵,r ‹rd› ⧖:C,S ⧗:C̵ ⧗:r △ ⊞ ‹rd› ⧖:C,st ⧗:C̵ ⧗:r #2# ⊞ ‹rd› ⧖:C,d ⧗:C̵,S,st,d ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹rget› ⸫
 
 ⍝ ‹noleak› C strand from: moments that evaporate must not hold quantum values (§8.1)
 ⦃
   ⧖:C,strand,from
-  ⧗:C,strand ‹llen› ⧖:C,n
-  ⧗:C,strand,from,n
+  ⧗:C̵,strand ‹llen› ⧖:C,n
+  ⧗:C̵,strand,from,n
   ⥀ ⦃
     ⧖:C,strand,j,n
-    ⧗:C,strand,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,strand,j,n ⧗:C,strand,j ‹lget› ⧖:C,m
-        ⧗:C,m #5# ‹vf› ⧖:C,void ⧗:C,m ‹vty› ‹tcopy› ⧖:C,cp
-        ⧗:C,m ⧗:void ○ ᛖ ⧗:cp ‹not› ⋎ ⋔ ⦃ ‹leakerr› ⦄ ⦃ ⌁ ⦄ ⁼
+    ⧗:C̵,strand,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,strand,j,n ⧗:C̵,strand,j ‹lget› ⧖:C,m
+        ⧗:C̵,m #5# ‹vf› ⧖:C,void ⧗:C̵,m ‹vty› ‹tcopy› ⧖:C,cp
+        ⧗:C̵,m ⧗:void ○ ᛖ ⧗:cp ‹not› ⋎ ⋔ ⦃ ‹leakerr› ⦄ ⦃ ⌁ ⦄ ⁼
         ⧗:strand ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹noleak› ⸫
 ⦃
   ⧖:C,m
-  ⧗:C,m #2# ‹vf› ⧖:C,t
-  ⧗:C,t ‹cerr› $decoherence leak: the $ ⎙̵ ⧗:m ‹vty› ‹spr› $ bound here is never consumed (move it, ⌁ it, or return it; §8.1)$ ⎙̵ ‹die›
+  ⧗:C̵,m #2# ‹vf› ⧖:C,t
+  ⧗:C̵,t ‹cerr› $decoherence leak: the $ ⎙̵ ⧗:m ‹vty› ‹spr› $ bound here is never consumed (move it, ⌁ it, or return it; §8.1)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹leakerr› ⸫
 
 ⍝ ‹noescape› C vs depth: shadows created in this block (region ≥ depth) may not leave it (§8.2)
 ⦃
   ⧖:C,vs,depth
-  ⧗:C,vs ‹llen› ⧖:C,n
-  ⧗:C,vs,depth ○ ⧗:n
+  ⧗:C̵,vs ‹llen› ⧖:C,n
+  ⧗:C̵,vs,depth ○ ⧗:n
   ⥀ ⦃
     ⧖:C,vs,depth,j,n
-    ⧗:C,vs,depth,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,vs,depth,j,n ⧗:C,vs,j ‹lget› ⧖:C,v
-        ⧗:C,v #4# ‹vf› ⧖:C,of ⧗:C,v #3# ‹vf› ⧖:C,rg
-        ⧗:C,v ⧗:of #-1# ᛖ ‹not› ⧗:rg ⧗:depth ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ ‹escerr› ⦄ ⦃ ⌁ ⦄ ⁼
+    ⧗:C̵,vs,depth,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vs,depth,j,n ⧗:C̵,vs,j ‹lget› ⧖:C,v
+        ⧗:C̵,v #4# ‹vf› ⧖:C,of ⧗:C̵,v #3# ‹vf› ⧖:C,rg
+        ⧗:C̵,v ⧗:of #-1# ᛖ ‹not› ⧗:rg ⧗:depth ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ ‹escerr› ⦄ ⦃ ⌁ ⦄ ⁼
         ⧗:vs,depth ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹noescape› ⸫
 ⦃
   ⧖:C,v
-  ⧗:C,v #2# ‹vf› ⧖:C,t
-  ⧗:C,t ‹cerr› $the shadow $ ⎙̵ ⧗:v ‹vty› ‹spr› $ created here escapes its block (§8.2)$ ⎙̵ ‹die›
+  ⧗:C̵,v #2# ‹vf› ⧖:C,t
+  ⧗:C̵,t ‹cerr› $the shadow $ ⎙̵ ⧗:v ‹vty› ‹spr› $ created here escapes its block (§8.2)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹escerr› ⸫
 
 ⍝ ‹pwcode› code: what a join or predicate error names
@@ -1313,176 +1315,176 @@
 ⍝ ‹livers› C rs: the results that are not dead
 ⦃
   ⧖:C,rs
-  ⧗:C,rs ‹llen› ⧖:C,n
-  ⧗:C ‹lnew0› ⧖:C,live
-  ⧗:C,rs,live ○ ⧗:n
+  ⧗:C̵,rs ‹llen› ⧖:C,n
+  ⧗:C̵ ‹lnew0› ⧖:C,live
+  ⧗:C̵,rs,live ○ ⧗:n
   ⥀ ⦃
     ⧖:C,rs,live,j,n
-    ⧗:C,rs,live,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,rs,live,j,n ⧗:C,rs,j ‹lget› ⧖:C,r ⧗:C ⧗:r #2# ⊞ ‹rd› ⧖:C,d
-        ⧗:C,live,r ⧗:d ○ ᛖ ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,live2
-        ⧗:C,rs,live2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,rs,live,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,rs,live,j,n ⧗:C̵,rs,j ‹lget› ⧖:C,r ⧗:C̵ ⧗:r #2# ⊞ ‹rd› ⧖:C,d
+        ⧗:C̵,live,r ⧗:d ○ ᛖ ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,live2
+        ⧗:C̵,rs,live2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⧖:live ⌁ ⧗:live
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹livers› ⸫
 
 ⦃
   ⧖:C,rs,tok,what,depth
-  ⧗:C,rs ‹livers› ⧖:C,live
-  ⧗:C,live ‹llen› ⧖:C,n
-  ⧗:C,live,tok,what,depth,n ⧗:n ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ‹lnew0› ⧖:C,e ⧗:C,e,e △ ⦄ ⦃ ‹join1› ⦄ ⁼
+  ⧗:C̵,rs ‹livers› ⧖:C,live
+  ⧗:C̵,live ‹llen› ⧖:C,n
+  ⧗:C̵,live,tok,what,depth,n ⧗:n ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ‹lnew0› ⧖:C,e ⧗:C̵,e,e △ ⦄ ⦃ ‹join1› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹join› ⸫
 ⦃
   ⧖:C,live,tok,what,depth,n
-  ⧗:C,live,tok,what,n ‹jtypes›
+  ⧗:C̵,live,tok,what,n ‹jtypes›
   ⧗:live,tok,what,depth,n ‹jstack› ⧖:C,S
-  ⧗:C,live,n ‹jprefix› ⧖:C,p
-  ⧗:C,live,n,p ‹jstrand› ⧖:C,strand
-  ⧗:C,live,n,p ‹jleaks›
+  ⧗:C̵,live,n ‹jprefix› ⧖:C,p
+  ⧗:C̵,live,n,p ‹jstrand› ⧖:C,strand
+  ⧗:C̵,live,n,p ‹jleaks›
   ⧗:strand ⧗:depth △ ⊞ ‹noescape›
   ⧗:S,strand ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹join1› ⸫
 
 ⍝ ‹rstack› C live i: the stack of live result i; ‹rstrand› its strand
-⦃ ⧖:C,live,i ⧗:C,live,i ‹lget› ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rstack› ⸫
-⦃ ⧖:C,live,i ⧗:C,live,i ‹lget› ⧖:C,r ⧗:C ⧗:r △ ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rstrand› ⸫
+⦃ ⧖:C,live,i ⧗:C̵,live,i ‹lget› ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rstack› ⸫
+⦃ ⧖:C,live,i ⧗:C̵,live,i ‹lget› ⧖:C,r ⧗:C̵ ⧗:r △ ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rstrand› ⸫
 
 ⍝ ‹jtypes› C live tok what n: every live face leaves the same types
 ⦃
   ⧖:C,live,tok,what,n
-  ⧗:C,live ○ ‹rstack› ‹ltypes› ⧖:C,t0
-  ⧗:C,live,tok,what,t0 △ ⧗:n
+  ⧗:C̵,live ○ ‹rstack› ‹ltypes› ⧖:C,t0
+  ⧗:C̵,live,tok,what,t0 △ ⧗:n
   ⥀ ⦃
     ⧖:C,live,tok,what,t0,i,n
-    ⧗:C,live,tok,what,t0,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,live,tok,what,t0,i,n ⧗:C,live,i ‹rstack› ‹ltypes› ⧖:C,ti
-        ⧗:C,ti,t0 ‹leq› ⧖:C,same
-        ⧗:C,tok,what,t0,ti ⧗:same ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹jdiff› ⦄ ⁼
+    ⧗:C̵,live,tok,what,t0,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,live,tok,what,t0,i,n ⧗:C̵,live,i ‹rstack› ‹ltypes› ⧖:C,ti
+        ⧗:C̵,ti,t0 ‹leq› ⧖:C,same
+        ⧗:C̵,tok,what,t0,ti ⧗:same ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹jdiff› ⦄ ⁼
         ⧗:live,tok,what,t0 ⧗:i △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹jtypes› ⸫
 ⦃
   ⧖:C,tok,what,t0,ti
-  ⧗:C,tok ‹cerr› ⧗:what ‹pwcode› $ leaves different stacks: $ ⎙̵ ⧗:t0 ○ ‹plist› $ and $ ⎙̵ ⧗:ti ○ ‹plist›
+  ⧗:C̵,tok ‹cerr› ⧗:what ‹pwcode› $ leaves different stacks: $ ⎙̵ ⧗:t0 ○ ‹plist› $ and $ ⎙̵ ⧗:ti ○ ‹plist›
   $ (every live face must have the same effect)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹jdiff› ⸫
 
 ⍝ ‹jstack› C live tok what depth n: the merged stack; values unchanged in every face keep their identity
 ⦃
   ⧖:C,live,tok,what,depth,n
-  ⧗:C,live ○ ‹rstack› ⧖:C,S0
-  ⧗:C,S0 ‹llen› ⧖:C,m
-  ⧗:C ‹lnew0› ⧖:C,S
-  ⧗:C,live,tok,what,depth,n,S0,S ○ ⧗:m
+  ⧗:C̵,live ○ ‹rstack› ⧖:C,S0
+  ⧗:C̵,S0 ‹llen› ⧖:C,m
+  ⧗:C̵ ‹lnew0› ⧖:C,S
+  ⧗:C̵,live,tok,what,depth,n,S0,S ○ ⧗:m
   ⥀ ⦃
     ⧖:C,live,tok,what,depth,n,S0,S,j,m
-    ⧗:C,live,tok,what,depth,n,S0,S,j,m ⧗:j ⧗:m ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+    ⧗:C̵,live,tok,what,depth,n,S0,S,j,m ⧗:j ⧗:m ≶ ⋔ ⦃ ⦶ ⦄ ⁼
       ⦃ ⧖:C,live,tok,what,depth,n,S0,S,j,m
-        ⧗:C,live,tok,what,depth,n,S0,j ‹jslot› ⧖:C,v
-        ⧗:C,S,v ‹lpush› ⧖:C,S2
-        ⧗:C,live,tok,what,depth,n,S0,S2 ⧗:j △ ⊞ ⧗:m ⊕ ⦄
+        ⧗:C̵,live,tok,what,depth,n,S0,j ‹jslot› ⧖:C,v
+        ⧗:C̵,S,v ‹lpush› ⧖:C,S2
+        ⧗:C̵,live,tok,what,depth,n,S0,S2 ⧗:j △ ⊞ ⧗:m ⊕ ⦄
   ⦄
-  ⧖:C,live,tok,what,depth,n,S0,S,j,m ⧗:C,S
+  ⧖:C,live,tok,what,depth,n,S0,S,j,m ⧗:C̵,S
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹jstack› ⸫
 
 ⍝ ‹jslot› C live tok what depth n S0 j: the merged value at slot j
 ⦃
   ⧖:C,live,tok,what,depth,n,S0,j
-  ⧗:C,S0,j ‹lget› ⧖:C,v0
-  ⧗:C,v0 △ ‹vf› ⧖:C,id0
+  ⧗:C̵,S0,j ‹lget› ⧖:C,v0
+  ⧗:C̵,v0 △ ‹vf› ⧖:C,id0
   ⍝ same identity in every face?  and the deepest region of the shadows
-  ⧗:C,v0 #3# ‹vf› ⧖:C,rg0
-  ⧗:C,live,j,id0 △ ⧗:n ⦶ ⧗:rg0
+  ⧗:C̵,v0 #3# ‹vf› ⧖:C,rg0
+  ⧗:C̵,live,j,id0 △ ⧗:n ⦶ ⧗:rg0
   ⥀ ⦃
     ⧖:C,live,j,id0,i,n,same,rg
-    ⧗:C,live,j,id0,i,n,same,rg ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,live,j,id0,i,n,same,rg ⧗:C,live,i ‹rstack› ⧖:C,Si ⧗:C,Si,j ‹lget› ⧖:C,vi
-        ⧗:C,vi △ ‹vf› ⧖:C,idi ⧗:C,vi #3# ‹vf› ⧖:C,ri
-        ⧗:C,live,j,id0 ⧗:i △ ⊞ ⧗:n ⧗:same ⧗:idi ⧗:id0 ᛖ ⋎ ⧗:rg ⧗:ri ‹max› ⊕ ⦄
+    ⧗:C̵,live,j,id0,i,n,same,rg ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,live,j,id0,i,n,same,rg ⧗:C̵,live,i ‹rstack› ⧖:C,Si ⧗:C̵,Si,j ‹lget› ⧖:C,vi
+        ⧗:C̵,vi △ ‹vf› ⧖:C,idi ⧗:C̵,vi #3# ‹vf› ⧖:C,ri
+        ⧗:C̵,live,j,id0 ⧗:i △ ⊞ ⧗:n ⧗:same ⧗:idi ⧗:id0 ᛖ ⋎ ⧗:rg ⧗:ri ‹max› ⊕ ⦄
   ⦄
   ⧖:C,live,j,id0,i,n,same,rg
-  ⧗:C,live,tok,what,depth,n,j,v0,rg ⧗:same ⋔ ⦃ ⌁ ⧖:v ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⧗:v ⦄ ⦃ ‹jnew› ⦄ ⁼
+  ⧗:C̵,live,tok,what,depth,n,j,v0,rg ⧗:same ⋔ ⦃ ⌁ ⧖:v ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⧗:v ⦄ ⦃ ‹jnew› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹jslot› ⸫
 
 ⍝ ‹jnew› C live tok what depth n j v0 rg: a new value for a slot the faces disagree on
 ⦃
   ⧖:C,live,tok,what,depth,n,j,v0,rg
-  ⧗:C,v0 ‹vall› ⧖:C,ty,id,vtok,vrg,of,role,ev,ch
+  ⧗:C̵,v0 ‹vall› ⧖:C,ty,id,vtok,vrg,of,role,ev,ch
   ⧗:depth ⧗:rg ⧗:of #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:rg2
-  ⧗:C,ty,tok,rg2 ‹vnew› ⧖:C,nv
-  ⧗:C,nv #4# ⧗:of ‹vset›
+  ⧗:C̵,ty,tok,rg2 ‹vnew› ⧖:C,nv
+  ⧗:C̵,nv #4# ⧗:of ‹vset›
   ⧗:live,tok,what,j,v0,ev,ch △ ⧗:n
   ⥀ ⦃
     ⧖:C,live,tok,what,j,v0,ev,ch,i,n
-    ⧗:C,live,tok,what,j,v0,ev,ch,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,live,tok,what,j,v0,ev,ch,i,n ⧗:C,live,i ‹rstack› ⧖:C,Si ⧗:C,Si,j ‹lget› ⧖:C,vi
-        ⧗:C,vi #6# ‹vf› ⧖:C,evi ⧗:C,vi #7# ‹vf› ⧖:C,chi
-        ⧗:C,ch,chi ‹chsame› ⧖:C,ch2
-        ⧗:C,tok,what,v0,vi ⧗:ch2 #-1# ᛖ ⋔ ⦃ ‹jcharge› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+    ⧗:C̵,live,tok,what,j,v0,ev,ch,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,live,tok,what,j,v0,ev,ch,i,n ⧗:C̵,live,i ‹rstack› ⧖:C,Si ⧗:C̵,Si,j ‹lget› ⧖:C,vi
+        ⧗:C̵,vi #6# ‹vf› ⧖:C,evi ⧗:C̵,vi #7# ‹vf› ⧖:C,chi
+        ⧗:C̵,ch,chi ‹chsame› ⧖:C,ch2
+        ⧗:C̵,tok,what,v0,vi ⧗:ch2 #-1# ᛖ ⋔ ⦃ ‹jcharge› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
         ⧗:live,tok,what,j,v0 ⧗:ev ⧗:evi ‹evmax› ⧗:ch2 ⧗:i △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⧖:C,live,tok,what,j,v0,ev,ch,i,n
-  ⧗:C,nv #6# ⧗:ev ‹vset› ⧗:nv #7# ⧗:ch ‹vset›
+  ⧗:C̵,nv #6# ⧗:ev ‹vset› ⧗:nv #7# ⧗:ch ‹vset›
   ⧗:nv
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹jnew› ⸫
 ⦃
   ⧖:C,tok,what,v0,vi
-  ⧗:C,tok ‹cerr› $charge violation: $ ⎙̵ ⧗:what ‹pwcode› $ joins $ ⎙̵ ⧗:v0 ‹pvstr› $ with $ ⎙̵ ⧗:vi ‹pvstr› $ (§3.2)$ ⎙̵ ‹die›
+  ⧗:C̵,tok ‹cerr› $charge violation: $ ⎙̵ ⧗:what ‹pwcode› $ joins $ ⎙̵ ⧗:v0 ‹pvstr› $ with $ ⎙̵ ⧗:vi ‹pvstr› $ (§3.2)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹jcharge› ⸫
 
 ⍝ ‹jprefix› C live n: the longest common prefix of the faces' moment types
 ⦃
   ⧖:C,live,n
-  ⧗:C,live ○ ‹rstrand› ⧖:C,st0
-  ⧗:C,st0 ‹llen› ⧖:C,p
-  ⧗:C,live,st0 △ ⧗:n ⧗:p
+  ⧗:C̵,live ○ ‹rstrand› ⧖:C,st0
+  ⧗:C̵,st0 ‹llen› ⧖:C,p
+  ⧗:C̵,live,st0 △ ⧗:n ⧗:p
   ⥀ ⦃
     ⧖:C,live,st0,i,n,p
-    ⧗:C,live,st0,i,n,p ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,live,st0,i,n,p ⧗:C,live,i ‹rstrand› ⧖:C,si ⧗:C,st0,si,p ‹cprefix› ⧖:C,p2 ⧗:C,live,st0 ⧗:i △ ⊞ ⧗:n ⧗:p2 ⊕ ⦄
+    ⧗:C̵,live,st0,i,n,p ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,live,st0,i,n,p ⧗:C̵,live,i ‹rstrand› ⧖:C,si ⧗:C̵,st0,si,p ‹cprefix› ⧖:C,p2 ⧗:C̵,live,st0 ⧗:i △ ⊞ ⧗:n ⧗:p2 ⊕ ⦄
   ⦄
-  ⧖:C,live,st0,i,n,p ⧗:C,p
+  ⧖:C,live,st0,i,n,p ⧗:C̵,p
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹jprefix› ⸫
 ⍝ ‹cprefix› C a b p: how many of the first p moments of a and b have equal types
 ⦃
   ⧖:C,a,b,p
-  ⧗:C,b ‹llen› ⧖:C,nb
-  ⧗:C,a,b ○ ⧗:p ⧗:nb ‹min›
+  ⧗:C̵,b ‹llen› ⧖:C,nb
+  ⧗:C̵,a,b ○ ⧗:p ⧗:nb ‹min›
   ⥀ ⦃
     ⧖:C,a,b,q,lim
-    ⧗:C,a,b,q,lim ⧗:q ⧗:lim ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,a,b,q,lim ⧗:C,a,q ‹lget› ‹vty› ⧖:C,ta ⧗:C,b,q ‹lget› ‹vty› ⧖:C,tb
-        ⧗:C,a,b,q,lim ⧗:ta ⧗:tb ᛖ ⋔ ⦃ ⧖:l △ ⊞ ⧗:l ⊕ ⦄ ⦃ ⦶ ⦄ ⁼ ⦄
+    ⧗:C̵,a,b,q,lim ⧗:q ⧗:lim ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,a,b,q,lim ⧗:C̵,a,q ‹lget› ‹vty› ⧖:C,ta ⧗:C̵,b,q ‹lget› ‹vty› ⧖:C,tb
+        ⧗:C̵,a,b,q,lim ⧗:ta ⧗:tb ᛖ ⋔ ⦃ ⧖:l △ ⊞ ⧗:l ⊕ ⦄ ⦃ ⦶ ⦄ ⁼ ⦄
   ⦄
-  ⧖:C,a,b,q,lim ⧗:C,q
+  ⧖:C,a,b,q,lim ⧗:C̵,q
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cprefix› ⸫
 
 ⍝ ‹jstrand› C live n p: the exported moments (consumed in all faces or in none)
 ⦃
   ⧖:C,live,n,p
-  ⧗:C,live ○ ‹rstrand› ⧖:C,st0
-  ⧗:C ‹lnew0› ⧖:C,out
-  ⧗:C,live,n,st0,out ○ ⧗:p
+  ⧗:C̵,live ○ ‹rstrand› ⧖:C,st0
+  ⧗:C̵ ‹lnew0› ⧖:C,out
+  ⧗:C̵,live,n,st0,out ○ ⧗:p
   ⥀ ⦃
     ⧖:C,live,n,st0,out,q,p
-    ⧗:C,live,n,st0,out,q,p ⧗:q ⧗:p ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,live,n,st0,out,q,p ⧗:C,st0,q ‹lget› ⧖:C,m0
-        ⧗:C,live,n,q,m0 ‹jvoid›
+    ⧗:C̵,live,n,st0,out,q,p ⧗:q ⧗:p ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,live,n,st0,out,q,p ⧗:C̵,st0,q ‹lget› ⧖:C,m0
+        ⧗:C̵,live,n,q,m0 ‹jvoid›
         ⧗:out,m0 ‹lpush› ⧖:C,out2
-        ⧗:C,live,n,st0,out2 ⧗:q △ ⊞ ⧗:p ⊕ ⦄
+        ⧗:C̵,live,n,st0,out2 ⧗:q △ ⊞ ⧗:p ⊕ ⦄
   ⦄
-  ⧖:C,live,n,st0,out,q,p ⧗:C,out
+  ⧖:C,live,n,st0,out,q,p ⧗:C̵,out
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹jstrand› ⸫
 ⦃
   ⧖:C,live,n,q,m0
-  ⧗:C,m0 #5# ‹vf› ⧖:C,v0 ⧗:C,m0 #2# ‹vf› ⧖:C,mt
-  ⧗:C,live,q,v0,mt ○ ⧗:n
+  ⧗:C̵,m0 #5# ‹vf› ⧖:C,v0 ⧗:C̵,m0 #2# ‹vf› ⧖:C,mt
+  ⧗:C̵,live,q,v0,mt ○ ⧗:n
   ⥀ ⦃
     ⧖:C,live,q,v0,mt,i,n
-    ⧗:C,live,q,v0,mt,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,live,q,v0,mt,i,n ⧗:C,live,i ‹rstrand› ⧖:C,si ⧗:C,si,q ‹lget› #5# ‹vf› ⧖:C,vi
-        ⧗:C ⧗:vi ⧗:v0 ᛖ ⧗:mt #19# ‹cfailunless›
+    ⧗:C̵,live,q,v0,mt,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,live,q,v0,mt,i,n ⧗:C̵,live,i ‹rstrand› ⧖:C,si ⧗:C̵,si,q ‹lget› #5# ‹vf› ⧖:C,vi
+        ⧗:C̵ ⧗:vi ⧗:v0 ᛖ ⧗:mt #19# ‹cfailunless›
         ⧗:live,q,v0,mt ⧗:i △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁ ⌁
@@ -1490,11 +1492,11 @@
 
 ⦃
   ⧖:C,live,n,p
-  ⧗:C,live,p ○ ⧗:n
+  ⧗:C̵,live,p ○ ⧗:n
   ⥀ ⦃
     ⧖:C,live,p,i,n
-    ⧗:C,live,p,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,live,p,i,n ⧗:C,live,i ‹rstrand› ⧖:C,si ⧗:C,si,p ‹noleak› ⧗:live,p ⧗:i △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,live,p,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,live,p,i,n ⧗:C̵,live,i ‹rstrand› ⧖:C,si ⧗:C̵,si,p ‹noleak› ⧗:live,p ⧗:i △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹jleaks› ⸫
@@ -1502,55 +1504,55 @@
 ⍝ ---- nested blocks
 
 ⍝ ‹brange› C b: the ops of block node b, as slots from … to−1
-⦃ ⧖:C,b ⧗:C,b #2# ‹nd› ⧖:C,sz ⧗:C ⧗:b #3# ⊞ ⧗:b ⧗:sz ⊞ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹brange› ⸫
+⦃ ⧖:C,b ⧗:C̵,b #2# ‹nd› ⧖:C,sz ⧗:C̵ ⧗:b #3# ⊞ ⧗:b ⧗:sz ⊞ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹brange› ⸫
 
 ⍝ ‹sub› C from to S depth locks ind: run a nested block; a shadow it made may not escape on the stack
 ⦃
   ⧖:C,from,to,S,depth,locks,ind
-  ⧗:C,from,to,S ⧗:depth △ ⊞ ⧗:locks,ind ‹cblock› ⧖:C,S2,strand,dead
-  ⧗:C,S2 ⧗:depth △ ⊞ ⧗:dead ○ ᛖ ⋔ ⦃ ‹noescape› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,from,to,S ⧗:depth △ ⊞ ⧗:locks,ind ‹cblock› ⧖:C,S2,strand,dead
+  ⧗:C̵,S2 ⧗:depth △ ⊞ ⧗:dead ○ ᛖ ⋔ ⦃ ‹noescape› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
   ⧗:S2,strand,dead
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹sub› ⸫
 ⦃
   ⧖:C,b,S,depth,locks,ind
-  ⧗:C,b ‹brange› ⧖:C,from,to
-  ⧗:C,from,to,S,depth,locks,ind ‹sub›
+  ⧗:C̵,b ‹brange› ⧖:C,from,to
+  ⧗:C̵,from,to,S,depth,locks,ind ‹sub›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹subb› ⸫
 
 ⍝ ‹predicate› C b vals tok what depth locks ind: a predicate block (⍤, ⊨, ⋔⇋, ⟜) sees copies or
 ⍝ shadows of vals and must leave exactly one ŧ
 ⦃
   ⧖:C,b,vals,tok,what,depth,locks,ind
-  ⧗:C,vals ‹llen› ⧖:C,n
-  ⧗:C ‹lnew0› ⧖:C,PS
-  ⧗:C,vals,tok,depth,PS ○ ⧗:n
+  ⧗:C̵,vals ‹llen› ⧖:C,n
+  ⧗:C̵ ‹lnew0› ⧖:C,PS
+  ⧗:C̵,vals,tok,depth,PS ○ ⧗:n
   ⥀ ⦃
     ⧖:C,vals,tok,depth,PS,j,n
-    ⧗:C,vals,tok,depth,PS,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,vals,tok,depth,PS,j,n ⧗:C,vals,j ‹lget› ⧖:C,v
-        ⧗:C,v ‹vty› ⧖:C,t ⧗:C,t ‹tcopy› ⧖:C,cp
-        ⧗:C,v,t,tok,depth ⧗:cp ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹pshadow› ⦄ ⁼ ⧖:C,w
-        ⧗:C,PS,w ‹lpush› ⧖:C,PS2
-        ⧗:C,vals,tok,depth,PS2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,vals,tok,depth,PS,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,tok,depth,PS,j,n ⧗:C̵,vals,j ‹lget› ⧖:C,v
+        ⧗:C̵,v ‹vty› ⧖:C,t ⧗:C̵,t ‹tcopy› ⧖:C,cp
+        ⧗:C̵,v,t,tok,depth ⧗:cp ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹pshadow› ⦄ ⁼ ⧖:C,w
+        ⧗:C̵,PS,w ‹lpush› ⧖:C,PS2
+        ⧗:C̵,vals,tok,depth,PS2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⧖:C,vals,tok,depth,PS,j,n
-  ⧗:C,b ‹brange› ⧖:C,from,to
-  ⧗:C,from,to,PS ⧗:depth △ ⊞ ⧗:locks,ind ‹cblock› ⧖:C,S2,strand,dead
-  ⧗:C,S2,strand,tok,what ⧗:dead ○ ᛖ ⋔ ⦃ ‹predcheck› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,b ‹brange› ⧖:C,from,to
+  ⧗:C̵,from,to,PS ⧗:depth △ ⊞ ⧗:locks,ind ‹cblock› ⧖:C,S2,strand,dead
+  ⧗:C̵,S2,strand,tok,what ⧗:dead ○ ᛖ ⋔ ⦃ ‹predcheck› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹predicate› ⸫
 ⦃
   ⧖:C,v,t,tok,depth
-  #10199# ⧗:t ⧖:a,b ⧗:C,a,b ‹spre› ⧖:C,sht
-  ⧗:C,sht,tok ⧗:depth △ ⊞ ‹vnew› ⧖:C,sh
-  ⧗:C,v △ ‹vf› ⧖:C,id
-  ⧗:C,sh #4# ⧗:id ‹vset› ⧗:sh
+  #10199# ⧗:t ⧖:a,b ⧗:C̵,a,b ‹spre› ⧖:C,sht
+  ⧗:C̵,sht,tok ⧗:depth △ ⊞ ‹vnew› ⧖:C,sh
+  ⧗:C̵,v △ ‹vf› ⧖:C,id
+  ⧗:C̵,sh #4# ⧗:id ‹vset› ⧗:sh
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pshadow› ⸫
 ⦃
   ⧖:C,S2,strand,tok,what
-  ⧗:C,S2 ‹ltypes› ⧖:C,ts
-  ⧗:C #10# ‹reg› ‹l1› ⧖:C,want
-  ⧗:C,ts,want ‹leq› ⧖:C,ok
-  ⧗:C,tok,what,ts ⧗:ok ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:tk,wh,ts2 ⧗:tk ‹cerr› ⧗:wh ‹pwcode› $ must leave exactly [ŧ], but leaves $ ⎙̵ ⧗:ts2 ○ ‹plist› ‹die› ⦄ ⁼
+  ⧗:C̵,S2 ‹ltypes› ⧖:C,ts
+  ⧗:C̵ #10# ‹reg› ‹l1› ⧖:C,want
+  ⧗:C̵,ts,want ‹leq› ⧖:C,ok
+  ⧗:C̵,tok,what,ts ⧗:ok ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:tk,wh,ts2 ⧗:tk ‹cerr› ⧗:wh ‹pwcode› $ must leave exactly [ŧ], but leaves $ ⎙̵ ⧗:ts2 ○ ‹plist› ‹die› ⦄ ⁼
   ⧗:strand ○ ‹noleak›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹predcheck› ⸫
 
@@ -1559,110 +1561,110 @@
 ⍝ ‹apply› C S strand locks f tok depth: call a function with record f
 ⦃
   ⧖:C,S,strand,locks,f,tok,depth
-  ⧗:C,f △ ‹vf› ⧖:C,ins
-  ⧗:C,ins ‹llen› ⧖:C,k
-  ⧗:C,S,k,tok △ ‹pop› ⧖:C,S2,vals
-  ⧗:C,S2,strand,locks ‹locks› ⧖:C,live
-  ⧗:C,vals,live,f,tok ○ ⧗:k
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins
+  ⧗:C̵,ins ‹llen› ⧖:C,k
+  ⧗:C̵,S,k,tok △ ‹pop› ⧖:C,S2,vals
+  ⧗:C̵,S2,strand,locks ‹locks› ⧖:C,live
+  ⧗:C̵,vals,live,f,tok ○ ⧗:k
   ⥀ ⦃
     ⧖:C,vals,live,f,tok,i,k
-    ⧗:C,vals,live,f,tok,i,k ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹apply1› ⧖:i2,k2 ⧗:i2 △ ⊞ ⧗:k2 ⊕ ⦄
+    ⧗:C̵,vals,live,f,tok,i,k ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹apply1› ⧖:i2,k2 ⧗:i2 △ ⊞ ⧗:k2 ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⧖:C
-  ⧗:C,f #2# ‹vf› ⧖:C,outs
-  ⧗:C,S2,outs,tok,depth ‹push› ⧖:C,S3
-  ⧗:C,outs ‹llen› ⧖:C,no
-  ⧗:C,f #6# ‹vf› ⧖:C,oev ⧗:C,f #7# ‹vf› ⧖:C,och
-  ⧗:C,S3,no,oev,och ‹annotl›
+  ⧗:C̵,f #2# ‹vf› ⧖:C,outs
+  ⧗:C̵,S2,outs,tok,depth ‹push› ⧖:C,S3
+  ⧗:C̵,outs ‹llen› ⧖:C,no
+  ⧗:C̵,f #6# ‹vf› ⧖:C,oev ⧗:C̵,f #7# ‹vf› ⧖:C,och
+  ⧗:C̵,S3,no,oev,och ‹annotl›
   ⧗:S3
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹apply› ⸫
 
 ⍝ ‹apply1› C vals live f tok i k: check argument i
 ⦃
   ⧖:C,vals,live,f,tok,i,k
-  ⧗:C,vals,i ‹lget› ⧖:C,v
-  ⧗:C,v ‹vty› ⧖:C,t
-  ⧗:C,f △ ‹vf› ⧖:C,ins ⧗:C,ins,i ‹lget› ⧖:C,want
-  ⧗:C,t,tok ⧗:t ⧗:want ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹unwrap› ⦄ ⁼ ⧖:C,t2
-  ⧗:C,tok,i,want,t2 ⧗:t2 ⧗:want ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹argerr› ⦄ ⁼ ⧖:C
-  ⧗:C,v #6# ‹vf› ⧖:C,have
-  ⧗:C,f #4# ‹vf› ⧖:C,iev ⧗:C,iev,i ‹lget› ⧖:C,wev
-  ⧗:C,tok,i,have,wev ⧗:have ⧗:wev ‹evok› ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹argev› ⦄ ⁼ ⧖:C
-  ⧗:C,f #3# ‹vf› ⧖:C,rev
-  ⧗:C ⧗:rev △ ᛖ ⧗:have △ ᛖ ⋎ ‹not› ⧗:tok #20# ‹cfailunless›
-  ⧗:f #5# ‹vf› ⧖:C,ich ⧗:C,ich,i ‹lget› ⧖:C,wch
-  ⧗:C,v #7# ‹vf› ⧖:C,vch
-  ⧗:C,vch,wch ‹chsame› ⧖:C,cs
-  ⧗:C,tok,i,v,wch ⧗:cs #-1# ᛖ ⋔ ⦃ ‹argch› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,vals,i ‹lget› ⧖:C,v
+  ⧗:C̵,v ‹vty› ⧖:C,t
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,ins,i ‹lget› ⧖:C,want
+  ⧗:C̵,t,tok ⧗:t ⧗:want ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹unwrap› ⦄ ⁼ ⧖:C,t2
+  ⧗:C̵,tok,i,want,t2 ⧗:t2 ⧗:want ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹argerr› ⦄ ⁼ ⧖:C
+  ⧗:C̵,v #6# ‹vf› ⧖:C,have
+  ⧗:C̵,f #4# ‹vf› ⧖:C,iev ⧗:C̵,iev,i ‹lget› ⧖:C,wev
+  ⧗:C̵,tok,i,have,wev ⧗:have ⧗:wev ‹evok› ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹argev› ⦄ ⁼ ⧖:C
+  ⧗:C̵,f #3# ‹vf› ⧖:C,rev
+  ⧗:C̵ ⧗:rev △ ᛖ ⧗:have △ ᛖ ⋎ ‹not› ⧗:tok #20# ‹cfailunless›
+  ⧗:f #5# ‹vf› ⧖:C,ich ⧗:C̵,ich,i ‹lget› ⧖:C,wch
+  ⧗:C̵,v #7# ‹vf› ⧖:C,vch
+  ⧗:C̵,vch,wch ‹chsame› ⧖:C,cs
+  ⧗:C̵,tok,i,v,wch ⧗:cs #-1# ᛖ ⋔ ⦃ ‹argch› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:v,live,tok ‹moveok›
   ⧗:vals,live,f,tok,i,k
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹apply1› ⸫
 ⦃
   ⧖:C,tok,i,want,t
-  ⧗:C,tok ‹cerr› $argument $ ⎙̵ ⧗:i △ ⊞ ᛁ $ of $ ⎙̵ ⧗:tok ‹plab› $: expected $ ⎙̵ ⧗:want ‹spr› $, found $ ⎙̵ ⧗:t ‹spr› ‹die›
+  ⧗:C̵,tok ‹cerr› $argument $ ⎙̵ ⧗:i △ ⊞ ᛁ $ of $ ⎙̵ ⧗:tok ‹plab› $: expected $ ⎙̵ ⧗:want ‹spr› $, found $ ⎙̵ ⧗:t ‹spr› ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹argerr› ⸫
 ⦃
   ⧖:C,tok,i,have,wev
-  ⧗:C,tok ‹cerr› $argument $ ⎙̵ ⧗:i △ ⊞ ᛁ $ of $ ⎙̵ ⧗:tok ‹plab› $ is $ ⎙̵ ⧗:have ‹evname› $, but the parameter accepts only $ ⎙̵
+  ⧗:C̵,tok ‹cerr› $argument $ ⎙̵ ⧗:i △ ⊞ ᛁ $ of $ ⎙̵ ⧗:tok ‹plab› $ is $ ⎙̵ ⧗:have ‹evname› $, but the parameter accepts only $ ⎙̵
   ⧗:wev ‹evname› $ values; attest it with ⊨ or mark the parameter (§3.1)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹argev› ⸫
 ⦃
   ⧖:C,tok,i,v,wch
-  ⧗:C,tok ‹cerr› $charge violation: argument $ ⎙̵ ⧗:i △ ⊞ ᛁ $ of $ ⎙̵ ⧗:tok ‹plab› $ is $ ⎙̵ ⧗:v ‹pvstr›
+  ⧗:C̵,tok ‹cerr› $charge violation: argument $ ⎙̵ ⧗:i △ ⊞ ᛁ $ of $ ⎙̵ ⧗:tok ‹plab› $ is $ ⎙̵ ⧗:v ‹pvstr›
   $, the parameter wants charge ⁽$ ⎙̵ ⧗:wch ‹spr› $⁾ (§3.2)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹argch› ⸫
 
 ⍝ ‹fnfind› C name: the function record of that name, or −1
 ⦃
   ⧖:C,name
-  ⧗:C #7# ‹reg› ⧖:C,fns
-  ⧗:C,fns ‹llen› ⧖:C,n
-  ⧗:C,fns,name ○ ⧗:n #-1#
+  ⧗:C̵ #7# ‹reg› ⧖:C,fns
+  ⧗:C̵,fns ‹llen› ⧖:C,n
+  ⧗:C̵,fns,name ○ ⧗:n #-1#
   ⥀ ⦃
     ⧖:C,fns,name,j,n,found
-    ⧗:C,fns,name,j,n,found ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,fns,name,j,n,found ⧗:C,fns,j ‹lget› ⧖:C,f ⧗:C,f ‹rd› ⧖:C,fname
-        ⧗:C,fns,name ⧗:j △ ⊞ ⧗:n ⧗:found ⧗:f ⧗:fname ⧗:name ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⊕ ⦄
+    ⧗:C̵,fns,name,j,n,found ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,fns,name,j,n,found ⧗:C̵,fns,j ‹lget› ⧖:C,f ⧗:C̵,f ‹rd› ⧖:C,fname
+        ⧗:C̵,fns,name ⧗:j △ ⊞ ⧗:n ⧗:found ⧗:f ⧗:fname ⧗:name ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⊕ ⦄
   ⦄
-  ⧖:C,fns,name,j,n,found ⧗:C,found
+  ⧖:C,fns,name,j,n,found ⧗:C̵,found
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹fnfind› ⸫
 
 ⍝ ‹resolve› C op: the function a call node names (§9, §9.1)
 ⦃
   ⧖:C,op
-  ⧗:C,op ○ ‹nd› ⧖:C,k
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,op,tok,k ⧗:k #6# ᛖ ⋔ ⦃ ⌁ ‹resshape› ⦄ ⦃ ‹resname› ⦄ ⁼
+  ⧗:C̵,op ○ ‹nd› ⧖:C,k
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,op,tok,k ⧗:k #6# ᛖ ⋔ ⦃ ⌁ ‹resshape› ⦄ ⦃ ‹resname› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹resolve› ⸫
 ⦃
   ⧖:C,op,tok,k
-  ⧗:C,tok ‹tname› ⧖:C,nm
-  ⧗:C,nm ‹fnfind› ⧖:C,f
-  ⧗:C,tok,nm ⧗:f #-1# ᛖ ⋔ ⦃ ⧖:tk,n ⧗:tk ‹cerr› $unknown function $ ⎙̵ ⧗:n ‹spr› ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C,f #3# ‹vf› ⧖:C,rev
-  ⧗:C,tok,nm ⧗:k #4# ᛖ ⧗:rev ○ ᛖ ⋎ ⋔ ⦃ ⧖:tk,n ⧗:tk ‹cerr› $⇜$ ⎙̵ ⧗:n ‹spr› $ calls an inverse, but $ ⎙̵ ⧗:n ‹spr› $ is not reversible (⇋, §10)$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,tok ‹tname› ⧖:C,nm
+  ⧗:C̵,nm ‹fnfind› ⧖:C,f
+  ⧗:C̵,tok,nm ⧗:f #-1# ᛖ ⋔ ⦃ ⧖:tk,n ⧗:tk ‹cerr› $unknown function $ ⎙̵ ⧗:n ‹spr› ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,f #3# ‹vf› ⧖:C,rev
+  ⧗:C̵,tok,nm ⧗:k #4# ᛖ ⧗:rev ○ ᛖ ⋎ ⋔ ⦃ ⧖:tk,n ⧗:tk ‹cerr› $⇜$ ⎙̵ ⧗:n ‹spr› $ calls an inverse, but $ ⎙̵ ⧗:n ‹spr› $ is not reversible (⇋, §10)$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
   ⧗:f
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹resname› ⸫
 ⦃
   ⧖:C,op,tok
-  ⧗:C ⧗:op #3# ⊞ ‹cshape› ⧖:C,key
-  ⧗:C #9# ‹reg› ⧖:C,shapes
+  ⧗:C̵ ⧗:op #3# ⊞ ‹cshape› ⧖:C,key
+  ⧗:C̵ #9# ‹reg› ⧖:C,shapes
   ⍝ the names with that shape, in definition order
-  ⧗:C,shapes ‹llen› ⧖:C,n
-  ⧗:C ‹lnew0› ⧖:C,names
-  ⧗:C,shapes,key,names ○ ⧗:n
+  ⧗:C̵,shapes ‹llen› ⧖:C,n
+  ⧗:C̵ ‹lnew0› ⧖:C,names
+  ⧗:C̵,shapes,key,names ○ ⧗:n
   ⥀ ⦃
     ⧖:C,shapes,key,names,j,n
-    ⧗:C,shapes,key,names,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,shapes,key,names,j,n ⧗:C,shapes,j ‹lget› ⧖:C,e ⧗:C,e ‹rd› ⧖:C,ek ⧗:C ⧗:e △ ⊞ ‹rd› ⧖:C,en
-        ⧗:C,names,en ⧗:ek ⧗:key ᛖ ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,names2
-        ⧗:C,shapes,key,names2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,shapes,key,names,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,shapes,key,names,j,n ⧗:C̵,shapes,j ‹lget› ⧖:C,e ⧗:C̵,e ‹rd› ⧖:C,ek ⧗:C̵ ⧗:e △ ⊞ ‹rd› ⧖:C,en
+        ⧗:C̵,names,en ⧗:ek ⧗:key ᛖ ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,names2
+        ⧗:C̵,shapes,key,names2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⧖:C,shapes,key,names,j,n
-  ⧗:C,names ‹llen› ⧖:C,nn
-  ⧗:C,tok,key,names ⧗:nn ○ ᛖ ⋔ ⦃ ⌁ ⧖:tk,ky ⧗:tk ‹cerr› $no function has the shape $ ⎙̵ ⧗:ky ‹spr› ‹die› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C,tok,key,names ⧗:nn △ ≶ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:tk,ky,ns ⧗:tk ‹cerr› $shape collision: $ ⎙̵ ⧗:ky ‹spr› $ is the shape of $ ⎙̵ ⧗:ns △ ‹pjoin› ‹die› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⧖:C
-  ⧗:C,names ○ ‹lget› ‹fnfind›
+  ⧗:C̵,names ‹llen› ⧖:C,nn
+  ⧗:C̵,tok,key,names ⧗:nn ○ ᛖ ⋔ ⦃ ⌁ ⧖:tk,ky ⧗:tk ‹cerr› $no function has the shape $ ⎙̵ ⧗:ky ‹spr› ‹die› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,tok,key,names ⧗:nn △ ≶ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:tk,ky,ns ⧗:tk ‹cerr› $shape collision: $ ⎙̵ ⧗:ky ‹spr› $ is the shape of $ ⎙̵ ⧗:ns △ ‹pjoin› ‹die› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⧖:C
+  ⧗:C̵,names ○ ‹lget› ‹fnfind›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹resshape› ⸫
 
 ⍝ ---- block cases: C op S strand dead depth locks ind prev → C S strand dead skip lab larg
@@ -1670,289 +1672,289 @@
 
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,tok ‹tkd› ⧖:C,lk
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok ‹tkd› ⧖:C,lk
   #11# ⧗:lk #6# ᛖ ⋔ ⦃ ⌁ #12# ⦄ ∅ ⁼ ⧗:lk #7# ᛖ ⋔ ⦃ ⌁ #10# ⦄ ∅ ⁼ ⧗:lk #12# ᛖ ⋔ ⦃ ⌁ #14# ⦄ ∅ ⁼ ⧖:r
-  ⧗:C,r ‹reg› ⧖:C,t
-  ⧗:C,t,tok,depth ‹vnew› ⧖:C,v
-  ⧗:C #17# ‹reg› ⧖:C,glu
-  ⧗:C,v #7# ⧗:glu ⧗:lk #5# ᛖ ⧗:lk #6# ᛖ ⋏ ⋔ ⦃ ‹vset› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,r ‹reg› ⧖:C,t
+  ⧗:C̵,t,tok,depth ‹vnew› ⧖:C,v
+  ⧗:C̵ #17# ‹reg› ⧖:C,glu
+  ⧗:C̵,v #7# ⧗:glu ⧗:lk #5# ᛖ ⧗:lk #6# ᛖ ⋏ ⋔ ⦃ ‹vset› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:tok ‹trole› ⧖:C,role
-  ⧗:C,v,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹vrole› ⦄ ⁼ ⧖:C,v2
-  ⧗:C,S,v2 ‹lpush› ⧗:strand,dead ○ ○ ○
+  ⧗:C̵,v,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹vrole› ⦄ ⁼ ⧖:C,v2
+  ⧗:C̵,S,v2 ‹lpush› ⧗:strand,dead ○ ○ ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_lit› ⸫
 
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,op ○ ‹nd› ⧖:C,k
-  ⧗:C,op ‹resolve› ⧖:C,f
-  ⧗:C,tok #2# ‹tmark› ⧖:C,fut
-  ⧗:C,f #2# ‹vf› ⧖:C,outs ⧗:C,outs ‹llen› ⧖:C,no
-  ⧗:C ⧗:fut ⧗:no ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ‹not› ⧗:tok #11# ‹cfailunless›
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,op ○ ‹nd› ⧖:C,k
+  ⧗:C̵,op ‹resolve› ⧖:C,f
+  ⧗:C̵,tok #2# ‹tmark› ⧖:C,fut
+  ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs ‹llen› ⧖:C,no
+  ⧗:C̵ ⧗:fut ⧗:no ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ‹not› ⧗:tok #11# ‹cfailunless›
   ⧗:S,strand,locks,f,tok,depth ‹apply› ⧖:C,S2
-  ⧗:C,f ‹rd› ⧖:C,fname
-  ⧗:C,S2,strand,dead ○ ⧗:k #6# ᛖ ⋔ ⦃ #9# ⦄ ⦃ ○ ⦄ ⁼ ⧗:fname
+  ⧗:C̵,f ‹rd› ⧖:C,fname
+  ⧗:C̵,S2,strand,dead ○ ⧗:k #6# ᛖ ⋔ ⦃ #9# ⦄ ⦃ ○ ⦄ ⁼ ⧗:fname
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_call› ⸫
 
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op,S,strand,depth,locks ‹glyph› ⧖:C,S2,strand2
-  ⧗:C,op ‹ndt› ⧖:C,tok ⧗:C,tok ‹tc0› ⧖:C,x
-  ⧗:C,S2,strand2 ⧗:dead ⧗:x #8623# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ○ ○ ○
+  ⧗:C̵,op,S,strand,depth,locks ‹glyph› ⧖:C,S2,strand2
+  ⧗:C̵,op ‹ndt› ⧖:C,tok ⧗:C̵,tok ‹tc0› ⧖:C,x
+  ⧗:C̵,S2,strand2 ⧗:dead ⧗:x #8623# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ○ ○ ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_op› ⸫
 
 ⍝ x ⦃pred⦄ ⊨ (§3.1 rule 4)
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,op #2# ‹nd› ⧖:C,sz
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,op #2# ‹nd› ⧖:C,sz
   ⧗:op ⧗:sz ⊞ ⧖:nx
-  ⧗:C,nx ○ ‹nd› ⧖:C,nk ⧗:C,nx ‹ndt› ⧖:C,atok
-  ⧗:C,atok #8# #8872# ‹tis1› ⧖:C,isat
-  ⧗:C ⧗:nx ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:nk #5# ᛖ ⋎ ⧗:isat ⋎ ⧗:tok #12# ‹cfailunless›
+  ⧗:C̵,nx ○ ‹nd› ⧖:C,nk ⧗:C̵,nx ‹ndt› ⧖:C,atok
+  ⧗:C̵,atok #8# #8872# ‹tis1› ⧖:C,isat
+  ⧗:C̵ ⧗:nx ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:nk #5# ᛖ ⋎ ⧗:isat ⋎ ⧗:tok #12# ‹cfailunless›
   ⧗:S △ ⧗:atok ○ ‹pop› ⧖:C,S2,vals
-  ⧗:C,atok,vals ‹agree›
+  ⧗:C̵,atok,vals ‹agree›
   ⧗:vals ○ ‹lget› ⧖:C,x
-  ⧗:C,x ‹vty› ⧖:C,t ⧗:C,t,atok ‹unwrap› ⧖:C,xt
-  ⧗:C,ind △ ‹note›
+  ⧗:C̵,x ‹vty› ⧖:C,t ⧗:C̵,t,atok ‹unwrap› ⧖:C,xt
+  ⧗:C̵,ind △ ‹note›
   ⧗:S2,strand,locks ‹locks› ⧖:C,inner
-  ⧗:C ⧗:op #3# ⊞ ⧗:vals,tok #2# ⧗:depth,inner ⧗:ind △ ⊞ ‹predicate›
+  ⧗:C̵ ⧗:op #3# ⊞ ⧗:vals,tok #2# ⧗:depth,inner ⧗:ind △ ⊞ ‹predicate›
   #9676# ⧗:xt ‹spre› ⧖:C,rt
-  ⧗:C,rt,atok,depth ‹vnew› ⧖:C,res
-  ⧗:C,x,res ‹vannot› ⧗:res #6# ○ ‹vset›
+  ⧗:C̵,rt,atok,depth ‹vnew› ⧖:C,res
+  ⧗:C̵,x,res ‹vannot› ⧗:res #6# ○ ‹vset›
   ⧗:S2,res ‹lpush› ⧗:strand,dead △ #5# ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_quote› ⸫
 
 ⍝ ⋔ and ⋔⇋
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,op ○ ‹nd› ⧖:C,k
-  ⧗:C,S △ ⧗:tok #2# ‹pop› ⧖:C,S2,vals
-  ⧗:C,vals ○ ‹lget› ‹vty› ⧖:C,t ⧗:C,t,tok ‹unwrap› ⧖:C,ct
-  ⧗:C,ct ‹shead› ⧖:C,h
-  ⧗:C ⧗:h #968# ᛖ ‹not› ⧗:tok #13# ‹cfailunless›
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,op ○ ‹nd› ⧖:C,k
+  ⧗:C̵,S △ ⧗:tok #2# ‹pop› ⧖:C,S2,vals
+  ⧗:C̵,vals ○ ‹lget› ‹vty› ⧖:C,t ⧗:C̵,t,tok ‹unwrap› ⧖:C,ct
+  ⧗:C̵,ct ‹shead› ⧖:C,h
+  ⧗:C̵ ⧗:h #968# ᛖ ‹not› ⧗:tok #13# ‹cfailunless›
   ⧗:ct #10# ‹tis› ⧖:C,istrit
-  ⧗:C,tok,ct ⧗:istrit ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tk,c ⧗:tk ‹cerr› $⋔ selects on a trit ŧ, found $ ⎙̵ ⧗:c ‹spr› ‹die› ⦄ ⁼
+  ⧗:C̵,tok,ct ⧗:istrit ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tk,c ⧗:tk ‹cerr› $⋔ selects on a trit ŧ, found $ ⎙̵ ⧗:c ‹spr› ‹die› ⦄ ⁼
   ⧗:S2,strand,locks ‹locks› ⧖:C,inner
   ⍝ the three faces
-  ⧗:C ‹lnew0› ⧖:C,rs
-  ⧗:C,op ⧗:op #3# ⊞ ⧗:S2,depth,inner,ind,rs ○ #-1#
+  ⧗:C̵ ‹lnew0› ⧖:C,rs
+  ⧗:C̵,op ⧗:op #3# ⊞ ⧗:S2,depth,inner,ind,rs ○ #-1#
   ⥀ ⦃
     ⧖:C,op,c,S,depth,inner,ind,rs,fi,prevr
-    ⧗:C,op,c,S,depth,inner,ind,rs,fi,prevr ⧗:fi #3# ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹selface› ⊕ ⦄
+    ⧗:C̵,op,c,S,depth,inner,ind,rs,fi,prevr ⧗:fi #3# ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹selface› ⊕ ⦄
   ⦄
   ⧖:C,op,c,S3,depth,inner,ind,rs,fi,prevr
-  ⧗:C,rs,tok ○ ⧗:depth ‹join› ⧖:C,S4,strand2,dead2
-  ⧗:C,op,c,S4,tok,depth,inner,ind ⧗:k #11# ᛖ ⋔ ⦃ ‹rsassert› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C,strand,strand2 ‹lcat› ⧖:C,strand3
-  ⧗:C,S4,strand3,dead2 ○ ⧗:k #11# ᛖ ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ○
+  ⧗:C̵,rs,tok ○ ⧗:depth ‹join› ⧖:C,S4,strand2,dead2
+  ⧗:C̵,op,c,S4,tok,depth,inner,ind ⧗:k #11# ᛖ ⋔ ⦃ ‹rsassert› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,strand,strand2 ‹lcat› ⧖:C,strand3
+  ⧗:C̵,S4,strand3,dead2 ○ ⧗:k #11# ᛖ ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_select› ⸫
 
 ⍝ ‹selface› C op c S depth inner ind rs fi prevr: one face (c is its node)
 ⦃
   ⧖:C,op,c,S,depth,inner,ind,rs,fi,prevr
-  ⧗:C ⧗:ind △ ⊞ ⧗:fi #2# ⊞ ‹note›
+  ⧗:C̵ ⧗:ind △ ⊞ ⧗:fi #2# ⊞ ‹note›
   ⧗:c ○ ‹nd› ⧖:C,fk
-  ⧗:C,c,S,depth,inner,ind,prevr,fk
+  ⧗:C̵,c,S,depth,inner,ind,prevr,fk
   ⍿⁰ #12# ᛖ ⋔ ⦃ ⌁ ⧖:pr ⌁ ⌁ ⌁ ⌁ ⌁ ⧗:pr ⦄
-    ⦃ #13# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⧖:S0 ⌁ ‹lnew0› ⧖:C,e ⧗:C,S0,e ○ ‹rnew› ⦄
+    ⦃ #13# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⧖:S0 ⌁ ‹lnew0› ⧖:C,e ⧗:C̵,S0,e ○ ‹rnew› ⦄
       ⦃ ⌁ ⧖:b,S0,dp,inn,id ⧗:b,S0,dp,inn ⧗:id #2# ⊞ ‹subb› ‹rnew› ⦄ ⁼ ⦄ ⁼
   ⧖:C,r
-  ⧗:C,rs,r ‹lpush› ⧖:C,rs2
-  ⧗:C,c #2# ‹nd› ⧖:C,sz
-  ⧗:C,op ⧗:c ⧗:sz ⊞ ⧗:S,depth,inner,ind,rs2 ⧗:fi △ ⊞ ⧗:r
+  ⧗:C̵,rs,r ‹lpush› ⧖:C,rs2
+  ⧗:C̵,c #2# ‹nd› ⧖:C,sz
+  ⧗:C̵,op ⧗:c ⧗:sz ⊞ ⧗:S,depth,inner,ind,rs2 ⧗:fi △ ⊞ ⧗:r
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹selface› ⸫
 
 ⍝ ‹rsassert› C op c S tok depth inner ind: the exit assertion of ⋔⇋
 ⦃
   ⧖:C,op,c,S,tok,depth,inner,ind
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C ⧗:n ○ ᛖ ‹not› ⧗:tok #14# ‹cfailunless›
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵ ⧗:n ○ ᛖ ‹not› ⧗:tok #14# ‹cfailunless›
   ⧗:S ⧗:n △ ⊟ ‹lget› ⧖:C,top
-  ⧗:C,top ‹l1› ⧖:C,vals
-  ⧗:C ⧗:ind △ ⊞ #5# ‹note›
+  ⧗:C̵,top ‹l1› ⧖:C,vals
+  ⧗:C̵ ⧗:ind △ ⊞ #5# ‹note›
   ⧗:c,vals,tok #3# ⧗:depth,inner ⧗:ind #2# ⊞ ‹predicate›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹rsassert› ⸫
 
 ⍝ ⥀: the body must have effect ⟨S ⊸ S ŧ⟩; evidentials and charges carried round must reach a fixpoint
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,S ‹ltypes› ⧖:C,before
-  ⧗:C,S,strand,locks ‹locks› ⧖:C,inner
-  ⧗:C △ ‹reg› ⧖:C,tracing
-  ⧗:C △ ○ ‹wr›
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,S ‹ltypes› ⧖:C,before
+  ⧗:C̵,S,strand,locks ‹locks› ⧖:C,inner
+  ⧗:C̵ △ ‹reg› ⧖:C,tracing
+  ⧗:C̵ △ ○ ‹wr›
   ⧗:op #3# ⊞ ⧗:S,depth,inner,ind,tok ○
   ⥀ ⦃
     ⧖:C,b,S,depth,inner,ind,tok,attempt
-    ⧗:C,b,S,depth,inner ⧗:ind △ ⊞ ‹subb› ⧖:C,R,rst,rdead
-    ⧗:C,S,R,rdead ‹lstab› ⧖:C,S2,unstable
+    ⧗:C̵,b,S,depth,inner ⧗:ind △ ⊞ ‹subb› ⧖:C,R,rst,rdead
+    ⧗:C̵,S,R,rdead ‹lstab› ⧖:C,S2,unstable
     ⧗:attempt △ ⊞ ⧖:att2
-    ⧗:C ⧗:unstable ⧗:att2 #3# ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ‹not› ⧗:tok #15# ‹cfailunless›
+    ⧗:C̵ ⧗:unstable ⧗:att2 #3# ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ‹not› ⧗:tok #15# ‹cfailunless›
     ⧗:b,S2,depth,inner,ind,tok,att2 ⧗:unstable ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
   ⦄
   ⧖:C,b,S,depth,inner,ind,tok,attempt
-  ⧗:C △ ⧗:tracing ‹wr› ⧖:C
-  ⧗:C ⧗:ind △ ⊞ #6# ‹note›
+  ⧗:C̵ △ ⧗:tracing ‹wr› ⧖:C
+  ⧗:C̵ ⧗:ind △ ⊞ #6# ‹note›
   ⧗:b,S,depth,inner ⧗:ind #2# ⊞ ‹subb› ⧖:C,R,rst,rdead
-  ⧗:C,S,strand,dead,before,R,rst,tok,depth ⧗:rdead △ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ △ ○ #3# ○ ⦄ ⦃ ‹loopend› ⦄ ⁼
+  ⧗:C̵,S,strand,dead,before,R,rst,tok,depth ⧗:rdead △ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ △ ○ #3# ○ ⦄ ⦃ ‹loopend› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_loop› ⸫
 
 ⍝ ‹lstab› C S R dead: S with the evidentials and charges the body leaves on it, and whether that changed anything
 ⦃
   ⧖:C,S,R,dead
-  ⧗:C,S ‹llen› ⧖:C,n ⧗:C,R ‹llen› ⧖:C,nr
-  ⧗:C,S,R,n ⧗:dead ○ ᛖ ⧗:nr ⧗:n ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ ‹lstab1› ⦄ ⦃ ⌁ ⌁ ⊕ ⦄ ⁼
+  ⧗:C̵,S ‹llen› ⧖:C,n ⧗:C̵,R ‹llen› ⧖:C,nr
+  ⧗:C̵,S,R,n ⧗:dead ○ ᛖ ⧗:nr ⧗:n ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ ‹lstab1› ⦄ ⦃ ⌁ ⌁ ⊕ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ŧ⟩ ‹lstab› ⸫
 ⦃
   ⧖:C,S,R,n
-  ⧗:C ‹lnew0› ⧖:C,S2
-  ⧗:C,S,R,S2 ○ ⧗:n ⊕
+  ⧗:C̵ ‹lnew0› ⧖:C,S2
+  ⧗:C̵,S,R,S2 ○ ⧗:n ⊕
   ⥀ ⦃
     ⧖:C,S,R,S2,q,n,un
-    ⧗:C,S,R,S2,q,n,un ⧗:q ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,S,R,S2,q,n,un ⧗:C,S,q ‹lget› ⧖:C,sv ⧗:C,R,q ‹lget› ⧖:C,bv
-        ⧗:C,sv #6# ‹vf› ⧖:C,sev ⧗:C,bv #6# ‹vf› ⧖:C,bev ⧗:C,sv #7# ‹vf› ⧖:C,sch ⧗:C,bv #7# ‹vf› ⧖:C,bch
+    ⧗:C̵,S,R,S2,q,n,un ⧗:q ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,S,R,S2,q,n,un ⧗:C̵,S,q ‹lget› ⧖:C,sv ⧗:C̵,R,q ‹lget› ⧖:C,bv
+        ⧗:C̵,sv #6# ‹vf› ⧖:C,sev ⧗:C̵,bv #6# ‹vf› ⧖:C,bev ⧗:C̵,sv #7# ‹vf› ⧖:C,sch ⧗:C̵,bv #7# ‹vf› ⧖:C,bch
         ⧗:sev ⧗:bev ‹evmax› ⧖:ev
-        ⧗:C,sch,bch ‹chsame› ⧖:C,ch0
+        ⧗:C̵,sch,bch ‹chsame› ⧖:C,ch0
         ⧗:ch0 ⧗:bch ⧗:ch0 #-1# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:ch
         ⧗:ev ⧗:sev ᛖ ‹not› ⧗:ch ⧗:sch ᛖ ‹not› ⋏ ⧖:changed
-        ⧗:C,sv,ev,ch ⧗:changed ⋔ ⦃ ‹restab› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C,sv2
-        ⧗:C,S2,sv2 ‹lpush› ⧖:C,S3
-        ⧗:C,S,R,S3 ⧗:q △ ⊞ ⧗:n ⧗:un ⧗:changed ⋏ ⊕ ⦄
+        ⧗:C̵,sv,ev,ch ⧗:changed ⋔ ⦃ ‹restab› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C,sv2
+        ⧗:C̵,S2,sv2 ‹lpush› ⧖:C,S3
+        ⧗:C̵,S,R,S3 ⧗:q △ ⊞ ⧗:n ⧗:un ⧗:changed ⋏ ⊕ ⦄
   ⦄
-  ⧖:C,S,R,S2,q,n,un ⧗:C,S2,un
+  ⧖:C,S,R,S2,q,n,un ⧗:C̵,S2,un
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ŧ⟩ ‹lstab1› ⸫
 ⦃
   ⧖:C,sv,ev,ch
-  ⧗:C,sv #5# ‹vf› ⧖:C,role
-  ⧗:C,sv,role ‹vrole› ⧖:C,w
-  ⧗:C,w #6# ⧗:ev ‹vset› ⧗:w #7# ⧗:ch ‹vset› ⧗:w
+  ⧗:C̵,sv #5# ‹vf› ⧖:C,role
+  ⧗:C̵,sv,role ‹vrole› ⧖:C,w
+  ⧗:C̵,w #6# ⧗:ev ‹vset› ⧗:w #7# ⧗:ch ‹vset› ⧗:w
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹restab› ⸫
 
 ⦃
   ⧖:C,S,strand,dead,before,R,rst,tok,depth
-  ⧗:C #10# ‹reg› ⧖:C,r10 ⧗:C,before,r10 ‹lpush› ⧖:C,want
-  ⧗:C,R ‹ltypes› ⧖:C,got
-  ⧗:C,got,want ‹leq› ⧖:C,ok
-  ⧗:C,tok,want,got ⧗:ok ⋔ ⦃ ⌁ ⌁ ⌁ ⦄
+  ⧗:C̵ #10# ‹reg› ⧖:C,r10 ⧗:C̵,before,r10 ‹lpush› ⧖:C,want
+  ⧗:C̵,R ‹ltypes› ⧖:C,got
+  ⧗:C̵,got,want ‹leq› ⧖:C,ok
+  ⧗:C̵,tok,want,got ⧗:ok ⋔ ⦃ ⌁ ⌁ ⌁ ⦄
     ⦃ ⧖:tk,w,g ⧗:tk ‹cerr› $the ⥀ body must have effect ⟨S ⊸ S ŧ⟩: expected $ ⎙̵ ⧗:w ○ ‹plist› $, found $ ⎙̵ ⧗:g ○ ‹plist› ‹die› ⦄ ⁼
   ⧗:rst ○ ‹noleak› ⧗:rst ⧗:depth △ ⊞ ‹noescape›
   ⧗:R ‹llen› ⧖:C,nr
-  ⧗:C,R ○ ⧗:nr △ ⊟ ‹lslice› ⧖:C,S2
-  ⧗:C,strand,rst ‹lcat› ⧖:C,strand2
-  ⧗:C,S2,strand2,dead ○ #3# ○
+  ⧗:C̵,R ○ ⧗:nr △ ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵,strand,rst ‹lcat› ⧖:C,strand2
+  ⧗:C̵,S2,strand2,dead ○ #3# ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹loopend› ⸫
 
 ⍝ ⁇: handle a failure
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,S △ ⧗:tok ○ ‹pop› ⧖:C,S2,vals
-  ⧗:C,vals ○ ‹lget› ⧖:C,fv ⧗:C,fv ‹vty› ⧖:C,ft
-  ⧗:C,ft ‹shead› ⧖:C,h
-  ⧗:C,tok,ft ⧗:h #9676# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tk,t ⧗:tk ‹cerr› $⁇ handles a possibly-failed value ◌T, found $ ⎙̵ ⧗:t ‹spr› ‹die› ⦄ ⁼
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,S △ ⧗:tok ○ ‹pop› ⧖:C,S2,vals
+  ⧗:C̵,vals ○ ‹lget› ⧖:C,fv ⧗:C̵,fv ‹vty› ⧖:C,ft
+  ⧗:C̵,ft ‹shead› ⧖:C,h
+  ⧗:C̵,tok,ft ⧗:h #9676# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tk,t ⧗:tk ‹cerr› $⁇ handles a possibly-failed value ◌T, found $ ⎙̵ ⧗:t ‹spr› ‹die› ⦄ ⁼
   ⧗:S2,strand,locks ‹locks› ⧖:C,inner
-  ⧗:C,ft #15# ‹tis› ⧖:C,bare
-  ⧗:C,S2,fv,ft,tok,depth ⧗:bare ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹okval› ⦄ ⁼ ⧖:C,okS
-  ⧗:C ⧗:ind △ ⊞ #7# ‹note›
+  ⧗:C̵,ft #15# ‹tis› ⧖:C,bare
+  ⧗:C̵,S2,fv,ft,tok,depth ⧗:bare ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹okval› ⦄ ⁼ ⧖:C,okS
+  ⧗:C̵ ⧗:ind △ ⊞ #7# ‹note›
   ⧗:op #3# ⊞ ⧖:okb
   ⧗:okb,okS,depth,inner ⧗:ind #2# ⊞ ‹subb› ‹rnew› ⧖:C,r1
-  ⧗:C ⧗:ind △ ⊞ #8# ‹note›
+  ⧗:C̵ ⧗:ind △ ⊞ #8# ‹note›
   ⧗:okb #2# ‹nd› ⧖:C,oksz
-  ⧗:C ⧗:okb ⧗:oksz ⊞ ⧗:S2,depth,inner ⧗:ind #2# ⊞ ‹subb› ‹rnew› ⧖:C,r2
-  ⧗:C,r1 ‹l1› ⧖:C,rs ⧗:C,rs,r2 ‹lpush› ⧖:C,rs2
-  ⧗:C,rs2,tok △ ⧗:depth ‹join› ⧖:C,S3,strand2,dead2
-  ⧗:C,strand,strand2 ‹lcat› ⧖:C,strand3
-  ⧗:C,S3,strand3,dead2 ○ #4# ○
+  ⧗:C̵ ⧗:okb ⧗:oksz ⊞ ⧗:S2,depth,inner ⧗:ind #2# ⊞ ‹subb› ‹rnew› ⧖:C,r2
+  ⧗:C̵,r1 ‹l1› ⧖:C,rs ⧗:C̵,rs,r2 ‹lpush› ⧖:C,rs2
+  ⧗:C̵,rs2,tok △ ⧗:depth ‹join› ⧖:C,S3,strand2,dead2
+  ⧗:C̵,strand,strand2 ‹lcat› ⧖:C,strand3
+  ⧗:C̵,S3,strand3,dead2 ○ #4# ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_handle› ⸫
 ⦃
   ⧖:C,S,fv,ft,tok,depth
-  ⧗:C,ft ‹stail› ⧖:C,t
-  ⧗:C,t,tok,depth ‹vnew› ⧖:C,okv
-  ⧗:C,fv #4# ‹vf› ⧖:C,of
-  ⧗:C,okv #4# ⧗:of ‹vset› ⧗:fv,okv ‹vannot›
+  ⧗:C̵,ft ‹stail› ⧖:C,t
+  ⧗:C̵,t,tok,depth ‹vnew› ⧖:C,okv
+  ⧗:C̵,fv #4# ‹vf› ⧖:C,of
+  ⧗:C̵,okv #4# ⧗:of ‹vset› ⧗:fv,okv ‹vannot›
   ⧗:S,okv ‹lpush›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹okval› ⸫
 
 ⍝ ⍤ⁿ: a prayer about the top n values
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,tok #4# ‹tf› ⧖:C,pn
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,tok,pn ⧗:n ⧗:pn ≶ ⋔ ⦃ ⌁ ⌁ ⦄ ⁼ ⦃ ⧖:tk,p ⧗:tk ‹cerr› $⍤ needs $ ⎙̵ ⧗:p ᛁ $ value(s) on the stack$ ⎙̵ ‹die› ⦄
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok #4# ‹tf› ⧖:C,pn
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,tok,pn ⧗:n ⧗:pn ≶ ⋔ ⦃ ⌁ ⌁ ⦄ ⁼ ⦃ ⧖:tk,p ⧗:tk ‹cerr› $⍤ needs $ ⎙̵ ⧗:p ᛁ $ value(s) on the stack$ ⎙̵ ‹die› ⦄
   ⧗:S ⧗:n ⧗:pn ⊟ ⧗:n ‹lslice› ⧖:C,vals
-  ⧗:C ⧗:ind △ ⊞ #9# ‹note›
+  ⧗:C̵ ⧗:ind △ ⊞ #9# ‹note›
   ⧗:S,strand,locks ‹locks› ⧖:C,live
-  ⧗:C ⧗:op #3# ⊞ ⧗:vals,tok #4# ⧗:depth,live ⧗:ind #2# ⊞ ‹predicate›
+  ⧗:C̵ ⧗:op #3# ⊞ ⧗:vals,tok #4# ⧗:depth,live ⧗:ind #2# ⊞ ‹predicate›
   ⧗:S,strand,dead ○ ○ ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_prayer› ⸫
 
 ⍝ ⟦ … ⟧: an array literal
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,op #2# ‹nd› ⧖:C,sz
-  ⧗:C ⧗:ind △ ⊞ #10# ‹note›
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,op #2# ‹nd› ⧖:C,sz
+  ⧗:C̵ ⧗:ind △ ⊞ #10# ‹note›
   ‹lnew0› ⧖:C,AS
-  ⧗:C ⧗:op #3# ⊞ ⧗:op ⧗:sz ⊞ ⧗:AS,depth,locks ⧗:ind #2# ⊞ ‹sub› ⧖:C,R,rst,rdead
-  ⧗:C ⧗:rdead ○ ᛖ ⧗:tok #16# ‹cfailunless›
+  ⧗:C̵ ⧗:op #3# ⊞ ⧗:op ⧗:sz ⊞ ⧗:AS,depth,locks ⧗:ind #2# ⊞ ‹sub› ⧖:C,R,rst,rdead
+  ⧗:C̵ ⧗:rdead ○ ᛖ ⧗:tok #16# ‹cfailunless›
   ⧗:R ‹ltypes› ⧖:C,ets
-  ⧗:C,ets ‹llen› ⧖:C,ne
-  ⧗:C ⧗:ne ○ ᛖ ‹not› ⧗:tok #17# ‹cfailunless›
+  ⧗:C̵,ets ‹llen› ⧖:C,ne
+  ⧗:C̵ ⧗:ne ○ ᛖ ‹not› ⧗:tok #17# ‹cfailunless›
   ⧗:ets ○ ‹lget› ⧖:C,et
-  ⧗:C,ets,et,tok ○ ⧗:ne
+  ⧗:C̵,ets,et,tok ○ ⧗:ne
   ⥀ ⦃
     ⧖:C,ets,et,tok,q,ne
-    ⧗:C,ets,et,tok,q,ne ⧗:q ⧗:ne ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,ets,et,tok,q,ne ⧗:C,ets,q ‹lget› ⧖:C,eq
-        ⧗:C,tok,et,eq ⧗:eq ⧗:et ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄
+    ⧗:C̵,ets,et,tok,q,ne ⧗:q ⧗:ne ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ets,et,tok,q,ne ⧗:C̵,ets,q ‹lget› ⧖:C,eq
+        ⧗:C̵,tok,et,eq ⧗:eq ⧗:et ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄
           ⦃ ⧖:tk,a,b ⧗:tk ‹cerr› $array elements must share one type: $ ⎙̵ ⧗:a ‹spr› $ and $ ⎙̵ ⧗:b ‹spr› ‹die› ⦄ ⁼
         ⧗:ets,et,tok ⧗:q △ ⊞ ⧗:ne ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁ ⧖:C
-  ⧗:C,et ‹tclass› ⧖:C,cl
-  ⧗:C ⧗:cl △ ᛖ ‹not› ⧗:tok #18# ‹cfailunless›
+  ⧗:C̵,et ‹tclass› ⧖:C,cl
+  ⧗:C̵ ⧗:cl △ ᛖ ‹not› ⧗:tok #18# ‹cfailunless›
   ⧗:rst ○ ‹noleak› ⧖:C
-  ⧗:C ‹sbeg› ⧖:C,e ⧗:C,e #10214# ‹scp› ⧗:e,et ‹sapp› ⧗:e #10215# ‹scp› ⧗:e ‹send› ⧖:C,at
-  ⧗:C,at,tok,depth ‹vnew› ⧖:C,av
-  ⧗:C,R ‹evof› ⧖:C,aev
-  ⧗:C,av #6# ⧗:aev ‹vset›
+  ⧗:C̵ ‹sbeg› ⧖:C,e ⧗:C̵,e #10214# ‹scp› ⧗:e,et ‹sapp› ⧗:e #10215# ‹scp› ⧗:e ‹send› ⧖:C,at
+  ⧗:C̵,at,tok,depth ‹vnew› ⧖:C,av
+  ⧗:C̵,R ‹evof› ⧖:C,aev
+  ⧗:C̵,av #6# ⧗:aev ‹vset›
   ⧗:S,av ‹lpush› ⧗:strand,dead ○ #6# ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_array› ⸫
 
 ⍝ ⟜: post-select a superposition; ⧗ⁿ ⟜ filters the moment itself (§8.5)
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,prev ○ ‹nd› ⧖:C,pk ⧗:C,prev ‹ndt› ⧖:C,ptok
-  ⧗:C,ptok #8# #10711# ‹tis1› ⧖:C,isread
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,prev ○ ‹nd› ⧖:C,pk ⧗:C̵,prev ‹ndt› ⧖:C,ptok
+  ⧗:C̵,ptok #8# #10711# ‹tis1› ⧖:C,isread
   ⧗:prev #-1# ᛖ ‹not› ⧗:pk #5# ᛖ ⋎ ⧗:isread ⋎ ⧖:retro
-  ⧗:C,S △ ⧗:tok ○ ‹pop› ⧖:C,S2,vals
-  ⧗:C,tok,vals ‹agree›
+  ⧗:C̵,S △ ⧗:tok ○ ‹pop› ⧖:C,S2,vals
+  ⧗:C̵,tok,vals ‹agree›
   ⧗:vals ○ ‹lget› ⧖:C,pv0
-  ⧗:C,pv0 ‹vty› ⧖:C,pt ⧗:C,pt ‹shead› ⧖:C,h
-  ⧗:C,tok,pt ⧗:h #968# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tk,t ⧗:tk ‹cerr› $⟜ post-selects a superposition ψₙT, found $ ⎙̵ ⧗:t ‹spr› ‹die› ⦄ ⁼
+  ⧗:C̵,pv0 ‹vty› ⧖:C,pt ⧗:C̵,pt ‹shead› ⧖:C,h
+  ⧗:C̵,tok,pt ⧗:h #968# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tk,t ⧗:tk ‹cerr› $⟜ post-selects a superposition ψₙT, found $ ⎙̵ ⧗:t ‹spr› ‹die› ⦄ ⁼
   ⧗:pt ‹psibase› ⧖:C,bt
-  ⧗:C,bt,tok ⧗:depth △ ⊞ ‹vnew› ⧖:C,alt
-  ⧗:C,pv0,alt ‹vannot›
+  ⧗:C̵,bt,tok ⧗:depth △ ⊞ ‹vnew› ⧖:C,alt
+  ⧗:C̵,pv0,alt ‹vannot›
   ⧗:S2,strand,locks ‹locks› ⧖:C,inner
-  ⧗:C ⧗:ind △ ⊞ #11# ‹note›
+  ⧗:C̵ ⧗:ind △ ⊞ #11# ‹note›
   ⧗:alt ‹l1› ⧖:C,avals
-  ⧗:C ⧗:op #3# ⊞ ⧗:avals,tok #5# ⧗:depth,inner ⧗:ind #2# ⊞ ‹predicate›
+  ⧗:C̵ ⧗:op #3# ⊞ ⧗:avals,tok #5# ⧗:depth,inner ⧗:ind #2# ⊞ ‹predicate›
   ⧗:S2,pv0 ⧗:retro ⋔ ⦃ ⌁ ⦄ ⦃ ‹lpush› ⦄ ⁼ ⧖:C,S3
-  ⧗:C,S3,strand,dead ○ ⧗:retro ⋔ ⦃ #8# ⦄ ⦃ #7# ⦄ ⁼ ○
+  ⧗:C̵,S3,strand,dead ○ ⧗:retro ⋔ ⦃ #8# ⦄ ⦃ #7# ⦄ ⁼ ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_post› ⸫
 
 ⍝ ---- blocks: ‹cblock› C from to S depth locks ind → C S strand dead
 
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
-  ⧗:C,op ○ ‹nd› ⧖:C,k
-  ⧗:C,op,S,strand,dead,depth,locks,ind,prev,to,k
+  ⧗:C̵,op ○ ‹nd› ⧖:C,k
+  ⧗:C̵,op,S,strand,dead,depth,locks,ind,prev,to,k
   ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹c_lit› ⦄ ⦃
   ⍿⁰ #2# #4# ᛦ ⍿¹ #6# ᛖ ⋏ ⋔ ⦃ ⌁ ‹c_call› ⦄ ⦃
   ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ‹c_op› ⦄ ⦃
@@ -1968,39 +1970,39 @@
 ⍝ ‹btrace› C ind tok lab larg S: the trace line after an op
 ⦃
   ⧖:C,ind,tok,lab,larg,S
-  ⧗:C,ind,tok,S,lab,larg ⧗:lab ○ ᛖ ⋔ ⦃ ⌁ ⌁ ‹trace› ⦄ ⦃ ⍿¹ #9# ᛖ ⋔ ⦃ ‹trshape› ⦄ ⦃ ‹trfix› ⦄ ⁼ ⦄ ⁼
+  ⧗:C̵,ind,tok,S,lab,larg ⧗:lab ○ ᛖ ⋔ ⦃ ⌁ ⌁ ‹trace› ⦄ ⦃ ⍿¹ #9# ᛖ ⋔ ⦃ ‹trshape› ⦄ ⦃ ‹trfix› ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹btrace› ⸫
 ⦃
   ⧖:C,ind,tok,S,lab,larg
-  ⧗:C ‹tron› ⧖:C,on
-  ⧗:C,ind,S,larg ⧗:on ⋔ ⦃ ⧖:C,ind,S,larg ⧗:ind ‹pind› $shape-call → $ ⎙̵ ⧗:C,larg ‹spr› ⧗:S ‹trtail› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵ ‹tron› ⧖:C,on
+  ⧗:C̵,ind,S,larg ⧗:on ⋔ ⦃ ⧖:C,ind,S,larg ⧗:ind ‹pind› $shape-call → $ ⎙̵ ⧗:C̵,larg ‹spr› ⧗:S ‹trtail› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹trshape› ⸫
-⦃ ⧖:C,ind,tok,S,lab,larg ⧗:C,ind,lab,S ‹tracek› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹trfix› ⸫
+⦃ ⧖:C,ind,tok,S,lab,larg ⧗:C̵,ind,lab,S ‹tracek› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹trfix› ⸫
 
 ⦃
   ⧖:C,from,to,S,depth,locks,ind
-  ⧗:C ‹lnew0› ⧖:C,strand
+  ⧗:C̵ ‹lnew0› ⧖:C,strand
   ⍝ the loop carries [C oi to S strand dead depth locks ind prev]
-  ⧗:C,from,to,S,strand ○ ⧗:depth,locks,ind #-1#
+  ⧗:C̵,from,to,S,strand ○ ⧗:depth,locks,ind #-1#
   ⥀ ⦃
     ⧖:C,oi,to,S,strand,dead,depth,locks,ind,prev
-    ⧗:C,oi,to,S,strand,dead,depth,locks,ind,prev ⧗:oi ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹bstep› ⊕ ⦄
+    ⧗:C̵,oi,to,S,strand,dead,depth,locks,ind,prev ⧗:oi ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹bstep› ⊕ ⦄
   ⦄
   ⧖:C,oi,to,S,strand,dead,depth,locks,ind,prev
-  ⧗:C,S,strand,dead
+  ⧗:C̵,S,strand,dead
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹cblock› ⸫
 
 ⍝ ‹bstep› C oi to S strand dead depth locks ind prev: one op of a block
 ⦃
   ⧖:C,oi,to,S,strand,dead,depth,locks,ind,prev
-  ⧗:C,oi ‹ndt› ⧖:C,tok
-  ⧗:C ⧗:dead ○ ᛖ ⧗:tok #10# ‹cfailunless›
+  ⧗:C̵,oi ‹ndt› ⧖:C,tok
+  ⧗:C̵ ⧗:dead ○ ᛖ ⧗:tok #10# ‹cfailunless›
   ⧗:oi,S,strand,dead,depth,locks,ind,prev,to ‹case› ⧖:C,S2,strand2,dead2,skip,lab,larg
-  ⧗:C,ind,tok,lab,larg,S2 ‹btrace› ⧖:C
-  ⧗:C,oi #2# ‹nd› ⧖:C,sz
+  ⧗:C̵,ind,tok,lab,larg,S2 ‹btrace› ⧖:C
+  ⧗:C̵,oi #2# ‹nd› ⧖:C,sz
   ⧗:oi ⧗:sz ⊞ ⧖:nx
-  ⧗:C,nx #2# ‹nd› ⧖:C,nsz
-  ⧗:C ⧗:nx ⧗:nx ⧗:nsz ⊞ ⧗:skip △ ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:oi2
+  ⧗:C̵,nx #2# ‹nd› ⧖:C,nsz
+  ⧗:C̵ ⧗:nx ⧗:nx ⧗:nsz ⊞ ⧗:skip △ ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:oi2
   ⧗:oi ⧗:nx ⧗:skip △ ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:prev2
   ⧗:oi2,to,S2,strand2,dead2,depth,locks,ind,prev2
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹bstep› ⸫
@@ -2010,24 +2012,24 @@
 ⍝ ‹isglyphn› C n cp: node n is an op whose token is the glyph cp
 ⦃
   ⧖:C,n,cp
-  ⧗:C,n ○ ‹nd› ⧖:C,k ⧗:C,n ‹ndt› ⧖:C,t ⧗:C,t #8# ⧗:cp ‹tis1› ⧖:C,g
-  ⧗:C ⧗:k #5# ᛖ ⧗:g ⋎
+  ⧗:C̵,n ○ ‹nd› ⧖:C,k ⧗:C̵,n ‹ndt› ⧖:C,t ⧗:C̵,t #8# ⧗:cp ‹tis1› ⧖:C,g
+  ⧗:C̵ ⧗:k #5# ᛖ ⧗:g ⋎
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isglyphn› ⸫
 ⍝ ‹isintlit› C n
 ⦃
   ⧖:C,n
-  ⧗:C,n ○ ‹nd› ⧖:C,k ⧗:C,n ‹ndt› ‹tkd› ⧖:C,tk
-  ⧗:C ⧗:k △ ᛖ ⧗:tk #5# ᛖ ⋎
+  ⧗:C̵,n ○ ‹nd› ⧖:C,k ⧗:C̵,n ‹ndt› ‹tkd› ⧖:C,tk
+  ⧗:C̵ ⧗:k △ ᛖ ⧗:tk #5# ᛖ ⋎
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isintlit› ⸫
 ⍝ ‹nextn› C n: the next sibling
-⦃ ⧖:C,n ⧗:C,n #2# ‹nd› ⧖:C,sz ⧗:C ⧗:n ⧗:sz ⊞ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹nextn› ⸫
+⦃ ⧖:C,n ⧗:C̵,n #2# ‹nd› ⧖:C,sz ⧗:C̵ ⧗:n ⧗:sz ⊞ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹nextn› ⸫
 
 ⦃
   ⧖:C,from,to
-  ⧗:C,from,to
+  ⧗:C̵,from,to
   ⥀ ⦃
     ⧖:C,i,to
-    ⧗:C,i,to ⧗:i ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹revunit› ⊕ ⦄
+    ⧗:C̵,i,to ⧗:i ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹revunit› ⊕ ⦄
   ⦄
   ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹reversible› ⸫
@@ -2035,11 +2037,11 @@
 ⍝ ‹revunit› C i to: one unit of a reversible body; the loop state after it
 ⦃
   ⧖:C,i,to
-  ⧗:C,i ○ ‹nd› ⧖:C,k
-  ⧗:C,i ‹ndt› ⧖:C,tok
-  ⧗:C,i ‹nextn› ⧖:C,n1 ⧗:C,n1 ‹nextn› ⧖:C,n2 ⧗:C,n2 ‹nextn› ⧖:C,n3
-  ⧗:C,i,to,k,n1,n2,n3 ‹rvcode› ⧖:C,code
-  ⧗:C,i,to,k,tok,n1,n2,n3,code
+  ⧗:C̵,i ○ ‹nd› ⧖:C,k
+  ⧗:C̵,i ‹ndt› ⧖:C,tok
+  ⧗:C̵,i ‹nextn› ⧖:C,n1 ⧗:C̵,n1 ‹nextn› ⧖:C,n2 ⧗:C̵,n2 ‹nextn› ⧖:C,n3
+  ⧗:C̵,i,to,k,n1,n2,n3 ‹rvcode› ⧖:C,code
+  ⧗:C̵,i,to,k,tok,n1,n2,n3,code
   ⍿⁰ #4# ᛖ ⋔ ⦃ ⌁ ⧖:i2,to2,k2,tok2,a,b,c ⧗:a,to2 ⦄ ⦃
   ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹rv_call› ⦄ ⦃
   ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⧖:i2,to2,k2,tok2,a,b,c ⧗:b,to2 ⦄ ⦃
@@ -2049,13 +2051,13 @@
 ⍝ ‹rvcode› C i to k n1 n2 n3: 4 ⊝, 1 a call, 2 a value then ⊞ ⊟ ⩡, 3 ⍿⁰ x ≶ ⋔⇋, 0 not invertible
 ⦃
   ⧖:C,i,to,k,n1,n2,n3
-  ⧗:C,i #8861# ‹isglyphn› ⧖:C,neg
-  ⧗:C,i ‹isintlit› ⧖:C,lit
-  ⧗:C,i #9087# ‹isglyphn› ⧖:C,pick
-  ⧗:C,i ‹ndt› ⧖:C,tok ⧗:C,tok #4# ‹tf› ⧖:C,idx
-  ⧗:C,n1 #8862# ‹isglyphn› ⧖:C,u1 ⧗:C,n1 #8863# ‹isglyphn› ⧖:C,u2 ⧗:C,n1 #10849# ‹isglyphn› ⧖:C,u3
-  ⧗:C,n1 ‹isintlit› ⧖:C,l1 ⧗:C,n2 #8822# ‹isglyphn› ⧖:C,cmp ⧗:C,n3 ○ ‹nd› ⧖:C,k3
-  ⧗:C ○
+  ⧗:C̵,i #8861# ‹isglyphn› ⧖:C,neg
+  ⧗:C̵,i ‹isintlit› ⧖:C,lit
+  ⧗:C̵,i #9087# ‹isglyphn› ⧖:C,pick
+  ⧗:C̵,i ‹ndt› ⧖:C,tok ⧗:C̵,tok #4# ‹tf› ⧖:C,idx
+  ⧗:C̵,n1 #8862# ‹isglyphn› ⧖:C,u1 ⧗:C̵,n1 #8863# ‹isglyphn› ⧖:C,u2 ⧗:C̵,n1 #10849# ‹isglyphn› ⧖:C,u3
+  ⧗:C̵,n1 ‹isintlit› ⧖:C,l1 ⧗:C̵,n2 #8822# ‹isglyphn› ⧖:C,cmp ⧗:C̵,n3 ○ ‹nd› ⧖:C,k3
+  ⧗:C̵ ○
   ⧗:pick ⧗:idx ○ ᛖ ⋎ ⧗:n3 ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⧗:l1 ⋎ ⧗:cmp ⋎ ⧗:k3 #11# ᛖ ⋎ ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼
   ⧗:lit ⧗:pick ⧗:idx ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⋏ ⧗:n1 ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⧗:u1 ⧗:u2 ⋏ ⧗:u3 ⋏ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼
   ⧗:k #2# ᛖ ⧗:k #4# ᛖ ⋏ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
@@ -2064,24 +2066,24 @@
 
 ⦃
   ⧖:C,i,to,k,tok,n1,n2,n3
-  ⧗:C,i ‹resolve› ⧖:C,f
-  ⧗:C,f #3# ‹vf› ⧖:C,rev
-  ⧗:C,tok ⧗:rev △ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:tk ⧗:tk ‹cerr› $a reversible function can only call reversible functions, and $ ⎙̵ ⧗:tk ‹ptx› $ is not ⇋ (§10)$ ⎙̵ ‹die› ⦄ ⁼ ⧖:C
-  ⧗:C,tok #3# ‹tf› ⧖:C,m
-  ⧗:C ⧗:m ○ ᛖ ⧗:tok #21# ‹cfailunless›
+  ⧗:C̵,i ‹resolve› ⧖:C,f
+  ⧗:C̵,f #3# ‹vf› ⧖:C,rev
+  ⧗:C̵,tok ⧗:rev △ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:tk ⧗:tk ‹cerr› $a reversible function can only call reversible functions, and $ ⎙̵ ⧗:tk ‹ptx› $ is not ⇋ (§10)$ ⎙̵ ‹die› ⦄ ⁼ ⧖:C
+  ⧗:C̵,tok #3# ‹tf› ⧖:C,m
+  ⧗:C̵ ⧗:m ○ ᛖ ⧗:tok #21# ‹cfailunless›
   ⧗:n1,to
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹rv_call› ⸫
 
 ⦃
   ⧖:C,i,to,k,tok,n1,n2,n3
   ⍝ the faces of the ⋔⇋ are reversible too
-  ⧗:C ⧗:n3 #3# ⊞ ○
+  ⧗:C̵ ⧗:n3 #3# ⊞ ○
   ⥀ ⦃
     ⧖:C,c,q
-    ⧗:C,c ○ ‹nd› ⧖:C,fk
-    ⧗:C,c ⧗:fk #9# ᛖ ⋔ ⦃ ⧖:cc ⧗:cc ‹brange› ‹reversible› ⦄ ⦃ ⌁ ⦄ ⁼
+    ⧗:C̵,c ○ ‹nd› ⧖:C,fk
+    ⧗:C̵,c ⧗:fk #9# ᛖ ⋔ ⦃ ⧖:cc ⧗:cc ‹brange› ‹reversible› ⦄ ⦃ ⌁ ⦄ ⁼
     ⧗:c ‹nextn› ⧖:C,c2
-    ⧗:C,c2 ⧗:q △ ⊞ ⧗:q △ ⊞ #3# ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+    ⧗:C̵,c2 ⧗:q △ ⊞ ⧗:q △ ⊞ #3# ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⌁ ⌁
   ⧗:n3 ‹nextn› ⧗:to
@@ -2089,7 +2091,7 @@
 
 ⦃
   ⧖:C,i,to,k,tok,n1,n2,n3
-  ⧗:C ⧗:k #11# ᛖ ‹not› ⧗:tok #22# ‹cfailunless›
+  ⧗:C̵ ⧗:k #11# ᛖ ‹not› ⧗:tok #22# ‹cfailunless›
   ⧗:tok ‹cerr› ⧗:tok ‹plab›
   $ is not invertible here: a reversible function may use x ⊞, x ⊟, x ⩡ (x a literal or ⍿ⁿ with n ≥ 1), ⊝, ⇋ calls and ⋔⇋ (§10)$ ⎙̵ ‹die›
   ⧗:to,to
@@ -2100,147 +2102,147 @@
 ⍝ ‹tbase› C t: strip ◌ ⟗ ⟖ ψₙ and ⟦…⟧ to find the base type name
 ⦃
   ⧖:C,t
-  ⧗:C,t
+  ⧗:C̵,t
   ⥀ ⦃
     ⧖:C,b
-    ⧗:C,b ‹shead› ⧖:C,h
+    ⧗:C̵,b ‹shead› ⧖:C,h
     ○ ⧗:h ⧖ @any(9676,10199,10198)@ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:h #968# ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:h #10214# ᛖ ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧖:code
-    ⧗:C,b,code ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹stail› ⊕ ⦄ ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ‹psiinner› ⊕ ⦄ ⦃ #3# ᛖ ⋔ ⦃ △ ‹elemof› ⊕ ⦄ ⦃ ⦶ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+    ⧗:C̵,b,code ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹stail› ⊕ ⦄ ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ‹psiinner› ⊕ ⦄ ⦃ #3# ᛖ ⋔ ⦃ △ ‹elemof› ⊕ ⦄ ⦃ ⦶ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
   ⦄
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tbase› ⸫
 
 ⍝ ‹ptfind› C name: the representation of particle name, or −1
 ⦃
   ⧖:C,name
-  ⧗:C #8# ‹reg› ⧖:C,ps
-  ⧗:C,ps ‹llen› ⧖:C,n
-  ⧗:C,ps,name ○ ⧗:n #-1#
+  ⧗:C̵ #8# ‹reg› ⧖:C,ps
+  ⧗:C̵,ps ‹llen› ⧖:C,n
+  ⧗:C̵,ps,name ○ ⧗:n #-1#
   ⥀ ⦃
     ⧖:C,ps,name,j,n,found
-    ⧗:C,ps,name,j,n,found ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,ps,name,j,n,found ⧗:C,ps,j ‹lget› ⧖:C,e ⧗:C,e ‹rd› ⧖:C,en ⧗:C ⧗:e △ ⊞ ‹rd› ⧖:C,rep
-        ⧗:C,ps,name ⧗:j △ ⊞ ⧗:n ⧗:found ⧗:rep ⧗:en ⧗:name ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⊕ ⦄
+    ⧗:C̵,ps,name,j,n,found ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ps,name,j,n,found ⧗:C̵,ps,j ‹lget› ⧖:C,e ⧗:C̵,e ‹rd› ⧖:C,en ⧗:C̵ ⧗:e △ ⊞ ‹rd› ⧖:C,rep
+        ⧗:C̵,ps,name ⧗:j △ ⊞ ⧗:n ⧗:found ⧗:rep ⧗:en ⧗:name ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⊕ ⦄
   ⦄
-  ⧖:C,ps,name,j,n,found ⧗:C,found
+  ⧖:C,ps,name,j,n,found ⧗:C̵,found
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ptfind› ⸫
 
 ⍝ ‹chktypes› C ts tok outputs: every named type is a declared particle; shadows cannot be returned
 ⦃
   ⧖:C,ts,tok,outputs
-  ⧗:C,ts ‹llen› ⧖:C,n
-  ⧗:C,ts,tok,outputs ○ ⧗:n
+  ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵,ts,tok,outputs ○ ⧗:n
   ⥀ ⦃
     ⧖:C,ts,tok,outputs,j,n
-    ⧗:C,ts,tok,outputs,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,ts,tok,outputs,j,n ⧗:C,ts,j ‹lget› ⧖:C,t ⧗:C,t,tok,outputs ‹chktype1› ⧗:ts,tok,outputs ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,ts,tok,outputs,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ts,tok,outputs,j,n ⧗:C̵,ts,j ‹lget› ⧖:C,t ⧗:C̵,t,tok,outputs ‹chktype1› ⧗:ts,tok,outputs ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹chktypes› ⸫
 ⦃
   ⧖:C,t,tok,outputs
-  ⧗:C,t ‹tbase› ⧖:C,b
-  ⧗:C,b ‹slen› ⧖:C,bl ⧗:C,b ‹shead› ⧖:C,bh
-  ⧗:C,b ‹ptfind› ⧖:C,rep
-  ⧗:C,tok,b ⧗:bl ○ ᛖ ‹not› ⧗:bh ‹isbasecp› ‹not› ⋎ ⧗:rep #-1# ᛖ ⋎ ⋔
+  ⧗:C̵,t ‹tbase› ⧖:C,b
+  ⧗:C̵,b ‹slen› ⧖:C,bl ⧗:C̵,b ‹shead› ⧖:C,bh
+  ⧗:C̵,b ‹ptfind› ⧖:C,rep
+  ⧗:C̵,tok,b ⧗:bl ○ ᛖ ‹not› ⧗:bh ‹isbasecp› ‹not› ⋎ ⧗:rep #-1# ᛖ ⋎ ⋔
     ⦃ ⧖:tk,bb ⧗:tk ‹cerr› $unknown type $ ⎙̵ ⧗:bb ‹spr› $ (Ogham type names must be declared with ⚛, §8.6)$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C,t ‹shead› ⧖:C,h
-  ⧗:C,tok,t ⧗:outputs △ ᛖ ⧗:h #10199# ᛖ ⧗:h #10198# ᛖ ⋏ ⋎ ⋔
+  ⧗:C̵,t ‹shead› ⧖:C,h
+  ⧗:C̵,tok,t ⧗:outputs △ ᛖ ⧗:h #10199# ᛖ ⧗:h #10198# ᛖ ⋏ ⋎ ⋔
     ⦃ ⧖:tk,tt ⧗:tk ‹cerr› $a function cannot return a shadow $ ⎙̵ ⧗:tt ‹spr› $ (shadows never leave their block, §8.2)$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹chktype1› ⸫
 
 ⍝ ‹fparams› C f name tok: the starting stack (inside its own antiparticle a particle decays to its representation, §8.6)
 ⦃
   ⧖:C,f,name,tok
-  ⧗:C,f △ ‹vf› ⧖:C,ins
-  ⧗:C,name ‹shead› ⧖:C,h
-  ⧗:C,name ‹stail› ⧖:C,pt
-  ⧗:C,pt ‹ptfind› ⧖:C,rep
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins
+  ⧗:C̵,name ‹shead› ⧖:C,h
+  ⧗:C̵,name ‹stail› ⧖:C,pt
+  ⧗:C̵,pt ‹ptfind› ⧖:C,rep
   ⧗:h #8961# ᛖ ⧗:rep #-1# ᛖ ‹not› ⋎ ⧖:anti
-  ⧗:C,ins ‹llen› ⧖:C,n
-  ⧗:C ‹lnew0› ⧖:C,S
-  ⧗:C,f,ins,tok,pt,rep,S ○ ⧗:n ⧗:anti
+  ⧗:C̵,ins ‹llen› ⧖:C,n
+  ⧗:C̵ ‹lnew0› ⧖:C,S
+  ⧗:C̵,f,ins,tok,pt,rep,S ○ ⧗:n ⧗:anti
   ⥀ ⦃
     ⧖:C,f,ins,tok,pt,rep,S,j,n,anti
-    ⧗:C,f,ins,tok,pt,rep,S,j,n,anti ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹fparam1› ⊕ ⦄
+    ⧗:C̵,f,ins,tok,pt,rep,S,j,n,anti ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹fparam1› ⊕ ⦄
   ⦄
-  ⧖:C,f,ins,tok,pt,rep,S,j,n,anti ⧗:C,S
+  ⧖:C,f,ins,tok,pt,rep,S,j,n,anti ⧗:C̵,S
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹fparams› ⸫
 ⦃
   ⧖:C,f,ins,tok,pt,rep,S,j,n,anti
-  ⧗:C,ins,j ‹lget› ⧖:C,t
+  ⧗:C̵,ins,j ‹lget› ⧖:C,t
   ⧗:t ⧗:rep ⧗:anti ⧗:t ⧗:pt ᛖ ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:t2
-  ⧗:C,t2,tok ○ ‹vnew› ⧖:C,v
-  ⧗:C,t2 ‹tclass› ⧖:C,cl
-  ⧗:C,v #4# ○ ⧗:cl △ ᛖ ⋔ ⦃ ‹vset› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
-  ⧗:f #4# ‹vf› ⧖:C,iev ⧗:C,iev,j ‹lget› ⧖:C,ev
-  ⧗:C,f #5# ‹vf› ⧖:C,ich ⧗:C,ich,j ‹lget› ⧖:C,ch
-  ⧗:C,v #6# ⧗:ev ‹vset› ⧗:v #7# ⧗:ch ‹vset›
+  ⧗:C̵,t2,tok ○ ‹vnew› ⧖:C,v
+  ⧗:C̵,t2 ‹tclass› ⧖:C,cl
+  ⧗:C̵,v #4# ○ ⧗:cl △ ᛖ ⋔ ⦃ ‹vset› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:f #4# ‹vf› ⧖:C,iev ⧗:C̵,iev,j ‹lget› ⧖:C,ev
+  ⧗:C̵,f #5# ‹vf› ⧖:C,ich ⧗:C̵,ich,j ‹lget› ⧖:C,ch
+  ⧗:C̵,v #6# ⧗:ev ‹vset› ⧗:v #7# ⧗:ch ‹vset›
   ⧗:S,v ‹lpush› ⧖:C,S2
-  ⧗:C,f,ins,tok,pt,rep,S2 ⧗:j △ ⊞ ⧗:n,anti
+  ⧗:C̵,f,ins,tok,pt,rep,S2 ⧗:j △ ⊞ ⧗:n,anti
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ŧ⟩ ‹fparam1› ⸫
 
 ⍝ ‹cfunction› C it f: check function item it with record f
 ⦃
   ⧖:C,it,f
-  ⧗:C,it ‹ndt› ⧖:C,tok
-  ⧗:C,f ‹rd› ⧖:C,name
-  ⧗:C,f #2# ‹vf› ⧖:C,outs
-  ⧗:C,outs ‹llen› ⧖:C,no
-  ⧗:C,outs ○ ‹lget› ‹shead› ⧖:C,oh
-  ⧗:C #2# ⧗:no △ ᛖ ⧗:oh #9676# ᛖ ⋎ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ‹wr›
+  ⧗:C̵,it ‹ndt› ⧖:C,tok
+  ⧗:C̵,f ‹rd› ⧖:C,name
+  ⧗:C̵,f #2# ‹vf› ⧖:C,outs
+  ⧗:C̵,outs ‹llen› ⧖:C,no
+  ⧗:C̵,outs ○ ‹lget› ‹shead› ⧖:C,oh
+  ⧗:C̵ #2# ⧗:no △ ᛖ ⧗:oh #9676# ᛖ ⋎ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ‹wr›
   ⧗:f,name,tok ‹fparams› ⧖:C,S
-  ⧗:C,it #5# ‹nd› ⧖:C,nfr
+  ⧗:C̵,it #5# ‹nd› ⧖:C,nfr
   ⧗:it #6# ⊞ ⧗:nfr ⊞ ⧖:sig
   ⍝ the header line
-  ⧗:C ‹tron› ⧖:C,on
-  ⧗:C,name,sig,S ⧗:on ⋔ ⦃ ⧖:C,name,sig,S ⧗:C,sig ‹cshape› ⧖:C,key $fn $ ⎙̵ ⧗:C,name ‹spr› $ $ ⎙̵ ⧗:key ‹spr› $  start $ ⎙̵ ⧗:S △ ‹plist› $\n$ ⎙̵ ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C,sig #2# ‹nd› ⧖:C,ssz
-  ⧗:C,it #2# ‹nd› ⧖:C,isz
+  ⧗:C̵ ‹tron› ⧖:C,on
+  ⧗:C̵,name,sig,S ⧗:on ⋔ ⦃ ⧖:C,name,sig,S ⧗:C̵,sig ‹cshape› ⧖:C,key $fn $ ⎙̵ ⧗:C̵,name ‹spr› $ $ ⎙̵ ⧗:key ‹spr› $  start $ ⎙̵ ⧗:S △ ‹plist› $\n$ ⎙̵ ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,sig #2# ‹nd› ⧖:C,ssz
+  ⧗:C̵,it #2# ‹nd› ⧖:C,isz
   ⧗:sig ⧗:ssz ⊞ ⧖:from
   ⧗:it ⧗:isz ⊞ ⧖:to
-  ⧗:C,it #4# ‹nd› ⧖:C,rev
-  ⧗:C,from,to ⧗:rev △ ᛖ ⋔ ⦃ ‹reversible› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
-  ⧗:C ‹lnew0› ⧖:C,e
-  ⧗:C,from,to,S △ ⧗:e △ ‹cblock› ⧖:C,R,rst,rdead
-  ⧗:C,f,tok,name,R ⧗:rdead ○ ᛖ ⋔ ⦃ ‹fnend› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,it #4# ‹nd› ⧖:C,rev
+  ⧗:C̵,from,to ⧗:rev △ ᛖ ⋔ ⦃ ‹reversible› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵ ‹lnew0› ⧖:C,e
+  ⧗:C̵,from,to,S △ ⧗:e △ ‹cblock› ⧖:C,R,rst,rdead
+  ⧗:C̵,f,tok,name,R ⧗:rdead ○ ᛖ ⋔ ⦃ ‹fnend› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:rst ○ ‹noleak›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cfunction› ⸫
 
 ⍝ ‹fnend› C f tok name R: the final stack must be what the signature promises
 ⦃
   ⧖:C,f,tok,name,R
-  ⧗:C,R ‹ltypes› ⧖:C,got
-  ⧗:C,f #2# ‹vf› ⧖:C,outs
-  ⧗:C,got,outs ‹leq› ⧖:C,same
-  ⧗:C #2# ‹reg› ⧖:C,cf
-  ⧗:C,outs ○ ‹lget› ⧖:C,o
-  ⧗:C,got ‹llen› ⧖:C,ng
-  ⧗:C,got ○ ‹lget› ⧖:C,g0
-  ⧗:C #9676# ⧗:g0 ‹spre› ⧖:C,wrapped
-  ⧗:C,o #15# ‹tis› ⧖:C,bare
+  ⧗:C̵,R ‹ltypes› ⧖:C,got
+  ⧗:C̵,f #2# ‹vf› ⧖:C,outs
+  ⧗:C̵,got,outs ‹leq› ⧖:C,same
+  ⧗:C̵ #2# ‹reg› ⧖:C,cf
+  ⧗:C̵,outs ○ ‹lget› ⧖:C,o
+  ⧗:C̵,got ‹llen› ⧖:C,ng
+  ⧗:C̵,got ○ ‹lget› ⧖:C,g0
+  ⧗:C̵ #9676# ⧗:g0 ‹spre› ⧖:C,wrapped
+  ⧗:C̵,o #15# ‹tis› ⧖:C,bare
   ⧗:same ⧗:cf △ ᛖ ⧗:bare ⧗:ng ○ ᛖ ⋎ ⧗:ng △ ᛖ ⧗:wrapped ⧗:o ᛖ ⋎ ⋏ ⋎ ⋏ ⧖:ok
-  ⧗:C,tok,name,got,outs ⧗:ok ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄
+  ⧗:C̵,tok,name,got,outs ⧗:ok ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄
     ⦃ ⧖:tk,nm,g,os ⧗:tk ‹cerr› ⧗:nm ‹spr› $ ends with $ ⎙̵ ⧗:g ○ ‹plist› $ but its signature promises $ ⎙̵ ⧗:os ○ ‹plist› ‹die› ⦄ ⁼ ⧖:C
-  ⧗:C,R ‹llen› ⧖:C,nr
-  ⧗:C,f,tok,name,R ○ ⧗:nr
+  ⧗:C̵,R ‹llen› ⧖:C,nr
+  ⧗:C̵,f,tok,name,R ○ ⧗:nr
   ⥀ ⦃
     ⧖:C,f,tok,name,R,j,nr
-    ⧗:C,f,tok,name,R,j,nr ⧗:j ⧗:nr ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹fnout1› ⊕ ⦄
+    ⧗:C̵,f,tok,name,R,j,nr ⧗:j ⧗:nr ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹fnout1› ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹fnend› ⸫
 ⦃
   ⧖:C,f,tok,name,R,j,nr
-  ⧗:C,R,j ‹lget› ⧖:C,v
-  ⧗:C,v #6# ‹vf› ⧖:C,have
-  ⧗:C,f #6# ‹vf› ⧖:C,oev ⧗:C,oev,j ‹lget› ⧖:C,wev
-  ⧗:C,tok,name,have ⧗:have ⧗:wev ‹evok› ⋔ ⦃ ⌁ ⌁ ⌁ ⦄
+  ⧗:C̵,R,j ‹lget› ⧖:C,v
+  ⧗:C̵,v #6# ‹vf› ⧖:C,have
+  ⧗:C̵,f #6# ‹vf› ⧖:C,oev ⧗:C̵,oev,j ‹lget› ⧖:C,wev
+  ⧗:C̵,tok,name,have ⧗:have ⧗:wev ‹evok› ⋔ ⦃ ⌁ ⌁ ⌁ ⦄
     ⦃ ⧖:tk,nm,hv ⧗:tk ‹cerr› ⧗:nm ‹spr› $ returns a value that is $ ⎙̵ ⧗:hv ‹evname›
       $; declare the output ⸮ (or ⁖), or attest the value with ⊨ (§3.1)$ ⎙̵ ‹die› ⦄ ⁼
-  ⧗:f #7# ‹vf› ⧖:C,och ⧗:C,och,j ‹lget› ⧖:C,wch
-  ⧗:C,v #7# ‹vf› ⧖:C,vch
-  ⧗:C,vch,wch ‹chsame› ⧖:C,cs
-  ⧗:C,tok,name,v,wch ⧗:cs #-1# ᛖ ‹not› ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄
+  ⧗:f #7# ‹vf› ⧖:C,och ⧗:C̵,och,j ‹lget› ⧖:C,wch
+  ⧗:C̵,v #7# ‹vf› ⧖:C,vch
+  ⧗:C̵,vch,wch ‹chsame› ⧖:C,cs
+  ⧗:C̵,tok,name,v,wch ⧗:cs #-1# ᛖ ‹not› ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄
     ⦃ ⧖:tk,nm,vv,wc ⧗:tk ‹cerr› $charge violation: $ ⎙̵ ⧗:nm ‹spr› $ returns $ ⎙̵ ⧗:vv ‹pvstr› $ but promises charge ⁽$ ⎙̵ ⧗:wc ‹spr› $⁾ (§3.2)$ ⎙̵ ‹die› ⦄ ⁼
   ⧗:f,tok,name,R ⧗:j △ ⊞ ⧗:nr
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹fnout1› ⸫
@@ -2250,73 +2252,73 @@
 ⍝ ‹items› C pass: run pass 1 (particles), 2 (signatures) or 3 (bodies) over the tangled items
 ⦃
   ⧖:C,pass
-  ⧗:C #24# ‹reg› ⧖:C,from ⧗:C #25# ‹reg› ⧖:C,to
-  ⧗:C,from,to,pass
+  ⧗:C̵ #24# ‹reg› ⧖:C,from ⧗:C̵ #25# ‹reg› ⧖:C,to
+  ⧗:C̵,from,to,pass
   ⥀ ⦃
     ⧖:C,i,to,pass
-    ⧗:C,i,to,pass ⧗:i ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,i,to,pass ⧗:C,i,pass ‹item1› ⧗:i ‹nextn› ⧖:C,i2 ⧗:C,i2,to,pass ⊕ ⦄
+    ⧗:C̵,i,to,pass ⧗:i ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,i,to,pass ⧗:C̵,i,pass ‹item1› ⧗:i ‹nextn› ⧖:C,i2 ⧗:C̵,i2,to,pass ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹citems› ⸫
 ⦃
   ⧖:C,i,pass
-  ⧗:C,i ○ ‹nd› ⧖:C,k
-  ⧗:C,i,k,pass ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹pass1› ⦄ ⦃ #2# ᛖ ⋔ ⦃ ‹pass2› ⦄ ⦃ ‹pass3› ⦄ ⁼ ⦄ ⁼
+  ⧗:C̵,i ○ ‹nd› ⧖:C,k
+  ⧗:C̵,i,k,pass ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹pass1› ⦄ ⦃ #2# ᛖ ⋔ ⦃ ‹pass2› ⦄ ⦃ ‹pass3› ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹item1› ⸫
 
 ⦃
   ⧖:C,i,k
-  ⧗:C,i,k ⧗:k #31# ᛖ ⋔ ⦃ ⌁ ‹pass1p› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,i,k ⧗:k #31# ᛖ ⋔ ⦃ ⌁ ‹pass1p› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pass1› ⸫
 ⦃
   ⧖:C,i
-  ⧗:C ⧗:i #4# ⊞ ○ ‹canon› ⧖:C,rep
-  ⧗:C,rep ‹tcopy› ⧖:C,cp
-  ⧗:C,i ‹ndt› ⧖:C,tok
-  ⧗:C,cp,tok #23# ‹cfailunless›
-  ⧗:i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C,nt ‹tname› ⧖:C,name
-  ⧗:C ‹len› ⧖:C,e ⧗:C ⧗:name ⍆̵ ⧗:rep ⍆̵ ⧖:C
-  ⧗:C #8# ‹reg› ⧖:C,ps ⧗:C,ps,e ‹lpush› ⧖:C,ps2 ⧗:C #8# ⧗:ps2 ‹wr›
+  ⧗:C̵ ⧗:i #4# ⊞ ○ ‹canon› ⧖:C,rep
+  ⧗:C̵,rep ‹tcopy› ⧖:C,cp
+  ⧗:C̵,i ‹ndt› ⧖:C,tok
+  ⧗:C̵,cp,tok #23# ‹cfailunless›
+  ⧗:i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C̵,nt ‹tname› ⧖:C,name
+  ⧗:C̵ ‹len› ⧖:C,e ⧗:C̵ ⧗:name ⍆̵ ⧗:rep ⍆̵ ⧖:C
+  ⧗:C̵ #8# ‹reg› ⧖:C,ps ⧗:C̵,ps,e ‹lpush› ⧖:C,ps2 ⧗:C̵ #8# ⧗:ps2 ‹wr›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹pass1p› ⸫
 
 ⦃
   ⧖:C,i,k
-  ⧗:C,i,k ⧗:k #31# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹pass2f› ⦄ ⁼
+  ⧗:C̵,i,k ⧗:k #31# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹pass2f› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pass2› ⸫
 ⦃
   ⧖:C,i,k
-  ⧗:C,i ‹ndt› ⧖:C,tok
-  ⧗:C,i #4# ‹nd› ⧖:C,r4
-  ⧗:C,i #5# ‹nd› ⧖:C,nfr
+  ⧗:C̵,i ‹ndt› ⧖:C,tok
+  ⧗:C̵,i #4# ‹nd› ⧖:C,r4
+  ⧗:C̵,i #5# ‹nd› ⧖:C,nfr
   ⧗:k #40# ᛖ ⧗:r4 △ ᛖ ⋎ ⧖:rev
   ⧗:i #6# ⊞ ⧗:nfr ⊞ ⧗:i #5# ⊞ ⧗:k #40# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:sig
-  ⧗:C,i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C,nt ‹tname› ⧖:C,name
-  ⧗:C,sig ⧗:rev ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧗:name ‹fninfo› ⧖:C,f
-  ⧗:C,f △ ‹vf› ⧖:C,ins ⧗:C,f #2# ‹vf› ⧖:C,outs
-  ⧗:C,ins,tok ○ ‹chktypes› ⧗:outs,tok △ ‹chktypes› ⧖:C
-  ⧗:C #7# ‹reg› ⧖:C,fns ⧗:C,fns,f ‹lpush› ⧖:C,fns2 ⧗:C #7# ⧗:fns2 ‹wr›
+  ⧗:C̵,i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C̵,nt ‹tname› ⧖:C,name
+  ⧗:C̵,sig ⧗:rev ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧗:name ‹fninfo› ⧖:C,f
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,f #2# ‹vf› ⧖:C,outs
+  ⧗:C̵,ins,tok ○ ‹chktypes› ⧗:outs,tok △ ‹chktypes› ⧖:C
+  ⧗:C̵ #7# ‹reg› ⧖:C,fns ⧗:C̵,fns,f ‹lpush› ⧖:C,fns2 ⧗:C̵ #7# ⧗:fns2 ‹wr›
   ⧗:sig ‹cshape› ⧖:C,key
-  ⧗:C ‹len› ⧖:C,e ⧗:C ⧗:key ⍆̵ ⧗:name ⍆̵ ⧖:C
-  ⧗:C #9# ‹reg› ⧖:C,sh ⧗:C,sh,e ‹lpush› ⧖:C,sh2 ⧗:C #9# ⧗:sh2 ‹wr›
+  ⧗:C̵ ‹len› ⧖:C,e ⧗:C̵ ⧗:key ⍆̵ ⧗:name ⍆̵ ⧖:C
+  ⧗:C̵ #9# ‹reg› ⧖:C,sh ⧗:C̵,sh,e ‹lpush› ⧖:C,sh2 ⧗:C̵ #9# ⧗:sh2 ‹wr›
   ⧗:ins,outs ‹leq› ⧖:C,io
-  ⧗:C ⧗:rev ‹not› ⧗:io ⋏ ⧗:tok #24# ‹cfailunless›
+  ⧗:C̵ ⧗:rev ‹not› ⧗:io ⋏ ⧗:tok #24# ‹cfailunless›
   #5855# ‹str1› ⧖:C,entry
-  ⧗:C,ins ‹llen› ⧖:C,ni
-  ⧗:C,outs ‹llen› ⧖:C,no
-  ⧗:C,outs ○ ‹lget› #15# ‹tis› ⧖:C,obare
-  ⧗:C ⧗:name ⧗:entry ᛖ ‹not› ⧗:ni ○ ᛖ ⧗:no ○ ᛖ ⧗:no △ ᛖ ⧗:obare ⋎ ⋏ ⋎ ⋏ ⧗:tok #25# ‹cfailunless›
+  ⧗:C̵,ins ‹llen› ⧖:C,ni
+  ⧗:C̵,outs ‹llen› ⧖:C,no
+  ⧗:C̵,outs ○ ‹lget› #15# ‹tis› ⧖:C,obare
+  ⧗:C̵ ⧗:name ⧗:entry ᛖ ‹not› ⧗:ni ○ ᛖ ⧗:no ○ ᛖ ⧗:no △ ᛖ ⧗:obare ⋎ ⋏ ⋎ ⋏ ⧗:tok #25# ‹cfailunless›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pass2f› ⸫
 
 ⦃
   ⧖:C,i,k
-  ⧗:C,i,k ⧗:k #40# ᛖ ⋔ ⦃ ⌁ ‹pass3f› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,i,k ⧗:k #40# ᛖ ⋔ ⦃ ⌁ ‹pass3f› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pass3› ⸫
 ⦃
   ⧖:C,i
-  ⧗:C,i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C,nt ‹tname› ⧖:C,name
-  ⧗:C,name ‹fnfind› ⧖:C,f
-  ⧗:C,i,f ‹cfunction›
+  ⧗:C̵,i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C̵,nt ‹tname› ⧖:C,name
+  ⧗:C̵,name ‹fnfind› ⧖:C,f
+  ⧗:C̵,i,f ‹cfunction›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹pass3f› ⸫
 
 ⍝ ‹cinit› T F st trace: the heap for checking: registers, the common types, the token buffer and the tree
@@ -2324,44 +2326,44 @@
   ⧖:T,F,st,trace
   ⟦ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ⟧
   ‹snew› △ ⧗:trace ‹wr›
-  ‹len› ⧖:C,tb ⧗:T ⧗:C ‹cpyin› #4# ⧗:tb ‹wr› ⧖:C
-  ⧗:st ⟗ ⧗:C ‹ccopyst› ⧖:st2,C
-  ⧗:st2 ⌁̵
+  ‹len› ⧖:C,tb ⧗:Ṯ ⧗:C̵ ‹cpyin› #4# ⧗:tb ‹wr› ⧖:C
+  ⧗:st̵ ⟗ ⧗:C̵ ‹ccopyst› ⧖:st2,C
+  ⧗:st2̵ ⌁̵
   ⍝ the path, as a string
-  ⧗:F ᛞ ⧖:pc
-  ⧗:pc ⟗ ⧗:C ‹cpath› ⧖:C ⌁̵
-  ⧗:C #359# ‹str1› ⧖:C,s ⧗:C #10# ⧗:s ‹wr›
-  #8484# ‹str1› ⧖:C,s ⧗:C #11# ⧗:s ‹wr›
-  #8477# ‹str1› ⧖:C,s ⧗:C #12# ⧗:s ‹wr›
-  #120121# ‹str1› ⧖:C,s ⧗:C #13# ⧗:s ‹wr›
-  #643# ‹str1› ⧖:C,s ⧗:C #14# ⧗:s ‹wr›
-  #9676# ‹str1› ⧖:C,s ⧗:C #15# ⧗:s ‹wr›
-  ‹sbeg› ‹send› ⧖:C,s ⧗:C #16# ⧗:s ‹wr›
-  #42# ‹str1› ⧖:C,s ⧗:C #17# ⧗:s ‹wr›
-  #10199# #643# ‹str2› ⧖:C,s ⧗:C #18# ⧗:s ‹wr›
-  #10198# #643# ‹str2› ⧖:C,s ⧗:C #19# ⧗:s ‹wr›
-  #9676# #120121# ‹str2› ⧖:C,s ⧗:C #20# ⧗:s ‹wr›
-  ‹lnew0› ⧖:C,e ⧗:C #7# ⧗:e ‹wr› #8# ⧗:e ‹wr› #9# ⧗:e ‹wr›
+  ⧗:F̱ ᛞ ⧖:pc
+  ⧗:pc̵ ⟗ ⧗:C̵ ‹cpath› ⧖:C ⌁̵
+  ⧗:C̵ #359# ‹str1› ⧖:C,s ⧗:C̵ #10# ⧗:s ‹wr›
+  #8484# ‹str1› ⧖:C,s ⧗:C̵ #11# ⧗:s ‹wr›
+  #8477# ‹str1› ⧖:C,s ⧗:C̵ #12# ⧗:s ‹wr›
+  #120121# ‹str1› ⧖:C,s ⧗:C̵ #13# ⧗:s ‹wr›
+  #643# ‹str1› ⧖:C,s ⧗:C̵ #14# ⧗:s ‹wr›
+  #9676# ‹str1› ⧖:C,s ⧗:C̵ #15# ⧗:s ‹wr›
+  ‹sbeg› ‹send› ⧖:C,s ⧗:C̵ #16# ⧗:s ‹wr›
+  #42# ‹str1› ⧖:C,s ⧗:C̵ #17# ⧗:s ‹wr›
+  #10199# #643# ‹str2› ⧖:C,s ⧗:C̵ #18# ⧗:s ‹wr›
+  #10198# #643# ‹str2› ⧖:C,s ⧗:C̵ #19# ⧗:s ‹wr›
+  #9676# #120121# ‹str2› ⧖:C,s ⧗:C̵ #20# ⧗:s ‹wr›
+  ‹lnew0› ⧖:C,e ⧗:C̵ #7# ⧗:e ‹wr› #8# ⧗:e ‹wr› #9# ⧗:e ‹wr›
 ⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cinit› ⸫
 
 ⍝ ‹ccopyst› st C: copy the tree into the heap (register 5: its base; 24, 25: the tangled items)
 ⦃
   ⧖:st,C
-  ⧗:C ‹len› ⧖:C,ab
-  ⧗:st ⧗:C ‹cpyin› #5# ⧗:ab ‹wr› #24# ⧗:st #2# ᚳ ‹wr› #25# ⧗:st ᚴ ‹wr›
+  ⧗:C̵ ‹len› ⧖:C,ab
+  ⧗:sṯ ⧗:C̵ ‹cpyin› #5# ⧗:ab ‹wr› #24# ⧗:sṯ #2# ᚳ ‹wr› #25# ⧗:sṯ ᚴ ‹wr›
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹ccopyst› ⸫
 
 ⍝ ‹cpath› pc C: the path's code points as an interned string in register 6
 ⦃
   ⧖:pc,C
-  ⧗:C ‹sbeg› ⧖:C,e
-  ⧗:pc,C,e ○ ⧗:pc ᚴ
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:pc̱,C̵,e ○ ⧗:pc̱ ᚴ
   ⥀ ⦃
     ⧖:pc,C,e,j,n
-    ⧗:pc,C,e,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:pc,C,e,j,n ⧗:pc ⧗:C,e ⧗:pc,j ᚳ ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:pc̱,C̵,e,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:pc,C,e,j,n ⧗:pc̱ ⧗:C̵,e ⧗:pc̱,j ᚳ ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:n ⊕ ⦄
   ⦄
-  ⌁ ⌁ ⧖:e ⧖:C ⌁̱ ⧗:C,e ‹send› ⧖:C,s ⧗:C #6# ⧗:s ‹wr›
+  ⌁ ⌁ ⧖:e ⧖:C ⌁̱ ⧗:C̵,e ‹send› ⧖:C,s ⧗:C̵ #6# ⧗:s ‹wr›
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cpath› ⸫
 
 ⍝ ‹check› C: check every item (its trace goes to the output when register 1 is set)

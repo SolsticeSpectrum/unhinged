@@ -3,11 +3,11 @@ fn ᛟ ⟨⊸⟩
   lit trit ⊖
   op ⫴
   op ⧖
-  op ⧗ idx=0
+  op ⧗ idx=0 [superposed]
   postselect [superposed]
     lit trit ⦶
     op ≶
-  op ⧗ idx=0
+  op ⧗ idx=0 [superposed]
   op ⊙ idx=0 [superposed]
   handle
     ok

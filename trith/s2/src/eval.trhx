@@ -6,53 +6,53 @@
 ⍝ Registers: 49 the first error (a string, −1: none), 50 unwinding a ◌
 ⍝ failure, 51 steps taken, 52 call depth.
 
-⦃ ⧖:C ⧗:C #49# #-1# ‹wr› #50# ○ ‹wr› #51# ○ ‹wr› #52# ○ ‹wr› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹evnew› ⸫
+⦃ ⧖:C ⧗:C̵ #49# #-1# ‹wr› #50# ○ ‹wr› #51# ○ ‹wr› #52# ○ ‹wr› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹evnew› ⸫
 ⍝ ‹everr› C msg: record the first error
 ⦃
   ⧖:C,msg
-  ⧗:C #49# ‹reg› ⧖:C,e
-  ⧗:C,msg ⧗:e #-1# ᛖ ⋔ ⦃ ⧖:m #49# ⧗:m ‹wr› ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:C̵ #49# ‹reg› ⧖:C,e
+  ⧗:C̵,msg ⧗:e #-1# ᛖ ⋔ ⦃ ⧖:m #49# ⧗:m ‹wr› ⦄ ⦃ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹everr› ⸫
 ⍝ ‹evstop› C: an error, or a failure unwinding
 ⦃
   ⧖:C
-  ⧗:C #49# ‹reg› ⧖:C,e ⧗:C #50# ‹reg› ⧖:C,f
-  ⧗:C ⧗:e #-1# ᛖ ‹not› ⧗:f △ ᛖ ⋏
+  ⧗:C̵ #49# ‹reg› ⧖:C,e ⧗:C̵ #50# ‹reg› ⧖:C,f
+  ⧗:C̵ ⧗:e #-1# ᛖ ‹not› ⧗:f △ ᛖ ⋏
 ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evstop› ⸫
 ⍝ ‹evdie› C tok: report the evaluator's error at tok, if there is one
 ⦃
   ⧖:C,tok
-  ⧗:C #49# ‹reg› ⧖:C,e
-  ⧗:C,tok,e ⧗:e #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tk,m ⧗:tk ‹eerr› ⧗:m ‹spr› ‹die› ⦄ ⁼
+  ⧗:C̵ #49# ‹reg› ⧖:C,e
+  ⧗:C̵,tok,e ⧗:e #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tk,m ⧗:tk ‹eerr› ⧗:m ‹spr› ‹die› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹evdie› ⸫
 
 ⍝ ‹evrole› C v role: a copy of value v with that role
 ⦃
   ⧖:C,v,role
-  ⧗:C,v ○ ‹vf› ⧖:C,ty ⧗:C,v △ ‹vf› ⧖:C,n ⧗:C,v #2# ‹vf› ⧖:C,ok ⧗:C,v #4# ‹vf› ⧖:C,hn
-  ⧗:C ‹len› ⧖:C,w ⧗:C ⧗:ty ⍆̵ ⧗:n ⍆̵ ⧗:ok ⍆̵ ⧗:role ⍆̵ ⧗:hn ⍆̵ ⧗:w
+  ⧗:C̵,v ○ ‹vf› ⧖:C,ty ⧗:C̵,v △ ‹vf› ⧖:C,n ⧗:C̵,v #2# ‹vf› ⧖:C,ok ⧗:C̵,v #4# ‹vf› ⧖:C,hn
+  ⧗:C̵ ‹len› ⧖:C,w ⧗:C̵ ⧗:ty ⍆̵ ⧗:n ⍆̵ ⧗:ok ⍆̵ ⧗:role ⍆̵ ⧗:hn ⍆̵ ⧗:w
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evrole› ⸫
 
 ⍝ ‹evunwrap› C v: ◌T used as T; a failed value starts unwinding (giving −1)
 ⦃
   ⧖:C,v
-  ⧗:C,v ○ ‹vf› ⧖:C,t
-  ⧗:C,t ‹efailty› ⧖:C,f ⧗:C,t #15# ‹tis› ⧖:C,bare
-  ⧗:C,v △ ‹vf› ⧖:C,n ⧗:C,v #2# ‹vf› ⧖:C,ok ⧗:C,v #4# ‹vf› ⧖:C,hn
+  ⧗:C̵,v ○ ‹vf› ⧖:C,t
+  ⧗:C̵,t ‹efailty› ⧖:C,f ⧗:C̵,t #15# ‹tis› ⧖:C,bare
+  ⧗:C̵,v △ ‹vf› ⧖:C,n ⧗:C̵,v #2# ‹vf› ⧖:C,ok ⧗:C̵,v #4# ‹vf› ⧖:C,hn
   ○ ⧗:f ‹not› ⧗:bare ⋏ ‹not› ⋔ ∅ ⦃ ⌁ △ ⦄ ⁼ ⧗:f ‹not› ⧗:bare ⋏ ‹not› ⧗:ok ○ ᛖ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:k
-  ⧗:C,v,t,n,hn,k
+  ⧗:C̵,v,t,n,hn,k
   ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃
   #2# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ #50# △ ‹wr› #-1# ⦄ ⦃ ⧖:vv,tt,nn,h ⧗:tt ‹stail› ⧖:bt ⧗:bt,nn,h △ ‹evval› ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evunwrap› ⸫
 ⍝ ‹evunwraps› C L n: every value of L unwrapped (stops early once unwinding)
 ⦃
   ⧖:C,L,n
-  ⧗:C ‹qnew› ⧖:C,q
-  ⧗:C,L,q ○ ⧗:n
+  ⧗:C̵ ‹qnew› ⧖:C,q
+  ⧗:C̵,L,q ○ ⧗:n
   ⥀ ⦃
     ⧖:C,L,q,i,n
-    ⧗:C,L,q,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,L,q,i,n ⧗:C,L,i ‹lget› ‹evunwrap› ⧖:C,u ⧗:C,q,u ‹qadd› ⧗:L,q ⧗:i △ ⊞ ⧗:n ⊕ ⦄
+    ⧗:C̵,L,q,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,q,i,n ⧗:C̵,L,i ‹lget› ‹evunwrap› ⧖:C,u ⧗:C̵,q,u ‹qadd› ⧗:L,q ⧗:i △ ⊞ ⧗:n ⊕ ⦄
   ⦄
   ⌁ ⌁ ⧖:q ⌁ ⧗:q ‹qlist›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evunwraps› ⸫
@@ -62,27 +62,27 @@
 ⍝ ‹evnumv› C t n: [the value n of type t], noting an integer that leaves the exact range
 ⦃
   ⧖:C,t,n
-  ⧗:C,n ⧗:n ‹eexact› ⋔ ⦃ ⌁ ⦄ ⦃ ⌁ %%an integer left the exact range of compile-time evaluation (2⁵³)%% ‹everr› ⦄ ⁼
+  ⧗:C̵,n ⧗:n ‹eexact› ⋔ ⦃ ⌁ ⦄ ⦃ ⌁ %%an integer left the exact range of compile-time evaluation (2⁵³)%% ‹everr› ⦄ ⁼
   ⧗:t,n △ △ ‹evval› ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evnumv› ⸫
 ⍝ ‹evglyphv› C x vals: an operator on values; its results (an error leaves them empty)
 ⦃
   ⧖:C,x,vals
-  ⧗:C,vals ○ ‹lget› ⧖:C,v0
-  ⧗:C,v0 ○ ‹vf› ⧖:C,ty ⧗:C,v0 △ ‹vf› ⧖:C,a
-  ⧗:C,vals ‹llen› ⧖:C,nv
-  ⧗:C,vals ⧗:nv △ ≶ ⋔ ⦃ ⌁ ○ ⦄ ⦃ △ ‹lget› △ ‹vf› ⦄ ⦃ ⌁ ○ ⦄ ⧖:C,b
-  ⧗:C,ty #10# ‹tis› ⧖:C,tr ⧗:C,ty #11# ‹tis› ⧖:C,iz
-  ⧗:C,x,ty,a,b ⧗:tr ⧗:iz ⋏ ⋔ ⦃ ‹evglyph2› ⦄ ⦃ ‹evnotype› ⦄ ⁼
+  ⧗:C̵,vals ○ ‹lget› ⧖:C,v0
+  ⧗:C̵,v0 ○ ‹vf› ⧖:C,ty ⧗:C̵,v0 △ ‹vf› ⧖:C,a
+  ⧗:C̵,vals ‹llen› ⧖:C,nv
+  ⧗:C̵,vals ⧗:nv △ ≶ ⋔ ⦃ ⌁ ○ ⦄ ⦃ △ ‹lget› △ ‹vf› ⦄ ⦃ ⌁ ○ ⦄ ⧖:C,b
+  ⧗:C̵,ty #10# ‹tis› ⧖:C,tr ⧗:C̵,ty #11# ‹tis› ⧖:C,iz
+  ⧗:C̵,x,ty,a,b ⧗:tr ⧗:iz ⋏ ⋔ ⦃ ‹evglyph2› ⦄ ⦃ ‹evnotype› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evglyphv› ⸫
 ⦃
   ⧖:C,x,ty,a,b
-  ⧗:C,x ‹str1› ⧖:C,xs
-  ⧗:C %%compile-time evaluation of {xs} on {ty} is not supported in s1%% ‹everr› ‹lnew0›
+  ⧗:C̵,x ‹str1› ⧖:C,xs
+  ⧗:C̵ %%compile-time evaluation of {xs} on {ty} is not supported in s1%% ‹everr› ‹lnew0›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evnotype› ⸫
 ⦃
   ⧖:C,x,ty,a,b
-  ⧗:C,x,ty,a,b ⧗:x
+  ⧗:C̵,x,ty,a,b ⧗:x
   ⍿⁰ #8862# ᛖ ⋔ ⦃ ⌁ ⧖:xx,t,p,q ⧗:t ⧗:p ⧗:q ⊞ ‹evnumv› ⦄ ⦃
   ⍿⁰ #8863# ᛖ ⋔ ⦃ ⌁ ⧖:xx,t,p,q ⧗:t ⧗:p ⧗:q ⊟ ‹evnumv› ⦄ ⦃
   ⍿⁰ #8864# ᛖ ⋔ ⦃ ⌁ ‹evmul› ⦄ ⦃
@@ -95,20 +95,20 @@
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evglyph2› ⸫
 ⦃
   ⧖:C,x,ty,a,b
-  ⧗:C,x ‹str1› ⧖:C,xs
-  ⧗:C %%compile-time evaluation of {xs} is not supported in s1%% ‹everr› ‹lnew0›
+  ⧗:C̵,x ‹str1› ⧖:C,xs
+  ⧗:C̵ %%compile-time evaluation of {xs} is not supported in s1%% ‹everr› ‹lnew0›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evnoop› ⸫
 ⦃
   ⧖:C,x,ty,a,b
-  ⧗:C,ty,a,b ⧗:a ⧗:b ‹emulok› ⋔ ⦃ ⧖:t,p,q ⧗:t ⧗:p ⧗:q ⊠ ‹evnumv› ⦄
+  ⧗:C̵,ty,a,b ⧗:a ⧗:b ‹emulok› ⋔ ⦃ ⧖:t,p,q ⧗:t ⧗:p ⧗:q ⊠ ‹evnumv› ⦄
     ⦃ ⧖:t,p,q %%an integer left the exact range of compile-time evaluation (2⁵³)%% ‹everr› ⧗:t ○ ‹evnumv› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evmul› ⸫
 ⦃
   ⧖:C,x,ty,a,b
-  ⧗:C #9676# ⧗:ty ‹spre› ⧖:C,ft
+  ⧗:C̵ #9676# ⧗:ty ‹spre› ⧖:C,ft
   ⧗:a ⧗:b ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:q0 ⧗:a ⧗:b ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:r0
   ⧗:q0 ⧗:r0 ⧗:x #8860# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:q
-  ⧗:C,ft,q ⧗:b ○ ᛖ ⋔ ⦃ ⌁ ○ ○ ○ ‹evval› ⦄ ⦃ △ △ ‹evval› ⦄ ⁼ ‹l1›
+  ⧗:C̵,ft,q ⧗:b ○ ᛖ ⋔ ⦃ ⌁ ○ ○ ○ ‹evval› ⦄ ⦃ △ △ ‹evval› ⦄ ⁼ ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evdivv› ⸫
 
 ⍝ ---- purity: no I/O, FFI, containers or future calls
@@ -116,33 +116,33 @@
 ⍝ ‹evpure› C nm seen: function nm (and what it calls) can be evaluated
 ⦃
   ⧖:C,nm,seen
-  ⧗:C,seen,nm ‹qhas› ⧖:C,had
-  ⧗:C,nm,seen ⧗:had ⋔ ⦃ ⌁ ⌁ ⦶ ⦄ ⦃ ‹evpure1› ⦄ ⁼
+  ⧗:C̵,seen,nm ‹qhas› ⧖:C,had
+  ⧗:C̵,nm,seen ⧗:had ⋔ ⦃ ⌁ ⌁ ⦶ ⦄ ⦃ ‹evpure1› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evpure› ⸫
 ⦃
   ⧖:C,nm,seen
-  ⧗:C,seen,nm ‹qadd›
+  ⧗:C̵,seen,nm ‹qadd›
   ⧗:nm ‹efind› ⧖:C,f
-  ⧗:C,f #2# ‹vf› ⧖:C,ffi ⧗:C,f #5# ‹vf› ⧖:C,from ⧗:C,f #6# ‹vf› ⧖:C,to
-  ⧗:C,from,to,seen ⧗:ffi ○ ᛖ ⧗:from #-1# ᛖ ‹not› ⋎ ⋔ ⦃ ‹evpureops› ⦄ ⦃ ⌁ ⌁ ⌁ ⊕ ⦄ ⁼
+  ⧗:C̵,f #2# ‹vf› ⧖:C,ffi ⧗:C̵,f #5# ‹vf› ⧖:C,from ⧗:C̵,f #6# ‹vf› ⧖:C,to
+  ⧗:C̵,from,to,seen ⧗:ffi ○ ᛖ ⧗:from #-1# ᛖ ‹not› ⋎ ⋔ ⦃ ‹evpureops› ⦄ ⦃ ⌁ ⌁ ⌁ ⊕ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evpure1› ⸫
 ⍝ ‹evpureops› C from to seen
 ⦃
   ⧖:C,from,to,seen
-  ⧗:C,from,to,seen ⦶
+  ⧗:C̵,from,to,seen ⦶
   ⥀ ⦃
     ⧖:C,i,to,seen,ok
-    ⧗:C,i,to,seen,ok ⧗:i ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:ok ⋎ ⋔ ⦃ ‹evpure2› ⦄ ⦃ ⦶ ⦄ ⁼
+    ⧗:C̵,i,to,seen,ok ⧗:i ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:ok ⋎ ⋔ ⦃ ‹evpure2› ⦄ ⦃ ⦶ ⦄ ⁼
   ⦄
-  ⧖:C,i,to,seen,ok ⧗:C,ok
+  ⧖:C,i,to,seen,ok ⧗:C̵,ok
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evpureops› ⸫
-⦃ ⧖:C,i,to,seen,ok ⧗:C,i,seen ‹evpureop› ⧖:C,p ⧗:C,i ‹nextn› ⧖:C,nx ⧗:C,nx,to,seen,p ⊕ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ⟩ ‹evpure2› ⸫
+⦃ ⧖:C,i,to,seen,ok ⧗:C̵,i,seen ‹evpureop› ⧖:C,p ⧗:C̵,i ‹nextn› ⧖:C,nx ⧗:C̵,nx,to,seen,p ⊕ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ⟩ ‹evpure2› ⸫
 ⍝ ‹evpureop› C op seen: one op is pure
 ⦃
   ⧖:C,op,seen
-  ⧗:C,op ○ ‹nd› ⧖:C,k
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,op,seen,tok,k
+  ⧗:C̵,op ○ ‹nd› ⧖:C,k
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,op,seen,tok,k
   ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ⧖:o,s,t ⧗:t ‹tc0› ⧖:x ⧗:x ⧖ @any(9113,8961,10199,10198,8982,9032,9076,9030,10996,8859,8857,10204)@ ‹not› ⦄ ⦃
   ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ⧖:o,s,t ⧗:t ‹tkd› #12# ᛖ ‹not› ⦄ ⦃
   ⍿⁰ #8# ᛖ ⍿¹ #3# ᛖ ⋏ ⍿¹ #15# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⊕ ⦄ ⦃
@@ -153,25 +153,25 @@
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evpureop› ⸫
 ⦃
   ⧖:C,op,seen,tok
-  ⧗:C,tok #2# ‹tmark› ⧖:C,fut
-  ⧗:C,op,seen ⧗:fut ⋔ ⦃ ⌁ ⌁ ⊕ ⦄ ⦃ ⧖:o,s ⧗:o ‹eresolve› ‹rd› ⧖:nm ⧗:nm,s ‹evpure› ⦄ ⁼
+  ⧗:C̵,tok #2# ‹tmark› ⧖:C,fut
+  ⧗:C̵,op,seen ⧗:fut ⋔ ⦃ ⌁ ⌁ ⊕ ⦄ ⦃ ⧖:o,s ⧗:o ‹eresolve› ‹rd› ⧖:nm ⧗:nm,s ‹evpure› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evpurecall› ⸫
 ⦃
   ⧖:C,op,seen
-  ⧗:C ⧗:op #3# ⊞ ⧖:C,f0 ⧗:C,f0 ‹nextn› ⧖:C,f1 ⧗:C,f1 ‹nextn› ⧖:C,f2
-  ⧗:C,f0,seen ‹evpureface› ⧖:C,p0 ⧗:C,f1,seen ‹evpureface› ⧖:C,p1 ⧗:C,f2,seen ‹evpureface› ⧖:C,p2
-  ⧗:C ⧗:p0 ⧗:p1 ⋎ ⧗:p2 ⋎
+  ⧗:C̵ ⧗:op #3# ⊞ ⧖:C,f0 ⧗:C̵,f0 ‹nextn› ⧖:C,f1 ⧗:C̵,f1 ‹nextn› ⧖:C,f2
+  ⧗:C̵,f0,seen ‹evpureface› ⧖:C,p0 ⧗:C̵,f1,seen ‹evpureface› ⧖:C,p1 ⧗:C̵,f2,seen ‹evpureface› ⧖:C,p2
+  ⧗:C̵ ⧗:p0 ⧗:p1 ⋎ ⧗:p2 ⋎
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evpurefaces› ⸫
 ⦃
   ⧖:C,f,seen
-  ⧗:C,f ○ ‹nd› ⧖:C,k
-  ⧗:C,f,seen ⧗:k #9# ᛖ ⋔ ⦃ ⧖:ff,s ⧗:ff ‹brange› ⧗:s ‹evpureops› ⦄ ⦃ ⌁ ⌁ ⦶ ⦄ ⁼
+  ⧗:C̵,f ○ ‹nd› ⧖:C,k
+  ⧗:C̵,f,seen ⧗:k #9# ᛖ ⋔ ⦃ ⧖:ff,s ⧗:ff ‹brange› ⧗:s ‹evpureops› ⦄ ⦃ ⌁ ⌁ ⦶ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evpureface› ⸫
 ⦃
   ⧖:C,op,seen,tok
-  ⧗:C ⧗:op #3# ⊞ ⧖:C,okb ⧗:C,okb ‹nextn› ⧖:C,fb
-  ⧗:C,okb,seen ‹evpureface› ⧖:C,p1 ⧗:C,fb,seen ‹evpureface› ⧖:C,p2
-  ⧗:C ⧗:p1 ⧗:p2 ⋎
+  ⧗:C̵ ⧗:op #3# ⊞ ⧖:C,okb ⧗:C̵,okb ‹nextn› ⧖:C,fb
+  ⧗:C̵,okb,seen ‹evpureface› ⧖:C,p1 ⧗:C̵,fb,seen ‹evpureface› ⧖:C,p2
+  ⧗:C̵ ⧗:p1 ⧗:p2 ⋎
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹evpurehandle› ⸫
 
 ⍝ ---- calls and blocks
@@ -179,89 +179,89 @@
 ⍝ ‹evcall› C f args: call the function with emit record f; its output values
 ⦃
   ⧖:C,f,args
-  ⧗:C #52# ‹inc› △ ⊞ ⧖:C,d
-  ⧗:C,f,args ⧗:d #200# ≶ ⋔ ⦃ ‹evcall1› ⦄ ⦃ ⌁ ⌁ %%compile-time evaluation recursed more than 200 calls deep%% ‹everr› ‹lnew0› ⦄ ⦃ ‹evcall1› ⦄
+  ⧗:C̵ #52# ‹inc› △ ⊞ ⧖:C,d
+  ⧗:C̵,f,args ⧗:d #200# ≶ ⋔ ⦃ ‹evcall1› ⦄ ⦃ ⌁ ⌁ %%compile-time evaluation recursed more than 200 calls deep%% ‹everr› ‹lnew0› ⦄ ⦃ ‹evcall1› ⦄
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evcall› ⸫
 ⦃
   ⧖:C,f,args
-  ⧗:C,f #5# ‹vf› ⧖:C,from ⧗:C,f #6# ‹vf› ⧖:C,to
-  ⧗:C,from,to,args ‹evblock› ⧖:C,S
-  ⧗:C #52# ‹reg› ⧖:C,d ⧗:C #52# ⧗:d △ ⊟ ‹wr› ⧖:C
-  ⧗:C,f #3# ‹vf› #2# ‹vf› ⧖:C,outs
-  ⧗:C #49# ‹reg› ⧖:C,err ⧗:C #50# ‹reg› ⧖:C,fail
+  ⧗:C̵,f #5# ‹vf› ⧖:C,from ⧗:C̵,f #6# ‹vf› ⧖:C,to
+  ⧗:C̵,from,to,args ‹evblock› ⧖:C,S
+  ⧗:C̵ #52# ‹reg› ⧖:C,d ⧗:C̵ #52# ⧗:d △ ⊟ ‹wr› ⧖:C
+  ⧗:C̵,f #3# ‹vf› #2# ‹vf› ⧖:C,outs
+  ⧗:C̵ #49# ‹reg› ⧖:C,err ⧗:C̵ #50# ‹reg› ⧖:C,fail
   #2# ⧗:fail △ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:err #-1# ᛖ ‹not› ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:k
-  ⧗:C,S,outs,k ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ‹lnew0› ⦄ ⦃ #1# ᛖ ⋔ ⦃ ⧖:SS,oo ⧗:oo ‹evfailed› ⦄ ⦃ ‹evouts› ⦄ ⁼ ⦄ ⁼
+  ⧗:C̵,S,outs,k ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ‹lnew0› ⦄ ⦃ #1# ᛖ ⋔ ⦃ ⧖:SS,oo ⧗:oo ‹evfailed› ⦄ ⦃ ‹evouts› ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evcall1› ⸫
 ⍝ the function failed: its single ◌ output carries the failure
 ⦃
   ⧖:C,outs
-  ⧗:C #50# ○ ‹wr› ⧖:C
-  ⧗:C,outs ○ ‹lget› ⧖:C,o
-  ⧗:C,o ○ ○ ○ ‹evval› ‹l1›
+  ⧗:C̵ #50# ○ ‹wr› ⧖:C
+  ⧗:C̵,outs ○ ‹lget› ⧖:C,o
+  ⧗:C̵,o ○ ○ ○ ‹evval› ‹l1›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evfailed› ⸫
 ⦃
   ⧖:C,S,outs
-  ⧗:C ‹qnew› ⧖:C,q
-  ⧗:C,S ‹llen› ⧖:C,ns
-  ⧗:C,outs ‹llen› ⧖:C,n
-  ⧗:C,S,outs,q,ns ○ ⧗:n
+  ⧗:C̵ ‹qnew› ⧖:C,q
+  ⧗:C̵,S ‹llen› ⧖:C,ns
+  ⧗:C̵,outs ‹llen› ⧖:C,n
+  ⧗:C̵,S,outs,q,ns ○ ⧗:n
   ⥀ ⦃
     ⧖:C,S,outs,q,ns,i,n
-    ⧗:C,S,outs,q,ns,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹evout1› ⊕ ⦄
+    ⧗:C̵,S,outs,q,ns,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹evout1› ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⧖:q ⌁ ⌁ ⧗:q ‹qlist›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evouts› ⸫
 ⦃
   ⧖:C,S,outs,q,ns,i,n
-  ⧗:C,outs,i ‹lget› ⧖:C,o
-  ⧗:C,o #15# ‹tis› ⧖:C,bare
-  ⧗:C,S,i,o ⧗:bare ⧗:ns ○ ᛖ ⋎ ⋔ ⦃ ⧖:SS,ii,oo ⧗:oo ○ ○ △ ‹evval› ⦄ ⦃ ‹evout2› ⦄ ⁼ ⧖:C,v
-  ⧗:C,q,v ‹qadd›
+  ⧗:C̵,outs,i ‹lget› ⧖:C,o
+  ⧗:C̵,o #15# ‹tis› ⧖:C,bare
+  ⧗:C̵,S,i,o ⧗:bare ⧗:ns ○ ᛖ ⋎ ⋔ ⦃ ⧖:SS,ii,oo ⧗:oo ○ ○ △ ‹evval› ⦄ ⦃ ‹evout2› ⦄ ⁼ ⧖:C,v
+  ⧗:C̵,q,v ‹qadd›
   ⧗:S,outs,q,ns ⧗:i △ ⊞ ⧗:n
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹evout1› ⸫
 ⦃
   ⧖:C,S,i,o
-  ⧗:C,S,i ‹lget› ⧖:C,v
-  ⧗:C,v ○ ‹vf› ⧖:C,vt ⧗:C,v △ ‹vf› ⧖:C,n ⧗:C,v #4# ‹vf› ⧖:C,hn
-  ⧗:C,v,o,n,hn ⧗:o ⧗:vt ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:vv,oo,nn,h ⧗:oo,nn,h △ ‹evval› ⦄ ⁼
+  ⧗:C̵,S,i ‹lget› ⧖:C,v
+  ⧗:C̵,v ○ ‹vf› ⧖:C,vt ⧗:C̵,v △ ‹vf› ⧖:C,n ⧗:C̵,v #4# ‹vf› ⧖:C,hn
+  ⧗:C̵,v,o,n,hn ⧗:o ⧗:vt ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:vv,oo,nn,h ⧗:oo,nn,h △ ‹evval› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evout2› ⸫
 
 ⍝ ‹evblockn› C b S: ‹evblock› on block node b
-⦃ ⧖:C,b,S ⧗:C,b ‹brange› ⧖:C,from,to ⧗:C,from,to,S ‹evblock› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evblockn› ⸫
+⦃ ⧖:C,b,S ⧗:C̵,b ‹brange› ⧖:C,from,to ⧗:C̵,from,to,S ‹evblock› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evblockn› ⸫
 ⍝ ‹evblock› C from to S: run the ops over S (a fresh strand), giving the final stack
 ⦃
   ⧖:C,from,to,S
-  ⧗:C ‹lnew0› ⧖:C,strand
-  ⧗:C,from,to,S,strand
+  ⧗:C̵ ‹lnew0› ⧖:C,strand
+  ⧗:C̵,from,to,S,strand
   ⥀ ⦃
     ⧖:C,oi,to,S,strand
-    ⧗:C ‹evstop› ⧖:C,stop
-    ⧗:C,oi,to,S,strand ⧗:oi ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:stop ‹not› ⋎ ⋔ ⦃ ‹evstep› ⦄ ⦃ ⦶ ⦄ ⁼
+    ⧗:C̵ ‹evstop› ⧖:C,stop
+    ⧗:C̵,oi,to,S,strand ⧗:oi ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:stop ‹not› ⋎ ⋔ ⦃ ‹evstep› ⦄ ⦃ ⦶ ⦄ ⁼
   ⦄
-  ⧖:C,oi,to,S,strand ⧗:C,S
+  ⧖:C,oi,to,S,strand ⧗:C̵,S
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evblock› ⸫
 ⍝ ‹evstep› C oi to S strand: one op; ⊕ to go on
 ⦃
   ⧖:C,oi,to,S,strand
-  ⧗:C #51# ‹inc› △ ⊞ ⧖:C,st
-  ⧗:C,oi,to,S,strand ⧗:st #10000000# ≶ ⋔ ⦃ ‹evstep1› ⦄ ⦃ ⧖:o,t,s,st2 %%compile-time evaluation did not finish within its step budget%% ‹everr› ⧗:o,t,s,st2 ⦶ ⦄ ⦃ ‹evstep1› ⦄
+  ⧗:C̵ #51# ‹inc› △ ⊞ ⧖:C,st
+  ⧗:C̵,oi,to,S,strand ⧗:st #10000000# ≶ ⋔ ⦃ ‹evstep1› ⦄ ⦃ ⧖:o,t,s,st2 %%compile-time evaluation did not finish within its step budget%% ‹everr› ⧗:o,t,s,st2 ⦶ ⦄ ⦃ ‹evstep1› ⦄
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ŧ⟩ ‹evstep› ⸫
 ⦃
   ⧖:C,oi,to,S,strand
-  ⧗:C,oi,S,strand ‹evcase› ⧖:C,S2,strand2,skip
-  ⧗:C,oi ‹nextn› ⧖:C,nx
-  ⧗:C,nx ‹nextn› ⧖:C,nx2
+  ⧗:C̵,oi,S,strand ‹evcase› ⧖:C,S2,strand2,skip
+  ⧗:C̵,oi ‹nextn› ⧖:C,nx
+  ⧗:C̵,nx ‹nextn› ⧖:C,nx2
   ⧗:nx ⧗:nx2 ⧗:skip △ ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:oi2
-  ⧗:C,oi2,to,S2,strand2 ⊕
+  ⧗:C̵,oi2,to,S2,strand2 ⊕
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ŧ⟩ ‹evstep1› ⸫
 
 ⍝ ‹evcase› C op S strand → C S strand skip
 ⦃
   ⧖:C,op,S,strand
-  ⧗:C,op ○ ‹nd› ⧖:C,k
-  ⧗:C,op ‹ndt› ⧖:C,tok
-  ⧗:C,tok ‹trole› ⧖:C,role
-  ⧗:C,op,S,strand,tok,role,k
+  ⧗:C̵,op ○ ‹nd› ⧖:C,k
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok ‹trole› ⧖:C,role
+  ⧗:C̵,op,S,strand,tok,role,k
   ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹ev_lit› ⦄ ⦃
   ⍿⁰ #2# ᛖ ⍿¹ #6# ᛖ ⋏ ⋔ ⦃ ⌁ ‹ev_call› ⦄ ⦃
   ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ‹ev_op› ⦄ ⦃
@@ -275,50 +275,50 @@
 ⍝ the cases: C op S strand tok role [k] → C S strand skip
 ⦃
   ⧖:C,op,S,strand,tok,role,k
-  ⧗:C,k ‹evkname› ⧖:C,kn
-  ⧗:C %%compile-time evaluation of {kn} is not supported in s1%% ‹everr›
+  ⧗:C̵,k ‹evkname› ⧖:C,kn
+  ⧗:C̵ %%compile-time evaluation of {kn} is not supported in s1%% ‹everr›
   ⧗:S,strand ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ev_none› ⸫
 ⦃
   ⧖:C,k
-  ⧗:C,k ⍿⁰ #3# ᛖ ⋔ ⦃ ⌁ %%!anti-call%% ⦄ ⦃ ⍿⁰ #4# ᛖ ⋔ ⦃ ⌁ %%!inverse-call%% ⦄ ⦃ ⍿⁰ #8# ᛖ ⋔ ⦃ ⌁ %%!array%% ⦄ ⦃
+  ⧗:C̵,k ⍿⁰ #3# ᛖ ⋔ ⦃ ⌁ %%!anti-call%% ⦄ ⦃ ⍿⁰ #4# ᛖ ⋔ ⦃ ⌁ %%!inverse-call%% ⦄ ⦃ ⍿⁰ #8# ᛖ ⋔ ⦃ ⌁ %%!array%% ⦄ ⦃
     ⍿⁰ #11# ᛖ ⋔ ⦃ ⌁ %%!rselect%% ⦄ ⦃ #15# ᛖ ⋔ ⦃ %%!postselect%% ⦄ ⦃ %%!op%% ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evkname› ⸫
 
 ⦃
   ⧖:C,op,S,strand,tok,role
-  ⧗:C,tok ‹tkd› ⧖:C,lk
-  ⧗:C,tok,lk ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ #5# ‹tf› ⧖:v #11# ‹reg› ⧖:t ⧗:t,v △ △ ‹evval› ⦄
+  ⧗:C̵,tok ‹tkd› ⧖:C,lk
+  ⧗:C̵,tok,lk ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ #5# ‹tf› ⧖:v #11# ‹reg› ⧖:t ⧗:t,v △ △ ‹evval› ⦄
     ⦃ #7# ᛖ ⋔ ⦃ ‹tc0› ⧖:x ○ ⧗:x #8854# ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼ ⧗:x #8853# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:n #10# ‹reg› ⧖:t ⧗:t,n △ △ ‹evval› ⦄
       ⦃ ⌁ %%compile-time evaluation of reals and strings is not supported in s1%% ‹everr› #-1# ⦄ ⁼ ⦄ ⁼ ⧖:C,v
-  ⧗:C,S,v,role ⧗:v #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:SS,vv,r ⧗:vv,r ‹evrole› ⧖:w ⧗:SS,w ‹lpush› ⦄ ⁼ ⧗:strand ○
+  ⧗:C̵,S,v,role ⧗:v #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:SS,vv,r ⧗:vv,r ‹evrole› ⧖:w ⧗:SS,w ‹lpush› ⦄ ⁼ ⧗:strand ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ev_lit› ⸫
 
 ⦃
   ⧖:C,op,S,strand,tok,role
-  ⧗:C,op ‹eresolve› ⧖:C,f
-  ⧗:C,f #3# ‹vf› △ ‹vf› ⧖:C,ins
-  ⧗:C,ins ‹llen› ⧖:C,ka
-  ⧗:C,S,ka ‹epop› ⧖:C,S2,args
-  ⧗:C ‹qnew› ⧖:C,q
-  ⧗:C,args,ins,q ○ ⧗:ka
+  ⧗:C̵,op ‹eresolve› ⧖:C,f
+  ⧗:C̵,f #3# ‹vf› △ ‹vf› ⧖:C,ins
+  ⧗:C̵,ins ‹llen› ⧖:C,ka
+  ⧗:C̵,S,ka ‹epop› ⧖:C,S2,args
+  ⧗:C̵ ‹qnew› ⧖:C,q
+  ⧗:C̵,args,ins,q ○ ⧗:ka
   ⥀ ⦃
     ⧖:C,args,ins,q,i,k
-    ⧗:C,args,ins,q,i,k ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼
-      ⦃ ⧖:C,args,ins,q,i,k ⧗:C,args,i ‹lget› ⧖:C,a ⧗:C,ins,i ‹lget› ‹efailty› ⧖:C,pf
-        ⧗:C,a ⧗:pf ⋔ ⦃ ⦄ ⦃ ‹evunwrap› ⦄ ⁼ ⧖:C,u ⧗:C,q,u ‹qadd› ⧗:args,ins,q ⧗:i △ ⊞ ⧗:k ⊕ ⦄
+    ⧗:C̵,args,ins,q,i,k ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,args,ins,q,i,k ⧗:C̵,args,i ‹lget› ⧖:C,a ⧗:C̵,ins,i ‹lget› ‹efailty› ⧖:C,pf
+        ⧗:C̵,a ⧗:pf ⋔ ⦃ ⦄ ⦃ ‹evunwrap› ⦄ ⁼ ⧖:C,u ⧗:C̵,q,u ‹qadd› ⧗:args,ins,q ⧗:i △ ⊞ ⧗:k ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁ ⧖:C
-  ⧗:C,q ‹qlist› ⧖:C,uargs
-  ⧗:C ‹evstop› ⧖:C,stop
-  ⧗:C,f,uargs ⧗:stop ⋔ ⦃ ⌁ ⌁ ‹lnew0› ⦄ ⦃ ‹evcall› ⦄ ⁼ ⧖:C,res
-  ⧗:C,S2,res ‹lcat› ⧗:strand ○
+  ⧗:C̵,q ‹qlist› ⧖:C,uargs
+  ⧗:C̵ ‹evstop› ⧖:C,stop
+  ⧗:C̵,f,uargs ⧗:stop ⋔ ⦃ ⌁ ⌁ ‹lnew0› ⦄ ⦃ ‹evcall› ⦄ ⁼ ⧖:C,res
+  ⧗:C̵,S2,res ‹lcat› ⧗:strand ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ev_call› ⸫
 
 ⦃
   ⧖:C,op,S,strand,tok,role
-  ⧗:C,tok ‹tc0› ⧖:C,x ⧗:C,tok #4# ‹tf› ⧖:C,idx
-  ⧗:C,S,strand,x,idx,role
+  ⧗:C̵,tok ‹tc0› ⧖:C,x ⧗:C̵,tok #4# ‹tf› ⧖:C,idx
+  ⧗:C̵,S,strand,x,idx,role
   ⍿² #10710# ᛖ ⋔ ⦃ ‹evo_bind› ⦄ ⦃
   ⍿² #10711# ᛖ ⋔ ⦃ ‹evo_read› ⦄ ⦃
   ⍿² #9087# ᛖ ⋔ ⦃ ‹evo_pick› ⦄ ⦃
@@ -327,128 +327,128 @@
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ev_op› ⸫
 ⦃
   ⧖:C,S,strand,x,idx,role
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,S ⧗:n △ ⊟ ‹lget› ⧖:C,v
-  ⧗:C,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
-  ⧗:C,strand,v ‹lpush› ⧖:C,st2
-  ⧗:C,S2,st2
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,v
+  ⧗:C̵,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵,strand,v ‹lpush› ⧖:C,st2
+  ⧗:C̵,S2,st2
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹evo_bind› ⸫
 ⦃
   ⧖:C,S,strand,x,idx,role
-  ⧗:C,strand ‹llen› ⧖:C,n
-  ⧗:C,strand ⧗:n △ ⊟ ⧗:idx ⊟ ‹lget› ⧖:C,v
-  ⧗:C,v,role ‹evrole› ⧖:C,w
-  ⧗:C,S,w ‹lpush› ⧗:strand
+  ⧗:C̵,strand ‹llen› ⧖:C,n
+  ⧗:C̵,strand ⧗:n △ ⊟ ⧗:idx ⊟ ‹lget› ⧖:C,v
+  ⧗:C̵,v,role ‹evrole› ⧖:C,w
+  ⧗:C̵,S,w ‹lpush› ⧗:strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹evo_read› ⸫
 ⦃
   ⧖:C,S,strand,x,idx,role
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,S ⧗:n △ ⊟ ⧗:idx ⊟ ‹lget› ⧖:C,v
-  ⧗:C,v,role ‹evrole› ⧖:C,w
-  ⧗:C,S,w ‹lpush› ⧗:strand
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ⧗:idx ⊟ ‹lget› ⧖:C,v
+  ⧗:C̵,v,role ‹evrole› ⧖:C,w
+  ⧗:C̵,S,w ‹lpush› ⧗:strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹evo_pick› ⸫
 ⦃
   ⧖:C,S,strand,x,idx,role
   ⧗:x ‹arity› ⧖:ar
-  ⧗:C,S,ar ‹epop› ⧖:C,S2,vals
-  ⧗:C,vals,ar ‹evunwraps› ⧖:C,uv
-  ⧗:C ‹evstop› ⧖:C,stop
-  ⧗:C,x,uv ⧗:stop ⋔ ⦃ ⌁ ⌁ ‹lnew0› ⦄ ⦃ ‹evglyphv› ⦄ ⁼ ⧖:C,res
-  ⧗:C,S2,res ‹lcat› ⧗:strand
+  ⧗:C̵,S,ar ‹epop› ⧖:C,S2,vals
+  ⧗:C̵,vals,ar ‹evunwraps› ⧖:C,uv
+  ⧗:C̵ ‹evstop› ⧖:C,stop
+  ⧗:C̵,x,uv ⧗:stop ⋔ ⦃ ⌁ ⌁ ‹lnew0› ⦄ ⦃ ‹evglyphv› ⦄ ⁼ ⧖:C,res
+  ⧗:C̵,S2,res ‹lcat› ⧗:strand
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹evo_glyph› ⸫
 
 ⍝ ⋔: the face the condition picks (⁼ means the face before)
 ⦃
   ⧖:C,op,S,strand,tok,role
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,S ⧗:n △ ⊟ ‹lget› ⧖:C,c0
-  ⧗:C,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
-  ⧗:C,c0 ‹evunwrap› ⧖:C,c
-  ⧗:C ‹evstop› ⧖:C,stop
-  ⧗:C,op,S2,c ⧗:stop ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹evselect1› ⦄ ⁼ ⧖:C,S3
-  ⧗:C,S3,strand ○
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,c0
+  ⧗:C̵,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵,c0 ‹evunwrap› ⧖:C,c
+  ⧗:C̵ ‹evstop› ⧖:C,stop
+  ⧗:C̵,op,S2,c ⧗:stop ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹evselect1› ⦄ ⁼ ⧖:C,S3
+  ⧗:C̵,S3,strand ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ev_select› ⸫
 ⦃
   ⧖:C,op,S,c
-  ⧗:C,c △ ‹vf› ⧖:C,cn
+  ⧗:C̵,c △ ‹vf› ⧖:C,cn
   ○ ⧗:cn △ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:cn #-1# ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:fi0
-  ⧗:C ⧗:op #3# ⊞ ⧖:C,f0 ⧗:C,f0 ‹nextn› ⧖:C,f1 ⧗:C,f1 ‹nextn› ⧖:C,f2
-  ⧗:C,f1 ○ ‹nd› ⧖:C,k1 ⧗:C,f2 ○ ‹nd› ⧖:C,k2
+  ⧗:C̵ ⧗:op #3# ⊞ ⧖:C,f0 ⧗:C̵,f0 ‹nextn› ⧖:C,f1 ⧗:C̵,f1 ‹nextn› ⧖:C,f2
+  ⧗:C̵,f1 ○ ‹nd› ⧖:C,k1 ⧗:C̵,f2 ○ ‹nd› ⧖:C,k2
   ⍝ ⁼ steps back to the face before (twice at most)
   ⧗:fi0 ⧗:fi0 #2# ᛖ ⧗:k2 #12# ᛖ ⋎ ⋔ ⦃ △ ⊟ ⦄ ∅ ⁼ ⧖:fi1
   ⧗:fi1 ⧗:fi1 △ ᛖ ⧗:k1 #12# ᛖ ⋎ ⋔ ⦃ △ ⊟ ⦄ ∅ ⁼ ⧖:fi
   ⧗:f0,f1 ⧗:fi △ ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:fa ⧗:fa,f2 ⧗:fi #2# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:f
-  ⧗:C,f ○ ‹nd› ⧖:C,fk
-  ⧗:C,f,S ⧗:fk #13# ᛖ ⋔ ⦃ ⧖:ff,SS ⧗:SS ⦄ ⦃ ‹evblockn› ⦄ ⁼
+  ⧗:C̵,f ○ ‹nd› ⧖:C,fk
+  ⧗:C̵,f,S ⧗:fk #13# ᛖ ⋔ ⦃ ⧖:ff,SS ⧗:SS ⦄ ⦃ ‹evblockn› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evselect1› ⸫
 
 ⍝ ⥀: again while the body leaves ⊕; ⊖ is a failure
 ⦃
   ⧖:C,op,S,strand,tok,role
-  ⧗:C ⧗:op #3# ⊞ ⧖:C,b
-  ⧗:C,b,S
+  ⧗:C̵ ⧗:op #3# ⊞ ⧖:C,b
+  ⧗:C̵,b,S
   ⥀ ⦃
     ⧖:C,b,S
-    ⧗:C,b,S ‹evblockn› ⧖:C,S2
-    ⧗:C ‹evstop› ⧖:C,stop
-    ⧗:C,b,S2 ⧗:stop ⋔ ⦃ ⦶ ⦄ ⦃ ‹evloop1› ⦄ ⁼
+    ⧗:C̵,b,S ‹evblockn› ⧖:C,S2
+    ⧗:C̵ ‹evstop› ⧖:C,stop
+    ⧗:C̵,b,S2 ⧗:stop ⋔ ⦃ ⦶ ⦄ ⦃ ‹evloop1› ⦄ ⁼
   ⦄
-  ⧖:C,b,S ⧗:C,S,strand ○
+  ⧖:C,b,S ⧗:C̵,S,strand ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ev_loop› ⸫
 ⦃
   ⧖:C,b,S
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,S ⧗:n △ ⊟ ‹lget› ⧖:C,c0
-  ⧗:C,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
-  ⧗:C,c0 ‹evunwrap› ⧖:C,c
-  ⧗:C ‹evstop› ⧖:C,stop
-  ⧗:C,c ⧗:stop ⋔ ⦃ ⌁ ○ ⦄ ⦃ △ ‹vf› ⦄ ⁼ ⧖:C,cn
-  ⧗:C,cn #-1# ᛖ ⋔ ⦃ #50# △ ‹wr› ⦄ ∅ ⁼
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,c0
+  ⧗:C̵,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵,c0 ‹evunwrap› ⧖:C,c
+  ⧗:C̵ ‹evstop› ⧖:C,stop
+  ⧗:C̵,c ⧗:stop ⋔ ⦃ ⌁ ○ ⦄ ⦃ △ ‹vf› ⦄ ⁼ ⧖:C,cn
+  ⧗:C̵,cn #-1# ᛖ ⋔ ⦃ #50# △ ‹wr› ⦄ ∅ ⁼
   ⧗:b,S2 ⧗:stop ‹not› ⧗:cn △ ᛖ ⋎ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ŧ⟩ ‹evloop1› ⸫
 
 ⍝ ⁇
 ⦃
   ⧖:C,op,S,strand,tok,role
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,S ⧗:n △ ⊟ ‹lget› ⧖:C,fv
-  ⧗:C,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
-  ⧗:C ⧗:op #3# ⊞ ⧖:C,okb ⧗:C,okb ‹nextn› ⧖:C,fb
-  ⧗:C,fv #2# ‹vf› ⧖:C,ok
-  ⧗:C,fv,okb,fb,S2 ⧗:ok △ ᛖ ⋔ ⦃ ‹evhandleok› ⦄ ⦃ ⧖:v,o,f,SS ⧗:f,SS ‹evblockn› ⦄ ⁼ ⧖:C,S3
-  ⧗:C,S3,strand ○
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,fv
+  ⧗:C̵,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵ ⧗:op #3# ⊞ ⧖:C,okb ⧗:C̵,okb ‹nextn› ⧖:C,fb
+  ⧗:C̵,fv #2# ‹vf› ⧖:C,ok
+  ⧗:C̵,fv,okb,fb,S2 ⧗:ok △ ᛖ ⋔ ⦃ ‹evhandleok› ⦄ ⦃ ⧖:v,o,f,SS ⧗:f,SS ‹evblockn› ⦄ ⁼ ⧖:C,S3
+  ⧗:C̵,S3,strand ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ev_handle› ⸫
 ⦃
   ⧖:C,fv,okb,fb,S
-  ⧗:C,fv ○ ‹vf› ⧖:C,ty ⧗:C,fv △ ‹vf› ⧖:C,n ⧗:C,fv #4# ‹vf› ⧖:C,hn
-  ⧗:C,ty #15# ‹tis› ⧖:C,bare
-  ⧗:C,S,ty,n,hn ⧗:bare ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:SS,t,nn,h ⧗:t ‹stail› ⧖:bt ⧗:bt,nn,h △ ‹evval› ⧖:w ⧗:SS,w ‹lpush› ⦄ ⁼ ⧖:C,S2
-  ⧗:C,okb,S2 ‹evblockn›
+  ⧗:C̵,fv ○ ‹vf› ⧖:C,ty ⧗:C̵,fv △ ‹vf› ⧖:C,n ⧗:C̵,fv #4# ‹vf› ⧖:C,hn
+  ⧗:C̵,ty #15# ‹tis› ⧖:C,bare
+  ⧗:C̵,S,ty,n,hn ⧗:bare ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:SS,t,nn,h ⧗:t ‹stail› ⧖:bt ⧗:bt,nn,h △ ‹evval› ⧖:w ⧗:SS,w ‹lpush› ⦄ ⁼ ⧖:C,S2
+  ⧗:C̵,okb,S2 ‹evblockn›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evhandleok› ⸫
 
 ⍝ x ⦃pred⦄ ⊨
 ⦃
   ⧖:C,op,S,strand,tok,role
-  ⧗:C,S ‹llen› ⧖:C,n
-  ⧗:C,S ⧗:n △ ⊟ ‹lget› ⧖:C,x0
-  ⧗:C,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
-  ⧗:C,x0 ‹evunwrap› ⧖:C,xv
-  ⧗:C ‹evstop› ⧖:C,stop
-  ⧗:C,op,S2,xv ⧗:stop ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹evquote1› ⦄ ⁼ ⧖:C,S3
-  ⧗:C,S3,strand △
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,x0
+  ⧗:C̵,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵,x0 ‹evunwrap› ⧖:C,xv
+  ⧗:C̵ ‹evstop› ⧖:C,stop
+  ⧗:C̵,op,S2,xv ⧗:stop ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹evquote1› ⦄ ⁼ ⧖:C,S3
+  ⧗:C̵,S3,strand △
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ev_quote› ⸫
 ⦃
   ⧖:C,op,S,xv
-  ⧗:C,xv ‹l1› ⧖:C,in
-  ⧗:C ⧗:op #3# ⊞ ⧗:in ‹evblockn› ⧖:C,PS
-  ⧗:C ‹evstop› ⧖:C,stop
-  ⧗:C,S,xv,PS ⧗:stop ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹evquote2› ⦄ ⁼
+  ⧗:C̵,xv ‹l1› ⧖:C,in
+  ⧗:C̵ ⧗:op #3# ⊞ ⧗:in ‹evblockn› ⧖:C,PS
+  ⧗:C̵ ‹evstop› ⧖:C,stop
+  ⧗:C̵,S,xv,PS ⧗:stop ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹evquote2› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evquote1› ⸫
 ⦃
   ⧖:C,S,xv,PS
-  ⧗:C,xv ○ ‹vf› ⧖:C,xt ⧗:C,xv △ ‹vf› ⧖:C,n ⧗:C,xv #4# ‹vf› ⧖:C,hn
-  ⧗:C,PS ○ ‹lget› △ ‹vf› ⧖:C,verdict
-  ⧗:C #9676# ⧗:xt ‹spre› ⧖:C,rt
-  ⧗:C,rt,n,hn ⧗:verdict △ ᛖ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ‹evval› ⧖:C,w
-  ⧗:C,S,w ‹lpush›
+  ⧗:C̵,xv ○ ‹vf› ⧖:C,xt ⧗:C̵,xv △ ‹vf› ⧖:C,n ⧗:C̵,xv #4# ‹vf› ⧖:C,hn
+  ⧗:C̵,PS ○ ‹lget› △ ‹vf› ⧖:C,verdict
+  ⧗:C̵ #9676# ⧗:xt ‹spre› ⧖:C,rt
+  ⧗:C̵,rt,n,hn ⧗:verdict △ ᛖ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ‹evval› ⧖:C,w
+  ⧗:C̵,S,w ‹lpush›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evquote2› ⸫

@@ -6,6 +6,7 @@
   @any(a,b)@   ⧗⁰ a ᛖ ⧗⁰ b ᛖ ⋏ …   (is ⧗⁰ one of the code points)
   ⧖:a          bind a moment named a          ⧖:a,b,c  bind [a b c] (c is on top)
   ⧗:a          read moment a as ⧗ⁿ            ⧗:a,b,c  push a, b, c
+  ⧗:a̵          the read carries the agreement mark written after the name (§6.1)
   ‹word›       a function name, mapped to a unique Runic name
   %%text {x} {#n}%%   build a string from C on the stack, leaving C and the
                string (not interned; %%!…%% interns it): {x} appends the
@@ -111,10 +112,14 @@ def process(src):
             elif t.startswith('⧗:'):
                 rs = []
                 for nm in t[2:].split(','):
+                    # an agreement mark written after a name goes onto its read (§6.1): ⧗:C̵
+                    mk = ''
+                    while nm and '\u0300' <= nm[-1] <= '\u036f':
+                        mk = nm[-1] + mk; nm = nm[:-1]
                     ns = stack[-1].names
                     for i in range(len(ns) - 1, -1, -1):
                         if ns[i] == nm:
-                            rs.append('⧗' + str(len(ns) - 1 - i).translate(SUP))
+                            rs.append('⧗' + mk + str(len(ns) - 1 - i).translate(SUP))
                             if nm in LINEAR:
                                 ns[i] = '(moved ' + nm + ')'
                             break

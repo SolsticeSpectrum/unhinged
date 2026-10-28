@@ -99,7 +99,7 @@ make trith-memcheck # valgrind over every test program: no invalid accesses, no 
 
 Writing on-disk Trith by hand is error-prone (even lines run right to left, and the token count must divide by 3). Write the logical order and run `--plough`.
 
-The s2 sources (`trith/s2/src/*.trhx`) are logical-order Trith with a few authoring shorthands, expanded by `trith/s2/tools/trx.py`. Named moments `⧖:x` / `⧗:x` become `⧖` / `⧗ⁿ` with the index counted for you, following Trith's own scope rules. `‹name›` gets a unique Runic function name, `#42#` becomes a balanced-ternary literal, and `$text$` becomes a string literal. The generated, ploughed `trith/s2/s2c.trh` is committed, so building s2 needs no Python.
+The s2 sources (`trith/s2/src/*.trhx`) are logical-order Trith with a few authoring shorthands, expanded by `trith/s2/tools/trx.py`. Named moments `⧖:x` / `⧗:x` become `⧖` / `⧗ⁿ` with the index counted for you, following Trith's own scope rules. A read carries the agreement mark written after its name (`⧗:C̵` moves the heap `C`, `⧗:m̱` reads a shadow). `‹name›` gets a unique Runic function name, `#42#` becomes a balanced-ternary literal, and `$text$` becomes a string literal. The generated, ploughed `trith/s2/s2c.trh` is committed, so building s2 needs no Python.
 
 ```bash
 make s2             # builds build/s2c from trith/s2/s2c.trh with s1

@@ -20,7 +20,7 @@
 ⦃ ⍿¹ ⍿¹ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦄ ⟨ℤ ℤ ⊸ ℤ⟩ ‹max› ⸫
 
 ⍝ ‹set› a j v: a with slot j set to v
-⦃ ⧖:a,j,v ⧗:a ⟗ ⍴̱ ⧖:len ⟖ ⧗:j △ ⊞ ⧗:len △ ≫ ⊟ ⧗:v ⍈̱ ⁇ ⦃ ⦄ ⦃ ↯ ⦄ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹set› ⸫
+⦃ ⧖:a,j,v ⧗:a̵ ⟗ ⍴̱ ⧖:len ⟖ ⧗:j △ ⊞ ⧗:len △ ≫ ⊟ ⧗:v ⍈̱ ⁇ ⦃ ⦄ ⦃ ↯ ⦄ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹set› ⸫
 
 ⍝ ‹count1› a: one more token
 ⦃ ⟗ ○ ᚳ ⧖:c ○ ⧗:c △ ⊞ ‹set› ⦄ ⟨⟦ℤ⟧ ⊸ ◌⟦ℤ⟧⟩ ‹count1› ⸫
@@ -28,17 +28,17 @@
 ⦃ ⟗ #3# ᚳ ⧖:k #3# ⧗:k △ ⊞ ‹set› ⦄ ⟨⟦ℤ⟧ ⊸ ◌⟦ℤ⟧⟩ ‹kstep› ⸫
 
 ⍝ ‹errat› path line col: "path:line:col: error: "
-⦃ ⧖:path,line,col ⧗:path ⎙̱ $:$ ⎙̵ ⧗:line ᛁ $:$ ⎙̵ ⧗:col ᛁ $: error: $ ⎙̵ ⦄ ⟨⟗ʃ ℤ ℤ ⊸⟩ ‹errat› ⸫
+⦃ ⧖:path,line,col ⧗:patẖ ⎙̱ $:$ ⎙̵ ⧗:line ᛁ $:$ ⎙̵ ⧗:col ᛁ $: error: $ ⎙̵ ⦄ ⟨⟗ʃ ℤ ℤ ⊸⟩ ‹errat› ⸫
 
 ⍝ ---- printing
 
 ⍝ ‹ptext› a j n: print slots j … j+n−1 of a
 ⦃
   ⧖:a,j,n
-  ⧗:a,j ⧗:j ⧗:n ⊞
+  ⧗:a̱,j ⧗:j ⧗:n ⊞
   ⥀ ⦃
     ⧖:a,j,end
-    ⧗:a,j,end ⧗:j,end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:a,j,end ⧗:a,j ᚳ ᚢ ⧗:a ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+    ⧗:a̱,j,end ⧗:j,end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:a,j,end ⧗:a̱,j ᚳ ᚢ ⧗:a̱ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁̱
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹ptext› ⸫
@@ -54,10 +54,10 @@
 ⦃
   ⧖:a,j,n
   $"$ ⎙̵
-  ⧗:a,j ⧗:j ⧗:n ⊞
+  ⧗:a̱,j ⧗:j ⧗:n ⊞
   ⥀ ⦃
     ⧖:a,j,end
-    ⧗:a,j,end ⧗:j,end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:a,j,end ⧗:a,j ᚳ ‹pesc› ⧗:a ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+    ⧗:a̱,j,end ⧗:j,end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:a,j,end ⧗:a̱,j ᚳ ‹pesc› ⧗:a̱ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁̱
   $"$ ⎙̵
@@ -106,19 +106,19 @@
 ⍝ its sign, its exponent digits and whether there were any (1) or not (0)
 ⦃
   ⧖:b,i,to
-  ⧗:b,i ᚳ ‹flav› ⧖:f
+  ⧗:ḇ,i ᚳ ‹flav› ⧖:f
   ⧗:i △ ⊞ ⧖:i
-  ⧗:b,i ᚳ #8315# ᛖ ⧗:i ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⧖:neg
+  ⧗:ḇ,i ᚳ #8315# ᛖ ⧗:i ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⧖:neg
   ⧗:i ⧗:neg ⋔ ⦃ △ ⊞ ⦄ ∅ ⁼ ⧖:i
   ⧗:neg ⋔ ⦃ #-1# ⦄ ⦃ △ ⦄ ⁼ ⧖:sgn
-  ⧗:b,i,to ○ ○
+  ⧗:ḇ,i,to ○ ○
   ⍝ the loop carries [b i to e have]
   ⥀ ⦃
     ⧖:b,i,to,e,have
-    ⧗:b,i ᚳ ᛥ ⧖:d
-    ⧗:b,i,to,e,have,d
+    ⧗:ḇ,i ᚳ ᛥ ⧖:d
+    ⧗:ḇ,i,to,e,have,d
     ⧗:d ○ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⧗:i ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎
-    ⋔ ⦃ ⧖:b,i,to,e,have,d ⧗:b ⧗:i △ ⊞ ⧗:to ⧗:e #10# ⊠ ⧗:d ⊞ △ ⊕ ⦄ ⦃ ⌁ ⦶ ⦄ ⁼
+    ⋔ ⦃ ⧖:b,i,to,e,have,d ⧗:ḇ ⧗:i △ ⊞ ⧗:to ⧗:e #10# ⊠ ⧗:d ⊞ △ ⊕ ⦄ ⦃ ⌁ ⦶ ⦄ ⁼
   ⦄
   ⧖:b,i,to,e,have
   ⧗:i,f,sgn,e,have
@@ -127,15 +127,15 @@
 ⍝ ‹pcharge› a from to: a charge as "u·d^-1"
 ⦃
   ⧖:a,from,to
-  ⧗:a,from,from,to
+  ⧗:a̱,from,from,to
   ⥀ ⦃
     ⧖:a,i,from,to
     ⧗:i ⧗:from ≶ ⋔ ∅ ⦃ $·$ ⎙̵ ⦄ ∅
-    ⧗:a,i,to ‹chparse› ⧖:i2,f,sgn,e,have
+    ⧗:a̱,i,to ‹chparse› ⧖:i2,f,sgn,e,have
     ⧗:f ‹pflavi›
     ⧗:sgn ⧗:e ⧗:have △ ᛖ ⋔ ∅ ⦃ ⌁ △ ⦄ ⁼ ⊠ ⧖:ee
     ⧗:ee ⧗:ee △ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ $^$ ⎙̵ ᛁ ⦄ ⁼
-    ⧗:a,i2,from,to
+    ⧗:a̱,i2,from,to
     ⧗:i2 ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁̱
@@ -144,13 +144,13 @@
 ⍝ ‹pprefix› a t np: type prefixes separated by commas (ψ keeps its subscript)
 ⦃
   ⧖:a,t,np
-  ⧗:a,t,t ⧗:t ⧗:np ⊞
+  ⧗:a̱,t,t ⧗:t ⧗:np ⊞
   ⥀ ⦃
     ⧖:a,i,t,end
-    ⧗:a,i ᚳ ⧖:c
+    ⧗:a̱,i ᚳ ⧖:c
     ⧗:i ⧗:t ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:c #8320# #8329# ᛦ ‹not› ⋎ ⋔ ⦃ $,$ ⎙̵ ⦄ ∅ ⁼
     ⧗:c ᚢ
-    ⧗:a ⧗:i △ ⊞ ⧗:t,end
+    ⧗:a̱ ⧗:i △ ⊞ ⧗:t,end
     ⧗:i △ ⊞ ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁ ⌁̱
@@ -160,18 +160,18 @@
 ⦃
   ⧖:a,t,np,copen,n
   $ base=$ ⎙̵
-  ⧗:a ⧗:t ⧗:np ⊞ ⧗:n ⧗:copen ⧗:copen ○ ≶ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⧗:np ⊟ ‹ptext›
-  ⧗:a ⧗:t ⧗:copen ⊞ △ ⊞ ⧗:t ⧗:n ⊞ △ ⊟
+  ⧗:a̱ ⧗:t ⧗:np ⊞ ⧗:n ⧗:copen ⧗:copen ○ ≶ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⧗:np ⊟ ‹ptext›
+  ⧗:a̱ ⧗:t ⧗:copen ⊞ △ ⊞ ⧗:t ⧗:n ⊞ △ ⊟
   ⧗:copen ○ ≶ ⋔ ⦃ $ charge=$ ⎙̵ ‹pcharge› ⦄ ⁼ ⦃ ⌁ ⌁ ⌁̱ ⦄
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸⟩ ‹pbase› ⸫
 
 ⍝ ‹ptype› a t kind np copen n: the type fields of a record
 ⦃
   ⧖:a,t,kind,np,copen,n
-  ⧗:a,t,np
+  ⧗:a̱,t,np
   ⧗:kind #9# ᛖ ⧗:kind #10# ᛖ ⋏ ⧗:np ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎
   ⋔ ⦃ $ prefixes=$ ⎙̵ ‹pprefix› ⦄ ⦃ ⌁ ⌁ ⌁̱ ⦄ ⁼
-  ⧗:a,t,np,copen,n ⧗:kind #9# ᛖ ⋔ ⦃ ‹pbase› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⦄ ⁼
+  ⧗:a̱,t,np,copen,n ⧗:kind #9# ᛖ ⋔ ⦃ ‹pbase› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸⟩ ‹ptype› ⸫
 
 ⍝ ‹pidx› idx
@@ -194,33 +194,33 @@
 ⍝ ‹prec› a j: print the record at slot j, giving the slot after it
 ⦃
   ⧖:a,j
-  ⧗:a,j ᚳ ⧖:kind
-  ⧗:a ⧗:j △ ⊞ ᚳ ⧖:line
-  ⧗:a ⧗:j #2# ⊞ ᚳ ⧖:col
-  ⧗:a ⧗:j #3# ⊞ ᚳ ⧖:marks
-  ⧗:a ⧗:j #4# ⊞ ᚳ ⧖:idx
-  ⧗:a ⧗:j #5# ⊞ ᚳ ⧖:v1
-  ⧗:a ⧗:j #6# ⊞ ᚳ ⧖:v2
-  ⧗:a ⧗:j #7# ⊞ ᚳ ⧖:n
+  ⧗:a̱,j ᚳ ⧖:kind
+  ⧗:a̱ ⧗:j △ ⊞ ᚳ ⧖:line
+  ⧗:a̱ ⧗:j #2# ⊞ ᚳ ⧖:col
+  ⧗:a̱ ⧗:j #3# ⊞ ᚳ ⧖:marks
+  ⧗:a̱ ⧗:j #4# ⊞ ᚳ ⧖:idx
+  ⧗:a̱ ⧗:j #5# ⊞ ᚳ ⧖:v1
+  ⧗:a̱ ⧗:j #6# ⊞ ᚳ ⧖:v2
+  ⧗:a̱ ⧗:j #7# ⊞ ᚳ ⧖:n
   ⧗:line ᛁ $:$ ⎙̵ ⧗:col ᛁ $ $ ⎙̵ ⧗:kind ‹pkind› $ $ ⎙̵
-  ⧗:a ⧗:j #8# ⊞ ⧗:n ⧗:kind #12# ᛖ ⋔ ⦃ ‹pquoted› ⦄ ⦃ ‹ptext› ⦄ ⁼
+  ⧗:a̱ ⧗:j #8# ⊞ ⧗:n ⧗:kind #12# ᛖ ⋔ ⦃ ‹pquoted› ⦄ ⦃ ‹ptext› ⦄ ⁼
   ⧗:idx ‹pidx›
   ⧗:kind,v1,v2 ‹pvalue›
-  ⧗:a ⧗:j #8# ⊞ ⧗:kind,v1,v2,n ‹ptype›
+  ⧗:a̱ ⧗:j #8# ⊞ ⧗:kind,v1,v2,n ‹ptype›
   ⧗:marks ᛗᛈ
   $\n$ ⎙̵
-  ⧗:j #9# ⊞ ⧗:n ⊞ ⧗:a ⧗:j #8# ⊞ ⧗:n ⊞ ᚳ ⊞
+  ⧗:j #9# ⊞ ⧗:n ⊞ ⧗:a̱ ⧗:j #8# ⊞ ⧗:n ⊞ ᚳ ⊞
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ‹prec› ⸫
 
 ⍝ ‹dump› a: every record, one per line
 ⦃
   ⧖:a
-  ⧗:a ⧗:a ᚴ #6# ≶ ⋔ ⦃ ⌁̱ ⦄ ⦃ ‹dump1› ⦄ ⁼
+  ⧗:a̱ ⧗:a̱ ᚴ #6# ≶ ⋔ ⦃ ⌁̱ ⦄ ⦃ ‹dump1› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸⟩ ‹dump› ⸫
 ⦃
   ⧖:a
-  ⧗:a #6#
-  ⥀ ⦃ ⧖:a,j ⧗:a ⧗:a,j ‹prec› ⍿⁰ ⧗:a ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⦄
+  ⧗:a̱ #6#
+  ⥀ ⦃ ⧖:a,j ⧗:a̱ ⧗:a̱,j ‹prec› ⍿⁰ ⧗:a̱ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⦄
   ⌁ ⌁̱
 ⦄ ⟨⟗⟦ℤ⟧ ⊸⟩ ‹dump1› ⸫
 
@@ -238,15 +238,15 @@
 ⍝ ‹allcls› b from to cls: from < to and slots from … to−1 are all in cls
 ⦃
   ⧖:b,from,to,cls
-  ⧗:b,from,to,cls ⧗:from ⧗:to ≶ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁̱ ⊕ ⦄ ⁼ ⦃ ‹allcls1› ⦄
+  ⧗:ḇ,from,to,cls ⧗:from ⧗:to ≶ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁̱ ⊕ ⦄ ⁼ ⦃ ‹allcls1› ⦄
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ŧ⟩ ‹allcls› ⸫
 ⦃
   ⧖:b,from,to,cls
-  ⧗:b,from,to,cls ⦶
+  ⧗:ḇ,from,to,cls ⦶
   ⥀ ⦃
     ⧖:b,i,to,cls,acc
-    ⧗:b ⧗:i △ ⊞ ⧗:to,cls
-    ⧗:acc ⧗:b,i ᚳ ⧗:cls ‹incls› ⋎
+    ⧗:ḇ ⧗:i △ ⊞ ⧗:to,cls
+    ⧗:acc ⧗:ḇ,i ᚳ ⧗:cls ‹incls› ⋎
     ⧗:i △ ⊞ ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⧖:b,i,to,cls,acc ⧗:acc
@@ -255,11 +255,11 @@
 ⍝ ‹findcp› b from cp: the first slot ≥ from holding cp, or the length
 ⦃
   ⧖:b,from,cp
-  ⧗:b,from,cp
+  ⧗:ḇ,from,cp
   ⥀ ⦃
     ⧖:b,i,cp
-    ⧗:b,i,cp
-    ⧗:b,i ᚳ ⧗:cp ᛖ ⧗:i ⧗:b ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋏
+    ⧗:ḇ,i,cp
+    ⧗:ḇ,i ᚳ ⧗:cp ᛖ ⧗:i ⧗:ḇ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋏
     ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:c △ ⊞ ⧗:c ⊕ ⦄ ⁼
   ⦄
   ⌁ ⧖:r ⌁̱ ⧗:r
@@ -268,11 +268,11 @@
 ⍝ ‹skipm› cps lo hi: the first index in lo … hi that is not a mark, or hi+1
 ⦃
   ⧖:cps,lo,hi
-  ⧗:cps,hi,lo
+  ⧗:cps̱,hi,lo
   ⥀ ⦃
     ⧖:cps,hi,i
-    ⧗:cps,hi,i
-    ⧗:i ⧗:hi ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⧗:cps,i ᚳ ᛗ ⋎
+    ⧗:cps̱,hi,i
+    ⧗:i ⧗:hi ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⧗:cps̱,i ᚳ ᛗ ⋎
     ⋔ ⦃ △ ⊞ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
   ⦄
   ⧖:r ⌁ ⌁̱ ⧗:r
@@ -281,11 +281,11 @@
 ⍝ ‹bases› cps lo hi: the code points of lo … hi that are not marks, after a sentinel
 ⦃
   ⧖:cps,lo,hi
-  ⟦ ○ ⟧ ⧗:cps,lo,hi
+  ⟦ ○ ⟧ ⧗:cps̱,lo,hi
   ⥀ ⦃
     ⧖:a,cps,i,hi
-    ⧗:a ⧗:cps,i ᚳ ⍿⁰ ᛗ ⋔ ⦃ ⌁ ⦄ ⦃ ⍆̵ ⦄ ⁼
-    ⧗:cps ⧗:i △ ⊞ ⧗:hi
+    ⧗:a̵ ⧗:cps̱,i ᚳ ⍿⁰ ᛗ ⋔ ⦃ ⌁ ⦄ ⦃ ⍆̵ ⦄ ⁼
+    ⧗:cps̱ ⧗:i △ ⊞ ⧗:hi
     ⧗:i ⧗:hi ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁̱
@@ -294,13 +294,13 @@
 ⍝ ‹copy› b out from n: out with slots from … from+n−1 of b appended (n ≥ 1)
 ⦃
   ⧖:b,out,from,n
-  ⧗:b,out,from ⧗:from ⧗:n ⊞
+  ⧗:ḇ,out̵,from ⧗:from ⧗:n ⊞
   ⥀ ⦃
     ⧖:b,out,j,end
-    ⧗:b ⧗:out ⧗:b,j ᚳ ⍆̵ ⧗:j △ ⊞ ⧗:end
+    ⧗:ḇ ⧗:out̵ ⧗:ḇ,j ᚳ ⍆̵ ⧗:j △ ⊞ ⧗:end
     ⧗:j △ ⊞ ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
-  ⌁ ⌁ ⧖:out ⌁̱ ⧗:out
+  ⌁ ⌁ ⧖:out ⌁̱ ⧗:out̵
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹copy› ⸫
 
 ⍝ ---- numerals (§2): balanced ternary, least-significant trit first
@@ -308,11 +308,11 @@
 ⍝ ‹btval› b from to: the value of the trit digits from … to−1 (not empty)
 ⦃
   ⧖:b,from,to
-  ⧗:b ⧗:to △ ⊟ ⧗:from ○
+  ⧗:ḇ ⧗:to △ ⊟ ⧗:from ○
   ⍝ the loop carries [b j from v], j going down
   ⥀ ⦃
     ⧖:b,j,from,v
-    ⧗:b ⧗:j △ ⊟ ⧗:from ⧗:v #3# ⊠ ⧗:b,j ᚳ ᛏ ⊞
+    ⧗:ḇ ⧗:j △ ⊟ ⧗:from ⧗:v #3# ⊠ ⧗:ḇ,j ᚳ ᛏ ⊞
     ⧗:j ⧗:from ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄
   ⦄
   ⧖:b,j,from,v ⧗:v
@@ -321,10 +321,10 @@
 ⍝ ‹msdval› b from to: the trit digits read most-significant first (not empty)
 ⦃
   ⧖:b,from,to
-  ⧗:b,from,to ○
+  ⧗:ḇ,from,to ○
   ⥀ ⦃
     ⧖:b,j,to,v
-    ⧗:b ⧗:j △ ⊞ ⧗:to ⧗:v #3# ⊠ ⧗:b,j ᚳ ᛏ ⊞
+    ⧗:ḇ ⧗:j △ ⊞ ⧗:to ⧗:v #3# ⊠ ⧗:ḇ,j ᚳ ᛏ ⊞
     ⧗:j △ ⊞ ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⧖:b,j,to,v ⧗:v
@@ -354,30 +354,30 @@
 ⦃
   ⧖:b,n,q
   ⧗:n ⧗:q ⊟ △ ⊟ ‹pow3› ⧖:den
-  ⧗:b ○ ⧗:q ‹btval› ⧗:den ⊠ ⧗:b ⧗:q △ ⊞ ⧗:n ‹msdval› ⊞ ⧗:den ‹reduce› ⧖:num2,den2
+  ⧗:ḇ ○ ⧗:q ‹btval› ⧗:den ⊠ ⧗:ḇ ⧗:q △ ⊞ ⧗:n ‹msdval› ⊞ ⧗:den ‹reduce› ⧖:num2,den2
   #6# #-9# ⧗:num2,den2 ○ ⧗:n
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹real› ⸫
 
 ⦃
   ⧖:b,n,q,q2
-  ⧗:b,n ⧗:b ○ ⧗:n #4# ‹allcls›
-  ⋔ ⦃ ⧖:b,n #5# #-9# ⧗:b ○ ⧗:n ‹btval› ○ ○ ⧗:n ⦄ ⦃ ⌁ ⌁̱ ○ #3# ○ ○ ○ ○ ⦄ ⁼
+  ⧗:ḇ,n ⧗:ḇ ○ ⧗:n #4# ‹allcls›
+  ⋔ ⦃ ⧖:b,n #5# #-9# ⧗:ḇ ○ ⧗:n ‹btval› ○ ○ ⧗:n ⦄ ⦃ ⌁ ⌁̱ ○ #3# ○ ○ ○ ○ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹numint› ⸫
 
 ⦃
   ⧖:b,n,q,q2
-  ⧗:b,n,q
-  ⧗:q2 ⧗:n ᛖ ⧗:b ○ ⧗:q #4# ‹allcls› ⋎ ⧗:b ⧗:q △ ⊞ ⧗:n #4# ‹allcls› ⋎
+  ⧗:ḇ,n,q
+  ⧗:q2 ⧗:n ᛖ ⧗:ḇ ○ ⧗:q #4# ‹allcls› ⋎ ⧗:ḇ ⧗:q △ ⊞ ⧗:n #4# ‹allcls› ⋎
   ⋔ ⦃ ‹real› ⦄ ⦃ ⌁ ⌁ ⌁̱ ○ #4# ○ ○ ○ ○ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹numreal› ⸫
 
 ⍝ ‹numeral› b: an int or a real
 ⦃
   ⧖:b
-  ⧗:b ᚴ ⧖:n
-  ⧗:b ○ #8285# ‹findcp› ⧖:q
-  ⧗:b ⧗:q △ ⊞ ⧗:n ‹min› #8285# ‹findcp› ⧖:q2
-  ⧗:b,n,q,q2
+  ⧗:ḇ ᚴ ⧖:n
+  ⧗:ḇ ○ #8285# ‹findcp› ⧖:q
+  ⧗:ḇ ⧗:q △ ⊞ ⧗:n ‹min› #8285# ‹findcp› ⧖:q2
+  ⧗:ḇ,n,q,q2
   ⧗:q ⧗:n ᛖ ⋔ ⦃ ‹numint› ⦄ ⦃ ‹numreal› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹numeral› ⸫
 
@@ -386,19 +386,19 @@
 ⍝ ‹chk1› b from to: check a non-empty charge; error code and argument (0 0 if fine)
 ⦃
   ⧖:b,from,to
-  ⧗:b,from,to ○ ○ ○
+  ⧗:ḇ,from,to ○ ○ ○
   ⍝ the loop carries [b i to seen code arg]
   ⥀ ⦃
     ⧖:b,i,to,seen,code,arg
-    ⧗:b,i ᚳ ⧖:c
-    ⧗:b,i,to ‹chparse› ⧖:i2,f,sgn,e,have
+    ⧗:ḇ,i ᚳ ⧖:c
+    ⧗:ḇ,i,to ‹chparse› ⧖:i2,f,sgn,e,have
     ⧗:seen △ ⧗:f ≪ ⋒ ○ ᛖ ‹not› ⧖:dup
     ○
     ⧗:have △ ᛖ ⧗:e ○ ᛖ ⋎ ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
     ⧗:dup ⋔ ⦃ ⌁ #8# ⦄ ∅ ⁼
     ⧗:f ○ ᛖ ⋔ ⦃ ⌁ #7# ⦄ ∅ ⁼
     ⧖:gc
-    ⧗:b,i2,to ⧗:seen △ ⧗:f ≪ ⋓ ⧗:gc ⧗:c
+    ⧗:ḇ,i2,to ⧗:seen △ ⧗:f ≪ ⋓ ⧗:gc ⧗:c
     ⧗:gc ○ ᛖ ⧗:i2 ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
   ⦄
   ⧖:b,i,to,seen,code,arg ⧗:code,arg
@@ -406,7 +406,7 @@
 
 ⦃
   ⧖:b,from,to
-  ⧗:b,from,to ⧗:from ⧗:to ᛖ ⋔ ⦃ ⌁ ⌁ ⌁̱ #6# ○ ⦄ ⦃ ‹chk1› ⦄ ⁼
+  ⧗:ḇ,from,to ⧗:from ⧗:to ᛖ ⋔ ⦃ ⌁ ⌁ ⌁̱ #6# ○ ⦄ ⦃ ‹chk1› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ ℤ⟩ ‹chkcharge› ⸫
 
 ⍝ ‹tyres› r np copen n: the result for a type (r 9), a tprefix (10),
@@ -425,14 +425,14 @@
 ⍝ ‹psi› b k end: ψ at k with its subscript bound: the next slot and an error code
 ⦃
   ⧖:b,k,end
-  ⧗:b ⧗:k △ ⊞ ⧗:end ○ ○
+  ⧗:ḇ ⧗:k △ ⊞ ⧗:end ○ ○
   ⍝ the loop carries [b j end bound cnt]
   ⥀ ⦃
     ⧖:b,j,end,bound,cnt
-    ⧗:b,j ᚳ ⧖:c
-    ⧗:b,j,end,bound,cnt,c
+    ⧗:ḇ,j ᚳ ⧖:c
+    ⧗:ḇ,j,end,bound,cnt,c
     ⧗:c #8320# #8329# ᛦ ⧗:j ⧗:end ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎
-    ⋔ ⦃ ⧖:b,j,end,bound,cnt,c ⧗:b ⧗:j △ ⊞ ⧗:end ⧗:bound #10# ⊠ ⧗:c #8320# ⊟ ⊞ ⧗:cnt △ ⊞ ⊕ ⦄ ⦃ ⌁ ⦶ ⦄ ⁼
+    ⋔ ⦃ ⧖:b,j,end,bound,cnt,c ⧗:ḇ ⧗:j △ ⊞ ⧗:end ⧗:bound #10# ⊠ ⧗:c #8320# ⊟ ⊞ ⧗:cnt △ ⊞ ⊕ ⦄ ⦃ ⌁ ⦶ ⦄ ⁼
   ⦄
   ⧖:b,j,end,bound,cnt
   ⧗:j ○
@@ -444,17 +444,17 @@
 ⍝ ‹prefix1› b k end: one type prefix at k: the next slot (k when there is none) and an error code
 ⦃
   ⧖:b,k,end
-  ⧗:b,k ᚳ ⧖:c
+  ⧗:ḇ,k ᚳ ⧖:c
   ⧗:k ⧗:end ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧖:inr
   ⧗:k ○
   ⧗:inr ⧗:c ⧖ @any(9676,10199,10198,11822,8278)@ ⋎ ⋔ ⦃ ⌁ △ ⊞ ○ ⦄ ∅ ⁼
-  ⧗:b,k,end ⧗:inr ⧗:c #968# ᛖ ⋎ ⋔ ⦃ ‹psi› ⧖:x,y ⌁ ⌁ ⧗:x,y ⦄ ⦃ ⌁ ⌁ ⌁̱ ⦄ ⁼
+  ⧗:ḇ,k,end ⧗:inr ⧗:c #968# ᛖ ⋎ ⋔ ⦃ ‹psi› ⧖:x,y ⌁ ⌁ ⧗:x,y ⦄ ⦃ ⌁ ⌁ ⌁̱ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ ℤ⟩ ‹prefix1› ⸫
 
 ⍝ ‹tyempty› b k end copen: only prefixes
 ⦃
   ⧖:b,k,end,copen
-  ⧗:b ᚴ ⧖:n
+  ⧗:ḇ ᚴ ⧖:n
   ○
   ⧗:n △ ᛖ ‹not› ⋔ ⦃ ⌁ #10# ⦄ ∅ ⁼
   ⧗:n △ ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼
@@ -466,9 +466,9 @@
 ⍝ ‹ttype5› b k end copen: prefixes, then a base type or an Ogham type name
 ⦃
   ⧖:b,k,end,copen
-  ⧗:b ᚴ ⧖:n
+  ⧗:ḇ ᚴ ⧖:n
   ○
-  ⧗:end ⧗:k ⊟ △ ᛖ ⧗:b,k ᚳ ⧖ @any(359,8484,8477,120121,643)@ ⋎ ⧗:b,k,end #2# ‹allcls› ⋏ ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
+  ⧗:end ⧗:k ⊟ △ ᛖ ⧗:ḇ,k ᚳ ⧖ @any(359,8484,8477,120121,643)@ ⋎ ⧗:ḇ,k,end #2# ‹allcls› ⋏ ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
   ⧖:r0
   ⍝ not a type: malformed when there were prefixes or a charge
   ⧗:r0
@@ -480,68 +480,68 @@
 
 ⦃
   ⧖:b,k,end,copen
-  ⧗:b,k,end,copen
+  ⧗:ḇ,k,end,copen
   ⧗:k ⧗:end ᛖ ⋔ ⦃ ‹tyempty› ⦄ ⦃ ‹ttype5› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹ttype4› ⸫
 
 ⦃
   ⧖:b,k,end,copen,code
-  ⧗:b,k,end,copen,code
+  ⧗:ḇ,k,end,copen,code
   ⧗:code ○ ᛖ ⋔ ⦃ ⌁ ‹ttype4› ⦄ ⦃ ⧖:code ⌁ ⌁ ⌁ ⌁̱ ○ ⧗:code ○ ○ ○ ○ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹ttype3› ⸫
 
 ⍝ ‹ttype2› b end copen: the prefixes, then the rest
 ⦃
   ⧖:b,end,copen
-  ⧗:b ○ ⧗:end ○
+  ⧗:ḇ ○ ⧗:end ○
   ⍝ the loop carries [b k end code]
   ⥀ ⦃
     ⧖:b,k,end,code
-    ⧗:b,k,end ‹prefix1› ⧖:k2,code2
-    ⧗:b,k2,end,code2
+    ⧗:ḇ,k,end ‹prefix1› ⧖:k2,code2
+    ⧗:ḇ,k2,end,code2
     ⧗:code2 ○ ᛖ ⧗:k2 ⧗:k ᛖ ‹not› ⋎ ⧗:k2 ⧗:end ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
   ⦄
   ⧖:b,k,end,code
-  ⧗:b,k,end,copen,code ‹ttype3›
+  ⧗:ḇ,k,end,copen,code ‹ttype3›
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹ttype2› ⸫
 
 ⦃
   ⧖:b,n,open
-  ⧗:b ⧗:open △ ⊞ ⧗:n △ ⊟ ‹chkcharge› ⧖:code,arg
-  ⧗:b,open,open,code,arg
+  ⧗:ḇ ⧗:open △ ⊞ ⧗:n △ ⊟ ‹chkcharge› ⧖:code,arg
+  ⧗:ḇ,open,open,code,arg
   ⧗:code ○ ᛖ ⋔ ⦃ ⌁ ⌁ ‹ttype2› ⦄ ⦃ ⧖:code,arg ⌁ ⌁ ⌁̱ ○ ⧗:code,arg ○ ○ ○ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹tycharge1› ⸫
 
 ⦃
   ⧖:b,n,open
-  ⧗:b,n,open ⧗:open ⧗:n ᛖ ⋔ ⦃ ⌁ ⌁ ⌁̱ ○ #5# ○ ○ ○ ○ ⦄ ⦃ ‹tycharge1› ⦄ ⁼
+  ⧗:ḇ,n,open ⧗:open ⧗:n ᛖ ⋔ ⦃ ⌁ ⌁ ⌁̱ ○ #5# ○ ○ ○ ○ ⦄ ⦃ ‹tycharge1› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹tycharge› ⸫
 
 ⍝ ‹ttype› b: a type, a tprefix, not a type, or an error
 ⦃
   ⧖:b
-  ⧗:b ᚴ ⧖:n
-  ⧗:b ○ #8317# ‹findcp› ⧖:open
-  ⧗:b,n,open
-  ⧗:b ⧗:n △ ⊟ ᚳ #8318# ᛖ ⋔ ⦃ ‹tycharge› ⦄ ⦃ ⌁ #-1# ‹ttype2› ⦄ ⁼
+  ⧗:ḇ ᚴ ⧖:n
+  ⧗:ḇ ○ #8317# ‹findcp› ⧖:open
+  ⧗:ḇ,n,open
+  ⧗:ḇ ⧗:n △ ⊟ ᚳ #8318# ᛖ ⋔ ⦃ ‹tycharge› ⦄ ⦃ ⌁ #-1# ‹ttype2› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹ttype› ⸫
 
 ⍝ ---- classification of the base characters of a chunk
 
-⦃ ⧖:b,kind ⧗:kind #-9# ○ ○ ○ ⧗:b ᚴ ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹rsimple› ⸫
-⦃ ⧖:b,kind ⧗:kind #-9# ○ ○ △ ⧗:b ᚴ △ ⊟ ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹rtail› ⸫
+⦃ ⧖:b,kind ⧗:kind #-9# ○ ○ ○ ⧗:ḇ ᚴ ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹rsimple› ⸫
+⦃ ⧖:b,kind ⧗:kind #-9# ○ ○ △ ⧗:ḇ ᚴ △ ⊟ ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹rtail› ⸫
 
 ⍝ ‹asciicode› c: 1 for an ASCII letter, 2 for an ASCII digit, else 0
 ⦃ ⧖:c ○ ⧗:c ᛰ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:c ᚪ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⦄ ⟨ℤ ⊸ ℤ⟩ ‹asciicode› ⸫
 
 ⍝ ‹ascii› b: the code of the first ASCII letter or digit
 ⦃
-  ⧖:b ⧗:b ○ ○
+  ⧖:b ⧗:ḇ ○ ○
   ⥀ ⦃
     ⧖:b,i,code
-    ⧗:b ⧗:i △ ⊞
-    ⧗:code ⧗:b,i ᚳ ‹asciicode› ⧗:code ○ ᛖ ⋔ ⦃ ⧖:v ⌁ ⧗:v ⦄ ⦃ ⌁ ⦄ ⁼
-    ⧗:i △ ⊞ ⧗:b ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+    ⧗:ḇ ⧗:i △ ⊞
+    ⧗:code ⧗:ḇ,i ᚳ ‹asciicode› ⧗:code ○ ᛖ ⋔ ⦃ ⧖:v ⌁ ⧗:v ⦄ ⦃ ⌁ ⦄ ⁼
+    ⧗:i △ ⊞ ⧗:ḇ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⧖:code ⌁ ⌁̱ ⧗:code
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ⟩ ‹ascii› ⸫
@@ -549,10 +549,10 @@
 ⍝ ‹supval› b from to: superscript digits as a decimal number
 ⦃
   ⧖:b,from,to
-  ⧗:b,from,to ○
+  ⧗:ḇ,from,to ○
   ⥀ ⦃
     ⧖:b,j,to,v
-    ⧗:b ⧗:j △ ⊞ ⧗:to ⧗:v #10# ⊠ ⧗:b,j ᚳ ᛥ ⊞
+    ⧗:ḇ ⧗:j △ ⊞ ⧗:to ⧗:v #10# ⊠ ⧗:ḇ,j ᚳ ᛥ ⊞
     ⧗:j △ ⊞ ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⧖:b,j,to,v ⧗:v
@@ -561,74 +561,74 @@
 ⍝ ‹index› b: a glyph with a superscript index
 ⦃
   ⧖:b
-  ⧗:b ᚴ ⧖:n
+  ⧗:ḇ ᚴ ⧖:n
   #-9#
-  ⧗:b ○ ᚳ #8857# ᛖ ⧗:n #2# ᛖ ⋎ ⧖:dot
-  ⧗:dot ⧗:b △ ᚳ #8315# ᛖ ⋎ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼
-  ⧗:dot ⧗:b △ ᚳ #8314# ᛖ ⋎ ⋔ ⦃ ⌁ #-2# ⦄ ∅ ⁼
-  ⧗:b
-  ⧗:b △ ⧗:n #3# ‹allcls› ⋔ ⦃ ⧖:b ⌁ ⧗:b △ ⧗:b ᚴ ‹supval› ⦄ ⦃ ⌁̱ ⦄ ⁼
+  ⧗:ḇ ○ ᚳ #8857# ᛖ ⧗:n #2# ᛖ ⋎ ⧖:dot
+  ⧗:dot ⧗:ḇ △ ᚳ #8315# ᛖ ⋎ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼
+  ⧗:dot ⧗:ḇ △ ᚳ #8314# ᛖ ⋎ ⋔ ⦃ ⌁ #-2# ⦄ ∅ ⁼
+  ⧗:ḇ
+  ⧗:ḇ △ ⧗:n #3# ‹allcls› ⋔ ⦃ ⧖:b ⌁ ⧗:ḇ △ ⧗:ḇ ᚴ ‹supval› ⦄ ⦃ ⌁̱ ⦄ ⁼
   ⧖:idx
   ⧗:idx ⧗:idx #-9# ᛖ ⋔ ⦃ ⌁ ○ #15# ○ ○ ○ ○ ⦄ ⦃ ⧖:x #8# ⧗:x ○ ○ ○ △ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹index› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ⧗:b ᚴ △ ᛖ ⧗:b ○ ᚳ ᚷ ⋎ ⋔ ⦃ #8# ‹rsimple› ⦄ ⦃ ⌁̱ ○ #16# ○ ○ ○ ○ ⦄ ⁼
+  ⧗:ḇ ⧗:ḇ ᚴ △ ᛖ ⧗:ḇ ○ ᚳ ᚷ ⋎ ⋔ ⦃ #8# ‹rsimple› ⦄ ⦃ ⌁̱ ○ #16# ○ ○ ○ ○ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl10› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ‹ttype› ⧖:k,i,v1,v2,s,l
-  ⧗:b ⧗:k,i,v1,v2,s,l
+  ⧗:ḇ ‹ttype› ⧖:k,i,v1,v2,s,l
+  ⧗:ḇ ⧗:k,i,v1,v2,s,l
   ⧗:k #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ‹cl10› ⦄ ⦃ ⧖:k,i,v1,v2,s,l ⌁̱ ⧗:k,i,v1,v2,s,l ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl9› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ⧗:b ᚴ △ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:b ○ ᚳ ᛃ ⋎ ⋔ ⦃ ‹index› ⦄ ⦃ ‹cl9› ⦄ ⁼
+  ⧗:ḇ ⧗:ḇ ᚴ △ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:ḇ ○ ᚳ ᛃ ⋎ ⋔ ⦃ ‹index› ⦄ ⦃ ‹cl9› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl8› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ⧗:b ᚴ #2# ᛖ ⧗:b ○ ᚳ #8916# ᛖ ⋎ ⧗:b △ ᚳ #8651# ᛖ ⋎ ⋔ ⦃ #8# ‹rsimple› ⦄ ⦃ ‹cl8› ⦄ ⁼
+  ⧗:ḇ ⧗:ḇ ᚴ #2# ᛖ ⧗:ḇ ○ ᚳ #8916# ᛖ ⋎ ⧗:ḇ △ ᚳ #8651# ᛖ ⋎ ⋔ ⦃ #8# ‹rsimple› ⦄ ⦃ ‹cl8› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl7› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ⧗:b ᚴ △ ᛖ ⧗:b ○ ᚳ ᛇ ⋎ ⋔ ⦃ #7# ‹rsimple› ⦄ ⦃ ‹cl7› ⦄ ⁼
+  ⧗:ḇ ⧗:ḇ ᚴ △ ᛖ ⧗:ḇ ○ ᚳ ᛇ ⋎ ⋔ ⦃ #7# ‹rsimple› ⦄ ⦃ ‹cl7› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl6› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ⧗:b ○ ᚳ ᛏ #9# ᛖ ⋔ ⦃ ‹cl6› ⦄ ⦃ ‹numeral› ⦄ ⁼
+  ⧗:ḇ ⧗:ḇ ○ ᚳ ᛏ #9# ᛖ ⋔ ⦃ ‹cl6› ⦄ ⦃ ‹numeral› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl5› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ⧗:b ○ ᚳ #8668# ᛖ ⧗:b △ ⧗:b ᚴ △ ‹allcls› ⋎ ⋔ ⦃ #4# ‹rtail› ⦄ ⦃ ‹cl5› ⦄ ⁼
+  ⧗:ḇ ⧗:ḇ ○ ᚳ #8668# ᛖ ⧗:ḇ △ ⧗:ḇ ᚴ △ ‹allcls› ⋎ ⋔ ⦃ #4# ‹rtail› ⦄ ⦃ ‹cl5› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl4› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ⧗:b ○ ᚳ #8961# ᛖ ⧗:b △ ⧗:b ᚴ #2# ‹allcls› ⋎ ⋔ ⦃ #3# ‹rtail› ⦄ ⦃ ‹cl4› ⦄ ⁼
+  ⧗:ḇ ⧗:ḇ ○ ᚳ #8961# ᛖ ⧗:ḇ △ ⧗:ḇ ᚴ #2# ‹allcls› ⋎ ⋔ ⦃ #3# ‹rtail› ⦄ ⦃ ‹cl4› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl3› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ⧗:b ○ ⧗:b ᚴ #2# ‹allcls› ⋔ ⦃ #2# ‹rsimple› ⦄ ⦃ ‹cl3› ⦄ ⁼
+  ⧗:ḇ ⧗:ḇ ○ ⧗:ḇ ᚴ #2# ‹allcls› ⋔ ⦃ #2# ‹rsimple› ⦄ ⦃ ‹cl3› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl2› ⸫
 
 ⦃
   ⧖:b
-  ⧗:b ⧗:b ○ ⧗:b ᚴ △ ‹allcls› ⋔ ⦃ △ ‹rsimple› ⦄ ⦃ ‹cl2› ⦄ ⁼
+  ⧗:ḇ ⧗:ḇ ○ ⧗:ḇ ᚴ △ ‹allcls› ⋔ ⦃ △ ‹rsimple› ⦄ ⦃ ‹cl2› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cl1› ⸫
 
 ⍝ ‹classify› b: kind idx v1 v2 skip len
 ⦃
   ⧖:b
-  ⧗:b ‹ascii› ⧖:code
-  ⧗:b ⧗:code ⧗:code ○ ᛖ ⋔ ⦃ ⌁ ‹cl1› ⦄ ⦃ ⧖:code ⌁̱ ○ ⧗:code ○ ○ ○ ○ ⦄ ⁼
+  ⧗:ḇ ‹ascii› ⧖:code
+  ⧗:ḇ ⧗:code ⧗:code ○ ᛖ ⋔ ⦃ ⌁ ‹cl1› ⦄ ⦃ ⧖:code ⌁̱ ○ ⧗:code ○ ○ ○ ○ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹classify› ⸫
 
 ⍝ ---- combining marks (§2.1)
@@ -683,11 +683,11 @@
 ⍝ ‹marks› cps from to kind c0: the marks in from … to: mask, error code, the bit at fault
 ⦃
   ⧖:cps,from,to,kind,c0
-  ⧗:cps,from,to,kind,c0 ○ ○ ○ ○ ○
+  ⧗:cps̱,from,to,kind,c0 ○ ○ ○ ○ ○
   ⥀ ⦃
     ⧖:cps,i,to,kind,c0,mask,code,bit,nc,nt
-    ⧗:cps ⧗:i △ ⊞ ⧗:to,kind,c0
-    ⧗:cps,i ᚳ ⧗:kind,c0,mask,code,bit,nc,nt ‹mark1›
+    ⧗:cps̱ ⧗:i △ ⊞ ⧗:to,kind,c0
+    ⧗:cps̱,i ᚳ ⧗:kind,c0,mask,code,bit,nc,nt ‹mark1›
     ⧗:i △ ⊞ ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄
   ⦄
   ⧖:cps,i,to,kind,c0,mask,code,bit,nc,nt
@@ -720,7 +720,7 @@
   ⧗:kind,bit ⧗:code #23# ᛖ ⋔ ⦃ ‹pm23› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
   ⧗:code #24# ᛖ ⋔ ⦃ $more than one case mark on $ ⎙̵ ⦄ ∅ ⁼
   ⧗:code #25# ᛖ ⋔ ⦃ $more than one tense mark on $ ⎙̵ ⦄ ∅ ⁼
-  ⧗:t,from,n ‹ptext› $\n$ ⎙̵
+  ⧗:ṯ,from,n ‹ptext› $\n$ ⎙̵
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸⟩ ‹pmerr› ⸫
 
 ⍝ ‹pcerr› b code arg: the message of a classification error
@@ -741,9 +741,9 @@
   ⧗:code #13# ᛖ ⋔ ⦃ $charge without a type: $ ⎙̵ ⦄ ∅ ⁼
   ⧗:code #14# ᛖ ⋔ ⦃ $malformed type: $ ⎙̵ ⦄ ∅ ⁼
   ⧗:code #16# ᛖ ⋔ ⦃ $unknown token: $ ⎙̵ ⦄ ∅ ⁼
-  ⧗:b ⧗:code #15# ᛖ ⋔ ⦃ ⧖:b $bad index on $ ⎙̵ ⧗:b ○ ᚳ ᚢ $: $ ⎙̵ ⧗:b △ ⧗:b ᚴ △ ⊟ ‹ptext› ⦄ ⦃ ⌁̱ ⦄ ⁼
+  ⧗:ḇ ⧗:code #15# ᛖ ⋔ ⦃ ⧖:b $bad index on $ ⎙̵ ⧗:ḇ ○ ᚳ ᚢ $: $ ⎙̵ ⧗:ḇ △ ⧗:ḇ ᚴ △ ⊟ ‹ptext› ⦄ ⦃ ⌁̱ ⦄ ⁼
   ⍝ codes that quote the whole chunk
-  ⧗:b ○ ⧗:b ᚴ
+  ⧗:ḇ ○ ⧗:ḇ ᚴ
   ⧗:code △ #4# ᛦ ⧗:code #13# ᛖ ⋏ ⧗:code #14# ᛖ ⋏ ⧗:code #16# ᛖ ⋏ ⋔ ⦃ ‹ptext› ⦄ ⦃ ⌁ ⌁ ⌁̱ ⦄ ⁼
   $\n$ ⎙̵
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹pcerr› ⸫
@@ -753,70 +753,70 @@
 ⍝ ‹emit1› out bs line col kind idx v1 v2 skip n mask cps fb hi: append a record
 ⦃
   ⧖:out,bs,line,col,kind,idx,v1,v2,skip,n,mask,cps,fb,hi
-  ⧗:out ⧗:kind ⍆̵ ⧗:line ⍆̵ ⧗:col ⍆̵ ⧗:mask ⍆̵ ⧗:idx ⍆̵ ⧗:v1 ⍆̵ ⧗:v2 ⍆̵ ⧗:n ⍆̵ ⧖:out
-  ⧗:bs ⟗ ⧗:out,skip,n ‹copy› ⧖:out ⌁̵
-  ⧗:cps ⧗:out ⧗:hi ⧗:fb ⊟ △ ⊞ ⍆̵ ⧗:fb ⧗:hi ⧗:fb ⊟ △ ⊞ ‹copy›
+  ⧗:out̵ ⧗:kind ⍆̵ ⧗:line ⍆̵ ⧗:col ⍆̵ ⧗:mask ⍆̵ ⧗:idx ⍆̵ ⧗:v1 ⍆̵ ⧗:v2 ⍆̵ ⧗:n ⍆̵ ⧖:out
+  ⧗:bs̵ ⟗ ⧗:out̵,skip,n ‹copy› ⧖:out ⌁̵
+  ⧗:cps̱ ⧗:out̵ ⧗:hi ⧗:fb ⊟ △ ⊞ ⍆̵ ⧗:fb ⧗:hi ⧗:fb ⊟ △ ⊞ ‹copy›
 ⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹emit1› ⸫
 
 ⍝ ‹emit› out bs path line col kind idx v1 v2 skip n mask cps fb hi: count the token; record it unless it is a breath
 ⦃
   ⧖:out,bs,path,line,col,kind,idx,v1,v2,skip,n,mask,cps,fb,hi
-  ⧗:bs ⟗ ⧗:skip ᚳ ⧖:c0 ⧖:bs
-  ⧗:out ‹count1› ‹ok›
-  ⧗:bs,line,col,kind,idx,v1,v2,skip,n,mask,cps,fb,hi
+  ⧗:bs̵ ⟗ ⧗:skip ᚳ ⧖:c0 ⧖:bs
+  ⧗:out̵ ‹count1› ‹ok›
+  ⧗:bs̵,line,col,kind,idx,v1,v2,skip,n,mask,cps̱,fb,hi
   ⧗:kind #8# ᛖ ⧗:n △ ᛖ ⋎ ⧗:c0 #11825# ᛖ ⋎
   ⋔ ⦃ ⌁ ⌁ ⌁̱ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̵ ⦄ ⦃ ‹emit1› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹emit› ⸫
 
 ⦃
   ⧖:out,bs,path,line,col,kind,idx,v1,v2,skip,n,mask,code,bit
-  ⧗:path,line,col ‹errat›
-  ⧗:bs ⟗ ⧗:skip,n,kind,code,bit ‹pmerr› ⌁̵
-  ⧗:out ⌁̵ ↯
+  ⧗:patẖ,line,col ‹errat›
+  ⧗:bs̵ ⟗ ⧗:skip,n,kind,code,bit ‹pmerr› ⌁̵
+  ⧗:out̵ ⌁̵ ↯
 ⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹markerr› ⸫
 
 ⦃
   ⧖:out,bs,cps,path,line,col,fb,hi,kind,idx,v1,v2,skip,n
-  ⧗:bs ⟗ ⧗:skip ᚳ ⧖:c0 ⧖:bs
-  ⧗:cps,fb,hi,kind,c0 ‹marks› ⧖:mask,code,bit
-  ⧗:out,bs,path,line,col,kind,idx,v1,v2,skip,n,mask,code,bit,cps,fb,hi
-  ⧗:code ○ ᛖ ⋔ ⦃ ⧖:cps2,fb2,hi2 ⌁ ⌁ ⧗:cps2,fb2,hi2 ‹emit› ⦄ ⦃ ⌁ ⌁ ⌁̱ ‹markerr› ⦄ ⁼
+  ⧗:bs̵ ⟗ ⧗:skip ᚳ ⧖:c0 ⧖:bs
+  ⧗:cps̱,fb,hi,kind,c0 ‹marks› ⧖:mask,code,bit
+  ⧗:out̵,bs̵,patẖ,line,col,kind,idx,v1,v2,skip,n,mask,code,bit,cps̱,fb,hi
+  ⧗:code ○ ᛖ ⋔ ⦃ ⧖:cps2,fb2,hi2 ⌁ ⌁ ⧗:cps2̱,fb2,hi2 ‹emit› ⦄ ⦃ ⌁ ⌁ ⌁̱ ‹markerr› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tokok› ⸫
 
 ⦃
   ⧖:out,bs,cps,path,line,col,fb,hi,kind,idx,v1,v2,skip,n
-  ⧗:path,line,col ‹errat›
-  ⧗:bs ⟗ ⧗:idx,v1 ‹pcerr› ⌁̵
-  ⧗:out ⌁̵ ↯
+  ⧗:patẖ,line,col ‹errat›
+  ⧗:bs̵ ⟗ ⧗:idx,v1 ‹pcerr› ⌁̵
+  ⧗:out̵ ⌁̵ ↯
 ⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tokerr› ⸫
 
 ⍝ ‹token› out cps path line ls le fb hi: the token whose first base is at fb
 ⦃
   ⧖:out,cps,path,line,ls,le,fb,hi
-  ⧗:cps,fb,hi ‹bases› ⧖:bs
-  ⧗:bs ⟗ ‹classify› ⧖:kind,idx,v1,v2,skip,n ⧖:bs
+  ⧗:cps̱,fb,hi ‹bases› ⧖:bs
+  ⧗:bs̵ ⟗ ‹classify› ⧖:kind,idx,v1,v2,skip,n ⧖:bs
   ⧗:fb ⧗:ls ⊟ △ ⊞ ⧖:col
-  ⧗:out,bs,cps,path,line,col,fb,hi,kind,idx,v1,v2,skip,n
+  ⧗:out̵,bs̵,cps̱,patẖ,line,col,fb,hi,kind,idx,v1,v2,skip,n
   ⧗:kind ○ ᛖ ⋔ ⦃ ‹tokerr› ⦄ ⦃ ‹tokok› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹token› ⸫
 
 ⍝ ‹lead› out path line ls lo fb isStr: marks before the first base of a chunk
 ⦃
   ⧖:out,path,line,ls,lo,fb,isStr
-  ⧗:out,path,line,ls,lo,fb
+  ⧗:out̵,patẖ,line,ls,lo,fb
   ⧗:line △ ⋒ ○ ᛖ ⧗:isStr ⋎
-  ⋔ ⦃ ⧖:out,path,line,ls,lo,fb ⧗:out △ ⧗:lo ‹set› #2# ⧗:fb △ ⊟ ‹set› ⦄
-    ⦃ ⧖:out,path,line,ls,lo,fb ⧗:path,line ⧗:lo ⧗:ls ⊟ △ ⊞ ‹errat› $combining mark with no base character\n$ ⎙̵ ⧗:out ⌁̵ ↯ ⦄ ⁼
+  ⋔ ⦃ ⧖:out,path,line,ls,lo,fb ⧗:out̵ △ ⧗:lo ‹set› #2# ⧗:fb △ ⊟ ‹set› ⦄
+    ⦃ ⧖:out,path,line,ls,lo,fb ⧗:patẖ,line ⧗:lo ⧗:ls ⊟ △ ⊞ ‹errat› $combining mark with no base character\n$ ⎙̵ ⧗:out̵ ⌁̵ ↯ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ŧ ⊸ ◌⟦ℤ⟧⟩ ‹lead› ⸫
 
 ⍝ ‹chunk› out cps path line ls le lo hi isStr: the chunk at lo … hi
 ⦃
   ⧖:out,cps,path,line,ls,le,lo,hi,isStr
-  ⧗:cps,lo,hi ‹skipm› ⧖:fb
-  ⧗:out,path,line,ls,lo,fb,isStr
+  ⧗:cps̱,lo,hi ‹skipm› ⧖:fb
+  ⧗:out̵,patẖ,line,ls,lo,fb,isStr
   ⧗:fb ⧗:lo ≶ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⦄ ⦃ ‹lead› ‹ok› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⦄
   ⧖:out
-  ⧗:out,cps,path,line,ls,le,fb,hi
+  ⧗:out̵,cps̱,patẖ,line,ls,le,fb,hi
   ⧗:fb ⧗:hi ≶ ⋔ ⦃ ‹token› ‹ok› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⦃ ‹token› ‹ok› ⦄
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ŧ ⊸ ◌⟦ℤ⟧⟩ ‹chunk› ⸫
 
@@ -824,35 +824,35 @@
   ⧖:out,cps,path,line,ls,le,isStr,k0,k
   ⧗:line,ls,le,k0 ᛈᛟ ⧗:line,ls,le ⧗:k △ ⊟ ᛈᛟ ⧖:pa,pb
   ⧗:pa ⧗:pb ‹min› ⧗:pa ⧗:pb ‹max› ⧖:lo,hi
-  ⧗:out #4# #-1# ‹set› ⧗:cps,path,line,ls,le,lo,hi,isStr ‹chunk›
+  ⧗:out̵ #4# #-1# ‹set› ⧗:cps̱,patẖ,line,ls,le,lo,hi,isStr ‹chunk›
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ŧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹flush1› ⸫
 
 ⍝ ‹flush› out cps path line ls le isStr: end the current chunk (isStr: a string follows)
 ⦃
   ⧖:out,cps,path,line,ls,le,isStr
-  ⧗:out ⟗ #4# ᚳ ⧖:k0 ⟗ #3# ᚳ ⧖:k ⧖:out
-  ⧗:out,cps,path,line,ls,le,isStr,k0,k
+  ⧗:out̵ ⟗ #4# ᚳ ⧖:k0 ⟗ #3# ᚳ ⧖:k ⧖:out
+  ⧗:out̵,cps̱,patẖ,line,ls,le,isStr,k0,k
   ⧗:k0 #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⦃ ‹flush1› ‹ok› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ŧ ⊸ ◌⟦ℤ⟧⟩ ‹flush› ⸫
 
 ⍝ ---- the characters of a line (out cps path line ls le, then the case)
 
-⦃ ⧖:out,cps,path,line,ls,le ⧗:out,cps,path,line,ls,le ⊕ ‹flush› #5# △ ‹set› ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹cend› ⸫
-⦃ ⧖:out,cps,path,line,ls,le ⧗:out,cps,path,line,ls,le ⊕ ‹flush› ‹kstep› ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹cspace› ⸫
+⦃ ⧖:out,cps,path,line,ls,le ⧗:out̵,cps̱,patẖ,line,ls,le ⊕ ‹flush› #5# △ ‹set› ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹cend› ⸫
+⦃ ⧖:out,cps,path,line,ls,le ⧗:out̵,cps̱,patẖ,line,ls,le ⊕ ‹flush› ‹kstep› ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹cspace› ⸫
 
 ⦃
   ⧖:out,cps,path,line,ls,le
-  ⧗:out ⟗ #4# ᚳ ⧖:k0 ⟗ #3# ᚳ ⧖:k ⧖:out
-  ⧗:out ⧗:k ⧗:k0 #-1# ᛖ ⋔ ⦃ ⧖:k #4# ⧗:k ‹set› ‹ok› ⦄ ⦃ ⌁ ⦄ ⁼ ‹kstep›
+  ⧗:out̵ ⟗ #4# ᚳ ⧖:k0 ⟗ #3# ᚳ ⧖:k ⧖:out
+  ⧗:out̵ ⧗:k ⧗:k0 #-1# ᛖ ⋔ ⦃ ⧖:k #4# ⧗:k ‹set› ‹ok› ⦄ ⦃ ⌁ ⦄ ⁼ ‹kstep›
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹cother› ⸫
 
 ⦃
   ⧖:out,cps,path,line,ls,le
-  ⧗:out,cps,path,line,ls,le ⊕ ‹flush› ‹ok›
+  ⧗:out̵,cps̱,patẖ,line,ls,le ⊕ ‹flush› ‹ok›
   ⟗ #3# ᚳ ⧖:k ⧖:out
   ⧗:line,ls,le,k ᛈᛟ ⧖:p
-  ⧗:cps,p ᚳ ⧗:line ᚹ ⋔ ∅ ⦃ ᛘ ⦄ ⁼ ⧖:b
-  ⧗:out #11# ⍆̵ ⧗:line ⍆̵ ⧗:p ⧗:ls ⊟ △ ⊞ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ○ ⍆̵ ○ ⍆̵ △ ⍆̵ ⧗:b ⍆̵ △ ⍆̵ ⧗:b ⍆̵
+  ⧗:cps̱,p ᚳ ⧗:line ᚹ ⋔ ∅ ⦃ ᛘ ⦄ ⁼ ⧖:b
+  ⧗:out̵ #11# ⍆̵ ⧗:line ⍆̵ ⧗:p ⧗:ls ⊟ △ ⊞ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ○ ⍆̵ ○ ⍆̵ △ ⍆̵ ⧗:b ⍆̵ △ ⍆̵ ⧗:b ⍆̵
   ‹count1› ‹kstep›
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹cbracket› ⸫
 
@@ -861,11 +861,11 @@
 ⍝ ‹findclose› cps line ls le k: the reading index of the next «, or the line length
 ⦃
   ⧖:cps,line,ls,le,k
-  ⧗:cps,line,ls,le,k
+  ⧗:cps̱,line,ls,le,k
   ⥀ ⦃
     ⧖:cps,line,ls,le,k
-    ⧗:cps,line,ls,le,k
-    ⧗:k ⧗:le ⧗:ls ⊟ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⧗:cps ⧗:line,ls,le,k ᛈᛟ ᚳ #171# ᛖ ⋏
+    ⧗:cps̱,line,ls,le,k
+    ⧗:k ⧗:le ⧗:ls ⊟ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⧗:cps̱ ⧗:line,ls,le,k ᛈᛟ ᚳ #171# ᛖ ⋏
     ⋔ ⦃ ⦶ ⦄ ⦃ △ ⊞ ⊕ ⦄ ⁼
   ⦄
   ⧖:cps,line,ls,le,k ⧗:k
@@ -874,11 +874,11 @@
 ⍝ ‹cstart› cps j lo: the start of the cluster (base and marks) ending at j
 ⦃
   ⧖:cps,j,lo
-  ⧗:cps,j,lo
+  ⧗:cps̱,j,lo
   ⥀ ⦃
     ⧖:cps,s,lo
-    ⧗:cps,s,lo
-    ⧗:s ⧗:lo ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:cps,s ᚳ ᛗ ⋎
+    ⧗:cps̱,s,lo
+    ⧗:s ⧗:lo ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:cps̱,s ᚳ ᛗ ⋎
     ⋔ ⦃ ⧖:l △ ⊟ ⧗:l ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
   ⦄
   ⌁ ⧖:s ⌁̱ ⧗:s
@@ -887,11 +887,11 @@
 ⍝ ‹appcl› out cps s j: append s … j, with ↵ as a newline
 ⦃
   ⧖:out,cps,s,j
-  ⧗:out,cps,s,j
+  ⧗:out̵,cps̱,s,j
   ⥀ ⦃
     ⧖:out,cps,i,j
-    ⧗:out ⧗:cps,i ᚳ ⍿⁰ #8629# ᛖ ⋔ ⦃ ⌁ #10# ⦄ ∅ ⁼ ⍆̵
-    ⧗:cps ⧗:i △ ⊞ ⧗:j
+    ⧗:out̵ ⧗:cps̱,i ᚳ ⍿⁰ #8629# ᛖ ⋔ ⦃ ⌁ #10# ⦄ ∅ ⁼ ⍆̵
+    ⧗:cps̱ ⧗:i △ ⊞ ⧗:j
     ⧗:i ⧗:j ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁̱
@@ -900,13 +900,13 @@
 ⍝ ‹decode› out cps a b: the string between delimiters a and b: clusters in reverse
 ⦃
   ⧖:out,cps,a,b
-  ⧗:out,cps ⧗:b △ ⊟ ⧗:a △ ⊞
+  ⧗:out̵,cps̱ ⧗:b △ ⊟ ⧗:a △ ⊞
   ⍝ the loop carries [out cps j lo]
   ⥀ ⦃
     ⧖:out,cps,j,lo
-    ⧗:out,cps,j,lo
+    ⧗:out̵,cps̱,j,lo
     ⧗:j ⧗:lo ≶ ⋔
-      ⦃ ⧖:out,cps,j,lo ⧗:cps,j,lo ‹cstart› ⧖:s ⧗:out ⧗:cps,s,j ‹appcl› ⧗:cps ⧗:s △ ⊟ ⧗:lo ⊕ ⦄
+      ⦃ ⧖:out,cps,j,lo ⧗:cps̱,j,lo ‹cstart› ⧖:s ⧗:out̵ ⧗:cps̱,s,j ‹appcl› ⧗:cps̱ ⧗:s △ ⊟ ⧗:lo ⊕ ⦄
       ⁼
       ⦃ ⦶ ⦄
   ⦄
@@ -915,21 +915,21 @@
 
 ⦃
   ⧖:out,path,line,col,r,mask,code,bit
-  ⧗:out ⧗:r #3# ⊞ ⧗:mask ‹set›
+  ⧗:out̵ ⧗:r #3# ⊞ ⧗:mask ‹set›
 ⦄ ⟨⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹smok› ⸫
 
 ⦃
   ⧖:out,path,line,col,r,mask,code,bit
-  ⧗:path,line,col ‹errat›
-  ⧗:out ⟗ ⧗:r #7# ⊞ ᚳ ⧖:n ⧖:out
-  ⧗:out ⟗ ⧗:r #8# ⊞ ⧗:n #12# ⧗:code,bit ‹pmerr› ⌁̵ ↯
+  ⧗:patẖ,line,col ‹errat›
+  ⧗:out̵ ⟗ ⧗:r #7# ⊞ ᚳ ⧖:n ⧖:out
+  ⧗:out̵ ⟗ ⧗:r #8# ⊞ ⧗:n #12# ⧗:code,bit ‹pmerr› ⌁̵ ↯
 ⦄ ⟨⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹smerr› ⸫
 
 ⍝ ‹smarks› out cps path line r from to col: the marks of the string record at r
 ⦃
   ⧖:out,cps,path,line,r,from,to,col
-  ⧗:cps,from,to #12# ○ ‹marks› ⧖:mask,code,bit
-  ⧗:out,path,line,col,r,mask,code,bit
+  ⧗:cps̱,from,to #12# ○ ‹marks› ⧖:mask,code,bit
+  ⧗:out̵,patẖ,line,col,r,mask,code,bit
   ⧗:code ○ ᛖ ⋔ ⦃ ‹smok› ⦄ ⦃ ‹smerr› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹smarks› ⸫
 
@@ -939,7 +939,7 @@
 ⍝ ‹copyn› b out from n: ‹copy›, but n may be 0 (or below)
 ⦃
   ⧖:b,out,from,n
-  ⧗:b,out,from,n ⧗:n ○ ≶ ⋔ ⦃ ⌁ ⌁ ⧖:o ⌁̱ ⧗:o ⦄ ⦃ ‹copy› ⦄ ⁼
+  ⧗:ḇ,out̵,from,n ⧗:n ○ ≶ ⋔ ⦃ ⌁ ⌁ ⧖:o ⌁̱ ⧗:o̵ ⦄ ⦃ ‹copy› ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹copyn› ⸫
 
 ⍝ ‹sraw› out cps a b mlo mhi: a string's raw text: »content« and the marks mlo … mhi (none if mlo is −1)
@@ -947,36 +947,36 @@
   ⧖:out,cps,a,b,mlo,mhi
   ⧗:mhi ⧗:mlo ⊟ △ ⊞ ⧗:mlo #-1# ᛖ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:nm
   ⧗:b ⧗:a ⊟ △ ⊟ ⧖:nc
-  ⧗:cps ⧗:out ⧗:nc ⧗:nm ⊞ #2# ⊞ ⍆̵ #187# ⍆̵ ⧗:a △ ⊞ ⧗:nc ‹copyn› #171# ⍆̵ ⧖:out
-  ⧗:cps ⧗:out ⧗:mlo ⧗:nm ‹copyn›
+  ⧗:cps̱ ⧗:out̵ ⧗:nc ⧗:nm ⊞ #2# ⊞ ⍆̵ #187# ⍆̵ ⧗:a △ ⊞ ⧗:nc ‹copyn› #171# ⍆̵ ⧖:out
+  ⧗:cps̱ ⧗:out̵ ⧗:mlo ⧗:nm ‹copyn›
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sraw› ⸫
 
 ⍝ ‹smodd› …: on an odd line the marks follow «
 ⦃
   ⧖:out,cps,path,line,ls,le,kc,pc,left,r,right
-  ⧗:cps ⧗:pc △ ⊞ ⧗:le △ ⊟ ‹skipm› ⧖:q
+  ⧗:cps̱ ⧗:pc △ ⊞ ⧗:le △ ⊟ ‹skipm› ⧖:q
   ⍝ errors in these marks point at the chunk that follows them, as in s1
   ⧗:pc △ ⊞ ⧗:ls ⊟ △ ⊞ ⧗:q ⧗:ls ⊟ △ ⊞
-  ⧗:q ⧗:le ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:cps,q ᚳ ‹chunkc› ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:col
-  ⧗:out,cps,path,line,r ⧗:pc △ ⊞ ⧗:q △ ⊟ ⧗:col ‹smarks›
-  ⧗:cps,left,right ⧗:pc △ ⊞ ⧗:q △ ⊟ ‹sraw›
+  ⧗:q ⧗:le ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:cps̱,q ᚳ ‹chunkc› ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:col
+  ⧗:out̵,cps̱,patẖ,line,r ⧗:pc △ ⊞ ⧗:q △ ⊟ ⧗:col ‹smarks›
+  ⧗:cps̱,left,right ⧗:pc △ ⊞ ⧗:q △ ⊟ ‹sraw›
   #3# ⧗:kc ⧗:q ⊞ ⧗:pc ⊟ ‹set›
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹smodd› ⸫
 
 ⍝ ‹smeven› …: on an even line the marks were carried from the chunk before »
 ⦃
   ⧖:out,cps,path,line,ls,le,kc,pc,left,r,right
-  ⧗:out ⟗ △ ᚳ ⧖:clo ⟗ #2# ᚳ ⧖:chi ⧖:out
-  ⧗:out △ #-1# ‹set› #2# #-1# ‹set› ‹ok›
-  ⧗:cps,path,line,r,clo,chi ⧗:left ⧗:ls ⊟ △ ⊞ ‹smarks›
-  ⧗:cps,left,right,clo,chi ‹sraw›
+  ⧗:out̵ ⟗ △ ᚳ ⧖:clo ⟗ #2# ᚳ ⧖:chi ⧖:out
+  ⧗:out̵ △ #-1# ‹set› #2# #-1# ‹set› ‹ok›
+  ⧗:cps̱,patẖ,line,r,clo,chi ⧗:left ⧗:ls ⊟ △ ⊞ ‹smarks›
+  ⧗:cps̱,left,right,clo,chi ‹sraw›
   #3# ⧗:kc △ ⊞ ‹set›
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹smeven› ⸫
 
 ⦃
   ⧖:out,cps,path,line,ls,le,k,kc
-  ⧗:path,line ⧗:line,ls,le,k ᛈᛟ ⧗:ls ⊟ △ ⊞ ‹errat› $unterminated string\n$ ⎙̵
-  ⧗:out ⌁̵ ↯
+  ⧗:patẖ,line ⧗:line,ls,le,k ᛈᛟ ⧗:ls ⊟ △ ⊞ ‹errat› $unterminated string\n$ ⎙̵
+  ⧗:out̵ ⌁̵ ↯
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹unterm› ⸫
 
 ⦃
@@ -985,20 +985,20 @@
   ⧗:line,ls,le,kc ᛈᛟ ⧖:pc
   ⧗:p0 ⧗:pc ‹min› ⧖:left
   ⧗:p0 ⧗:pc ‹max› ⧖:right
-  ⧗:out ⟗ ᚴ ⧖:r ⧖:out
+  ⧗:out̵ ⟗ ᚴ ⧖:r ⧖:out
   ⧗:right ⧗:left ⊟ △ ⊟ ⧖:n
-  ⧗:out #12# ⍆̵ ⧗:line ⍆̵ ⧗:left ⧗:ls ⊟ △ ⊞ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ○ ⍆̵ ○ ⍆̵ ⧗:n ⍆̵
-  ⧗:cps,left,right ‹decode› ‹count1› ‹ok›
-  ⧗:cps,path,line,ls,le,kc,pc,left,r,right
+  ⧗:out̵ #12# ⍆̵ ⧗:line ⍆̵ ⧗:left ⧗:ls ⊟ △ ⊞ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ○ ⍆̵ ○ ⍆̵ ⧗:n ⍆̵
+  ⧗:cps̱,left,right ‹decode› ‹count1› ‹ok›
+  ⧗:cps̱,patẖ,line,ls,le,kc,pc,left,r,right
   ⧗:line ᚹ ⋔ ⦃ ‹smodd› ⦄ ⦃ ‹smeven› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹string› ⸫
 
 ⦃
   ⧖:out,cps,path,line,ls,le
-  ⧗:out,cps,path,line,ls,le ⦶ ‹flush› ‹ok›
+  ⧗:out̵,cps̱,patẖ,line,ls,le ⦶ ‹flush› ‹ok›
   ⟗ #3# ᚳ ⧖:k ⧖:out
-  ⧗:cps,line,ls,le ⧗:k △ ⊞ ‹findclose› ⧖:kc
-  ⧗:out,cps,path,line,ls,le,k,kc
+  ⧗:cps̱,line,ls,le ⧗:k △ ⊞ ‹findclose› ⧖:kc
+  ⧗:out̵,cps̱,patẖ,line,ls,le,k,kc
   ⧗:kc ⧗:le ⧗:ls ⊟ ᛖ ⋔ ⦃ ‹unterm› ⦄ ⦃ ‹string› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹cstring› ⸫
 
@@ -1015,9 +1015,9 @@
 
 ⦃
   ⧖:out,cps,path,line,ls,le
-  ⧗:out ⟗ #3# ᚳ ⧖:k ⧖:out
-  ⧗:cps ⧗:line,ls,le,k ᛈᛟ ᚳ ‹cclass› ⧖:cl
-  ⧗:out,cps,path,line,ls,le,cl
+  ⧗:out̵ ⟗ #3# ᚳ ⧖:k ⧖:out
+  ⧗:cps̱ ⧗:line,ls,le,k ᛈᛟ ᚳ ‹cclass› ⧖:cl
+  ⧗:out̵,cps̱,patẖ,line,ls,le,cl
   ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ‹cspace› ⦄ ⦃
   ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹cend› ⦄ ⦃
   ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ‹cbracket› ⦄ ⦃
@@ -1026,21 +1026,21 @@
 
 ⦃
   ⧖:out,cps,path,line,ls,le
-  ⧗:out ⟗ #3# ᚳ ⧖:k ⧖:out
-  ⧗:out,cps,path,line,ls,le
+  ⧗:out̵ ⟗ #3# ᚳ ⧖:k ⧖:out
+  ⧗:out̵,cps̱,patẖ,line,ls,le
   ⧗:k ⧗:le ⧗:ls ⊟ ≶ ⋔ ⦃ ‹cend› ⦄ ⁼ ⦃ ‹char› ⦄
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹step› ⸫
 
 ⍝ ‹line› out cps path line ls le: the tokens of the line ls … le−1
 ⦃
   ⧖:out,cps,path,line,ls,le
-  ⧗:out #3# ○ ‹set› #4# #-1# ‹set› #5# ○ ‹set› ‹ok›
-  ⧗:cps,path,line,ls,le
+  ⧗:out̵ #3# ○ ‹set› #4# #-1# ‹set› #5# ○ ‹set› ‹ok›
+  ⧗:cps̱,patẖ,line,ls,le
   ⥀ ⦃
     ⧖:out,cps,path,line,ls,le
-    ⧗:out,cps,path,line,ls,le ‹step› ‹ok›
+    ⧗:out̵,cps̱,patẖ,line,ls,le ‹step› ‹ok›
     ⟗ #5# ᚳ ⧖:stop ⧖:out
-    ⧗:out,cps,path,line,ls,le
+    ⧗:out̵,cps̱,patẖ,line,ls,le
     ⧗:stop ○ ᛖ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
   ⦄
   ⌁ ⌁ ⌁ ⌁̱ ⌁̱
@@ -1049,11 +1049,11 @@
 ⍝ ‹eol› cps i: the index of the next newline at or after i, or the length
 ⦃
   ⧖:cps,i
-  ⧗:cps,i
+  ⧗:cps̱,i
   ⥀ ⦃
     ⧖:cps,i
-    ⧗:cps,i ᚳ ⧖:c
-    ⧗:cps,i
+    ⧗:cps̱,i ᚳ ⧖:c
+    ⧗:cps̱,i
     ⧗:c #10# ᛖ ⧗:c #-1# ᛖ ⋏ ⋔ ⦃ ⦶ ⦄ ⦃ △ ⊞ ⊕ ⦄ ⁼
   ⦄
   ⌁ ⌁̱ ⧗:i
@@ -1063,16 +1063,16 @@
 ⦃
   ⧖:cps,path
   ⟦ ○ ○ ▽ ▽ ○ ▽ ○ ⟧
-  ⧗:cps,path ○ △
+  ⧗:cps̱,patẖ ○ △
   ⍝ the loop carries [out cps path ls line]
   ⥀ ⦃
     ⧖:out,cps,path,ls,line
-    ⧗:cps,ls ‹eol› ⧖:le
-    ⧗:out,cps,path,line,ls,le ‹line› ‹ok›
-    ⧗:cps,path ⧗:le △ ⊞ ⧗:line △ ⊞
-    ⧗:le ⧗:cps ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+    ⧗:cps̱,ls ‹eol› ⧖:le
+    ⧗:out̵,cps̱,patẖ,line,ls,le ‹line› ‹ok›
+    ⧗:cps̱,patẖ ⧗:le △ ⊞ ⧗:line △ ⊞
+    ⧗:le ⧗:cps̱ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁̱ ⌁̱
 ⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹lex› ⸫
 
-⦃ ⧖:path,cps ⧗:cps ⟗ ⧗:path ‹lex› ⧖:out ⌁̵ ⧗:out ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟦ℤ⟧⟩ ‹lexw› ⸫
+⦃ ⧖:path,cps ⧗:cps̵ ⟗ ⧗:patẖ ‹lex› ⧖:out ⌁̵ ⧗:out̵ ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟦ℤ⟧⟩ ‹lexw› ⸫

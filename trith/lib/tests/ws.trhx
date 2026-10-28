@@ -24,7 +24,7 @@
 ⦃ ⧖:s ⧗:s ‹accept› ⁇ ⦃ ‹echo› ⦄ ⦃ ⦄ ⧗:s ‹wclose› ⌁ ⦄ ⟨ℤ ⊸⟩ ‹child› ⸫
 
 ⍝ ‹say› conn text: send text and print what comes back
-⦃ ⧖:c,t ⧗:c ⧗:t ‹send› ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⧗:c ‹recv› ‹or› ⎙̵ $\n$ ⎙̵ ⦄ ⟨ℤ ʃ ⊸⟩ ‹say› ⸫
+⦃ ⧖:c,t ⧗:c ⧗:t̵ ‹send› ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⧗:c ‹recv› ‹or› ⎙̵ $\n$ ⎙̵ ⦄ ⟨ℤ ʃ ⊸⟩ ‹say› ⸫
 
 ⍝ ‹talk› conn: the client's side of the conversation
 ⦃

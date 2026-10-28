@@ -1,0 +1,1 @@
+trith/tests/check_errors/psi_quantum_cap.trh:2:21: error: decoherence cap: a superposition of quantum values holds at most 9 alternatives (§8.3)

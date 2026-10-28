@@ -344,7 +344,7 @@ This is linear typing. Memory is freed at the point of annihilation, with no gar
 - `a b ⫴` superposes two values of the same type into a `ψ₂T`. Superposing a `ψₙ` with a `ψₘ` gives a `ψₙ₊ₘ`.
 - **Lifting.** An operation on superpositions applies to every alternative: `ψₙ ⊞ ψₘ` gives a `ψₙ·ₘ`. A classical operand is broadcast to every alternative.
 - **Branching.** `⋔` on a `ψ ŧ` runs **every face whose trit is live**. The face outputs are collected into a superposition.
-- **Decoherence cap.** n must be at most 27 (3³), and exceeding it is a compile error. This bounds code size and runtime cost statically.
+- **Decoherence cap.** n must be at most 27 (3³), and exceeding it is a compile error. A superposition of quantum values (strings, arrays, particles) holds at most 9 (3²), because every alternative needs its own drop path. This bounds code size and runtime cost statically.
 - **Collapse.** Collapsing a value makes it inferred (§3.1):
   - `⊙⁻` takes the minimum alternative.
   - `⊙⁺` takes the maximum.
@@ -811,11 +811,12 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
   - Agreement applies to `⧗ⁿ` reads too (§6.1). `trx.py` writes the mark after a name: `⧗:C̵` reads the heap `C` by moving it.
   - Call by shape matches evidentials and charges as well (§9.1).
   - Generics: type variables `α … θ` over classical types, monomorphised per call (§9.4). Step 2 is quotations with row-polymorphic effects, specialised per call site (§9.5).
+  - The ψ cap is 9 for quantum alternatives and stays 27 for classical ones (§8.3).
+  - Scattered fragments may live in different files of one module: all the files given to one compiler run are the planes of one module (Addendum A.1).
   - Arrays inside `⥀`: borrowed moments are region-scoped (§5.1), so a loop body reads and writes an array through a `⟗`/`⟖` moment of an enclosing block instead of carrying it through the loop stack. Codegen is free: the shadow is a loop-invariant pointer. `trx.py` resolves `⧗:x̱` through the enclosing blocks.
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
-- Should the ψ cap be lower than 27 for quantum alternatives, to bound the drop logic?
-- Should scattered fragments be allowed across files within a module?
+No question of draft 1 is open any more. The addenda keep their own (A.9, B.5).
 
 ---
 

@@ -2154,7 +2154,10 @@
       b ⟪ len ⟫ 0 ≡ ⤴ ↵ ⊥ → going ¿ ⊕ ¿ ⌫ ¿
       b ⟪ ck_head ⟫ → h ¿
       h "◌" ≡ h "⟗" ≡ ∨ h "⟖" ≡ ∨ ⤴ ↵ b ⟪ ck_tail ⟫ → b ¿ ⊕ ¿ ⌫ ¿
-      h "ψ" ≡ ⤴ ↵ b ⟪ ck_psi_inner ⟫ → b ¿ ⊕ ¿ ⌫ ¿
+      h "ψ" ≡ ⤴ ↵
+        b ⟪ ck_psi_count ⟫ 9 ≻ b ⟪ ck_psi_inner ⟫ ⟪ ck_class ⟫ "quantum" ≡ ∧ ⤴ ↵ C tok "decoherence cap: a superposition of quantum values holds at most 9 alternatives (§8.3)" ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
+        b ⟪ ck_psi_inner ⟫ → b ¿ ⊕ ¿
+      ⌫ ¿
       h "⟦" ≡ ⤴ ↵ b 1 b ⟪ len ⟫ 2 ⊟ ⟪ substr ⟫ → b ¿ ⊕ ¿ ⌫ ¿
       h "⟨" ≡ ⤴ ↵ "" → b ¿ ⊥ → going ¿ ⊕ ¿ ⌫ ¿
       ⊥ → going ¿

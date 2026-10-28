@@ -1362,6 +1362,7 @@
   ⍿⁰ #27# ᛖ ⋔ ⦃ $a reversible function cannot be generic (§9.4)$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #28# ᛖ ⋔ ⦃ $a quotation type has the same row variable on both sides, or none: ⟨ρ … ⊸ ρ …⟩ (§9.5)$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #29# ᛖ ⋔ ⦃ $a row variable stands for the bottom of an effect, so it comes first: ⟨ρ … ⊸ ρ …⟩ (§9.5)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #30# ᛖ ⋔ ⦃ $decoherence cap: a superposition of quantum values holds at most 9 alternatives (§8.3)$ ⎙̵ ⦄ ∅ ⁼
   ⌁
 ⦄ ⟨ℤ ⊸⟩ ‹pmsg› ⸫
 
@@ -2962,6 +2963,28 @@
   ⧖:C,ps,name,j,n,found ⧗:C̵,found
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ptfind› ⸫
 
+⍝ ‹psicap› C t tok: inside t, a ψ of quantum values holds at most 9 alternatives (§8.3)
+⦃
+  ⧖:C,t,tok
+  ⧗:C̵,t,tok
+  ⥀ ⦃
+    ⧖:C,b,tok
+    ⧗:C̵,b ‹shead› ⧖:C,h
+    ○ ⧗:h ⧖ @any(9676,10199,10198)@ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:h #968# ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:h #10214# ᛖ ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧖:code
+    ⧗:C̵,b,tok,code ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ⧖:k ‹stail› ⧗:k ⊕ ⦄
+      ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ‹psichk› ⊕ ⦄ ⦃ #3# ᛖ ⋔ ⦃ ⧖:k △ ‹elemof› ⧗:k ⊕ ⦄ ⦃ ⦶ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ⦄
+  ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹psicap› ⸫
+⦃
+  ⧖:C,b,tok
+  ⧗:C̵,b ‹psicount› ⧖:C,n
+  ⧗:C̵,b ‹psiinner› ⧖:C,in
+  ⧗:C̵,in ‹tclass› ⧖:C,cl
+  ⧗:C̵ ⧗:n #9# ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:cl #3# ᛖ ⋎ ‹not› ⧗:tok #30# ‹cfailunless› ⧖:C
+  ⧗:C̵,in,tok
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹psichk› ⸫
+
 ⍝ ‹chktypes› C ts tok outputs: every named type is a declared particle; shadows cannot be returned
 ⦃
   ⧖:C,ts,tok,outputs
@@ -2976,6 +2999,7 @@
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹chktypes› ⸫
 ⦃
   ⧖:C,t,tok,outputs
+  ⧗:C̵,t,tok ‹psicap› ⧖:C
   ⧗:C̵,t ‹tbase› ⧖:C,b
   ⧗:C̵,b ‹slen› ⧖:C,bl ⧗:C̵,b ‹shead› ⧖:C,bh
   ⧗:C̵,b ‹ptfind› ⧖:C,rep

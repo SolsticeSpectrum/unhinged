@@ -1,0 +1,678 @@
+⍝ ==== s2 planes (Addendum A.1): a module is a lattice of cells (x, y, z), one plane per z
+⍝ Every file of a compiler run is part of one module. A file holds one plane, or several,
+⍝ each starting with a header line ⧉ z ⁿ; a file with no header is plane ○ of a one-plane
+⍝ module. Each plane is lexed on its own, its lines numbered from 1 after its header, and
+⍝ the planes are then folded into one token stream: line by line, cell by cell, the planes
+⍝ taken in ascending z on odd lines and descending z on even ones.
+⍝ A token's origin is packed into its line: y in bits 0-19, the header's line + 1 in bits
+⍝ 20-39 (so a plane line is at least 2^20, and a plain one is below), the file in bits
+⍝ 40-45, z + 128 in bits 46-53, and x + 1 in bits 54-62 (0 until folding). The parity of
+⍝ the packed line is the parity of y, and the next line is the packed line + 1, so the
+⍝ lexer runs unchanged on planes. A module of one file without a header is never packed:
+⍝ it takes the old path, token for token.
+
+⍝ ---- origins
+
+⍝ ‹isplane› line: the line holds a plane origin
+⦃ #1048576# ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦄ ⟨ℤ ⊸ ŧ⟩ ‹isplane› ⸫
+⦃ #1048575# ⋒ ⦄ ⟨ℤ ⊸ ℤ⟩ ‹ply› ⸫
+⦃ #20# ≫ #1048575# ⋒ ⦄ ⟨ℤ ⊸ ℤ⟩ ‹plh› ⸫
+⦃ #40# ≫ #63# ⋒ ⦄ ⟨ℤ ⊸ ℤ⟩ ‹plf› ⸫
+⦃ #46# ≫ #255# ⋒ #128# ⊟ ⦄ ⟨ℤ ⊸ ℤ⟩ ‹plz› ⸫
+⦃ #54# ≫ ⦄ ⟨ℤ ⊸ ℤ⟩ ‹plx1› ⸫
+⍝ ‹plline› line: the line in its file
+⦃ ⧖:l ⧗:l ‹plh› △ ⊟ ⧗:l ‹ply› ⊞ ⦄ ⟨ℤ ⊸ ℤ⟩ ‹plline› ⸫
+⍝ ‹plpack› y h f z x1
+⦃ ⧖:y,h,f,z,x1 ⧗:y ⧗:h #20# ≪ ⊞ ⧗:f #40# ≪ ⊞ ⧗:z #128# ⊞ #46# ≪ ⊞ ⧗:x1 #54# ≪ ⊞ ⦄ ⟨ℤ ℤ ℤ ℤ ℤ ⊸ ℤ⟩ ‹plpack› ⸫
+⍝ ‹plsetx› line x: the line with its cell's x
+⦃ ⧖:l,x ⧗:l △ #54# ≪ △ ⊟ ⋒ ⧗:x △ ⊞ #54# ≪ ⊞ ⦄ ⟨ℤ ℤ ⊸ ℤ⟩ ‹plsetx› ⸫
+
+⍝ ---- printing positions
+
+⍝ ‹pbt› v: v as a balanced-ternary numeral, least-significant trit first (§2)
+⦃
+  ⧖:v
+  ⧗:v ○ ᛖ ⋔ ⦃ $○$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:v
+  ⥀ ⦃ ⧖:v ⧗:v ⧗:v ○ ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹pbt1› ⊕ ⦄ ⁼ ⦄
+  ⌁
+⦄ ⟨ℤ ⊸⟩ ‹pbt› ⸫
+⍝ ‹pbt1› v: print the lowest trit of v, giving the rest (⊜ gives the balanced remainder)
+⦃
+  ⧖:v
+  ⧗:v #3# ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:d
+  ⧗:d #-1# ᛖ ⋔ ⦃ $▽$ ⎙̵ ⦄ ∅ ⁼ ⧗:d ○ ᛖ ⋔ ⦃ $○$ ⎙̵ ⦄ ∅ ⁼ ⧗:d △ ᛖ ⋔ ⦃ $△$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:v ⧗:d ⊟ #3# ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄
+⦄ ⟨ℤ ⊸ ℤ⟩ ‹pbt1› ⸫
+
+⍝ ‹plpos› line col: "line:col", with the cell's lattice coordinates if it is in a plane (A.1.2)
+⦃
+  ⧖:l,c
+  ⧗:l,c ⧗:l ‹isplane› ⋔ ⦃ ‹plpos1› ⦄ ⦃ ⧖:l,c ⧗:l ᛁ $:$ ⎙̵ ⧗:c ᛁ ⦄ ⁼
+⦄ ⟨ℤ ℤ ⊸⟩ ‹plpos› ⸫
+⦃
+  ⧖:l,c
+  ⧗:l ‹plline› ᛁ $:$ ⎙̵ ⧗:c ᛁ $ ($ ⎙̵
+  ⧗:l ‹plx1› ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ $x=$ ⎙̵ △ ⊟ ᛁ $, $ ⎙̵ ⦄ ⁼
+  $y=$ ⎙̵ ⧗:l ‹ply› ᛁ $, z=$ ⎙̵ ⧗:l ‹plz› ‹pbt› $)$ ⎙̵
+⦄ ⟨ℤ ℤ ⊸⟩ ‹plpos1› ⸫
+
+⍝ ‹ppath› path f: print file f of a module's path (its files are separated by U+0001)
+⦃
+  ⧖:path,f
+  ⧗:patẖ,f ○ ○
+  ⍝ the loop carries [path f i seg]
+  ⥀ ⦃
+    ⧖:path,f,i,seg
+    ⧗:patẖ,i ᛑ ⧖:cp,len
+    ⧗:cp ⧗:seg ⧗:f ᛖ ⧗:cp △ ᛖ ‹not› ⋎ ⧗:cp #-1# ᛖ ‹not› ⋎ ⋔ ⦃ ᚢ ⦄ ⦃ ⌁ ⦄ ⁼
+    ⧗:patẖ,f ⧗:i ⧗:len ⊞ ⧗:seg ⧗:cp △ ᛖ ⋔ ⦃ △ ⊞ ⦄ ∅ ⁼
+    ⧗:cp #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⌁ ⌁ ⌁̱
+⦄ ⟨⟗ʃ ℤ ⊸⟩ ‹ppath› ⸫
+
+⍝ ‹sprseg› C s f: print file f of the heap string s
+⦃
+  ⧖:C,s,f
+  ⧗:C̵ ⧗:s △ ⊞ ‹rd› ⧖:C,n
+  ⧗:C̵,f ⧗:s #2# ⊞ ⧗:s #2# ⊞ ⧗:n ⊞ ○
+  ⥀ ⦃
+    ⧖:C,f,j,end,seg
+    ⧗:C̵,f,j,end,seg ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,f,j,end,seg ⧗:C̵,j ‹rd› ⧖:C,cp
+        ⧗:cp ⧗:seg ⧗:f ᛖ ⧗:cp △ ᛖ ‹not› ⋎ ⋔ ⦃ ᚢ ⦄ ⦃ ⌁ ⦄ ⁼
+        ⧗:C̵,f ⧗:j △ ⊞ ⧗:end ⧗:seg ⧗:cp △ ᛖ ⋔ ⦃ △ ⊞ ⦄ ∅ ⁼ ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sprseg› ⸫
+
+⍝ ‹spos› C ln cl: "line:col" (with the lattice coordinates of a plane cell) as a heap string
+⦃
+  ⧖:C,ln,cl
+  ⧗:C̵,ln,cl ⧗:ln ‹isplane› ⋔ ⦃ ‹spos1› ⦄ ⦃ ⧖:C,ln,cl ⧗:C̵ %%!{#ln}:{#cl}%% ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹spos› ⸫
+⦃
+  ⧖:C,ln,cl
+  ⧗:ln ‹plline› ⧖:fl ⧗:ln ‹plx1› △ ⊟ ⧖:x ⧗:ln ‹ply› ⧖:y ⧗:ln ‹plz› ⧖:z
+  ⧗:C̵ %%!{#fl}:{#cl} (x={#x}, y={#y}, z=%% ⧖:C,a
+  ⧗:C̵ ‹sbeg› ⧖:C,e ⧗:C̵,e,a ‹sapp› ⧖:C
+  ⧗:C̵,e,z ‹sbt› ⧖:C
+  ⧗:C̵ ⧗:e #41# ‹scp› ⧗:e ‹send›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹spos1› ⸫
+⍝ ‹sbt› C e v: append v as a balanced-ternary numeral
+⦃
+  ⧖:C,e,v
+  ⧗:C̵,e ⧗:v ○ ᛖ ⋔ ⦃ #9675# ‹scp› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,e,v
+  ⥀ ⦃ ⧖:C,e,v ⧗:C̵,e,v ⧗:v ○ ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹sbt1› ⊕ ⦄ ⁼ ⦄
+  ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sbt› ⸫
+⦃
+  ⧖:C,e,v
+  ⧗:v #3# ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:d
+  ⧗:C̵,e #9675# ⧗:d △ ⊞ ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ #9661# ⦄ ⦃ △ ᛖ ⋔ ⦃ ⦄ ⦃ ⌁ #9651# ⦄ ⁼ ⦄ ⁼ ‹scp›
+  ⧗:e ⧗:v ⧗:d ⊟ #3# ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹sbt1› ⸫
+
+⍝ ‹erratfl› path f fl: "file:line:1: error: " for a whole line of file f
+⦃ ⧖:path,f,fl ⧗:patẖ,f ‹ppath› $:$ ⎙̵ ⧗:fl ᛁ $:1: error: $ ⎙̵ ⦄ ⟨⟗ʃ ℤ ℤ ⊸⟩ ‹erratfl› ⸫
+
+⍝ ---- plane headers (A.1.1)
+
+⍝ ‹skipsp› cps i le: the first index ≥ i that is not a space, or le
+⦃
+  ⧖:cps,i,le
+  ⧗:cps̱,i,le
+  ⥀ ⦃
+    ⧖:cps,i,le
+    ⧗:cps̱,i,le
+    ⧗:i ⧗:le ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:cps̱,i ᚳ ᛋ ⋎
+    ⋔ ⦃ ⧖:e △ ⊞ ⧗:e ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⌁ ⧖:r ⌁̱ ⧗:r
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ⟩ ‹skipsp› ⸫
+⍝ ‹skipns› cps i le: the first index ≥ i that is a space, or le
+⦃
+  ⧖:cps,i,le
+  ⧗:cps̱,i,le
+  ⥀ ⦃
+    ⧖:cps,i,le
+    ⧗:cps̱,i,le
+    ⧗:i ⧗:le ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:cps̱,i ᚳ ᛋ ‹not› ⋎
+    ⋔ ⦃ ⧖:e △ ⊞ ⧗:e ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⌁ ⧖:r ⌁̱ ⧗:r
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ⟩ ‹skipns› ⸫
+
+⍝ ‹ishdr› cps ls le: the line ls … le−1 is a plane header (it starts with ⧉)
+⦃
+  ⧖:cps,ls,le
+  ⧗:cps̱,ls,le ‹skipsp› ⧖:i
+  ⧗:cps̱,i ᚳ #10697# ᛖ ⧗:i ⧗:le ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ŧ⟩ ‹ishdr› ⸫
+
+⍝ ‹hashdr› cps: some line of the file is a plane header
+⦃
+  ⧖:cps
+  ⧗:cps̱ ○ ⊕
+  ⍝ the loop carries [cps ls found]
+  ⥀ ⦃
+    ⧖:cps,ls,found
+    ⧗:cps̱,ls ‹eol› ⧖:le
+    ⧗:cps̱ ⧗:le △ ⊞ ⧗:found ⧗:cps̱,ls,le ‹ishdr› ⋏
+    ⍿⁰ ⧗:le ⧗:cps̱ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋏ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:cps,ls,found ⧗:found
+⦄ ⟨⟗⟦ℤ⟧ ⊸ ŧ⟩ ‹hashdr› ⸫
+
+⍝ ‹hdrparse› cps ls le: whether the header line is well formed, its z and its n
+⦃
+  ⧖:cps,ls,le
+  ⧗:cps̱,ls,le ‹skipsp› ⧖:i0
+  ⧗:cps̱ ⧗:i0 △ ⊞ ⧗:le ‹skipns› ⧖:e0
+  ⧗:cps̱,e0,le ‹skipsp› ⧖:i1 ⧗:cps̱,i1,le ‹skipns› ⧖:e1
+  ⧗:cps̱,e1,le ‹skipsp› ⧖:i2 ⧗:cps̱,i2,le ‹skipns› ⧖:e2
+  ⧗:cps̱,e2,le ‹skipsp› ⧖:i3
+  ⧗:cps̱,i1,e1 #4# ‹allcls› ⧖:okz
+  ⧗:cps̱,i2,e2 #3# ‹allcls› ⧖:okn
+  ⧗:e0 ⧗:i0 △ ⊞ ᛖ ⧗:okz ⋎ ⧗:okn ⋎ ⧗:i3 ⧗:le ᛖ ⋎ ⧖:ok
+  ⧗:cps̱,i1,e1,ok ⧗:ok ⋔ ⦃ ⌁ ‹btval› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁̱ ○ ⦄ ⁼ ⧖:z
+  ⧗:cps̱,i2,e2,ok ⧗:ok ⋔ ⦃ ⌁ ‹supval› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁̱ ○ ⦄ ⁼ ⧖:n
+  ⧗:ok,z,n
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ŧ ℤ ℤ⟩ ‹hdrparse› ⸫
+
+⍝ ‹header› out cps path line ls le: a header line becomes a marker record
+⍝ [14 line 1 0 −9 z n 0 0], whose line is the plane's origin with y = 0
+⦃
+  ⧖:out,cps,path,line,ls,le
+  ⧗:cps̱,ls,le ‹hdrparse› ⧖:ok,z,n
+  ⧗:line ‹plline› ⧖:fl
+  ⧗:out̵,patẖ,line,fl,z,n ⧗:ok ⋔ ⦃ ‹hdrrec› ⦄ ⦃ ‹hdrbad› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹header› ⸫
+⦃
+  ⧖:out,path,line,fl,z,n
+  ⧗:out̵ #14# ⍆̵ ○ ⧗:fl △ ⊞ ⧗:line ‹plf› ⧗:z ○ ‹plpack› ⍆̵ △ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ⧗:z ⍆̵ ⧗:n ⍆̵ ○ ⍆̵ ○ ⍆̵
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹hdrrec› ⸫
+⦃
+  ⧖:out,path,line,fl,z,n
+  ⧗:patẖ ⧗:line ‹plf› ⧗:fl ‹erratfl›
+  $malformed plane header: it is ⧉ z ⁿ, with z the plane's ordinal and n the number of planes (A.1.1)\n$ ⎙̵
+  ⧗:out̵ ⌁̵ ↯
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹hdrbad› ⸫
+
+⍝ ‹line2› out cps path line ls le: one line of a file, or a plane header
+⦃
+  ⧖:out,cps,path,line,ls,le
+  ⧗:out̵,cps̱,patẖ,line,ls,le ⧗:line ‹isplane› ⋔ ⦃ ‹line2p› ⦄ ⦃ ‹line› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹line2› ⸫
+⦃
+  ⧖:out,cps,path,line,ls,le
+  ⧗:out̵,cps̱,patẖ,line,ls,le ⧗:cps̱,ls,le ‹ishdr› ⋔ ⦃ ‹header› ⦄ ⦃ ‹line› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹line2p› ⸫
+
+⍝ ‹nextl› cps ls le line: the line after this one (a header starts its plane's y again)
+⦃
+  ⧖:cps,ls,le,line
+  ⧗:cps̱,ls,le,line ⧗:line ‹isplane› ⋔ ⦃ ‹nextlp› ⦄ ⦃ ⧖:l ⌁ ⌁ ⌁̱ ⧗:l △ ⊞ ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ℤ⟩ ‹nextl› ⸫
+⦃
+  ⧖:cps,ls,le,line
+  ⧗:cps̱,ls,le,line ⧗:cps̱,ls,le ‹ishdr› ⋔ ⦃ ‹hdrnext› ⦄ ⦃ ⧖:l ⌁ ⌁ ⌁̱ ⧗:l △ ⊞ ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ℤ⟩ ‹nextlp› ⸫
+⦃
+  ⧖:cps,ls,le,line
+  ⧗:cps̱,ls,le ‹hdrparse› ⧖:ok,z,n
+  △ ⧗:line ‹plline› △ ⊞ ⧗:line ‹plf› ⧗:z ○ ‹plpack›
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ℤ⟩ ‹hdrnext› ⸫
+
+⍝ ---- folding (A.1.2)
+
+⍝ ‹reclen› toks j: the length of the record at slot j
+⦃ ⧖:toks,j ⧗:toks̱ ⧗:j #7# ⊞ ᚳ ⧖:n ⧗:toks̱ ⧗:j #8# ⊞ ⧗:n ⊞ ᚳ ⧗:n ⊞ #9# ⊞ ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ‹reclen› ⸫
+
+⍝ ‹isbreath› toks j: the record at j is a breath ⸱, which holds a cell and is then dropped
+⦃
+  ⧖:toks,j
+  ⧗:toks̱,j ᚳ #8# ᛖ ⧗:toks̱ ⧗:j #7# ⊞ ᚳ △ ᛖ ⋎ ⧗:toks̱ ⧗:j #8# ⊞ ᚳ #11825# ᛖ ⋎
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ŧ⟩ ‹isbreath› ⸫
+
+⍝ The plane table P holds seven slots per plane: z n file start end header hline, where
+⍝ start … end−1 are its records' positions in the index X, header is 1 if the plane has a
+⍝ header, and hline is the header's packed line (with y = 0).
+
+⦃ ⧖:P,p,k ⧗:P̵ ⧗:p #7# ⊠ ⧗:k ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pget› ⸫
+⦃ ⧖:P,p,k,v ⧗:P̵ ⧗:p #7# ⊠ ⧗:k ⊞ ⧗:v ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pput› ⸫
+⦃ ‹len› #7# ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pnum› ⸫
+
+⍝ ‹ptscan› toks path: the plane table and the index of the records (breaths included)
+⦃
+  ⧖:toks,path
+  ⧗:toks̱,patẖ ⟦ ○ ⟧ ⟦ ○ ⟧ #6# #-1#
+  ⍝ the loop carries [toks path P X j cur]
+  ⥀ ⦃
+    ⧖:toks,path,P,X,j,cur
+    ⧗:toks̱,patẖ,P̵,X̵,j,cur ⧗:j ⧗:toks̱ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:toks,path,P,X,j,cur ⧗:toks̱,patẖ,P̵,X̵,j,cur ‹ptscan1› ⧖:P,X,j,cur ⧗:toks̱,patẖ,P̵,X̵,j,cur ⊕ ⦄
+  ⦄
+  ⧖:toks,path,P,X,j,cur ⧗:P̵,X̵
+⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⊸ ⟦ℤ⟧ ⟦ℤ⟧⟩ ‹ptscan› ⸫
+⦃
+  ⧖:toks,path,P,X,j,cur
+  ⧗:toks̱,j ᚳ ⧖:kind
+  ⧗:toks̱,patẖ,P̵,X̵,j,cur ⧗:kind #14# ᛖ ⋔ ⦃ ‹ptmark› ⦄ ⦃ ‹ptrec› ⦄ ⁼ ⧖:P,X,cur
+  ⧗:P̵,X̵ ⧗:j ⧗:toks̱,j ‹reclen› ⊞ ⧗:cur
+⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ⟩ ‹ptscan1› ⸫
+⍝ a header: a new plane, unless tokens of the same file came before it
+⦃
+  ⧖:toks,path,P,X,j,cur
+  ⧗:toks̱ ⧗:j △ ⊞ ᚳ ⧖:line
+  ⧗:P̵,cur #5# ‹pget› ⧖:P,hdr ⧗:P̵,cur #2# ‹pget› ⧖:P,f0 ⧗:P̵,cur #3# ‹pget› ⧖:P,s0
+  ⧗:hdr ○ ᛖ ⧗:cur #-1# ᛖ ‹not› ⋎ ⧗:f0 ⧗:line ‹plf› ᛖ ⋎ ⧖:early
+  ⧗:X̵ ⟗ ⧗:s0,toks̱,patẖ ⧗:early ⋔ ⦃ ‹ptearly› ⦄ ⦃ ⌁̱ ⌁̱ ⌁ ⌁̱ ⦄ ⁼ ⧖:X
+  ⧗:X̵ ‹len› ⧖:X,at
+  ⧗:P̵ ‹pnum› ⧖:P,np
+  ⧗:P̵ ⧗:toks̱ ⧗:j #5# ⊞ ᚳ ⍆̵ ⧗:toks̱ ⧗:j #6# ⊞ ᚳ ⍆̵ ⧗:line ‹plf› ⍆̵ ⧗:at ⍆̵ ⧗:at ⍆̵ △ ⍆̵ ⧗:line ⍆̵
+  ⧗:X̵ ⧗:np
+⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ℤ⟩ ‹ptmark› ⸫
+⦃
+  ⧖:X,s0,toks,path
+  ⧗:X̱,s0 ᚳ ⧖:r
+  ⧗:toks̱ ⧗:r △ ⊞ ᚳ ⧖:ln ⧗:toks̱ ⧗:r #2# ⊞ ᚳ ⧖:cl
+  ⧗:patẖ,ln,cl ‹errat› $a file with plane headers starts with one: this token comes before the first ⧉ (A.1.1)\n$ ⎙̵
+  △ ‹exit›
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⟗⟦ℤ⟧ ⟗ʃ ⊸⟩ ‹ptearly› ⸫
+⍝ a token: into the index, in the current plane (the tokens of a file without a header are its plane ○)
+⦃
+  ⧖:toks,path,P,X,j,cur
+  ⧗:toks̱ ⧗:j △ ⊞ ᚳ ‹plf› ⧖:f
+  ⧗:P̵,cur #2# ‹pget› ⧖:P,f0
+  ⧗:cur #-1# ᛖ ⧗:f0 ⧗:f ᛖ ‹not› ⋏ ⧖:fresh
+  ⧗:X̵ ‹len› ⧖:X,at
+  ⧗:P̵ ‹pnum› ⧖:P,np
+  ⧗:P̵,at,f ⧗:fresh ⋔ ⦃ ⧖:a,ff ○ ⍆̵ △ ⍆̵ ⧗:ff ⍆̵ ⧗:a ⍆̵ ⧗:a ⍆̵ ○ ⍆̵ ○ ⍆̵ ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:P
+  ⧗:np ⧗:cur ⧗:fresh ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:c2
+  ⧗:P̵,c2 #4# ⧗:at △ ⊞ ‹pput› ⧖:P
+  ⧗:P̵ ⧗:X̵ ⧗:j ⍆̵ ⧗:c2
+⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ℤ⟩ ‹ptrec› ⸫
+
+⍝ ‹ptcheck› path P: every header counts the module's planes, and no two planes share a z
+⦃
+  ⧖:path,P
+  ⧗:P̵ ‹pnum› ⧖:P,np
+  ⧗:patẖ,P̵,np ○
+  ⥀ ⦃
+    ⧖:path,P,np,p
+    ⧗:patẖ,P̵,np,p ⧗:p ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:path,P,np,p ⧗:patẖ,P̵,np,p ‹ptcheck1› ⧖:P ⧗:patẖ,P̵,np ⧗:p △ ⊞ ⊕ ⦄
+  ⦄
+  ⧖:path,P,np,p ⧗:P̵
+⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹ptcheck› ⸫
+⦃
+  ⧖:path,P,np,p
+  ⧗:P̵,p ○ ‹pget› ⧖:P,z ⧗:P̵,p △ ‹pget› ⧖:P,n ⧗:P̵,p #2# ‹pget› ⧖:P,f
+  ⧗:P̵,p #5# ‹pget› ⧖:P,hdr ⧗:P̵,p #6# ‹pget› ⧖:P,hl
+  ⧗:P̵,p,z ‹psamez› ⧖:P,dup
+  ⧗:hl ‹plline› ⧗:hdr ○ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:fl
+  ⧗:n ⧗:np ≶ ⋔ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ #-1# ⦄ ⧖:cmp
+  ⧗:patẖ,f,fl,z,n,np,cmp,hdr,dup
+  ⧗:dup #-1# ᛖ ‹not› ⧗:cmp ○ ᛖ ‹not› ⋏ ⋔ ⦃ ‹ptbad› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⦄ ⁼
+  ⧗:P̵
+⦄ ⟨⟗ʃ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ptcheck1› ⸫
+⍝ ‹psamez› P p z: the first plane before p with the same z, or −1
+⦃
+  ⧖:P,p,z
+  ⧗:P̵,p,z ○ #-1#
+  ⥀ ⦃
+    ⧖:P,p,z,q,found
+    ⧗:P̵,p,z,q,found ⧗:q ⧗:p ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹psamez1› ⊕ ⦄
+  ⦄
+  ⧖:P,p,z,q,found ⧗:P̵,found
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹psamez› ⸫
+⦃
+  ⧖:P,p,z,q,found
+  ⧗:P̵,q ○ ‹pget› ⧖:P,zq
+  ⧗:P̵,p,z ⧗:q △ ⊞ ⧗:found ⧗:q ⧗:zq ⧗:z ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹psamez1› ⸫
+⦃
+  ⧖:path,f,fl,z,n,np,cmp,hdr,dup
+  ⧗:patẖ,f,fl ‹erratfl›
+  #3# ⧗:cmp △ ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:dup #-1# ᛖ ‹not› ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:hdr ○ ᛖ ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼ ⧖:code
+  ⧗:z ⧗:code △ ᛖ ⋔ ⦃ $collapsed dimension: two planes have z = $ ⎙̵ ‹pbt› $ (A.1.2)$ ⎙̵ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:n,np ⧗:code #2# ᛖ ⋔ ⦃ ⧖:a,b $missing dimension: the header says $ ⎙̵ ⧗:a ᛁ $ planes, but the module has $ ⎙̵ ⧗:b ᛁ $ (A.1.2)$ ⎙̵ ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:n,np ⧗:code #3# ᛖ ⋔ ⦃ ⧖:a,b $phantom dimension: the header says $ ⎙̵ ⧗:a ᛁ $ planes, but the module has $ ⎙̵ ⧗:b ᛁ $ (A.1.2)$ ⎙̵ ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:np ⧗:code #4# ᛖ ⋔ ⦃ $phantom dimension: a file without a plane header is plane ○ of a one-plane module, but this module has $ ⎙̵ ᛁ $ planes (A.1.1)$ ⎙̵ ⦄ ⦃ ⌁ ⦄ ⁼
+  $\n$ ⎙̵ △ ‹exit›
+⦄ ⟨⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸⟩ ‹ptbad› ⸫
+
+⍝ ‹ptorder› P: the planes in ascending z
+⦃
+  ⧖:P
+  ⧗:P̵ ‹pnum› ⧖:P,np
+  ⟦ ○ ⟧ ⧗:np ‹fillm1› ⧖:O
+  ⧗:P̵,O̵,np ○
+  ⥀ ⦃
+    ⧖:P,O,np,p
+    ⧗:P̵,O̵,np,p ⧗:p ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:P,O,np,p ⧗:P̵,p,np ‹prank› ⧖:P,r ⧗:P̵ ⧗:O̵,r,p ‹wr› ⧗:np ⧗:p △ ⊞ ⊕ ⦄
+  ⦄
+  ⧖:P,O,np,p ⧗:P̵,O̵
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ⟦ℤ⟧⟩ ‹ptorder› ⸫
+⍝ ‹prank› P p np: how many planes have a smaller z than p
+⦃
+  ⧖:P,p,np
+  ⧗:P̵,p ○ ‹pget› ⧖:P,z
+  ⧗:P̵,z,np ○ ○
+  ⥀ ⦃
+    ⧖:P,z,np,q,r
+    ⧗:P̵,z,np,q,r ⧗:q ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:P,z,np,q,r ⧗:P̵,q ○ ‹pget› ⧖:P,zq ⧗:P̵,z,np ⧗:q △ ⊞ ⧗:r ⧗:zq ⧗:z ≶ ⋔ ⦃ ⦄ ⦃ ⦄ ⦃ △ ⊞ ⦄ ⊕ ⦄
+  ⦄
+  ⧖:P,z,np,q,r ⧗:P̵,r
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹prank› ⸫
+⍝ ‹fillm1› a n: a with n slots of −1 appended
+⦃
+  ⧖:a,n
+  ⧗:a̵,n
+  ⥀ ⦃ ⧖:a,k ⧗:a̵,k ⧗:k ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:a,k ⧗:a̵ #-1# ⍆̵ ⧗:k △ ⊟ ⊕ ⦄ ⦃ ⦶ ⦄ ⦄
+  ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹fillm1› ⸫
+
+⍝ ‹fold› toks path: the folded token stream of a module's planes, breaths dropped and
+⍝ each cell's x written into its line
+⦃
+  ⧖:toks,path
+  ⧗:toks̱,patẖ ‹ptscan› ⧖:P,X
+  ⧗:patẖ,P̵ ‹ptcheck› ⧖:P
+  ⧗:P̵ ‹ptorder› ⧖:P,O
+  ⧗:P̵ ‹pnum› ⧖:P,np
+  ⧗:P̵,np ‹pcursors› ⧖:P,K
+  ⧗:toks̱ ⟦ ○ ⟧ ○ #6# ‹copy› ⧖:out
+  ⧗:toks̱,P̵,X̵,O̵,out̵,K̵,np △
+  ⍝ the loop carries [toks P X O out K np y]
+  ⥀ ⦃
+    ⧖:toks,P,X,O,out,K,np,y
+    ⧗:P̵,K̵,np ‹fdone› ⧖:P,K,done
+    ⧗:toks̱,P̵,X̵,O̵,out̵,K̵,np,y ⧗:done ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:toks,P,X,O,out,K,np,y ⧗:toks̱,P̵,X̵,O̵,out̵,K̵,np,y ‹fline› ⧖:P,X,O,out,K,y ⧗:toks̱,P̵,X̵,O̵,out̵,K̵,np,y ⊕ ⦄ ⁼
+  ⦄
+  ⧖:toks,P,X,O,out,K,np,y
+  ⧗:P̵ ⌁̵ ⧗:X̵ ⌁̵ ⧗:O̵ ⌁̵ ⧗:K̵ ⌁̵ ⧗:out̵
+⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⊸ ⟦ℤ⟧⟩ ‹fold› ⸫
+⍝ ‹pcursors› P np: each plane's first record
+⦃
+  ⧖:P,np
+  ⧗:P̵ ⟦ ○ ⟧ ⧗:np ○
+  ⥀ ⦃
+    ⧖:P,K,np,p
+    ⧗:P̵,K̵,np,p ⧗:p ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:P,K,np,p ⧗:P̵,p #3# ‹pget› ⧖:P,s ⧗:P̵ ⧗:K̵ ⧗:s ⍆̵ ⧗:np ⧗:p △ ⊞ ⊕ ⦄
+  ⦄
+  ⧖:P,K,np,p ⧗:P̵,K̵
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧⟩ ‹pcursors› ⸫
+⍝ ‹fdone› P K np: every plane is used up
+⦃
+  ⧖:P,K,np
+  ⧗:P̵,K̵,np ○ ⦶
+  ⥀ ⦃
+    ⧖:P,K,np,p,acc
+    ⧗:P̵,K̵,np,p,acc ⧗:p ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:P,K,np,p,acc ⧗:P̵,p #4# ‹pget› ⧖:P,e ⧗:K̵,p ‹rd› ⧖:K,k
+        ⧗:P̵,K̵,np ⧗:p △ ⊞ ⧗:acc ⧗:k ⧗:e ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⊕ ⦄
+  ⦄
+  ⧖:P,K,np,p,acc ⧗:P̵,K̵,acc
+⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ŧ⟩ ‹fdone› ⸫
+
+⍝ ‹fline› toks P X O out K np y: line y of every plane, cell by cell
+⦃
+  ⧖:toks,P,X,O,out,K,np,y
+  ⧗:toks̱,P̵,X̵,K̵,np,y ‹flends› ⧖:P,X,K,L,w
+  ⧗:toks̱,X̵,O̵,out̵,K̵,L̵,np,y,w ‹fcells› ⧖:X,O,out,K,L
+  ⧗:K̵ ⌁̵
+  ⧗:P̵,X̵,O̵,out̵,L̵ ⧗:y △ ⊞
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ℤ⟩ ‹fline› ⸫
+⍝ ‹flends› toks P X K np y: where line y ends in each plane, and the widest line
+⦃
+  ⧖:toks,P,X,K,np,y
+  ⧗:toks̱,P̵,X̵,K̵ ⟦ ○ ⟧ ⧗:np,y ○ ○
+  ⍝ the loop carries [toks P X K L np y p w]
+  ⥀ ⦃
+    ⧖:toks,P,X,K,L,np,y,p,w
+    ⧗:toks̱,P̵,X̵,K̵,L̵,np,y,p,w ⧗:p ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:toks,P,X,K,L,np,y,p,w ⧗:toks̱,P̵,X̵,K̵,L̵,y,p,w ‹flend1› ⧖:P,X,K,L,w
+        ⧗:toks̱,P̵,X̵,K̵,L̵,np,y ⧗:p △ ⊞ ⧗:w ⊕ ⦄
+  ⦄
+  ⧖:toks,P,X,K,L,np,y,p,w ⧗:P̵,X̵,K̵,L̵,w
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ℤ⟩ ‹flends› ⸫
+⦃
+  ⧖:toks,P,X,K,L,y,p,w
+  ⧗:K̵,p ‹rd› ⧖:K,k0
+  ⧗:P̵,p #4# ‹pget› ⧖:P,e
+  ⧗:toks̱,X̵,k0,e,y ‹fscan› ⧖:X,le
+  ⧗:L̵ ⧗:le ⍆̵ ⧖:L
+  ⧗:P̵,X̵,K̵,L̵ ⧗:w ⧗:le ⧗:k0 ⊟ ‹max›
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ℤ⟩ ‹flend1› ⸫
+⍝ ‹fscan› toks X i e y: the first index ≥ i (and below e) whose record is not on line y
+⦃
+  ⧖:toks,X,i,e,y
+  ⧗:toks̱,X̵,i,e,y
+  ⥀ ⦃
+    ⧖:toks,X,i,e,y
+    ⧗:X̵,i ‹rd› ⧖:X,r
+    ⧗:toks̱,X̵,i,e,y ⧗:i ⧗:e ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:toks̱ ⧗:r △ ⊞ ᚳ ‹ply› ⧗:y ᛖ ⋎
+    ⋔ ⦃ ⧖:a,b △ ⊞ ⧗:a,b ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:toks,X,i,e,y ⧗:X̵,i
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹fscan› ⸫
+
+⍝ ‹fcells› toks X O out K L np y w: the cells of line y, x by x
+⦃
+  ⧖:toks,X,O,out,K,L,np,y,w
+  ⧗:toks̱,X̵,O̵,out̵,K̵,L̵,np,y,w ○
+  ⍝ the loop carries [toks X O out K L np y w x]
+  ⥀ ⦃
+    ⧖:toks,X,O,out,K,L,np,y,w,x
+    ⧗:toks̱,X̵,O̵,out̵,K̵,L̵,np,y,w,x ⧗:x ⧗:w ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:toks,X,O,out,K,L,np,y,w,x ⧗:toks̱,X̵,O̵,out̵,K̵,L̵,np,y,x ‹fcol› ⧖:X,O,out,K,L
+        ⧗:toks̱,X̵,O̵,out̵,K̵,L̵,np,y,w ⧗:x △ ⊞ ⊕ ⦄
+  ⦄
+  ⧖:toks,X,O,out,K,L,np,y,w,x ⧗:X̵,O̵,out̵,K̵,L̵
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧⟩ ‹fcells› ⸫
+⍝ ‹fcol› toks X O out K L np y x: the cells at x, the planes in ascending z on odd lines
+⍝ and in descending z on even ones
+⦃
+  ⧖:toks,X,O,out,K,L,np,y,x
+  ⧗:toks̱,X̵,O̵,out̵,K̵,L̵,np,y,x ○
+  ⥀ ⦃
+    ⧖:toks,X,O,out,K,L,np,y,x,k
+    ⧗:toks̱,X̵,O̵,out̵,K̵,L̵,np,y,x,k ⧗:k ⧗:np ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:toks,X,O,out,K,L,np,y,x,k ⧗:toks̱,X̵,O̵,out̵,K̵,L̵,np,y,x,k ‹fcell› ⧖:X,O,out,K,L
+        ⧗:toks̱,X̵,O̵,out̵,K̵,L̵,np,y,x ⧗:k △ ⊞ ⊕ ⦄
+  ⦄
+  ⧖:toks,X,O,out,K,L,np,y,x,k ⧗:X̵,O̵,out̵,K̵,L̵
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧⟩ ‹fcol› ⸫
+⦃
+  ⧖:toks,X,O,out,K,L,np,y,x,k
+  ⧗:k ⧗:np ⧗:k ⊟ △ ⊟ ⧗:y ᚹ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:kk
+  ⧗:O̵,kk ‹rd› ⧖:O,p
+  ⧗:K̵,p ‹rd› ⧖:K,k0
+  ⧗:L̵,p ‹rd› ⧖:L,le
+  ⧗:k0 ⧗:x ⊞ ⧖:i
+  ⧗:X̵,i ‹rd› ⧖:X,r
+  ⧗:i ⧗:le ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:toks̱,r ‹isbreath› ‹not› ⋎ ⧖:take
+  ⧗:toks̱,out̵,r,x ⧗:take ⋔ ⦃ ‹femit› ⦄ ⦃ ⌁ ⌁ ⧖:o ⌁̱ ⧗:o̵ ⦄ ⁼ ⧖:out
+  ⧗:X̵,O̵,out̵,K̵,L̵
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧ ⟦ℤ⟧⟩ ‹fcell› ⸫
+⍝ ‹femit› toks out r x: copy the record at r, its line carrying x
+⦃
+  ⧖:toks,out,r,x
+  ⧗:out̵ ‹len› ⧖:out,at
+  ⧗:toks̱,out̵,r ⧗:toks̱,r ‹reclen› ‹copy› ⧖:out
+  ⧗:toks̱ ⧗:r △ ⊞ ᚳ ⧖:line
+  ⧗:out̵ ⧗:at △ ⊞ ⧗:line,x ‹plsetx› ‹wr›
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹femit› ⸫
+
+⍝ ---- --fold and --unfold (A.1.4)
+
+⍝ ‹foldpr› toks: the folded module in logical order, one line per y
+⦃
+  ⧖:toks
+  ⧗:toks̱ #6# △ ⦶
+  ⍝ the loop carries [toks j y first]
+  ⥀ ⦃
+    ⧖:toks,j,y,first
+    ⧗:toks̱,j,y,first ⧗:j ⧗:toks̱ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:toks,j,y,first ⧗:toks̱,j,y,first ‹foldpr1› ⧖:j,y,first ⧗:toks̱,j,y,first ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁̱ $\n$ ⎙̵
+⦄ ⟨⟗⟦ℤ⟧ ⊸⟩ ‹foldpr› ⸫
+⦃
+  ⧖:toks,j,y,first
+  ⧗:toks̱ ⧗:j △ ⊞ ᚳ ‹ply› ⧖:ry
+  ⧗:ry ⧗:y ⊟ ‹pnl›
+  ⧗:first ⧗:ry ⧗:y ≶ ⋔ ⦃ ⦄ ⦃ ⌁ ⦶ ⦄ ⦃ ⦄ ‹not› ⋔ ⦃ $ $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:toks̱,j ‹praw›
+  ⧗:j ⧗:toks̱,j ‹reclen› ⊞ ⧗:ry ⊕
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ŧ ⊸ ℤ ℤ ŧ⟩ ‹foldpr1› ⸫
+⍝ ‹praw› toks j: print the raw text of the record at j
+⦃
+  ⧖:toks,j
+  ⧗:toks̱ ⧗:j #7# ⊞ ᚳ ⧖:n
+  ⧗:toks̱ ⧗:j #8# ⊞ ⧗:n ⊞ ᚳ ⧖:rn
+  ⧗:toks̱ ⧗:j #9# ⊞ ⧗:n ⊞ ⧗:rn ‹ptext›
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸⟩ ‹praw› ⸫
+⍝ ‹pnl› n: n newlines (none if n ≤ 0)
+⦃
+  ⥀ ⦃ ⧖:n ⧗:n ⧗:n ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ $\n$ ⎙̵ △ ⊟ ⊕ ⦄ ⦃ ⦶ ⦄ ⦄
+  ⌁
+⦄ ⟨ℤ ⊸⟩ ‹pnl› ⸫
+⍝ ‹psup› n: n ≥ 0 in superscript digits
+⦃
+  ⧖:n
+  ⧗:n #10# ‹modp› ⧖:d
+  ⧗:n ⧗:d ⊟ #10# ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:q
+  ⧗:q ⧗:q ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ‹psup› ⦄ ⦃ ⌁ ⦄
+  ⧗:d ⍿⁰ △ ≶ ⋔ ⦃ ⌁ #185# ⦄ ⦃ ⍿⁰ #3# ≶ ⋔ ⦃ ⌁ #179# ⦄ ⦃ #8304# ⊞ ⦄ ⦃ ⌁ #178# ⦄ ⦄ ⦃ #8304# ⊞ ⦄ ᚢ
+⦄ ⟨ℤ ⊸⟩ ‹psup› ⸫
+
+⍝ ‹unfoldpr› toks n: a one-plane module dealt over n planes, cell by cell, as on-disk text.
+⍝ Each line's cells go to the planes in turn (ascending z on odd lines, descending on even
+⍝ ones), so folding the output gives the tokens back in order. The planes are z = −h … ,
+⍝ h = ⌊(n−1)/2⌋, and a last line of breaths keeps the module balanced (§1.2).
+⦃
+  ⧖:toks,n
+  ⧗:toks̱,n ○
+  ⥀ ⦃
+    ⧖:toks,n,i
+    ⧗:toks̱,n,i ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:toks,n,i ⧗:toks̱,n,i ‹unplane› ⧗:toks̱,n ⧗:i △ ⊞ ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁̱
+  ⧗:toks̱ ‹nrec› #3# ‹modp› ⧖:r
+  ⧗:r ○ ᛖ ‹not› ⋔ ⦃ $⸱$ ⎙̵ ⦄ ∅ ⁼ ⧗:r △ ᛖ ⋔ ⦃ $ ⸱$ ⎙̵ ⦄ ∅ ⁼ ⧗:r ○ ᛖ ‹not› ⋔ ⦃ $\n$ ⎙̵ ⦄ ∅ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸⟩ ‹unfoldpr› ⸫
+⍝ ‹nrec› toks: the number of records
+⦃
+  ⧖:toks
+  ⧗:toks̱ #6# ○
+  ⥀ ⦃
+    ⧖:toks,j,c
+    ⧗:toks̱,j,c ⧗:j ⧗:toks̱ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:toks,j,c ⧗:toks̱ ⧗:j ⧗:toks̱,j ‹reclen› ⊞ ⧗:c △ ⊞ ⊕ ⦄
+  ⦄
+  ⧖:toks,j,c ⧗:c
+⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ⟩ ‹nrec› ⸫
+⍝ ‹unplane› toks n i: plane i, its header and its lines
+⦃
+  ⧖:toks,n,i
+  ⧗:n △ ⊟ ⧗:n △ ⊟ #2# ‹modp› ⊟ #2# ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:h
+  $⧉ $ ⎙̵ ⧗:i ⧗:h ⊟ ‹pbt› $ $ ⎙̵ ⧗:n ‹psup› $\n$ ⎙̵
+  ⧗:toks̱,n,i #6# ○
+  ⍝ the loop carries [toks n i j py]
+  ⥀ ⦃
+    ⧖:toks,n,i,j,py
+    ⧗:toks̱,n,i,j,py ⧗:j ⧗:toks̱ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:toks,n,i,j,py ⧗:toks̱,n,i,j,py ‹unline› ⧖:j,py ⧗:toks̱,n,i,j,py ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⌁̱
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹unplane› ⸫
+⍝ ‹unline› toks n i j py: the cells of plane i on the line that starts at record j
+⦃
+  ⧖:toks,n,i,j,py
+  ⧗:toks̱ ⧗:j △ ⊞ ᚳ ⧖:y
+  ⧗:y ⧗:py ⊟ △ ⊟ ‹pnl›
+  ⧗:toks̱,j,y ‹ungather› ⧖:R,je
+  ⧗:R̵ ‹len› ⧖:R,m
+  ⧗:toks̱,R̵,m,n,i,y ‹untoks›
+  $\n$ ⎙̵
+  ⧗:je ⧗:y
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ⟩ ‹unline› ⸫
+⍝ ‹ungather› toks j y: the records of line y from j on, and where the next line starts
+⦃
+  ⧖:toks,j,y
+  ⧗:toks̱ ⟦ ○ ⟧ ⧗:j,y
+  ⥀ ⦃
+    ⧖:toks,R,j,y
+    ⧗:toks̱,R̵,j,y ⧗:j ⧗:toks̱ ᚴ ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:toks̱ ⧗:j △ ⊞ ᚳ ⧗:y ᛖ ⋎
+    ⋔ ⦃ ⧖:toks,R,j,y ⧗:R̵ ⧗:j ⍆̵ ⧖:R ⧗:toks̱,R̵ ⧗:j ⧗:toks̱,j ‹reclen› ⊞ ⧗:y ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:toks,R,j,y ⧗:R̵,j
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ungather› ⸫
+⍝ ‹untoks› toks R m n i y: plane i's cells among the m records R of line y, in on-disk order
+⦃
+  ⧖:toks,R,m,n,i,y
+  ⧗:n ⧗:i ⊟ △ ⊟ ⧖:r
+  ⧗:m △ ⊟ ⧗:r ⊟ ⧖:span
+  ⧗:span ⧗:span ⧗:n ‹modp› ⊟ ⧗:r ⊞ ⧖:tlast
+  ⧗:i ⧗:tlast ⧗:y ᚹ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:t0
+  ⧗:n ⧗:n ⊝ ⧗:y ᚹ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:step
+  ⧗:toks̱,R̵,m,step,y,t0 ⦶
+  ⍝ the loop carries [toks R m step y t first]
+  ⥀ ⦃
+    ⧖:toks,R,m,step,y,t,first
+    ⧗:toks̱,R̵,m,step,y,t,first ⧗:t ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:t ⧗:m ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎
+    ⋔ ⦃ ⧖:toks,R,m,step,y,t,first ⧗:toks̱,R̵,y,t,first ‹untok› ⧖:R ⧗:toks̱,R̵,m,step,y ⧗:t ⧗:step ⊞ ⊕ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:toks,R,m,step,y,t,first ⧗:R̵ ⌁̵
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸⟩ ‹untoks› ⸫
+⦃
+  ⧖:toks,R,y,t,first
+  ⧗:first ‹not› ⋔ ⦃ $ $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:R̵,t ‹rd› ⧖:R,r
+  ⧗:toks̱,r,y ‹pphys›
+  ⧗:R̵
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ŧ ⊸ ⟦ℤ⟧⟩ ‹untok› ⸫
+⍝ ‹pphys› toks j y: the token at j as it is written on line y: on an even line a bracket
+⍝ and a string's delimiters are mirrored (§1.1)
+⦃
+  ⧖:toks,j,y
+  ⧗:toks̱,j ᚳ ⧖:kind
+  ○ ⧗:kind #11# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:kind #12# ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:y ᚹ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:code
+  ⧗:toks̱,j,code ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ‹praw› ⦄ ⦃ △ ᛖ ⋔ ⦃ ‹pmirb› ⦄ ⦃ ‹pmirs› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹pphys› ⸫
+⦃
+  ⧖:toks,j
+  ⧗:toks̱ ⧗:j #7# ⊞ ᚳ ⧖:n
+  ⧗:toks̱ ⧗:j #9# ⊞ ⧗:n ⊞ ᚳ ᛘ ᚢ
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸⟩ ‹pmirb› ⸫
+⦃
+  ⧖:toks,j
+  ⧗:toks̱ ⧗:j #7# ⊞ ᚳ ⧖:n
+  ⧗:toks̱ ⧗:j #8# ⊞ ⧗:n ⊞ ᚳ ⧖:rn
+  ⧗:j #9# ⊞ ⧗:n ⊞ ⧖:b
+  #171# ᚢ ⧗:toks̱ ⧗:b △ ⊞ ⧗:n ‹ptext› #187# ᚢ ⧗:toks̱ ⧗:b #2# ⊞ ⧗:n ⊞ ⧗:rn #2# ⊟ ⧗:n ⊟ ‹ptext›
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸⟩ ‹pmirs› ⸫
+
+⍝ ‹segend› C s: the length of the first file's path in the heap string s (up to the first U+0001)
+⦃
+  ⧖:C,s
+  ⧗:C̵,s ‹slen› ⧖:C,n
+  ⧗:C̵,s ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,s,j,n
+    ⧗:C̵,s,j ‹sat› ⧖:C,c
+    ⧗:C̵,s,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:c △ ᛖ ‹not› ⋎ ⋔ ⦃ ⧖:a △ ⊞ ⧗:a ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:C,s,j,n ⧗:C̵,j
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹segend› ⸫
+
+⍝ ‹modp› x n: x mod n in 0 … n−1 (⊜ gives the balanced remainder, which may be negative)
+⦃ ⧖:x,n ⧗:n ⧗:x ⧗:n ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⊞ ⦄ ⦄ ⟨ℤ ℤ ⊸ ℤ⟩ ‹modp› ⸫

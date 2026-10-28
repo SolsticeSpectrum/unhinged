@@ -1,0 +1,1 @@
+trith/s2/tests/check_errors/plane_bad_header.trh:1:1: error: malformed plane header: it is ⧉ z ⁿ, with z the plane's ordinal and n the number of planes (A.1.1)

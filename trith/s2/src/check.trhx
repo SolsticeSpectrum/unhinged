@@ -86,11 +86,14 @@
 
 ⍝ ---- errors and traces
 
+⍝ ‹cerr› C t: "path:line:col: error: " for token t (the file and coordinates of a plane cell, A.1.2)
 ⦃
   ⧖:C,t
-  ⧗:C̵ #6# ‹rd› ⧖:C,path ⧗:C̵,path ‹spr›
-  ⧗:t ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:t2 $:$ ⎙̵ ⧗:t2 △ ‹tf› ᛁ $:$ ⎙̵ ⧗:t2 #2# ‹tf› ᛁ ⦄ ⁼
-  $: error: $ ⎙̵
+  ⧗:C̵ #6# ‹rd› ⧖:C,path
+  ⧗:C̵ ⧗:t ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ ○ ○ ⦄ ⦃ ⧖:t2 ⧗:t2 △ ‹tf› ⧖:a ⧗:t2 #2# ‹tf› ⧖:b ⧗:a,b ⦄ ⁼ ⧖:C,ln,cl
+  ⧗:C̵,path ⧗:ln ⧗:ln ‹isplane› ⋔ ⦃ ‹plf› ⦄ ⦃ ⌁ ○ ⦄ ⁼ ‹sprseg› ⧖:C
+  ⧗:ln,cl ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ $:$ ⎙̵ ‹plpos› ⦄ ⁼
+  $: error: $ ⎙̵ ⧗:C̵
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cerr› ⸫
 ⍝ ‹die› C: end the message and stop
 ⍝ inside an instance of a generic function (register 56), it says which one (§9.4)
@@ -573,7 +576,13 @@
 ⍝ which instance a call makes, as seen from the function being checked (register 55).
 
 ⍝ ‹qtype› C tok: the type of the quotation whose ⦃ is token tok
-⦃ ⧖:C,tok ⧗:C̵,tok △ ‹tf› ⧖:C,l ⧗:C̵,tok #2# ‹tf› ⧖:C,c ⧗:C̵ %%!⦃{#l}:{#c}⦄%% ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qtype› ⸫
+⍝ (in a module of planes, by the lattice coordinates of its ⦃, which are unique: ⦃x,y,z⦄)
+⦃
+  ⧖:C,tok
+  ⧗:C̵,tok △ ‹tf› ⧖:C,l ⧗:C̵,tok #2# ‹tf› ⧖:C,c
+  ⧗:C̵,l,c ⧗:l ‹isplane› ⋔ ⦃ ⧖:C,l,c ⧗:l ‹plx1› △ ⊟ ⧖:x ⧗:l ‹ply› ⧖:y ⧗:l ‹plz› ⧖:z ⧗:C̵ %%!⦃{#x},{#y},{#z}⦄%% ⦄
+    ⦃ ⧖:C,l,c ⧗:C̵ %%!⦃{#l}:{#c}⦄%% ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qtype› ⸫
 ⍝ ‹pair› C a b: the list [a b]
 ⦃ ⧖:C,a,b ⧗:C̵ ‹lbeg› ⧖:C,e ⧗:C̵,e,a ‹ladd› ⧗:e,b ‹ladd› ⧗:e ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pair› ⸫
 ⍝ ‹regpush› C r v: append v to the list in register r
@@ -1053,7 +1062,8 @@
 ⍝ ‹cinstmake› …: a new instance's record, registered and queued for checking
 ⦃
   ⧖:C,f,b,rb,xs,fixed,key,ln,cl,old
-  ⧗:C̵ %%{key}, first called at {#ln}:{#cl}%% ⧖:C,at
+  ⧗:C̵,ln,cl ‹spos› ⧖:C,pos
+  ⧗:C̵ %%{key}, first called at {pos}%% ⧖:C,at
   ⧗:C̵,f #12# ‹vf› ⧖:C,qy
   ⧗:C̵,f,b,rb,xs,fixed,key,at ⧗:qy ○ ᛖ ⋔ ⦃ ⧖:C,f,b,rb,xs,fixed,key,at ⧗:C̵,f,b,at ‹instrec› ⦄ ⦃ ‹qinstrec› ⦄ ⁼ ⧖:C,g
   ⧗:C̵ #7# ⧗:g ‹regpush› ⧖:C
@@ -1560,7 +1570,7 @@
 ⦃
   ⧖:C,v,tok
   ⧗:C̵,v #2# ‹vf› ⧖:C,vt
-  ⧗:C̵,tok ‹cerr› $cannot move the $ ⎙̵ ⧗:v ‹vty› ‹spr› $ made at $ ⎙̵ ⧗:vt △ ‹tf› ᛁ $:$ ⎙̵ ⧗:vt #2# ‹tf› ᛁ
+  ⧗:C̵,tok ‹cerr› $cannot move the $ ⎙̵ ⧗:v ‹vty› ‹spr› $ made at $ ⎙̵ ⧗:vt △ ‹tf› ⧖:a ⧗:vt #2# ‹tf› ⧖:b ⧗:a,b ‹plpos›
   $ while it is entangled: a ⟗/⟖ shadow of it is still alive (§8.2)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹moveerr› ⸫
 
@@ -1753,7 +1763,7 @@
 ⦃
   ⧖:C,tok,ty,mtok
   ⧗:C̵,tok ‹cerr› ⧗:tok ‹plab› $ reads a void moment: its $ ⎙̵ ⧗:ty ‹spr› $ was already moved out (bound at $ ⎙̵
-  ⧗:mtok △ ‹tf› ᛁ $:$ ⎙̵ ⧗:mtok #2# ‹tf› ᛁ $)$ ⎙̵ ‹die›
+  ⧗:mtok △ ‹tf› ⧖:a ⧗:mtok #2# ‹tf› ⧖:b ⧗:a,b ‹plpos› $)$ ⎙̵ ‹die›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹voiderr› ⸫
 
 ⍝ a copy of a shadow belongs to the region where the shadow was made

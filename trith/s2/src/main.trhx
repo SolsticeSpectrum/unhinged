@@ -1,5 +1,8 @@
-⍝ ==== s2 driver: s2c main.trh [-o out] [--debug] [--include h] [--link f.c | -lNAME] [--tokens | --ast | --check | --emit-llvm]
+⍝ ==== s2 driver: s2c main.trh… [-o out] [--debug] [--include h] [--link f.c | -lNAME]
+⍝   [--tokens | --ast | --check | --emit-llvm | --fold | --unfold n]
 ⍝ The dumps print what trithc prints; without one, the program is compiled as trithc does.
+⍝ All the files given form one module; a module of several files, or one with a plane
+⍝ header ⧉, is folded from its planes first (Addendum A.1).
 
 ⎔ $trith_write_file$ ⟨⟗ʃ ⟗ʃ ⊸ ℤ⟩ ‹wfile› ⸫
 ⎔ $system$ ⟨⟗ʃ ⊸ ℤ⟩ ‹system› ⸫
@@ -22,7 +25,7 @@
 
 ⦃
   ⧖:path,out,count,rem
-  ⧗:path̵ ⎙̵ $: error: imbalance: $ ⎙̵ ⧗:count ᛁ $ tokens, $ ⎙̵ ⧗:rem ᛁ $ too many for the Ternary Balance Law\n$ ⎙̵
+  ⧗:path̵ ⟗ ○ ‹ppath› ⌁̵ $: error: imbalance: $ ⎙̵ ⧗:count ᛁ $ tokens, $ ⎙̵ ⧗:rem ᛁ $ too many for the Ternary Balance Law\n$ ⎙̵
   ⧗:out̵ ⌁̵ △ ‹exit›
 ⦄ ⟨ʃ ⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹imbal› ⸫
 
@@ -97,7 +100,7 @@
 ⦃
   ⧖:C
   ⧗:C̵ #6# ‹reg› ⧖:C,p
-  ⧗:C̵,p ‹slen› ⧖:C,n
+  ⧗:C̵,p ‹segend› ⧖:C,n
   ⧗:C̵,p ⧗:n #4# ⊟ ‹sat› ⧖:C,dot
   ⧗:C̵,p ○ ⧗:n #2# ⊟ ⧗:n #4# ⊟ ⧗:dot #46# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ‹ssub›
 ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹estripext› ⸫
@@ -163,13 +166,17 @@
 
 ⦃
   ⧖:path,out,mode
+  ⧗:path̵,out̵,mode ⍿⁰ #7# ᛖ ⋔ ⦃ ⌁ ⧖:o ⧗:o̵ ⟗ ‹foldpr› ⌁̵ ⌁̵ ⦄ ⦃ ‹run1› ⦄ ⁼
+⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹run› ⸫
+⦃
+  ⧖:path,out,mode
   ⧗:path̵,out̵,mode ⍿⁰ △ ᛖ
   ⋔ ⦃ ⌁ ⧖:o ⧗:o̵ ⟗ ‹dump› ⌁̵ ⌁̵ ⦄
     ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⧖:o ⟗ ⧗:o̵ ‹astw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
       ⦃ ⍿⁰ #3# ᛖ ⋔ ⦃ ⌁ ⧖:o ⟗ ⧗:o̵ ‹checkw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
         ⦃ ⍿⁰ #4# ᛖ ⍿¹ #14# ᛖ ⋏ ⋔ ⦃ #14# ᛖ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧖:d ⧖:o ⟗ ⧗:o̵,d ‹emitw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
           ⦃ ⧖:o,m ⟗ ⧗:o̵,m ‹compilew› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
-⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹run› ⸫
+⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹run1› ⸫
 
 ⦃
   ⧖:path,mode,out
@@ -179,11 +186,103 @@
   ⧗:rem ○ ᛖ ⋔ ⦃ ⧖:m ⌁ ⌁ ⧗:m ‹run› ⦄ ⦃ ⌁ ‹imbal› ⦄ ⁼
 ⦄ ⟨ʃ ℤ ⟦ℤ⟧ ⊸⟩ ‹main3› ⸫
 
+⍝ ‹main2› path mode src: one file; it is a module of planes if it has a header (A.1)
 ⦃
   ⧖:path,mode,src
   ⧗:src̵ ⟗ ᛞ ⧖:cps ⌁̵
-  ⧗:path̵ ⟗ ⧗:cps̵ ‹lexw› ⧗:mode ⍿¹ ⁇ ⦃ ‹main3› ⦄ ⦃ ⌁ ⌁̵ △ ‹exit› ⦄
+  ⧗:cps̵ ⟗ ‹hashdr› ⧖:planes ⧖:cps
+  ○ ⧗:planes ⧗:mode #7# ᛖ ⋏ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:mode #999# ≶ ⋔ ⦃ ⦄ ⦃ #2# ⊞ ⦄ ⦃ ⦄ ⧖:code
+  ⧗:path̵,cps̵,mode,code ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ‹main2a› ⦄
+    ⦃ ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ⧖:m ⌁̵ ⌁̵ ⧗:m ‹mainp› ⦄ ⦃ #2# ᛖ ⋔ ⦃ ‹main2u› ⦄ ⦃ ‹main2x› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨ʃ ℤ ʃ ⊸⟩ ‹main2› ⸫
+⦃
+  ⧖:path,cps,mode
+  ⧗:path̵ ⟗ ⧗:cps̵ ‹lexw› ⧗:mode ⍿¹ ⁇ ⦃ ‹main3› ⦄ ⦃ ⌁ ⌁̵ △ ‹exit› ⦄
+⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹main2a› ⸫
+⍝ --unfold n: the file dealt over n planes (A.1.4)
+⦃
+  ⧖:path,cps,mode
+  ⧗:path̵ ⟗ ⧗:cps̵ ‹lexw› ⁇ ⦃ ⦄ ⦃ △ ‹exit› ⟦ ○ ⟧ ⦄ ⧖:toks ⌁̵
+  ⧗:toks̵ ⟗ ⧗:mode #1000# ⊟ ‹unfoldpr› ⌁̵
+⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹main2u› ⸫
+⦃
+  ⧖:path,cps,mode
+  ⧗:cps̵ ⌁̵ ⧗:path̵ ⎙̵ $: error: --unfold takes a file of one plane, without a header ⧉ (A.1.4)\n$ ⎙̵ △ ‹exit›
+⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹main2x› ⸫
+
+⍝ ---- modules of several files (A.1)
+
+⍝ ‹mainp› mode: every source file is lexed (into one buffer, each line holding its plane
+⍝ origin), folded, and run as one module; the module's path is the files' paths, separated by U+0001
+⦃
+  ⧖:mode
+  ‹srcpath› ⟗ ‹lexall› ⁇ ⦃ ⦄ ⦃ △ ‹exit› ⟦ ○ ⟧ ⦄ ⧖:toks ⧖:path
+  ⧗:path̵ ⟗ ⧗:toks̵ ‹foldown› ⧖:t2 ⧖:path
+  ⧗:path̵,mode,t2̵ ‹main3›
+⦄ ⟨ℤ ⊸⟩ ‹mainp› ⸫
+⦃ ⧖:path,toks ⧗:toks̵ ⟗ ⧗:patẖ ‹fold› ⧖:out ⌁̵ ⧗:out̵ ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹foldown› ⸫
+
+⍝ ‹srcnext› i: the index of the next source file among the arguments from i, or −1
+⦃
+  ⥀ ⦃
+    ⧖:i
+    ⧗:i ‹argcode› ⧖:k
+    ⧗:i,k ⧗:k #-1# ᛖ ⧗:k ○ ᛖ ⋏ ⋔ ⦃ ⌁ ⦶ ⦄
+      ⦃ ⧖:k ⧗:k #6# #8# ᛦ ⧗:k #11# ᛖ ⋏ ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ⊞ ⊕ ⦄ ⁼
+  ⦄
+  ⍿⁰ ‹argcode› #-1# ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼
+⦄ ⟨ℤ ⊸ ℤ⟩ ‹srcnext› ⸫
+
+⍝ ‹srcpath›: the source files' paths, separated by U+0001
+⦃
+  »« △ ‹srcnext› ⦶
+  ⍝ the loop carries [path i first]
+  ⥀ ⦃
+    ⧖:path,i,first
+    ⧗:path̵,i,first ⧗:i #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹srcpath1› ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⌁
+⦄ ⟨⊸ ʃ⟩ ‹srcpath› ⸫
+⦃
+  ⧖:path,i,first
+  ⧗:path̵ ⧗:first ⋔ ∅ ⦃ △ ⍆̵ ⦄ ⁼ ⧖:path
+  ⧗:i ᚨ ⁇ ⦃ ⦄ ⦃ »« ⦄ ⧖:a
+  ⧗:a̵ ⟗ ⧗:path̵ ○ ‹scat1› ⧖:path ⌁̵
+  ⧗:path̵ ⧗:i △ ⊞ ‹srcnext› ⊕
+⦄ ⟨ʃ ℤ ŧ ⊸ ʃ ℤ ŧ⟩ ‹srcpath1› ⸫
+⍝ ‹scat1› b a i: a with the bytes of b from i on
+⦃
+  ⧖:b,a,i
+  ⧗:ḇ,a̵,i
+  ⥀ ⦃
+    ⧖:b,a,i
+    ⧗:ḇ,i ᛒ ⧖:c
+    ⧗:ḇ ⧗:a̵ ⧗:c ⧗:c #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⍆̵ ⦄ ⁼ ⧗:i △ ⊞ ⧗:c #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⧖:a ⌁̱ ⧗:a̵
+⦄ ⟨⟗ʃ ʃ ℤ ⊸ ʃ⟩ ‹scat1› ⸫
+
+⍝ ‹lexall› path: the tokens of every source file, each file's lines holding its plane origin
+⦃
+  ⧖:path
+  ⟦ ○ ○ ▽ ▽ ○ ▽ ○ ⟧ ⧗:patẖ △ ‹srcnext› ○
+  ⍝ the loop carries [out path i f]
+  ⥀ ⦃
+    ⧖:out,path,i,f
+    ⧗:out̵,patẖ,i,f ⧗:i #-1# ᛖ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:out,path,i,f ⧗:out̵,patẖ,i,f ‹lexsrc› ‹ok› ⧗:patẖ ⧗:i △ ⊞ ‹srcnext› ⧗:f △ ⊞ ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⌁ ⌁̱
+⦄ ⟨⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹lexall› ⸫
+⦃
+  ⧖:out,path,i,f
+  ⧗:i ᚨ ⁇ ⦃ ⦄ ⦃ »« ⦄ ⧖:name
+  ⧗:name̵ ⟗ ᚠ ⁇ ⦃ ⦄ ⦃ »« ⦄ ⧖:src ⧖:name
+  ⧗:src̵ ⟗ ⍴̱ ○ ᛖ ⧖:empty ⧖:src
+  ⧗:name̵ ⧗:empty ⋔ ⦃ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄ ⦃ ⌁̵ ⦄ ⁼
+  ⧗:src̵ ⟗ ᛞ ⧖:cps ⌁̵
+  ⧗:cps̵ ⟗ ⧗:out̵,patẖ △ △ ⧗:f ○ ○ ‹plpack› ‹lexinto› ⁇ ⦃ ⧖:o ⌁̵ ⧗:o̵ ⦄ ⦃ ⌁̵ ↯ ⦄
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹lexsrc› ⸫
 
 ⦃
   ⧖:path,mode
@@ -192,14 +291,14 @@
     ⦃ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄
 ⦄ ⟨ʃ ℤ ⊸⟩ ‹main1› ⸫
 
-⦃ $usage: s2c <main.trh> [-o <output>] [--debug] [--include h] [--link f.c | -lNAME] [--tokens | --ast | --check | --emit-llvm]\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
+⦃ $usage: s2c <main.trh>… [-o <output>] [--debug] [--include h] [--link f.c | -lNAME] [--tokens | --ast | --check | --emit-llvm | --fold | --unfold n]\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
 
 ⍝ ---- arguments, as trithc reads them: flags in any order, the first other argument is the source
 
 ⍝ ‹argeq› s i: argument i is the literal s
 ⦃ ⧖:s,i ⧗:s̵ ⧗:i ᚨ ⁇ ⦃ ⟗ ⍿² ‹streqo› ⧖:r ⌁̵ ⧗:r ⦄ ⦃ ⌁̵ ⊕ ⦄ ⦄ ⟨ʃ ℤ ⊸ ŧ⟩ ‹argeq› ⸫
 ⍝ ‹argcode› i: −1 none, 1 --tokens, 2 --ast, 3 --check, 4 --emit-llvm, 5 --debug, 6 -o, 7 --include,
-⍝ 8 --link, 9 --plough or --unplough (s1 only), 0 anything else
+⍝ 8 --link, 9 --plough or --unplough (s1 only), 10 --fold, 11 --unfold, 0 anything else
 ⦃
   ⧖:i
   ⧗:i ᚨ ⁇ ⦃ ⌁̵ ○ ⦄ ⦃ #-1# ⦄
@@ -208,37 +307,60 @@
   $--debug$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #5# ⦄ ∅ ⁼ $-o$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #6# ⦄ ∅ ⁼
   $--include$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #7# ⦄ ∅ ⁼ $--link$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #8# ⦄ ∅ ⁼
   $--plough$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼ $--unplough$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
+  $--fold$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #10# ⦄ ∅ ⁼ $--unfold$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #11# ⦄ ∅ ⁼
 ⦄ ⟨ℤ ⊸ ℤ⟩ ‹argcode› ⸫
-⍝ ‹argscan›: the mode (0 compile), --debug, the source's index (−1: none), and whether the arguments are bad
+⍝ ‹argscan›: the mode (0 compile, 7 --fold, 1000 + n --unfold n), --debug, the first source's
+⍝ index (−1: none), whether the arguments are bad, and how many source files there are
 ⦃
-  △ ○ ○ #-1# ○
+  △ ○ ○ #-1# ○ ○
   ⥀ ⦃
-    ⧖:i,mode,dbg,in,bad
+    ⧖:i,mode,dbg,in,bad,ns
     ⧗:i ‹argcode› ⧖:k
-    ⧗:i,mode,dbg,in,bad,k ⧗:k #-1# ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ‹argstep› ⊕ ⦄ ⁼
+    ⧗:i,mode,dbg,in,bad,ns,k ⧗:k #-1# ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ‹argstep› ⊕ ⦄ ⁼
   ⦄
-  ⧖:i,mode,dbg,in,bad ⧗:mode,dbg,in,bad
-⦄ ⟨⊸ ℤ ℤ ℤ ℤ⟩ ‹argscan› ⸫
+  ⧖:i,mode,dbg,in,bad,ns ⧗:mode,dbg,in,bad,ns
+⦄ ⟨⊸ ℤ ℤ ℤ ℤ ℤ⟩ ‹argscan› ⸫
 ⦃
-  ⧖:i,mode,dbg,in,bad,k
-  ⧗:mode ⧗:k ⧗:k △ #4# ᛦ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:mode2
+  ⧖:i,mode,dbg,in,bad,ns,k
+  ⧗:i △ ⊞ ‹argnum› ⧖:num
+  ⧗:mode ⧗:k ⧗:k △ #4# ᛦ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:k #10# ᛖ ⋔ ⦃ ⌁ #7# ⦄ ∅ ⁼ ⧗:num ⧗:k #11# ᛖ ⋔ ⦃ ⧖:a ⌁ ⧗:a #1000# ⊞ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:mode2
   ⧗:dbg ⧗:k #5# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:dbg2
   ⧗:i △ ⊞ ‹argcode› ⧖:knext
-  ⧗:k #6# #8# ᛦ ⧖:takes
+  ⧗:k #6# #8# ᛦ ⧗:k #11# ᛖ ⋏ ⧖:takes
   ⧗:in ⧗:i ⧗:k ○ ᛖ ⧗:in #-1# ᛖ ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:in2
-  ⧗:bad ⧗:takes ⧗:knext #-1# ᛖ ⋎ ⧗:k #9# ᛖ ⋏ ⧗:k ○ ᛖ ⧗:in #-1# ᛖ ‹not› ⋎ ⋏ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:bad2
+  ⧗:ns ⧗:k ○ ᛖ ⋔ ⦃ △ ⊞ ⦄ ∅ ⁼ ⧖:ns2
+  ⧗:bad ⧗:takes ⧗:knext #-1# ᛖ ⋎ ⧗:k #9# ᛖ ⋏ ⧗:k #11# ᛖ ⧗:num △ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋎ ⋏ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:bad2
   ⧗:i ⧗:takes ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ⊞ ⧖:i2
-  ⧗:i2,mode2,dbg2,in2,bad2
-⦄ ⟨ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ⟩ ‹argstep› ⸫
-⍝ ‹main0› mode dbg in: the run's mode (5 compile; +10 with --debug for --emit-llvm and compiling)
+  ⧗:i2,mode2,dbg2,in2,bad2,ns2
+⦄ ⟨ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹argstep› ⸫
+⍝ ‹argnum› i: argument i as a decimal number, or −1
 ⦃
-  ⧖:mode,dbg,in
+  ⧖:i
+  ⧗:i ᚨ ⁇ ⦃ ⟗ ○ ○ ⦶ ‹argnum1› ⧖:v ⌁̵ ⧗:v ⦄ ⦃ #-1# ⦄
+⦄ ⟨ℤ ⊸ ℤ⟩ ‹argnum› ⸫
+⦃
+  ⧖:s,j,v,ok
+  ⧗:s̱,j,v,ok
+  ⥀ ⦃
+    ⧖:s,j,v,ok
+    ⧗:s̱,j ᛒ ⧖:c
+    ⧗:s̱ ⧗:j △ ⊞ ⧗:v,ok,c ⧗:c #-1# ᛖ
+    ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ⧖:c ⧖:o ⧖:v ⧗:v #10# ⊠ ⧗:c #48# ⊟ ⊞ ⧗:o ⧗:c #48# #57# ᛦ ⋎ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:s,j,v,ok
+  ⧗:v ⧗:j #2# ≶ ⋔ ⦃ ⦄ ⦃ ⦄ ⦃ ⌁ #-1# ⦄ ⧗:ok ⋔ ∅ ⦃ ⌁ #-1# ⦄ ⁼
+⦄ ⟨⟗ʃ ℤ ℤ ŧ ⊸ ℤ⟩ ‹argnum1› ⸫
+⍝ ‹main0› mode dbg in ns: the run's mode (5 compile; +10 with --debug for --emit-llvm and
+⍝ compiling); a module of several files goes through ‹mainp›
+⦃
+  ⧖:mode,dbg,in,ns
   ⧗:mode ⧗:mode ○ ᛖ ⋔ ⦃ ⌁ #5# ⦄ ∅ ⁼ ⧖:m
   ⧗:m ⧗:m #4# ᛖ ⧗:m #5# ᛖ ⋏ ⧗:dbg △ ᛖ ⋎ ⋔ ⦃ #10# ⊞ ⦄ ∅ ⁼ ⧖:fm
-  ⧗:fm ⧗:in ᚨ ⁇ ⦃ ⧖:p ⧖:f ⧗:p̵,f ‹main1› ⦄ ⦃ ⌁ ‹usage› ⦄
-⦄ ⟨ℤ ℤ ℤ ⊸⟩ ‹main0› ⸫
+  ⧗:fm,in ⧗:ns △ ᛖ ‹not› ⋔ ⦃ ⌁ ‹mainp› ⦄ ⦃ ⧖:f,i ⧗:f ⧗:i ᚨ ⁇ ⦃ ⧖:p ⧖:f ⧗:p̵,f ‹main1› ⦄ ⦃ ⌁ ‹usage› ⦄ ⦄ ⁼
+⦄ ⟨ℤ ℤ ℤ ℤ ⊸⟩ ‹main0› ⸫
 
 ⦃
-  ‹argscan› ⧖:mode,dbg,in,bad
-  ⧗:mode,dbg,in ⧗:in #-1# ᛖ ⧗:bad △ ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ ⌁ ‹usage› ⦄ ⦃ ‹main0› ⦄ ⁼
+  ‹argscan› ⧖:mode,dbg,in,bad,ns
+  ⧗:mode,dbg,in,ns ⧗:in #-1# ᛖ ⧗:bad △ ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ‹usage› ⦄ ⦃ ‹main0› ⦄ ⁼
 ⦄ ⟨⊸⟩ ᛟ ⸫

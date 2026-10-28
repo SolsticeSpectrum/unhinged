@@ -1,7 +1,8 @@
-# Trith Addendum A: Planes, the Tesseract, Dreams, Curses and Blessings (draft 0)
+# Trith Addendum A: Planes, the Tesseract, Dreams, Curses and Blessings (draft 1)
 
 > Extends `docs/TRITH.md`. Section numbers here are prefixed with `A.`; a bare section number (such as §9.3) refers to TRITH.md.
 > The Zero-Cost Law (§0) applies to every feature in this addendum without exception. Every section ends with **Cost**, **Problems** and **Precedent**.
+> Status: the features are implemented in s2 (`build/s2c`) as milestones A1–A6 land; s1 stays frozen (A.8). Each implemented section ends with **As built**, which records what the draft left open and what s2 does.
 
 Summary:
 
@@ -99,6 +100,16 @@ These are the only sane ways to read or edit a multi-plane module.
 - Per-file diffs are meaningless, and code review has to work on folded output.
 - Error positions need four coordinates.
 - Missing files are only detectable because of the plane count in the header.
+
+**As built (milestone A1).**
+
+- `s2c a.trh b.trh … -o prog` compiles the module made of all its files, in command-line order (which only matters for the file index in error messages). A module of one file without a header takes exactly the old path, token for token, so s1 and s2 still agree on every such file.
+- A plane's lines are numbered from 1 after its header, and the Boustrophedon Rule uses that y. A file that has headers must start with one; a token before the first header is an error.
+- A breath inside a plane holds its cell, so it can push the plane's later cells to a higher x; it is dropped after folding.
+- Errors in a plane cell print `file:line:col (x=…, y=…, z=…)`, with the file's own line and column; lexer errors, which come before folding, print `(y=…, z=…)`.
+- A quotation (§9.5) in a module of planes is named by its lattice coordinates, `⦃x,y,z⦄`, since line and column no longer identify a cell across files.
+- `--fold` prints logical order, as specified. s2 cannot read logical order (only s1's `--plough` can), so `--unfold n file.trh` takes an on-disk single-plane file and prints the n planes on disk, in one file: header, then lines, with a final line of breaths if the module needs them. The planes are `z = −h … n−1−h` with `h = ⌊(n−1)/2⌋`, and the cells of each line are dealt in turn, ascending z on odd lines and descending on even ones, so folding gives the tokens back in order: `--fold` of what `--unfold` printed is `trithc --unplough` of the original, without its comments.
+- Gate: every program in `trith/tests/run`, unfolded over 2, 3 and 5 planes, compiles and prints what it prints in one plane; folding the unfolded file gives the original token stream back. The tests are in `trith/s2/tests/*/planes_*` and `plane_*`.
 
 **Precedent.** Trefunge (Funge-98), where a form feed starts the next z-plane. 4DL, whose programs are shown as stacked and side-by-side slices. Mu's layers, which a tangle tool merges into one source. Literate programming's tangle step.
 
@@ -371,7 +382,7 @@ s1 is frozen as the bootstrap for `s2c.trh`. **Every feature in this addendum is
 
 | # | Milestone | Gate |
 |---|---|---|
-| A1 | Planes: fold, headers, plane errors, `--fold`/`--unfold` | golden tests; folding a one-plane file is the identity on every existing test |
+| A1 | Planes: fold, headers, plane errors, `--fold`/`--unfold` | golden tests; folding a one-plane file is the identity on every existing test. **Done.** |
 | A2 | Curses, vows, blessings, attributes, `--confess`/`--confessions` | benchmark gate (§17) with no regression; report any speedup from attributes; memcheck and fuzz clean |
 | A3 | Evaluator containers and dreams (`⟪⟫`, `☾`, `--dream`, fuel, `--dream-trace`) | golden tests for nightmare, limbo, fever dream and stratification |
 | A4 | Retire `trx.py` (A.3.6) | dream output token-identical to trx.py; s2 sources are `.trh`; fixpoint holds; compile time at most 2× |

@@ -1,0 +1,37 @@
+2:1 (x=0, y=1, z=○) bracket ⦃
+11:3 (x=0, y=2, z=△) glyph ⍿ idx=0
+3:3 (x=0, y=2, z=○) int ▽△ value=2
+11:1 (x=1, y=2, z=△) glyph ≶
+3:1 (x=1, y=2, z=○) glyph ⋔
+4:1 (x=0, y=3, z=○) bracket ⦃
+12:1 (x=0, y=3, z=△) glyph ⧖
+4:3 (x=1, y=3, z=○) glyph ⧗ idx=0
+12:3 (x=1, y=3, z=△) int △ value=1
+4:6 (x=2, y=3, z=○) glyph ⊟
+12:5 (x=2, y=3, z=△) name ᚠ
+4:8 (x=3, y=3, z=○) glyph ⧗ idx=0
+12:7 (x=3, y=3, z=△) int ▽△ value=2
+4:11 (x=4, y=3, z=○) glyph ⊟
+12:10 (x=4, y=3, z=△) name ᚠ
+4:13 (x=5, y=3, z=○) glyph ⊞
+12:12 (x=5, y=3, z=△) bracket ⦄
+13:1 (x=0, y=4, z=△) glyph ⁼
+6:1 (x=0, y=5, z=○) glyph ∅
+15:7 (x=0, y=6, z=△) bracket ⦄
+7:7 (x=0, y=6, z=○) bracket ⟨
+15:5 (x=1, y=6, z=△) type ℤ base=ℤ
+7:5 (x=1, y=6, z=○) glyph ⊸
+15:3 (x=2, y=6, z=△) type ℤ base=ℤ
+7:3 (x=2, y=6, z=○) bracket ⟩
+15:1 (x=3, y=6, z=△) name ᚠ
+7:1 (x=3, y=6, z=○) glyph ⸫
+8:1 (x=0, y=7, z=○) bracket ⦃
+16:1 (x=0, y=7, z=△) int ▽○△ value=8
+8:3 (x=1, y=7, z=○) name ᚠ
+16:5 (x=1, y=7, z=△) glyph ⎙
+8:5 (x=2, y=7, z=○) bracket ⦄
+16:7 (x=2, y=7, z=△) bracket ⟨
+8:7 (x=3, y=7, z=○) glyph ⊸
+16:9 (x=3, y=7, z=△) bracket ⟩
+8:9 (x=4, y=7, z=○) name ᛟ
+16:11 (x=4, y=7, z=△) glyph ⸫

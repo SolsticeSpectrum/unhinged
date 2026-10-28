@@ -1,0 +1,1 @@
+trith/s2/tests/check_errors/plane_phantom/p0.trh:1:1: error: phantom dimension: the header says 2 planes, but the module has 3 (A.1.2)

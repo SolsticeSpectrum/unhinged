@@ -1,0 +1,1 @@
+trith/s2/tests/check_errors/plane_missing/p0.trh:1:1: error: missing dimension: the header says 3 planes, but the module has 2 (A.1.2)

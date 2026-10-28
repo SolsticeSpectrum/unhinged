@@ -8,11 +8,11 @@ UNHINGEDC := build/unhingedc
 UNHINGED_TESTS := build/unhinged-tests
 TRITHC := build/trithc
 TRITH_TESTS := build/trith-tests
-.PHONY: all unhinged unhinged-test test clean trith trith-test trith-bench trith-memcheck s2 s2-regen s2-test s2-fuzz s3 s2-fixpoint lib-test lib-regen bench-regen
+.PHONY: all unhinged unhinged-test test clean trith trith-test trith-bench trith-memcheck s2 s2-regen s2-test s2-golden s2-fuzz s3 s2-fixpoint lib-test lib-regen bench-regen
 
 all: s2
 
-test: trith-test s2-test s2-fixpoint lib-test unhinged-test
+test: trith-test s2-test s2-golden s2-fixpoint lib-test unhinged-test
 
 # the bootstrap: Rust → UNHINGED stage1 → UNHINGED stage2 (build/unhingedc), which must
 # rebuild itself
@@ -58,7 +58,7 @@ clean:
 # s2: the compiler rewritten in Trith (spec §17), compiled by s1. The sources
 # in trith/s2/src are authored in logical order with named moments; the
 # committed trith/s2/s2c.trh is generated from them by `make s2-regen`.
-S2_SRC := trith/s2/src/util.trhx trith/s2/src/chars.trhx trith/s2/src/lexer.trhx trith/s2/src/parser.trhx trith/s2/src/heap.trhx trith/s2/src/types.trhx trith/s2/src/check.trhx trith/s2/src/emit.trhx trith/s2/src/eval.trhx trith/s2/src/main.trhx
+S2_SRC := trith/s2/src/util.trhx trith/s2/src/chars.trhx trith/s2/src/lexer.trhx trith/s2/src/planes.trhx trith/s2/src/parser.trhx trith/s2/src/heap.trhx trith/s2/src/types.trhx trith/s2/src/check.trhx trith/s2/src/emit.trhx trith/s2/src/eval.trhx trith/s2/src/main.trhx
 s2: trith
 	$(TRITHC) trith/s2/s2c.trh -o build/s2c
 
@@ -68,6 +68,10 @@ s2-regen: trith
 
 s2-test: s2
 	TRITHC=$(TRITHC) S2C=build/s2c trith/s2/test.sh
+
+# golden tests for what only s2 implements (the addenda); BLESS=1 rewrites the .out files
+s2-golden: s2
+	S2C=build/s2c trith/s2/golden.sh
 
 # s3 is s2 compiled by s2; the fixpoint (spec §17) is that it emits exactly what
 # s2 emits, for its own source and for every test

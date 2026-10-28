@@ -1,0 +1,1 @@
+trith/s2/tests/check_errors/plane_early.trh:1:1 (y=1, z=○): error: a file with plane headers starts with one: this token comes before the first ⧉ (A.1.1)

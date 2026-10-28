@@ -27,8 +27,12 @@
 ⍝ ‹kstep› a: the next reading index
 ⦃ ⟗ #3# ᚳ ⧖:k #3# ⧗:k △ ⊞ ‹set› ⦄ ⟨⟦ℤ⟧ ⊸ ◌⟦ℤ⟧⟩ ‹kstep› ⸫
 
-⍝ ‹errat› path line col: "path:line:col: error: "
-⦃ ⧖:path,line,col ⧗:patẖ ⎙̱ $:$ ⎙̵ ⧗:line ᛁ $:$ ⎙̵ ⧗:col ᛁ $: error: $ ⎙̵ ⦄ ⟨⟗ʃ ℤ ℤ ⊸⟩ ‹errat› ⸫
+⍝ ‹errat› path line col: "path:line:col: error: " (for a plane cell, its file and coordinates, A.1.2)
+⦃
+  ⧖:path,line,col
+  ⧗:patẖ ⧗:line ⧗:line ‹isplane› ⋔ ⦃ ‹plf› ⦄ ⦃ ⌁ ○ ⦄ ⁼ ‹ppath›
+  $:$ ⎙̵ ⧗:line,col ‹plpos› $: error: $ ⎙̵
+⦄ ⟨⟗ʃ ℤ ℤ ⊸⟩ ‹errat› ⸫
 
 ⍝ ---- printing
 
@@ -202,7 +206,7 @@
   ⧗:a̱ ⧗:j #5# ⊞ ᚳ ⧖:v1
   ⧗:a̱ ⧗:j #6# ⊞ ᚳ ⧖:v2
   ⧗:a̱ ⧗:j #7# ⊞ ᚳ ⧖:n
-  ⧗:line ᛁ $:$ ⎙̵ ⧗:col ᛁ $ $ ⎙̵ ⧗:kind ‹pkind› $ $ ⎙̵
+  ⧗:line,col ‹plpos› $ $ ⎙̵ ⧗:kind ‹pkind› $ $ ⎙̵
   ⧗:a̱ ⧗:j #8# ⊞ ⧗:n ⧗:kind #12# ᛖ ⋔ ⦃ ‹pquoted› ⦄ ⦃ ‹ptext› ⦄ ⁼
   ⧗:idx ‹pidx›
   ⧗:kind,v1,v2 ‹pvalue›
@@ -758,13 +762,14 @@
   ⧗:cps̱ ⧗:out̵ ⧗:hi ⧗:fb ⊟ △ ⊞ ⍆̵ ⧗:fb ⧗:hi ⧗:fb ⊟ △ ⊞ ‹copy›
 ⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹emit1› ⸫
 
-⍝ ‹emit› out bs path line col kind idx v1 v2 skip n mask cps fb hi: count the token; record it unless it is a breath
+⍝ ‹emit› out bs path line col kind idx v1 v2 skip n mask cps fb hi: count the token; record it
+⍝ unless it is a breath outside a plane (in a plane a breath holds a cell, A.1.2)
 ⦃
   ⧖:out,bs,path,line,col,kind,idx,v1,v2,skip,n,mask,cps,fb,hi
   ⧗:bs̵ ⟗ ⧗:skip ᚳ ⧖:c0 ⧖:bs
   ⧗:out̵ ‹count1› ‹ok›
   ⧗:bs̵,line,col,kind,idx,v1,v2,skip,n,mask,cps̱,fb,hi
-  ⧗:kind #8# ᛖ ⧗:n △ ᛖ ⋎ ⧗:c0 #11825# ᛖ ⋎
+  ⧗:kind #8# ᛖ ⧗:n △ ᛖ ⋎ ⧗:c0 #11825# ᛖ ⋎ ⧗:line ‹isplane› ‹not› ⋎
   ⋔ ⦃ ⌁ ⌁ ⌁̱ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̵ ⦄ ⦃ ‹emit1› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹emit› ⸫
 
@@ -1060,19 +1065,22 @@
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ‹eol› ⸫
 
 ⍝ ‹lex› cps path: the token buffer of a whole file
+⦃ ⧖:cps,path ⧗:cps̱ ⟦ ○ ○ ▽ ▽ ○ ▽ ○ ⟧ ⧗:patẖ △ ‹lexinto› ⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹lex› ⸫
+
+⍝ ‹lexinto› cps out path line0: the tokens of a file appended to out, its first line being
+⍝ line0 (a packed plane origin for the files of a module of planes, A.1)
 ⦃
-  ⧖:cps,path
-  ⟦ ○ ○ ▽ ▽ ○ ▽ ○ ⟧
-  ⧗:cps̱,patẖ ○ △
+  ⧖:cps,out,path,line0
+  ⧗:out̵,cps̱,patẖ ○ ⧗:line0
   ⍝ the loop carries [out cps path ls line]
   ⥀ ⦃
     ⧖:out,cps,path,ls,line
     ⧗:cps̱,ls ‹eol› ⧖:le
-    ⧗:out̵,cps̱,patẖ,line,ls,le ‹line› ‹ok›
-    ⧗:cps̱,patẖ ⧗:le △ ⊞ ⧗:line △ ⊞
+    ⧗:out̵,cps̱,patẖ,line,ls,le ‹line2› ‹ok›
+    ⧗:cps̱,patẖ ⧗:le △ ⊞ ⧗:cps̱,ls,le,line ‹nextl›
     ⧗:le ⧗:cps̱ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁̱ ⌁̱
-⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹lex› ⸫
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹lexinto› ⸫
 
 ⦃ ⧖:path,cps ⧗:cps̵ ⟗ ⧗:patẖ ‹lex› ⧖:out ⌁̵ ⧗:out̵ ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟦ℤ⟧⟩ ‹lexw› ⸫

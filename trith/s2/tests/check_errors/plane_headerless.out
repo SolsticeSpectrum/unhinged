@@ -1,0 +1,1 @@
+trith/s2/tests/check_errors/plane_headerless/p1.trh:1:1: error: phantom dimension: a file without a plane header is plane ○ of a one-plane module, but this module has 2 planes (A.1.1)

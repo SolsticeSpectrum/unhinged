@@ -1,0 +1,3 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  ▽△  ⊢ [ℤ]
+trith/s2/tests/check_errors/plane_type_error/p2.trh:2:1 (x=0, y=1, z=△): error: disagreement: ⎙ on [ℤ] needs no agreement mark (§6.1)

@@ -1,7 +1,8 @@
 #!/bin/sh
 # s2 tests: s2c must print exactly what s1 prints for --tokens, --ast,
 # --check and --emit-llvm, for every Trith file in the repository (errors
-# included), its own source among them. Every program in trith/tests/run is
+# included), its own source among them, except the s2-only golden tests in
+# trith/s2/tests (golden.sh). Every program in trith/tests/run is
 # also compiled by both and run: the outputs and exit statuses must agree (a
 # compile error must print the same message). Run from the repo root after
 # `make s2`; S2C=build/s3c tests the compiler s2 built.
@@ -10,7 +11,7 @@ S2C=${S2C:-build/s2c}
 mkdir -p output/s2-test
 pass=0
 fail=0
-for f in $(find trith -name '*.trh' | sort); do
+for f in $(find trith -name '*.trh' -not -path 'trith/s2/tests/*' | sort); do
     for mode in --tokens --ast --check --emit-llvm; do
         "$S2C" "$f" $mode > output/s2.out 2>&1
         "$TRITHC" "$f" $mode > output/s1.out 2>&1

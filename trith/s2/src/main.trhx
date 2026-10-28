@@ -1,0 +1,75 @@
+⍝ ==== s2 driver: s2c file.trh --tokens | --ast prints what trithc prints
+
+⍝ ‹streq2› a b: the strings are equal
+⦃
+  ⧖:a,b
+  ⧗:a,b ○ ⦶
+  ⍝ the loop carries [a b i acc]
+  ⥀ ⦃
+    ⧖:a,b,i,acc
+    ⧗:a,i ᛒ ⧖:x
+    ⧗:a,b ⧗:i △ ⊞ ⧗:acc ⧗:x ⧗:b,i ᛒ ᛖ ⋎
+    ⧗:x #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:a,b,i,acc ⧗:acc
+⦄ ⟨⟗ʃ ⟗ʃ ⊸ ŧ⟩ ‹streq2› ⸫
+
+⦃ ⧖:a,b ⧗:b ⟗ ⧗:a ‹streq2› ⧖:r ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ŧ⟩ ‹streqo› ⸫
+
+⍝ ‹modeof› arg: 1 for --tokens, 2 for --ast, else 0
+⦃
+  ⟗ $--tokens$ ‹streqo› ⧖:r1 ⟗ $--ast$ ‹streqo› ⧖:r2 ⌁̵
+  ○ ⧗:r2 ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:r1 ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
+⦄ ⟨ʃ ⊸ ℤ⟩ ‹modeof› ⸫
+
+⦃
+  ⧖:path,out,count,rem
+  ⧗:path ⎙̵ $: error: imbalance: $ ⎙̵ ⧗:count ᛁ $ tokens, $ ⎙̵ ⧗:rem ᛁ $ too many for the Ternary Balance Law\n$ ⎙̵
+  ⧗:out ⌁̵ △ ‹exit›
+⦄ ⟨ʃ ⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹imbal› ⸫
+
+⦃ ⧖:T,st ⧗:st ⟗ ⧗:T ‹adump› ⌁̵ ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸⟩ ‹dumpw› ⸫
+
+⍝ ‹astw› path toks: parse, tangle and print the item tree
+⦃
+  ⧖:path,toks
+  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:st ‹dumpw› ⌁̵
+⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹astw› ⸫
+
+⦃
+  ⧖:path,out,mode
+  ⧗:path,out ⧗:mode △ ᛖ
+  ⋔ ⦃ ⧖:o ⧗:o ⟗ ‹dump› ⌁̵ ⌁̵ ⦄
+    ⦃ ⧖:o ⟗ ⧗:o ‹astw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼
+⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹run› ⸫
+
+⦃
+  ⧖:path,mode,out
+  ⧗:out ⟗ ○ ᚳ ⧖:count ⧖:out
+  ⧗:count #3# ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ #3# ⊞ ⦄ ⧖:rem
+  ⧗:path,out,count,rem,mode
+  ⧗:rem ○ ᛖ ⋔ ⦃ ⧖:m ⌁ ⌁ ⧗:m ‹run› ⦄ ⦃ ⌁ ‹imbal› ⦄ ⁼
+⦄ ⟨ʃ ℤ ⟦ℤ⟧ ⊸⟩ ‹main3› ⸫
+
+⦃
+  ⧖:path,mode,src
+  ⧗:src ⟗ ᛞ ⧖:cps ⌁̵
+  ⧗:path ⟗ ⧗:cps ‹lexw› ⧗:mode ⍿¹ ⁇ ⦃ ‹main3› ⦄ ⦃ ⌁ ⌁̵ △ ‹exit› ⦄
+⦄ ⟨ʃ ℤ ʃ ⊸⟩ ‹main2› ⸫
+
+⦃
+  ⧖:path,mode
+  ⧗:path ⟗ ᚠ ⧗:mode ⍿¹ ⁇
+    ⦃ ⟗ ⍴̱ ○ ᛖ ⋔ ⦃ ⌁̵ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄ ⦃ ‹main2› ⦄ ⁼ ⦄
+    ⦃ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄
+⦄ ⟨ʃ ℤ ⊸⟩ ‹main1› ⸫
+
+⦃ $usage: s2c <file.trh> --tokens | --ast\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
+
+⦃
+  △ ᚨ ⁇
+    ⦃ #2# ᚨ ⁇
+        ⦃ ‹modeof› ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁̵ ‹usage› ⦄ ⦃ ‹main1› ⦄ ⁼ ⦄
+        ⦃ ⌁̵ ‹usage› ⦄ ⦄
+    ⦃ ‹usage› ⦄
+⦄ ⟨⊸⟩ ᛟ ⸫

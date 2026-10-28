@@ -1,0 +1,2398 @@
+⍝ ==== s2 utilities: the outside world, bytes and code points, printing, tests
+
+⍝ ---- the outside world
+⸫ ᚨ ⟨ ◌ʃ ⊸ ℤ ⟩ «gra_htirt» ⎔
+⎔ »elif_daer_htirt« ⟨ ⟗ʃ ⊸ ◌ʃ ⟩ ᚠ ⸫
+
+⍝ ---- bytes and code points
+ᛒ s i: byte i of s (from 0) as ℤ, or −1 past either end ⍝
+⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⍴̱ △ ≫ ⊟ ⌖̱ ⁇ ⦃ ⚇ ⦄ ⦃ ▽ ⦄ ⦄ ⟨ ⟗ʃ ℤ ⊸ ℤ ⟩ ᛒ ⸫
+
+⍝ ᚳ a i: element i (from 0) of an array whose element 0 is a sentinel; −1 past the end
+⸫ ᚳ ⟨ ℤ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃ ⦃ ▽ ⦄ ⦃ ⦄ ⁇ ⌖̱ ⊟ ≫ △ ⍴̱ ⧗⁰ ⊞ △ ⧗¹ ⧗⁰ ⧖ ⧖ ⦄
+
+ᚴ a: number of elements after the sentinel ⍝
+⦃ ⍴̱ △ ⊟ ⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ⟩ ᚴ ⸫
+
+⍝ ᛝ s i b0: the code point of a multi-byte UTF-8 sequence led by b0, and its length
+⦄
+  ⧖ ⧖ ⧖
+  ⧗⁰ s  ⧗¹ i  ⧗² b0 ⍝
+  ⧗² △▽△▽○△ ≶ ⋔ ⦃ ▽△ ⦄ ⦃ ○△ ⦄ ⦃ ▽△ ⦄
+  ⧖ ⊞ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⋔ ≶ ▽▽○○○△ ⧗²
+  ⍝ ⧗⁰ n  ⧗¹ s  ⧗² i  ⧗³ b0; the loop carries [s i n k cp]
+  ⋒ ≫ ⧗⁰ △○▽▽▽△ ⧗³ △ ⧗⁰ ⧗² ⧗¹
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⍝ ⧗⁰ s  ⧗¹ i  ⧗² n  ⧗³ k  ⧗⁴ cp
+    ⊞ △ ⧗³ ⧗² ⧗¹ ⧗⁰
+    ⧗⁴ ○▽△ ≪ ⧗⁰ ⧗¹ ⧗³ ⊞ ᛒ ○○△▽△ ⋒ ⋓
+    ≶ ⊞ △ ⧗³ ⧗²
+  ⦄
+  ⧗⁰ ⧗¹ ⌁̱ ⌁ ⧖ ⌁ ⧖
+⦄ ⟨ ⟗ʃ ℤ ℤ ⊸ ℤ ℤ ⟩ ᛝ ⸫
+
+⍝ ᛑ s i: the code point starting at byte i, and its length in bytes
+⦄
+  ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⧗¹ ᛒ △○▽▽▽△ ⍿¹ ≶ ⋔
+    ⦃ △ ⧗⁰ ⌁̱ ⌁ ⧖ ⦄
+    ⁼
+    ⦃ ᛝ ⦄
+⦄ ⟨ ⟗ʃ ℤ ⊸ ℤ ℤ ⟩ ᛑ ⸫
+
+⍝ ᛞ s: the code points of s, after a sentinel; s must not be empty
+⦄
+  ⟦ ○ ⟧ ○ ⥀ ⦃
+    the loop carries [s cps i] ⍝
+    ⧖ ⍿¹ ⧗⁰ ᛑ ⧖ ⍆̵ ⧗¹ ⧗⁰ ⊞ ⍿² ⍴̱ ⍿¹ ≶
+  ⦃
+  ⌁ ⧖ ⌁̱ ⧗⁰
+⸫ ᛞ ⟨ ⟦ ℤ ⟧ ⊸ ⟗ʃ ⟩ ⦃
+
+ᚦ str cp: append the UTF-8 encoding of cp ≥ 128 ⍝
+⦃
+  ⧖
+  ⍝ ⧗⁰ cp; the stack holds [str]
+  ⧖ ⊞ ▽△ ⊞ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⋔ ≶ ○▽△○▽○○○△○△ ⧗⁰ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⋔ ≶ △△▽△△▽○△ ⧗⁰
+  ⍝ ⧗⁰ n  ⧗¹ cp
+  ⍆̵ ⋓ ≫ ⊠ ⊟ △ ⧗⁰ ○▽△ ⧗¹ ⋒ ○△△○○△ ≪ ⊟ ⧗⁰ ▽○△ ○△△○○△
+  ⧗¹ ⧗⁰ ▽△ ⊟ ⥀ ⦃
+    ⧖ ⧖
+    ⍝ ⧗⁰ cp  ⧗¹ k; the stack holds [str]
+    ⍆̵ ⋓ ▽△▽▽▽△ ⋒ ○○△▽△ ≫ ⊠ ⧗¹ ○▽△ ⧗⁰
+    ⧗⁰ ⧗¹ △ ⊟ ⍿⁰ ▽ ≶
+  ⦃
+  ⌁ ⌁
+⸫ ᚦ ⟨ ʃ ⊸ ℤ ʃ ⟩ ⦃
+
+ᚢ cp: print one code point ⍝
+⦃ ⧖ »« ⧗⁰ ⧗⁰ △○▽▽▽△ ≶ ⋔ ⦃ ⍆̵ ⦄ ⦃ ᚦ ⦄ ⦃ ⍆̵ ⦄ ⎙̵ ⦄ ⟨ ℤ ⊸ ⟩ ᚢ ⸫
+
+⍝ ᛂ n: print n > 0 in decimal
+⦄
+  ⧖
+  ⧗⁰ n; r is n mod 10 in 0 … 9 ⍝
+  ⧗⁰ △○△ ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ △○△ ⊞ ⦄ ⧖
+  ⧗⁰ r  ⧗¹ n ⍝
+  ⧗¹ ⧗⁰ ⊟ △○△ ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ᛂ ⦄ ⦃ ⌁ ⦄
+  ⎙̵ ⍆̵ ⊞ ○△▽▽△ ⧗⁰ «»
+⦄ ⟨ ℤ ⊸ ⟩ ᛂ ⸫
+
+⍝ ᛁ n: print n in decimal
+⸫ ᛁ ⟨ ⊸ ℤ ⟩ ⦃ ⦃ ᛂ ⊝ ⎙̵ «-» ⦄ ⦃ ᛂ ⦄ ⦃ ⎙̵ «0» ⌁ ⦄ ⋔ ≶ ○ ⧗⁰ ⧗⁰ ⧖ ⦄
+
+---- tests: ⦶ means yes, ⊕ means no (so ⋏ is "or" and ⋎ is "and") ⍝
+⍝ ᛖ a b: a = b
+⸫ ᛖ ⟨ ŧ ⊸ ℤ ℤ ⟩ ⦃ ⁼ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋔ ≶ ⦄
+⍝ ᛦ cp lo hi: lo ≤ cp ≤ hi
+⸫ ᛦ ⟨ ŧ ⊸ ℤ ℤ ℤ ⟩ ⦃ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ⋏ ≶ ⧗⁰ ⧗² ≶ ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⦄
+
+==== s2 lexer: character classes, digits, mark names ⍝
+
+---- character classes (yes is ⦶, no is ⊕) ⍝
+⍝ ᛗ combining mark · ᚱ Runic · ᚩ Ogham · ᛋ space · ᚸ bracket · ᛇ trit glyph
+ᛃ glyph that takes an index · ᚷ operator glyph · ᚪ ASCII letter · ᛰ ASCII digit ⍝
+⦃ ○△△△○○△ ○▽▽○▽△△ ᛦ ⦄ ⟨ ℤ ⊸ ŧ ⟩ ᛗ ⸫
+⸫ ᚱ ⟨ ŧ ⊸ ℤ ⟩ ⦃ ᛦ ○△▽▽△○▽○△ ▽▽▽▽○○▽○△ ⦄
+⦃ △○△○▽○▽○△ ▽○△△▽○▽○△ ᛦ ⦄ ⟨ ℤ ⊸ ŧ ⟩ ᚩ ⸫
+⸫ ᛋ ⟨ ŧ ⊸ ℤ ⟩ ⦃ ⋏ ᛖ ○○△○▽○▽○△ ⧗⁰ ⋏ ᛖ △△△ ⧗⁰ ⋏ ᛖ ○○△ ⧗⁰ ᛖ ▽▽△△ ⧗⁰ ⧖ ⦄
+⦃ ⧖ ⧗⁰ △▽▽△▽▽○▽▽△ ᛖ ⧗⁰ ▽○▽△▽▽○▽▽△ ᛖ ⋏ ⧗⁰ △○△○○○▽▽▽△ ᛖ ⋏ ⧗⁰ ▽△△○○○▽▽▽△ ᛖ ⋏ ⧗⁰ ▽○△○○○▽▽▽△ ᛖ ⋏ ⧗⁰ ○○△○○○▽▽▽△ ᛖ ⋏ ⦄ ⟨ ℤ ⊸ ŧ ⟩ ᚸ ⸫
+⸫ ᛇ ⟨ ŧ ⊸ ℤ ⟩ ⦃ ⋏ ᛖ ○▽○△△○○△△ ⧗⁰ ⋏ ᛖ △△△▽○▽○▽▽△ ⧗⁰ ᛖ △▽○△△○○△△ ⧗⁰ ⧖ ⦄
+⦃ ⧖ ⧗⁰ △○▽△○▽○▽▽△ ᛖ ⧗⁰ ○▽▽△△△○△△ ᛖ ⋏ ⧗⁰ ○▽▽○△△○△△ ᛖ ⋏ ⧗⁰ △○○△△○○△△ ᛖ ⋏ ⦄ ⟨ ℤ ⊸ ŧ ⟩ ᛃ ⸫
+⸫ ᚷ ⟨ ŧ ⊸ ℤ ⟩ ⦃ ⋏ ᛖ △▽▽△○△▽△△ ⧗⁰ ⋏ ᛖ ▽▽○○▽△△▽▽△ ⧗⁰ ⋏ ᛖ △○△△▽△△△△ ⧗⁰ ⋏ ᛖ ▽▽△▽▽△○△△ ⧗⁰ ⋏ ᛖ ▽○○○▽△△▽▽△ ⧗⁰ ⋏ ᛖ ○△△○▽△△▽▽△ ⧗⁰ ⋏ ᛖ ▽△▽○▽△△▽▽△ ⧗⁰ ⋏ ᛖ ▽▽▽▽▽▽△△△ ⧗⁰ ⋏ ᛖ ○○△△△△○△△ ⧗⁰ ⋏ ᛖ ○▽▽○△△○△△ ⧗⁰ ⋏ ᛖ △○○○▽▽▽▽▽△ ⧗⁰ ⋏ ᛖ △○○○▽○○△△ ⧗⁰ ⋏ ᛖ ▽△△▽▽○○△△ ⧗⁰ ⋏ ᛖ ○△△△○△○△△ ⧗⁰ ⋏ ᛖ △△○○△△○△△ ⧗⁰ ⋏ ᛖ ▽▽▽▽△△○△△ ⧗⁰ ⋏ ᛖ ○○▽○○△○△△ ⧗⁰ ⋏ ᛖ △○▽○○○▽▽▽△ ⧗⁰ ⋏ ᛖ ▽△▽○○○▽▽▽△ ⧗⁰ ⋏ ᛖ △▽○○○○▽▽▽△ ⧗⁰ ⋏ ᛖ △○○△△○○△△ ⧗⁰ ⋏ ᛖ ○△○△△○○△△ ⧗⁰ ⋏ ᛖ △▽△▽△○○▽▽△ ⧗⁰ ⋏ ᛖ △▽▽▽▽△○△△ ⧗⁰ ⋏ ᛖ △○○○○△▽△△ ⧗⁰ ⋏ ᛖ △○△△△▽○△△ ⧗⁰ ⋏ ᛖ ○△○△△△▽▽▽△ ⧗⁰ ⋏ ᛖ ○▽▽▽○○○△△ ⧗⁰ ⋏ ᛖ ○○○▽△△▽△△ ⧗⁰ ⋏ ᛖ ○▽△○▽△○△△ ⧗⁰ ⋏ ᛖ ▽○△▽▽▽▽▽▽△ ⧗⁰ ⋏ ᛖ ○○△▽△○○△△ ⧗⁰ ⋏ ᛖ ▽○△▽△○○△△ ⧗⁰ ⋏ ᛖ △△▽○▽○○▽▽△ ⧗⁰ ⋏ ᛖ ▽▽△○▽△○△△ ⧗⁰ ⋏ ᛖ △△○○▽△○△△ ⧗⁰ ⋏ ᛖ ○○○○▽△○△△ ⧗⁰ ⋏ ᛖ △○○○▽△○△△ ⧗⁰ ⋏ ᛖ ▽△▽○△○○△△ ⧗⁰ ⋏ ᛖ ▽▽△△△○○△△ ⧗⁰ ⋏ ᛖ △△○△△○○△△ ⧗⁰ ⋏ ᛖ ○○○△△○○△△ ⧗⁰ ⋏ ᛖ ▽○△△△○○△△ ⧗⁰ ⋏ ᛖ △▽△△△○○△△ ⧗⁰ ⋏ ᛖ ○▽△△△○○△△ ⧗⁰ ⋏ ᛖ ○▽○▽○△○△△ ⧗⁰ ⋏ ᛖ ○▽▽△△△○△△ ⧗⁰ ⋏ ᛖ △○▽△○▽○▽▽△ ⧗⁰ ᛖ ○○▽△○▽○▽▽△ ⧗⁰ ⧖ ⦄
+⦃ ⧖ ⧗⁰ ▽△△▽△ ○○△○△ ᛦ ⧗⁰ △▽▽△△ ▽▽▽▽▽△ ᛦ ⋏ ⦄ ⟨ ℤ ⊸ ŧ ⟩ ᚪ ⸫
+⸫ ᛰ ⟨ ŧ ⊸ ℤ ⟩ ⦃ ᛦ ○△○▽△ ○△▽▽△ ⦄
+
+ᛏ cp: value of a balanced-ternary digit ▽ ○ △, or 9 ⍝
+⦃ ⍿⁰ △△▽△▽△△△△ ≶ ⋔ ⦃ ⌁ ▽ ⦄ ⦃ ⍿⁰ ○○△△▽△△△△ ≶ ⋔ ⦃ ⌁ ○ ⦄ ⦃ ⍿⁰ ○△△○▽△△△△ ≶ ⋔ ⦃ ⌁ △ ⦄ ⦃ ⌁ ○○△ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⟨ ℤ ⊸ ℤ ⟩ ᛏ ⸫
+ᛥ cp: value of a superscript digit, or −1 ⍝
+⦃ ⍿⁰ ○▽▽▽△△▽△△ ≶ ⋔ ⦃ ⌁ ○ ⦄ ⦃ ⍿⁰ ▽▽○△▽△ ≶ ⋔ ⦃ ⌁ △ ⦄ ⦃ ⍿⁰ △▽▽△▽△ ≶ ⋔ ⦃ ⌁ ▽△ ⦄ ⦃ ⍿⁰ ▽○▽△▽△ ≶ ⋔ ⦃ ⌁ ○△ ⦄ ⦃ ⍿⁰ △○▽▽△△▽△△ ○▽○▽△△▽△△ ᛦ ⋔ ⦃ ○▽▽▽△△▽△△ ⊟ ⦄ ⦃ ⌁ ▽ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⟨ ℤ ⊸ ℤ ⟩ ᛥ ⸫
+
+⍝ ᚹ n: n is odd
+⸫ ᚹ ⟨ ŧ ⊸ ℤ ⟩ ⦃ ᛖ △ ⋒ △ ⦄
+
+ᛘ cp: the mirror image of a bracket (⦃⦄ ⟨⟩ ⟦⟧ add to fixed sums) ⍝
+⦃
+  ⦃ ⦃ ▽○▽△○○△○○△ ⦄ ⁼ ⦃ ○△▽△○○△○○△ ⦄ ⋔ ≶ △○△○○○▽▽▽△ ⍿⁰ ⦄ ⁼ ⦃ ○▽△△△○▽△○△ ⦄ ⋔ ≶ ○▽▽△▽▽○▽▽△ ⍿⁰
+  ⍿¹ ⊟ ⧖ ⌁ ⧗⁰
+⸫ ᛘ ⟨ ℤ ⊸ ℤ ⟩ ⦃
+
+ᛈᛟ line ls le k: physical position of reading-order index k ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⍝ ⧗⁰ line  ⧗¹ ls  ⧗² le  ⧗³ k
+  ⁼ ⦃ ⊟ ⧗¹ ⊟ △ ⧗⁰ ⌁ ⧖ ⧖ ⦄ ⦃ ⊞ ⧗⁰ ⌁ ⧖ ⦄ ⋔ ᚹ ⧗⁰ ⧗³ ⧗² ⧗¹
+⦄ ⟨ ℤ ℤ ℤ ℤ ⊸ ℤ ⟩ ᛈᛟ ⸫
+
+⍝ ---- printing
+ᛗᚾ bit: the name of a mark bit ⍝
+⦃
+  ⦃ ⎙̵ «deworrob» ⌁ ⦄ ⋔ ≶ △ ⍿⁰
+  ⦃ ⍿⁰ ▽△ ≶ ⋔ ⦃ ⌁ »erutuf« ⎙̵ ⦄
+    ⦃ ⎙̵ «tsap» ⌁ ⦄ ⋔ ≶ △△ ⍿⁰ ⦄
+      ⦃ ⍿⁰ ▽○△ ≶ ⋔ ⦃ ⌁ »mutnauq« ⎙̵ ⦄
+        ⦃ ⎙̵ «desoprepus» ⌁ ⦄ ⋔ ≶ △▽▽△ ⍿⁰ ⦄
+          ⦃ ⍿⁰ ▽▽△△ ≶ ⋔ ⦃ ⌁ »α« ⎙̵ ⦄
+            ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⎙̵ «γ» ⌁ ⦄ ⦃ ⎙̵ «β» ⌁ ⦄ ⋔ ≶ △○△▽△ ⍿⁰ ⦄
+⦄ ⟨ ℤ ⊸ ⟩ ᛗᚾ ⸫
+
+⍝ ᛗᛈ mask: " marks=a,b" for the bits of mask, in name order
+⦄
+  ⧖
+  ⁼ ∅ ⦃ ⎙̵ «=skram » ⦄ ⋔ ᚡᚠ ᛖ ○ ⧗⁰
+  ⧗⁰ △ ⦶
+  the loop carries [mask bit first] ⍝
+  ⥀ ⦃
+    ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⋒ ○ ᛖ ᚡᚠ ⧖
+    ⁼ ∅ ⦃ ⎙̵ «,» ⦄ ⋔ ⋎ ᚡᚠ ⧗³ ⧗⁰
+    ⧗² ⧗⁰ ⋔ ⦃ ᛗᚾ ⦄ ⦃ ⌁ ⦄ ⁼
+    ⁼ ∅ ⦃ ⊕ ⌁ ⦄ ⋔ ⧗⁰ ⧗³ ≪ △ ⧗² ⧗¹
+    ⧗² ▽△▽▽▽△ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦃
+  ⌁ ⌁ ⌁
+⸫ ᛗᛈ ⟨ ⊸ ℤ ⟩ ⦃
+
+==== s2 lexer (spec §1, §2): source code points → token buffer ⍝
+⍝ The token buffer is one array of ℤ after a sentinel. Slots 0 … 5 are the
+scanner's registers: token count (breaths included), carried marks lo and ⍝
+⍝ hi, reading index k, chunk start k0 (−1: none), line done. Records follow:
+kind line col marks idx v1 v2 n, then the n code points of the text. ⍝
+⍝ Kinds: 1 name 2 tname 3 anti 4 inverse 5 int 6 real 7 trit 8 glyph
+9 type 10 tprefix 11 bracket 12 string. idx −9 is none, −1 is ⁻, −2 is ⁺. ⍝
+⍝ int: v1 value; real: v1/v2; type and tprefix: v1 prefix length, v2 slot of ⁽ or −1.
+
+⎔ »tixe« ⟨ ℤ ⊸ ⟩ ᚡᚢ ⸫
+
+⍝ ᚡᚤ a: a, or the enclosing function fails
+⸫ ᚡᚤ ⟨ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ⟩ ⦃ ⦄
+
+ᚡᚠ t: yes ↔ no ⍝
+⦃ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼ ⦄ ⟨ ŧ ⊸ ŧ ⟩ ᚡᚠ ⸫
+⸫ ᚡᚥ ⟨ ℤ ⊸ ℤ ℤ ⟩ ⦃ ⦃ ⌁ ⦄ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⦃ ⌁ ⦄ ⋔ ≶ ⍿¹ ⍿¹ ⦄
+⦃ ⍿¹ ⍿¹ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦄ ⟨ ℤ ℤ ⊸ ℤ ⟩ ᚡᚦ ⸫
+
+⍝ ᚡᚧ a j v: a with slot j set to v
+⸫ ᚡᚧ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃ ⦃ ↯ ⦄ ⦃ ⦄ ⁇ ⍈̱ ⧗³ ⊟ ≫ △ ⧗⁰ ⊞ △ ⧗² ⟖ ⧖ ⍴̱ ⟗ ⧗⁰ ⧖ ⧖ ⧖ ⦄
+
+ᚡᚨ a: one more token ⍝
+⦃ ⟗ ○ ᚳ ⧖ ○ ⧗⁰ △ ⊞ ᚡᚧ ⦄ ⟨ ⟦ ℤ ⟧ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚡᚨ ⸫
+ᚡᚩ a: the next reading index ⍝
+⦃ ⟗ ○△ ᚳ ⧖ ○△ ⧗⁰ △ ⊞ ᚡᚧ ⦄ ⟨ ⟦ ℤ ⟧ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚡᚩ ⸫
+
+⍝ ᚡᚪ path line col: "path:line:col: error: "
+⸫ ᚡᚪ ⟨ ⊸ ℤ ℤ ⟗ʃ ⟩ ⦃ ⎙̵ « :rorre :» ᛁ ⧗² ⎙̵ «:» ᛁ ⧗¹ ⎙̵ «:» ⎙̱ ⧗⁰ ⧖ ⧖ ⧖ ⦄
+
+---- printing ⍝
+
+ᚡᚫ a j n: print slots j … j+n−1 of a ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗¹ ⧗² ⊞
+  ⦄ ⥀
+    ⧖ ⧖ ⧖
+    ⦃ ⊕ ⧗² ⊞ △ ⧗¹ ⧗⁰ ᚢ ᚳ ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗² ⧗¹ ⧗² ⧗¹ ⧗⁰
+  ⦄
+  ⌁̱ ⌁ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ⟩ ᚡᚫ ⸫
+
+⍝ ᚡᚬ cp: one code point inside a quoted string
+⦄
+  ⍿⁰ ▽△△○△ ᛖ ⋔ ⦃ ⌁ »\\« ⎙̵ ⦄
+  ⦃ ⎙̵ «n» ⎙̵ «\» ⌁ ⦄ ⋔ ᛖ △○△ ⍿⁰ ⦄
+    ⦃ ⍿⁰ △▽△△ ᛖ ⋔ ⦃ ⌁ »"\« ⎙̵ ⦄ ⦃ ᚢ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⸫ ᚡᚬ ⟨ ⊸ ℤ ⟩ ⦃
+
+ᚡᚭ a j n: slots j … j+n−1 as a quoted string ⍝
+⦃
+  ⧖ ⧖ ⧖
+  »"« ⎙̵
+  ⊞ ⧗² ⧗¹ ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ⧗¹ ⧗² ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖ ⧖ ⧖ ⧗⁰ ⧗¹ ᚳ ᚡᚬ ⧗⁰ ⧗¹ △ ⊞ ⧗² ⊕ ⦄
+  ⦃
+  ⌁ ⌁ ⌁̱
+  ⎙̵ «"»
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ⟩ ᚡᚭ ⸫
+
+⍝ ᚡᚮ k: the name of token kind k
+⦄
+  ⍿⁰ △ ᛖ ⋔ ⦃ »eman« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «emant» ⦄ ⋔ ᛖ ▽△ ⍿⁰
+  ⍿⁰ ○△ ᛖ ⋔ ⦃ »itna« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «esrevni» ⦄ ⋔ ᛖ △△ ⍿⁰
+  ⍿⁰ ▽▽△ ᛖ ⋔ ⦃ »tni« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «laer» ⦄ ⋔ ᛖ ○▽△ ⍿⁰
+  ⍿⁰ △▽△ ᛖ ⋔ ⦃ »tirt« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «hpylg» ⦄ ⋔ ᛖ ▽○△ ⍿⁰
+  ⍿⁰ ○○△ ᛖ ⋔ ⦃ »epyt« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «xiferpt» ⦄ ⋔ ᛖ △○△ ⍿⁰
+  ⍿⁰ ▽△△ ᛖ ⋔ ⦃ »tekcarb« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «gnirts» ⦄ ⋔ ᛖ ○△△ ⍿⁰
+  ⌁
+⸫ ᚡᚮ ⟨ ⊸ ℤ ⟩ ⦃
+
+ᚡᚯ cp: charge flavour 1 … 6 (u d s c b t), or 0 ⍝
+⦃
+  ○ ⧖
+  ⧗⁰ ○▽△▽○△△○△ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ▽△ ⌁ ⦄ ⋔ ᛖ ▽○▽▽○△△○△ ⧗⁰
+  ⧗⁰ ○○△○○○△ ᛖ ⋔ ⦃ ⌁ ○△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ △△ ⌁ ⦄ ⋔ ᛖ ▽△▽▽△△△○△ ⧗⁰
+  ⧗⁰ △▽▽▽○△△○△ ᛖ ⋔ ⦃ ⌁ ▽▽△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ○▽△ ⌁ ⦄ ⋔ ᛖ ▽▽△▽○△△○△ ⧗⁰
+⦄ ⟨ ℤ ⊸ ℤ ⟩ ᚡᚯ ⸫
+
+⍝ ᚡᚰ f: the letter of flavour f
+⦄
+  ⍿⁰ △ ᛖ ⋔ ⦃ »u« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «d» ⦄ ⋔ ᛖ ▽△ ⍿⁰
+  ⍿⁰ ○△ ᛖ ⋔ ⦃ »s« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «c» ⦄ ⋔ ᛖ △△ ⍿⁰
+  ⍿⁰ ▽▽△ ᛖ ⋔ ⦃ »b« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «t» ⦄ ⋔ ᛖ ○▽△ ⍿⁰
+  ⌁
+⸫ ᚡᚰ ⟨ ⊸ ℤ ⟩ ⦃
+
+ᚡᚱ b i to: one charge factor at slot i: the next slot, its flavour, ⍝
+⍝ its sign, its exponent digits and whether there were any (1) or not (0)
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ᚡᚯ ᚳ ⧗¹ ⧗⁰
+  ⧗² △ ⊞ ⧖
+  ⧖ ⋎ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋔ ≶ ⧗⁴ ⧗⁰ ᛖ ▽○○▽△△▽△△ ᚳ ⧗⁰ ⧗²
+  ⧗¹ ⧗⁰ ⋔ ⦃ △ ⊞ ⦄ ∅ ⁼ ⧖
+  ⧖ ⁼ ⦃ △ ⦄ ⦃ ▽ ⦄ ⋔ ⧗¹
+  ⧗⁵ ⧗¹ ⧗⁷ ○ ○
+  the loop carries [b i to e have] ⍝
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ᚳ ᛥ ⧖
+    ⧗⁰ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹
+    ⧗⁰ ○ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⧗² ⧗³ ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎
+    ⁼ ⦃ ⦶ ⌁ ⦄ ⦃ ⊕ △ ⊞ ⧗⁵ ⊠ △○△ ⧗³ ⧗² ⊞ △ ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔
+  ⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ⧗¹⁵ ⧗¹¹ ⧗³ ⧗⁴
+⸫ ᚡᚱ ⟨ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᚲ a from to: a charge as "u·d^-1" ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗¹ ⧗²
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ∅ ⦃ ⎙̵ «·» ⦄ ∅ ⋔ ≶ ⧗² ⧗¹
+    ⧗⁰ ⧗¹ ⧗³ ᚡᚱ ⧖ ⧖ ⧖ ⧖ ⧖
+    ᚡᚰ ⧗¹
+    ⧗² ⧗³ ⧗⁴ △ ᛖ ⋔ ∅ ⦃ ⌁ △ ⦄ ⁼ ⊠ ⧖
+    ⁼ ⦃ ᛁ ⎙̵ «^» ⦄ ⦃ ⌁ ⦄ ⋔ ᛖ △ ⧗⁰ ⧗⁰
+    ⧗⁶ ⧗¹ ⧗⁸ ⧗⁹
+    ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗⁹ ⧗¹
+  ⦄
+  ⌁̱ ⌁ ⌁ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ⟩ ᚡᚲ ⸫
+
+⍝ ᚡᚳ a t np: type prefixes separated by commas (ψ keeps its subscript)
+⦄
+  ⧖ ⧖ ⧖
+  ⊞ ⧗² ⧗¹ ⧗¹ ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ᚳ ⧖
+    ⁼ ∅ ⦃ ⎙̵ «,» ⦄ ⋔ ⋎ ᚡᚠ ᛦ △△△▽△△▽△△ △△○▽△△▽△△ ⧗⁰ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋔ ≶ ⧗³ ⧗²
+    ⧗⁰ ᚢ
+    ⧗⁴ ⧗³ ⊞ △ ⧗² ⧗¹
+    ⧗² △ ⊞ ⧗⁴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦃
+  ⌁ ⌁ ⌁ ⌁̱
+⸫ ᚡᚳ ⟨ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᚴ a t np copen n: " base=…" and " charge=…" ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  »=esab « ⎙̵
+  ᚡᚫ ⊟ ⧗² ⦃ ⌁ ⦄ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⋔ ≶ ○ ⧗³ ⧗³ ⧗⁴ ⊞ ⧗² ⧗¹ ⧗⁰
+  ⧗⁰ ⧗¹ ⧗³ ⊞ △ ⊞ ⧗¹ ⧗⁴ ⊞ △ ⊟
+  ⦃ ⌁̱ ⌁ ⌁ ⦄ ⁼ ⦃ ᚡᚲ ⎙̵ «=egrahc » ⦄ ⋔ ≶ ○ ⧗³
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ⊸ ⟩ ᚡᚴ ⸫
+
+⍝ ᚡᚵ a t kind np copen n: the type fields of a record
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗³ ⧗¹ ⧗⁰
+  ⧗² ○○△ ᛖ ⧗² △○△ ᛖ ⋏ ⧗³ ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎
+  ⁼ ⦃ ⌁̱ ⌁ ⌁ ⦄ ⦃ ᚡᚳ ⎙̵ «=sexiferp » ⦄ ⋔
+  ⧗⁰ ⧗¹ ⧗³ ⧗⁴ ⧗⁵ ⧗² ○○△ ᛖ ⋔ ⦃ ᚡᚴ ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⦄ ⁼
+⸫ ᚡᚵ ⟨ ⊸ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᚶ idx ⍝
+⦃
+  ⧖
+  ⧗⁰ ○○▽ ᛖ ᚡᚠ ⋔ ⦃ »=xdi « ⎙̵ ⦄ ∅ ⁼
+  ⧗⁰
+  ⍿⁰ ▽ ᛖ ⋔ ⦃ ⌁ »-« ⎙̵ ⦄
+  ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ᛁ ⦄ ⦃ ⌁ ⦄ ⋔ ᛖ ○○▽ ⍿⁰ ⦄ ⦃ ⎙̵ «+» ⌁ ⦄ ⋔ ᛖ △▽ ⍿⁰ ⦄
+⦄ ⟨ ℤ ⊸ ⟩ ᚡᚶ ⸫
+
+⍝ ᚡᚷ kind v1 v2
+⦄
+  ⧖ ⧖ ⧖
+  ⁼ ∅ ⦃ ⎙̵ «=eulav » ⦄ ⋔ ⋏ ᛖ ○▽△ ⧗⁰ ᛖ ▽▽△ ⧗⁰
+  ⧗¹ ⧗⁰ ▽▽△ ᛖ ⧗⁰ ○▽△ ᛖ ⋏ ⋔ ⦃ ᛁ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⁼ ⦃ ⌁ ⦄ ⦃ ᛁ ⎙̵ «/» ⦄ ⋔ ⋎ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋔ ≶ △ ⧗² ᛖ ○▽△ ⧗⁰ ⧗²
+⦄ ⟨ ℤ ℤ ℤ ⊸ ⟩ ᚡᚷ ⸫
+
+⍝ ᚡᚸ a j: print the record at slot j, giving the slot after it
+⦄
+  ⧖ ⧖
+  ⧖ ᚳ ⧗¹ ⧗⁰
+  ⧗¹ ⧗² △ ⊞ ᚳ ⧖
+  ⧖ ᚳ ⊞ ▽△ ⧗³ ⧗²
+  ⧗³ ⧗⁴ ○△ ⊞ ᚳ ⧖
+  ⧖ ᚳ ⊞ △△ ⧗⁵ ⧗⁴
+  ⧗⁵ ⧗⁶ ▽▽△ ⊞ ᚳ ⧖
+  ⧖ ᚳ ⊞ ○▽△ ⧗⁷ ⧗⁶
+  ⧗⁷ ⧗⁸ △▽△ ⊞ ᚳ ⧖
+  ⎙̵ « » ᚡᚮ ⧗⁷ ⎙̵ « » ᛁ ⧗⁵ ⎙̵ «:» ᛁ ⧗⁶
+  ⧗⁸ ⧗⁹ ▽○△ ⊞ ⧗⁰ ⧗⁷ ○△△ ᛖ ⋔ ⦃ ᚡᚭ ⦄ ⦃ ᚡᚫ ⦄ ⁼
+  ᚡᚶ ⧗³
+  ⧗⁷ ⧗² ⧗¹ ᚡᚷ
+  ᚡᚵ ⧗⁰ ⧗¹ ⧗² ⧗⁷ ⊞ ▽○△ ⧗⁹ ⧗⁸
+  ⧗⁴ ᛗᛈ
+  ⎙̵ «↵»
+  ⧗⁹ ▽○△ ⊞ ⧗⁰ ⊞
+⸫ ᚡᚸ ⟨ ℤ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᚹ a: every record, one per line ⍝
+⦃
+  ⧖
+  ⧗⁰ ⧗⁰ ᚴ ○▽△ ≶ ⋔ ⦃ ⌁̱ ⦄ ⦃ ᚡᚺ ⦄ ⁼
+⸫ ᚡᚹ ⟨ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+⦃
+  ⧖
+  ⧗⁰ ○▽△
+  ⦃ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ᚴ ⧗⁰ ⍿⁰ ᚡᚸ ⧗¹ ⧗⁰ ⧗⁰ ⧖ ⧖ ⦄ ⥀
+  ⌁ ⌁̱
+⸫ ᚡᚺ ⟨ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+---- arrays of code points (b is a shadow, slots from 0) ⍝
+
+ᚡᚻ cp cls: cp is in class cls (1 Runic, 2 Ogham, 3 superscript digit, 4 trit digit) ⍝
+⦃
+  ⧖ ⧖
+  ⧗⁰ ⧗¹ △ ᛖ ⋔ ⦃ ᚱ ⦄ ⦃ ⌁ ⊕ ⦄ ⁼
+  ⋏ ⁼ ⦃ ⊕ ⌁ ⦄ ⦃ ᚩ ⦄ ⋔ ᛖ ▽△ ⧗¹ ⧗⁰
+  ⧗⁰ ⧗¹ ○△ ᛖ ⋔ ⦃ ᛥ ○ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⦄ ⦃ ⌁ ⊕ ⦄ ⁼ ⋏
+  ⋏ ⁼ ⦃ ⊕ ⌁ ⦄ ⦃ ᚡᚠ ᛖ ○○△ ᛏ ⦄ ⋔ ᛖ △△ ⧗¹ ⧗⁰
+⦄ ⟨ ℤ ℤ ⊸ ŧ ⟩ ᚡᚻ ⸫
+
+⍝ ᚡᚼ b from to cls: from < to and slots from … to−1 are all in cls
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⦃ ᚡᚽ ⦄ ⁼ ⦃ ⊕ ⌁̱ ⌁ ⌁ ⌁ ⦄ ⋔ ≶ ⧗² ⧗¹ ⧗³ ⧗² ⧗¹ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ŧ ⟩ ᚡᚼ ⸫
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⦶ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ △ ⊞ ⧗² ⧗³
+    ⋎ ᚡᚻ ⧗³ ᚳ ⧗¹ ⧗⁰ ⧗⁴
+    ⧗¹ △ ⊞ ⧗² ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁴
+⸫ ᚡᚽ ⟨ ŧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᚾ b from cp: the first slot ≥ from holding cp, or the length ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗²
+  ⦄ ⥀
+    ⧖ ⧖ ⧖
+    ⧗² ⧗¹ ⧗⁰
+    ⧗⁰ ⧗¹ ᚳ ⧗² ᛖ ⧗¹ ⧗⁰ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋏
+    ⁼ ⦃ ⊕ ⧗⁰ ⊞ △ ⧖ ⦄ ⦃ ⦶ ⦄ ⋔
+  ⦄
+  ⧗⁰ ⌁̱ ⧖ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ℤ ⟩ ᚡᚾ ⸫
+
+⍝ ᚡᚿ cps lo hi: the first index in lo … hi that is not a mark, or hi+1
+⦄
+  ⧖ ⧖ ⧖
+  ⧗¹ ⧗² ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗²
+    ⋎ ᛗ ᚳ ⧗² ⧗⁰ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋔ ≶ ⧗¹ ⧗²
+    ⋔ ⦃ △ ⊞ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦃
+  ⧖ ⌁ ⌁̱ ⧗⁰
+⸫ ᚡᚿ ⟨ ℤ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᛀ cps lo hi: the code points of lo … hi that are not marks, after a sentinel ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⟦ ○ ⟧ ⧗⁰ ⧗¹ ⧗²
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ⁼ ⦃ ⍆̵ ⦄ ⦃ ⌁ ⦄ ⋔ ᛗ ⍿⁰ ᚳ ⧗² ⧗¹ ⧗⁰
+    ⧗¹ ⧗² △ ⊞ ⧗³
+    ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗³ ⧗²
+  ⦄
+  ⌁̱ ⌁ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟩ ᚡᛀ ⸫
+
+⍝ ᚡᛁ b out from n: out with slots from … from+n−1 of b appended (n ≥ 1)
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⊞ ⧗³ ⧗² ⧗² ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗⁰ ⧗² ᚳ ⍆̵ ⧗² △ ⊞ ⧗³
+    ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗³ ⊞ △ ⧗²
+  ⦄
+  ⧗⁰ ⌁̱ ⧖ ⌁ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟩ ᚡᛁ ⸫
+
+⍝ ---- numerals (§2): balanced ternary, least-significant trit first
+
+⍝ ᚡᛂ b from to: the value of the trit digits from … to−1 (not empty)
+⦄
+  ⧖ ⧖ ⧖
+  ○ ⧗¹ ⊟ △ ⧗² ⧗⁰
+  ⍝ the loop carries [b j from v], j going down
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ⊞ ᛏ ᚳ ⧗¹ ⧗⁰ ⊠ ○△ ⧗³ ⧗² ⊟ △ ⧗¹ ⧗⁰
+    ⧗¹ ⧗² ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧗³
+⸫ ᚡᛂ ⟨ ℤ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᛃ b from to: the trit digits read most-significant first (not empty) ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ○
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ⊞ ᛏ ᚳ ⧗¹ ⧗⁰ ⊠ ○△ ⧗³ ⧗² ⊞ △ ⧗¹ ⧗⁰
+    ⧗¹ △ ⊞ ⧗² ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧗³
+⸫ ᚡᛃ ⟨ ℤ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᛄ k ⍝
+⦃
+  ⍿¹ △
+  ⥀ ⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗¹ ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖ ⧖ ⧗⁰ ○△ ⊠ ⧗¹ △ ⊟ ⊕ ⦄ ⁼ ⦄
+  ⧗⁰ ⌁ ⧖ ⌁
+⦄ ⟨ ℤ ⊸ ℤ ⟩ ᚡᛄ ⸫
+
+⍝ ᚡᛅ num den: divide both by 3 while they can
+⦄
+  ⥀ ⦃
+    ⧖ ⧖
+    ⧗⁰ ⧗¹
+    ⋎ ᛖ ○ ⦃ △ ⦄ ⦃ ⦄ ⁇ ⊜ ○△ ⧗⁰ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋔ ≶ △ ⧗¹
+    ⋔ ⦃ ⧖ ⧖ ⧗⁰ ○△ ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧗¹ ○△ ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦃
+⦄ ⟨ ℤ ℤ ⊸ ℤ ℤ ⟩ ᚡᛅ ⸫
+
+⍝ classification results: kind idx v1 v2 skip len; kind 0 is an error whose
+code is idx and argument v1; kind −1 means "not of this shape" ⍝
+
+ᚡᛆ b n q: the real numeral b with ⁝ at q ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗¹ ⧗² ⊟ △ ⊟ ᚡᛄ ⧖
+  ⧖ ⧖ ᚡᛅ ⧗⁰ ⊞ ᚡᛃ ⧗² ⊞ △ ⧗³ ⧗¹ ⊠ ⧗⁰ ᚡᛂ ⧗³ ○ ⧗¹
+  ○▽△ ○○▽ ⧗⁰ ⧗¹ ○ ⧗⁴
+⸫ ᚡᛆ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ᚡᚼ △△ ⧗¹ ○ ⧗⁰ ⧗¹ ⧗⁰
+  ⋔ ⦃ ⧖ ⧖ ▽▽△ ○○▽ ⧗⁰ ○ ⧗¹ ᚡᛂ ○ ○ ⧗¹ ⦄ ⦃ ⌁ ⌁̱ ○ ○△ ○ ○ ○ ○ ⦄ ⁼
+⸫ ᚡᛇ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧗² ⧗¹ ⧗⁰
+  ⧗³ ⧗¹ ᛖ ⧗⁰ ○ ⧗² △△ ᚡᚼ ⋎ ⧗⁰ ⧗² △ ⊞ ⧗¹ △△ ᚡᚼ ⋎
+  ⁼ ⦃ ○ ○ ○ ○ △△ ○ ⌁̱ ⌁ ⌁ ⦄ ⦃ ᚡᛆ ⦄ ⋔
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛈ ⸫
+
+⍝ ᚡᛉ b: an int or a real
+⦄
+  ⧖
+  ⧖ ᚴ ⧗⁰
+  ⧗¹ ○ ▽▽○△○△▽△△ ᚡᚾ ⧖
+  ⧖ ᚡᚾ ▽▽○△○△▽△△ ᚡᚥ ⧗¹ ⊞ △ ⧗⁰ ⧗²
+  ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⁼ ⦃ ᚡᛈ ⦄ ⦃ ᚡᛇ ⦄ ⋔ ᛖ ⧗² ⧗¹
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛉ ⸫
+
+⍝ ---- charges and types (§3)
+
+⍝ ᚡᛊ b from to: check a non-empty charge; error code and argument (0 0 if fine)
+⦄
+  ⧖ ⧖ ⧖
+  ○ ○ ○ ⧗² ⧗¹ ⧗⁰
+  ⍝ the loop carries [b i to seen code arg]
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧖ ᚳ ⧗¹ ⧗⁰
+    ⧗¹ ⧗² ⧗³ ᚡᚱ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧖ ᚡᚠ ᛖ ○ ⋒ ≪ ⧗¹ △ ⧗⁹
+    ○
+    ⁼ ∅ ⦃ ○○△ ⌁ ⦄ ⋔ ⋎ ᛖ ○ ⧗⁴ ᛖ △ ⧗⁵
+    ⧗⁰ ⋔ ⦃ ⌁ ▽○△ ⦄ ∅ ⁼
+    ⁼ ∅ ⦃ △▽△ ⌁ ⦄ ⋔ ᛖ ○ ⧗²
+    ⧖
+    ⧗⁷ ⧗⁰ ⋓ ≪ ⧗³ △ ⧗¹¹ ⧗¹⁰ ⧗² ⧗⁸
+    ⧗⁰ ○ ᛖ ⧗² ⧗¹⁰ ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁴ ⧗⁵
+⸫ ᚡᛊ ⟨ ℤ ℤ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖
+  ⁼ ⦃ ᚡᛊ ⦄ ⦃ ○ ○▽△ ⌁̱ ⌁ ⌁ ⦄ ⋔ ᛖ ⧗² ⧗¹ ⧗² ⧗¹ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ℤ ℤ ⟩ ᚡᛋ ⸫
+
+⍝ ᚡᛌ r np copen n: the result for a type (r 9), a tprefix (10),
+not a type (−1) or error r ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ○○△ ᛖ ⧗⁰ △○△ ᛖ ⋏ ⧖
+  ⁼ ∅ ⦃ ○ ⌁ ⦄ ⋔ ᚡᚠ ⋏ ⧗⁰ ᛖ ▽ ⧗¹ ⧗¹
+  ⧗¹ ⧗⁰ ⋔ ⦃ ⌁ ○○▽ ⦄ ∅ ⁼ ⍿⁰ ▽ ᛖ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼
+  ⁼ ⦃ ○ ⌁ ⦄ ∅ ⋔ ⧗⁰ ⧗²
+  ⧗³ ⧗⁰ ⋔ ∅ ⦃ ⌁ ○ ⦄ ⁼
+  ○
+  ⧗⁴ ⧗⁰ ⋔ ∅ ⦃ ⌁ ○ ⦄ ⁼
+⸫ ᚡᛌ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ⟩ ⦃
+
+ᚡᛍ b k end: ψ at k with its subscript bound: the next slot and an error code ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ △ ⊞ ⧗² ○ ○
+  the loop carries [b j end bound cnt] ⍝
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ᚳ ⧖
+    ⧗⁰ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹
+    ⧗⁰ △△○▽△△▽△△ △△△▽△△▽△△ ᛦ ⧗² ⧗³ ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎
+    ⁼ ⦃ ⦶ ⌁ ⦄ ⦃ ⊕ ⊞ △ ⧗⁴ ⊞ ⊟ △△○▽△△▽△△ ⧗⁵ ⊠ △○△ ⧗³ ⧗² ⊞ △ ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔
+  ⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ○
+  ∅ ⦃ ○△△ ⌁ ⦄ ∅ ⋔ ≶ ○○○△ ⧗³
+  ⧗³ ○ ᛖ ⋔ ⦃ ⌁ ▽△△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ △○△ ⌁ ⦄ ⋔ ᛖ ○ ⧗⁴
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ℤ ℤ ⟩ ᚡᛍ ⸫
+
+⍝ ᚡᛎ b k end: one type prefix at k: the next slot (k when there is none) and an error code
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ᚳ ⧗¹ ⧗⁰
+  ⧗² ⧗³ ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧖
+  ○ ⧗³
+  ⧗⁰ ⧗¹ ⧖ ⧗⁰ △○△△▽△△△△ ᛖ ⧗⁰ ▽△▽○○○▽▽▽△ ᛖ ⋏ ⧗⁰ △○▽○○○▽▽▽△ ᛖ ⋏ ⧗⁰ ▽▽○○▽△△▽▽△ ᛖ ⋏ ⧗⁰ △▽▽△○△▽△△ ᛖ ⋏ ⋎ ⋔ ⦃ ⌁ △ ⊞ ○ ⦄ ∅ ⁼
+  ⁼ ⦃ ⌁̱ ⌁ ⌁ ⦄ ⦃ ⧗¹ ⧗⁰ ⌁ ⌁ ⧖ ⧖ ᚡᛍ ⦄ ⋔ ⋎ ᛖ ▽▽○○○△△ ⧗² ⧗¹ ⧗⁵ ⧗⁴ ⧗³
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ℤ ℤ ⟩ ᚡᛎ ⸫
+
+⍝ ᚡᛏ b k end copen: only prefixes
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚴ ⧗⁰
+  ○
+  ⁼ ∅ ⦃ △○△ ⌁ ⦄ ⋔ ᚡᚠ ᛖ △ ⧗⁰
+  ⧗⁰ △ ᛖ ⋔ ⦃ ⌁ ▽ ⦄ ∅ ⁼
+  ∅ ⁼ ⦃ △△△ ⌁ ⦄ ⋔ ≶ ○ ⧗⁴
+  ⧖
+  ᚡᛌ ⧗¹ ⧗⁵ ⧗³ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛏ ⸫
+
+⍝ ᚡᛐ b k end copen: prefixes, then a base type or an Ogham type name
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚴ ⧗⁰
+  ○
+  ⁼ ∅ ⦃ ○○△ ⌁ ⦄ ⋔ ⋏ ᚡᚼ ▽△ ⧗⁴ ⧗³ ⧗² ⋎ ⋏ ᛖ △△▽○▽○△ ⧗⁰ ⋏ ᛖ △▽○○△▽○△○○▽△ ⧗⁰ ⋏ ᛖ ▽○○▽○▽○△△ ⧗⁰ ⋏ ᛖ ○▽△▽○▽○△△ ⧗⁰ ᛖ ▽○△△△△ ⧗⁰ ⧖ ᚳ ⧗² ⧗¹ ᛖ △ ⊟ ⧗² ⧗³
+  ⧖
+  not a type: malformed when there were prefixes or a charge ⍝
+  ⧗⁰
+  ⁼ ∅ ⦃ ▽▽▽△ ⌁ ⦄ ⋔ ⋎ ⋏ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ○ ⧗⁶ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋔ ≶ ○ ⧗⁴ ᛖ ○ ⧗⁰
+  ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ▽ ⦄ ∅ ⁼
+  ⧖
+  ⧗⁰ ⧗⁵ ⧗⁷ ⧗³ ᚡᛌ
+⸫ ᚡᛐ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⧗¹ ⧗² ᛖ ⋔ ⦃ ᚡᛏ ⦄ ⦃ ᚡᛐ ⦄ ⁼
+⸫ ᚡᛑ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⧗⁴ ○ ᛖ ⋔ ⦃ ⌁ ᚡᛑ ⦄ ⦃ ⧖ ⌁ ⌁ ⌁ ⌁̱ ○ ⧗⁰ ○ ○ ○ ○ ⦄ ⁼
+⸫ ᚡᛒ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᛓ b end copen: the prefixes, then the rest ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ○ ⧗¹ ○
+  the loop carries [b k end code] ⍝
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ᚡᛎ ⧖ ⧖
+    ⧗¹ ⧗⁴ ⧗⁰ ⧗²
+    ⧗¹ ○ ᛖ ⧗⁰ ⧗³ ᛖ ᚡᚠ ⋎ ⧗⁰ ⧗⁴ ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦃
+  ⧖ ⧖ ⧖ ⧖
+  ᚡᛒ ⧗³ ⧗¹² ⧗² ⧗¹ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛓ ⸫
+
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗² △ ⊞ ⧗¹ △ ⊟ ᚡᛋ ⧖ ⧖
+  ⧗¹ ⧗⁰ ⧗⁴ ⧗⁴ ⧗²
+  ⧗⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ᚡᛓ ⦄ ⦃ ⧖ ⧖ ⌁ ⌁ ⌁̱ ○ ⧗⁰ ⧗¹ ○ ○ ○ ⦄ ⁼
+⸫ ᚡᛔ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖
+  ⁼ ⦃ ᚡᛔ ⦄ ⦃ ○ ○ ○ ○ ▽▽△ ○ ⌁̱ ⌁ ⌁ ⦄ ⋔ ᛖ ⧗¹ ⧗² ⧗² ⧗¹ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛕ ⸫
+
+⍝ ᚡᛖ b: a type, a tprefix, not a type, or an error
+⦄
+  ⧖
+  ⧖ ᚴ ⧗⁰
+  ⧗¹ ○ △○○▽△△▽△△ ᚡᚾ ⧖
+  ⧗⁰ ⧗¹ ⧗²
+  ⧗² ⧗¹ △ ⊟ ᚳ ▽△○▽△△▽△△ ᛖ ⋔ ⦃ ᚡᛕ ⦄ ⦃ ⌁ ▽ ᚡᛓ ⦄ ⁼
+⸫ ᚡᛖ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+---- classification of the base characters of a chunk ⍝
+
+⸫ ᚡᛗ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃ ᚴ ⧗⁰ ○ ○ ○ ○○▽ ⧗¹ ⧖ ⧖ ⦄
+⦃ ⧖ ⧖ ⧗¹ ○○▽ ○ ○ △ ⧗⁰ ᚴ △ ⊟ ⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛘ ⸫
+
+⍝ ᚡᛙ c: 1 for an ASCII letter, 2 for an ASCII digit, else 0
+⸫ ᚡᛙ ⟨ ℤ ⊸ ℤ ⟩ ⦃ ⁼ ∅ ⦃ △ ⌁ ⦄ ⋔ ᚪ ⧗⁰ ⁼ ∅ ⦃ ▽△ ⌁ ⦄ ⋔ ᛰ ⧗⁰ ○ ⧖ ⦄
+
+ᚡᛚ b: the code of the first ASCII letter or digit ⍝
+⦃
+  ○ ○ ⧗⁰ ⧖
+  ⥀ ⦃
+    ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ △ ⊞
+    ⁼ ⦃ ⌁ ⦄ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⋔ ᛖ ○ ⧗² ᚡᛙ ᚳ ⧗¹ ⧗⁰ ⧗²
+    ⧗¹ △ ⊞ ⧗⁰ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦃
+  ⧖ ⌁ ⌁̱ ⧗⁰
+⸫ ᚡᛚ ⟨ ℤ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᛛ b from to: superscript digits as a decimal number ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ○
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ⊞ ᛥ ᚳ ⧗¹ ⧗⁰ ⊠ △○△ ⧗³ ⧗² ⊞ △ ⧗¹ ⧗⁰
+    ⧗¹ △ ⊞ ⧗² ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧗³
+⸫ ᚡᛛ ⟨ ℤ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᛜ b: a glyph with a superscript index ⍝
+⦃
+  ⧖
+  ⧗⁰ ᚴ ⧖
+  ○○▽
+  ⧗¹ ○ ᚳ △○○△△○○△△ ᛖ ⧗⁰ ▽△ ᛖ ⋎ ⧖
+  ⁼ ∅ ⦃ ▽ ⌁ ⦄ ⋔ ⋎ ᛖ ▽○○▽△△▽△△ ᚳ △ ⧗² ⧗⁰
+  ⧗⁰ ⧗² △ ᚳ △▽○▽△△▽△△ ᛖ ⋎ ⋔ ⦃ ⌁ △▽ ⦄ ∅ ⁼
+  ⧗²
+  ⧗² △ ⧗¹ ○△ ᚡᚼ ⋔ ⦃ ⧖ ⌁ ⧗⁰ △ ⧗⁰ ᚴ ᚡᛛ ⦄ ⦃ ⌁̱ ⦄ ⁼
+  ⧖
+  ⧗⁰ ⧗⁰ ○○▽ ᛖ ⋔ ⦃ ⌁ ○ ○▽▽△ ○ ○ ○ ○ ⦄ ⦃ ⧖ ▽○△ ⧗⁰ ○ ○ ○ △ ⦄ ⁼
+⸫ ᚡᛜ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖
+  ⁼ ⦃ ○ ○ ○ ○ △▽▽△ ○ ⌁̱ ⦄ ⦃ ᚡᛗ ▽○△ ⦄ ⋔ ⋎ ᚷ ᚳ ○ ⧗⁰ ᛖ △ ᚴ ⧗⁰ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛝ ⸫
+
+⦃
+  ⧖
+  ⧗⁰ ᚡᛖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰ ⧗⁶
+  ⧗⁰ ▽ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ᚡᛝ ⦄ ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⌁̱ ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⦄ ⁼
+⸫ ᚡᛞ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖
+  ⁼ ⦃ ᚡᛞ ⦄ ⦃ ᚡᛜ ⦄ ⋔ ⋎ ᛃ ᚳ ○ ⧗⁰ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋔ ≶ △ ᚴ ⧗⁰ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛟ ⸫
+
+⦃
+  ⧖
+  ⧗⁰ ⧗⁰ ᚴ ▽△ ᛖ ⧗⁰ ○ ᚳ ○▽△○▽△○△△ ᛖ ⋎ ⧗⁰ △ ᚳ ▽△△▽▽○○△△ ᛖ ⋎ ⋔ ⦃ ▽○△ ᚡᛗ ⦄ ⦃ ᚡᛟ ⦄ ⁼
+⸫ ᚡᛠ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖
+  ⁼ ⦃ ᚡᛠ ⦄ ⦃ ᚡᛗ △▽△ ⦄ ⋔ ⋎ ᛇ ᚳ ○ ⧗⁰ ᛖ △ ᚴ ⧗⁰ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛡ ⸫
+
+⦃
+  ⧖
+  ⧗⁰ ⧗⁰ ○ ᚳ ᛏ ○○△ ᛖ ⋔ ⦃ ᚡᛡ ⦄ ⦃ ᚡᛉ ⦄ ⁼
+⸫ ᚡᛢ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖
+  ⁼ ⦃ ᚡᛢ ⦄ ⦃ ᚡᛘ △△ ⦄ ⋔ ⋎ ᚡᚼ △ ᚴ ⧗⁰ △ ⧗⁰ ᛖ △○○○▽○○△△ ᚳ ○ ⧗⁰ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛣ ⸫
+
+⦃
+  ⧖
+  ⧗⁰ ⧗⁰ ○ ᚳ ○▽○▽○△○△△ ᛖ ⧗⁰ △ ⧗⁰ ᚴ ▽△ ᚡᚼ ⋎ ⋔ ⦃ ○△ ᚡᛘ ⦄ ⦃ ᚡᛣ ⦄ ⁼
+⸫ ᚡᛤ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖
+  ⁼ ⦃ ᚡᛤ ⦄ ⦃ ᚡᛗ ▽△ ⦄ ⋔ ᚡᚼ ▽△ ᚴ ⧗⁰ ○ ⧗⁰ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛥ ⸫
+
+⦃
+  ⧖
+  ⧗⁰ ⧗⁰ ○ ⧗⁰ ᚴ △ ᚡᚼ ⋔ ⦃ △ ᚡᛗ ⦄ ⦃ ᚡᛥ ⦄ ⁼
+⸫ ᚡᛦ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚡᛧ b: kind idx v1 v2 skip len ⍝
+⦃
+  ⧖
+  ⧗⁰ ᚡᛚ ⧖
+  ⁼ ⦃ ○ ○ ○ ○ ⧗⁰ ○ ⌁̱ ⧖ ⦄ ⦃ ᚡᛦ ⌁ ⦄ ⋔ ᛖ ○ ⧗⁰ ⧗⁰ ⧗¹
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛧ ⸫
+
+⍝ ---- combining marks (§2.1)
+
+⍝ ᚡᛨ m: bit and class (1 case, 2 tense, 3 agreement); bit 0 if unregistered
+⦄
+  ⧖ ○ ○
+  ⁼ ∅ ⦃ ○△ △ ⌁ ⌁ ⦄ ⋔ ᛖ △▽△○△○△ ⧗⁰
+  ⧗⁰ ○▽▽▽△○△ ᛖ ⋔ ⦃ ⌁ ⌁ ▽△ ▽△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ▽△ △△ ⌁ ⌁ ⦄ ⋔ ᛖ ▽△▽▽△○△ ⧗⁰
+  ⧗⁰ ▽△△○△○△ ᛖ ⋔ ⦃ ⌁ ⌁ ▽○△ ○△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ○△ △▽▽△ ⌁ ⌁ ⦄ ⋔ ᛖ ○▽△○△○△ ⧗⁰
+  ⧗⁰ △△△△○○△ ᛖ ⋔ ⦃ ⌁ ⌁ ▽▽△△ △ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ △ △○△▽△ ⌁ ⌁ ⦄ ⋔ ᛖ ○△△△○○△ ⧗⁰
+  ⧗⁰ ▽▽▽▽△○△ ᛖ ⋔ ⦃ ⌁ ⌁ ▽△▽▽▽△ △ ⦄ ∅ ⁼
+⸫ ᚡᛨ ⟨ ℤ ℤ ⊸ ℤ ⟩ ⦃
+
+ᚡᛩ kind c0 cls: a mark of class cls may attach to this token ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⊕
+  ᛖ △ ⧗²
+  ⧗⁰ ▽▽△ ᛖ ⧗⁰ ○▽△ ᛖ ⋏ ⧗⁰ △▽△ ᛖ ⋏ ⧗⁰ ○△△ ᛖ ⋏
+  ⋎ ⋏ ᛖ ○▽▽△△△○△△ ⧗¹ ᛖ △○▽△○▽○▽▽△ ⧗¹ ᛖ ▽○△ ⧗⁰
+  ⋏ ⋎ ⋏
+  ⋏ ⋎ ⋏ ᛖ △△ ⧗⁰ ᛖ △ ⧗⁰ ᛖ ▽△ ⧗²
+  ⧗² ○△ ᛖ ⧗⁰ ▽○△ ᛖ ⋎ ⧗¹ ▽○○○▽△△▽▽△ ᛖ ᚡᚠ ⋎ ⋏
+⸫ ᚡᛩ ⟨ ŧ ⊸ ℤ ℤ ℤ ⟩ ⦃
+
+ᚡᛪ mask code bit nc nt cp kind c0: one mark ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁵ ᚡᛨ ⧖ ⧖
+  21 unregistered, 22 duplicate, 23 cannot attach ⍝
+  ○
+  ⁼ ∅ ⦃ ▽▽○△ ⌁ ⦄ ⋔ ᚡᚠ ᚡᛩ ⧗¹ ⧗⁹ ⧗⁸
+  ⧗² ⧗⁰ ⋒ ○ ᛖ ᚡᚠ ⋔ ⦃ ⌁ △△▽△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ○△▽△ ⌁ ⦄ ⋔ ᛖ ○ ⧗⁰
+  ⧖
+  ⧗¹ ⧗⁰ ⋓ ⧗¹ ⧗³
+  ⧗⁶ ⧗² △ ᛖ ⋔ ⦃ △ ⊞ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⊞ △ ⦄ ⋔ ᛖ ▽△ ⧗² ⧗⁷
+⦄ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ⟩ ᚡᛪ ⸫
+
+⍝ ᚣᚠ cp kind c0 mask code bit nc nt: one code point (not a mark: no change)
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗² ⧗¹ ⧗⁰ ⧗⁷ ⧗⁶ ⧗⁵ ⧗⁴ ⧗³
+  ⧗⁴ ○ ᛖ ⧗⁰ ᛗ ⋎ ⋔ ⦃ ᚡᛪ ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+⸫ ᚣᚠ ⟨ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ⦃
+
+ᚣᚢ cps from to kind c0: the marks in from … to: mask, error code, the bit at fault ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ○ ○ ○ ○ ○
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁴ ⧗³ ⧗² ⊞ △ ⧗¹ ⧗⁰
+    ⧗⁰ ⧗¹ ᚳ ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗⁷ ⧗⁸ ⧗⁹ ᚣᚠ
+    ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋔ ≶ ⧗² ⊞ △ ⧗¹
+  ⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁵
+  ⁼ ∅ ⦃ ○▽○△ ⌁ ⦄ ⋔ ⋎ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋔ ≶ △ ⧗⁸ ᛖ ○ ⧗⁶ ⧗⁶
+  ⍿⁰ ○ ᛖ ⧗⁹ △ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ ⌁ △▽○△ ⦄ ∅ ⁼
+  ⧗⁷
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ⟩ ᚣᚢ ⸫
+
+⍝ ᚣᚤ bit: the class name of a mark bit
+⦄
+  ⧖ ○△
+  ⁼ ∅ ⦃ ▽△ ⌁ ⦄ ⋔ ⋏ ᛖ △△ ⧗⁰ ᛖ ▽△ ⧗⁰
+  ⧗⁰ ▽▽△△ ≶ ⋔ ⦃ ⌁ △ ⦄ ⁼ ∅
+  ⁼ ∅ ⦃ ⎙̵ «esac» ⦄ ⋔ ᛖ △ ⍿⁰
+  ⍿⁰ ▽△ ᛖ ⋔ ⦃ »esnet« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «eerga» ⦄ ⋔ ᛖ ○△
+⦄ ⟨ ℤ ⊸ ⟩ ᚣᚤ ⸫
+
+⦃
+  ⧖ ⧖
+  » kram« ⎙̵ ⧗¹ ᛗᚾ »( « ⎙̵ ⧗¹ ᚣᚤ » ot hcatta tonnac )« ⎙̵ ⧗⁰ ᚡᚮ » « ⎙̵
+⸫ ᚣᚥ ⟨ ⊸ ℤ ℤ ⟩ ⦃
+
+ᚣᚦ t from n kind code bit: the message of a mark error, about text from … from+n−1 ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁴ ○△▽△ ᛖ ⋔ ⦃ » no kram gninibmoc deretsigernu« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ⦃ ⌁ ⦄ ⦃ ⎙̵ « no » ᛗᚾ ⎙̵ « kram etacilpud» ⦄ ⋔ ᛖ △△▽△ ⧗⁴ ⧗⁵
+  ⧗³ ⧗⁵ ⧗⁴ ▽▽○△ ᛖ ⋔ ⦃ ᚣᚥ ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⁼ ∅ ⦃ ⎙̵ « no kram esac eno naht erom» ⦄ ⋔ ᛖ ○▽○△ ⧗⁴
+  ⧗⁴ △▽○△ ᛖ ⋔ ⦃ » no kram esnet eno naht erom« ⎙̵ ⦄ ∅ ⁼
+  ⎙̵ «↵» ᚡᚫ ⧗² ⧗¹ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟩ ᚣᚦ ⸫
+
+⍝ ᚣᚧ b code arg: the message of a classification error
+⦄
+  ⧖ ⧖ ⧖
+  ⁼ ∅ ⦃ ⎙̵ « :sgnirts edistuo lagelli era srettel IICSA» ⦄ ⋔ ᛖ △ ⧗¹
+  ⧗¹ ▽△ ᛖ ⋔ ⦃ » :)△ ○ ▽ era slaremun( lagelli era stigid IICSA« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ « :laremun demroflam» ⦄ ⋔ ᛖ ○△ ⧗¹
+  ⧗¹ △△ ᛖ ⋔ ⦃ » :laremun laer demroflam« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «⁽ gnissim si egrahc» ⦄ ⋔ ᛖ ▽▽△ ⧗¹
+  ⧗¹ ○▽△ ᛖ ⋔ ⦃ »egrahc ytpme« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ⦃ ⌁ ⦄ ⦃ ᚢ ⎙̵ « :ruovalf egrahc dab» ⦄ ⋔ ᛖ △▽△ ⧗¹ ⧗²
+  ⧗² ⧗¹ ▽○△ ᛖ ⋔ ⦃ » :egrahc ni detaeper ruovalf« ⎙̵ ᚡᚯ ᚡᚰ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «egrahc ni tnenopxe orez» ⦄ ⋔ ᛖ ○○△ ⧗¹
+  ⧗¹ △○△ ᛖ ⋔ ⦃ »₂ψ .g.e ,dnuob tpircsbus a sdeen ψ« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «gnihtyna dloh tonnac ₀ψ» ⦄ ⋔ ᛖ ▽△△ ⧗¹
+  ⧗¹ ○△△ ᛖ ⋔ ⦃ »)3.8§( sevitanretla 72 tsom ta sdloh ψ :pac ecnerehoced« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ « :epyt a tuohtiw egrahc» ⦄ ⋔ ᛖ △△△ ⧗¹
+  ⧗¹ ▽▽▽△ ᛖ ⋔ ⦃ » :epyt demroflam« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ « :nekot nwonknu» ⦄ ⋔ ᛖ △▽▽△ ⧗¹
+  ⧗⁰ ⧗¹ ○▽▽△ ᛖ ⋔ ⦃ ⧖ » no xedni dab« ⎙̵ ⧗⁰ ○ ᚳ ᚢ » :« ⎙̵ ⧗⁰ △ ⧗⁰ ᚴ △ ⊟ ᚡᚫ ⦄ ⦃ ⌁̱ ⦄ ⁼
+  codes that quote the whole chunk ⍝
+  ⧗⁰ ○ ⧗⁰ ᚴ
+  ⁼ ⦃ ⌁̱ ⌁ ⌁ ⦄ ⦃ ᚡᚫ ⦄ ⋔ ⋏ ᛖ △▽▽△ ⧗¹ ⋏ ᛖ ▽▽▽△ ⧗¹ ⋏ ᛖ △△△ ⧗¹ ᛦ △△ △ ⧗¹
+  »↵« ⎙̵
+⸫ ᚣᚧ ⟨ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+---- tokens ⍝
+
+ᚣᚨ out bs line col kind idx v1 v2 skip n mask: append a record ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗⁴ ⍆̵ ⧗² ⍆̵ ⧗³ ⍆̵ ⧗¹⁰ ⍆̵ ⧗⁵ ⍆̵ ⧗⁶ ⍆̵ ⧗⁷ ⍆̵ ⧗⁹ ⍆̵ ⧖
+  ⧗⁰ ⌁̵ ⧖ ᚡᛁ ⧗¹⁰ ⧗⁹ ⧗⁰ ⟗ ⧗²
+⦄ ⟨ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟩ ᚣᚨ ⸫
+
+⍝ ᚣᚩ out bs path line col kind idx v1 v2 skip n mask: count the token; record it unless it is a breath
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚳ ⧗⁹ ⟗ ⧗¹
+  ⧗² ᚡᚨ ᚡᚤ
+  ⧗¹³ ⧗¹² ⧗¹¹ ⧗¹⁰ ⧗⁹ ⧗⁸ ⧗⁷ ⧗⁶ ⧗⁵ ⧗⁰
+  ⧗⁷ ▽○△ ᛖ ⧗¹² △ ᛖ ⋎ ⧗¹ ▽○○○▽△△▽▽△ ᛖ ⋎
+  ⁼ ⦃ ᚣᚨ ⦄ ⦃ ⌁̵ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⋔
+⦄ ⟨ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᚩ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗² ⧗³ ⧗⁴ ᚡᚪ
+  ⌁̵ ᚣᚦ ⧗¹³ ⧗¹² ⧗⁵ ⧗¹⁰ ⧗⁹ ⟗ ⧗¹
+  ⧗⁰ ⌁̵ ↯
+⸫ ᚣᚪ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚳ ⧗¹² ⟗ ⧗¹
+  ⧗⁴ ⧗⁸ ⧗⁹ ⧗¹⁰ ⧗¹ ᚣᚢ ⧖ ⧖ ⧖
+  ⧗² ⧗¹ ⧗⁰ ⧗¹⁸ ⧗¹⁷ ⧗¹⁶ ⧗¹⁵ ⧗¹⁴ ⧗¹³ ⧗¹⁰ ⧗⁹ ⧗⁸ ⧗³ ⧗⁵
+  ⧗¹ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ᚣᚩ ⦄ ⦃ ᚣᚪ ⦄ ⁼
+⸫ ᚣᚫ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ᚡᚪ ⧗⁵ ⧗⁴ ⧗³
+  ⧗¹ ⟗ ⧗⁹ ⧗¹⁰ ᚣᚧ ⌁̵
+  ↯ ⌁̵ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᚬ ⸫
+
+⍝ ᚣᚭ out cps path line ls le fb hi: the token whose first base is at fb
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚡᛀ ⧗⁷ ⧗⁶ ⧗¹
+  ⧗⁰ ⟗ ᚡᛧ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⊞ △ ⊟ ⧗¹² ⧗¹⁴
+  ⧗⁹ ⧗¹ ⧗¹⁰ ⧗¹¹ ⧗¹² ⧗⁰ ⧗¹⁵ ⧗¹⁶ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗⁷
+  ⁼ ⦃ ᚣᚫ ⦄ ⦃ ᚣᚬ ⦄ ⋔ ᛖ ○ ⧗²
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᚭ ⸫
+
+⍝ ᚣᚮ out path line ls lo fb isStr: marks before the first base of a chunk
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⧗² △ ⋒ ○ ᛖ ⧗⁶ ⋎
+  ⦃ ᚡᚧ ⊟ △ ⧗⁵ ▽△ ᚡᚧ ⧗⁴ △ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔
+    ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗¹ ⧗² ⧗⁴ ⧗³ ⊟ △ ⊞ ᚡᚪ »↵retcarahc esab on htiw kram gninibmoc« ⎙̵ ⧗⁰ ⌁̵ ↯ ⦄ ⁼
+⸫ ᚣᚮ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ŧ ℤ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᚯ out cps path line ls le lo hi isStr: the chunk at lo … hi ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ⧗⁶ ⧗⁷ ᚡᚿ ⧖
+  ⧗⁹ ⧗⁰ ⧗⁷ ⧗⁵ ⧗⁴ ⧗³ ⧗¹
+  ⧗⁰ ⧗⁷ ≶ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⦄ ⦃ ᚣᚮ ᚡᚤ ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⦄
+  ⧖
+  ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗⁷ ⧗¹ ⧗⁹
+  ⦃ ᚡᚤ ᚣᚭ ⦄ ⦃ ⌁̱ ⌁̱ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ᚡᚤ ᚣᚭ ⦄ ⋔ ≶ ⧗⁹ ⧗¹
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ŧ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᚯ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗³ ⧗⁴ ⧗⁵ ⧗⁷ ᛈᛟ ⧗³ ⧗⁴ ⧗⁵ ⧗⁸ △ ⊟ ᛈᛟ ⧖ ⧖
+  ⧖ ⧖ ᚡᚦ ⧗¹ ⧗⁰ ᚡᚥ ⧗¹ ⧗⁰
+  ⧗⁴ △△ ▽ ᚡᚧ ⧗⁵ ⧗⁶ ⧗⁷ ⧗⁸ ⧗⁹ ⧗⁰ ⧗¹ ⧗¹⁰ ᚣᚯ
+⸫ ᚣᚰ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ŧ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᚱ out cps path line ls le isStr: end the current chunk (isStr: a string follows) ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ △△ ᚳ ⧖ ⟗ ○△ ᚳ ⧖ ⧖
+  ⧗¹ ⧗² ⧗⁹ ⧗⁸ ⧗⁷ ⧗⁶ ⧗⁵ ⧗⁴ ⧗⁰
+  ⧗² ▽ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⦃ ᚣᚰ ᚡᚤ ⦄ ⁼
+⸫ ᚣᚱ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ŧ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+---- the characters of a line (out cps path line ls le, then the case) ⍝
+
+⸫ ᚣᚲ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃ ᚡᚧ △ ▽▽△ ᚣᚱ ⊕ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⊕ ᚣᚱ ᚡᚩ ⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᚳ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ △△ ᚳ ⧖ ⟗ ○△ ᚳ ⧖ ⧖
+  ᚡᚩ ⁼ ⦃ ⌁ ⦄ ⦃ ᚡᚤ ᚡᚧ ⧗⁰ △△ ⧖ ⦄ ⋔ ᛖ ▽ ⧗² ⧗¹ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᚴ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⊕ ᚣᚱ ᚡᚤ
+  ⧖ ⧖ ᚳ ○△ ⟗
+  ⧗⁵ ⧗⁶ ⧗⁷ ⧗¹ ᛈᛟ ⧖
+  ⧖ ⁼ ⦃ ᛘ ⦄ ∅ ⋔ ᚹ ⧗⁶ ᚳ ⧗⁰ ⧗⁴
+  ⧗² ▽△△ ⍆̵ ⧗⁷ ⍆̵ ⧗¹ ⧗⁸ ⊟ △ ⊞ ⍆̵ ○ ⍆̵ ○○▽ ⍆̵ ○ ⍆̵ ○ ⍆̵ △ ⍆̵ ⧗⁰ ⍆̵
+  ᚡᚩ ᚡᚨ
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᚵ ⸫
+
+⍝ ---- strings
+
+⍝ ᚣᚶ cps line ls le k: the reading index of the next «, or the line length
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴
+    ⋏ ᛖ ○○△○▽△ ᚳ ᛈᛟ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⊟ ⧗² ⧗³ ⧗⁴
+    ⋔ ⦃ ⦶ ⦄ ⦃ △ ⊞ ⊕ ⦄ ⁼
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁴
+⸫ ᚣᚶ ⟨ ℤ ⊸ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚣᚷ cps j lo: the start of the cluster (base and marks) ending at j ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗²
+  ⦄ ⥀
+    ⧖ ⧖ ⧖
+    ⧗² ⧗¹ ⧗⁰
+    ⧗¹ ⧗² ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗⁰ ⧗¹ ᚳ ᛗ ⋎
+    ⁼ ⦃ ⦶ ⦄ ⦃ ⊕ ⧗⁰ ⊟ △ ⧖ ⦄ ⋔
+  ⦄
+  ⧗⁰ ⌁̱ ⧖ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ℤ ⟩ ᚣᚷ ⸫
+
+⍝ ᚣᚸ out cps s j: append s … j, with ↵ as a newline
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ᚳ ⍿⁰ △▽▽▽▽○○△△ ᛖ ⋔ ⦃ ⌁ △○△ ⦄ ∅ ⁼ ⍆̵
+    ⧗³ ⊞ △ ⧗² ⧗¹
+    ⧗² ⧗³ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄
+  ⦃
+  ⌁ ⌁ ⌁̱
+⸫ ᚣᚸ ⟨ ⟦ ℤ ⟧ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᚹ out cps a b: the string between delimiters a and b: clusters in reverse ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗³ △ ⊟ ⧗² △ ⊞
+  the loop carries [out cps j lo] ⍝
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ⧗³
+    ⋔ ≶ ⧗³ ⧗²
+      ⦃ ⧖ ⧖ ⧖ ⧖ ⧗¹ ⧗² ⧗³ ᚣᚷ ⧖ ⧗¹ ⧗² ⧗⁰ ⧗³ ᚣᚸ ⧗² ⧗⁰ △ ⊟ ⧗⁴ ⊕ ⦄
+      ⁼
+      ⦃ ⦶ ⦄
+  ⦃
+  ⌁ ⌁ ⌁̱
+⸫ ᚣᚹ ⟨ ⟦ ℤ ⟧ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ᚡᚧ ⧗⁵ ⊞ ○△ ⧗⁴ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᚺ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ⧗² ⧗³ ᚡᚪ
+  ⧖ ⧖ ᚳ ⊞ △▽△ ⧗⁴ ⟗ ⧗⁰
+  ⧗⁰ ⟗ ⧗⁶ ▽○△ ⊞ ⧗¹ ○△△ ⧗⁸ ⧗⁹ ᚣᚦ ⌁̵ ↯
+⸫ ᚣᚻ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᚼ out cps path line r from to col: the marks of the string record at r ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ⧗⁵ ⧗⁶ ○△△ ○ ᚣᚢ ⧖ ⧖ ⧖
+  ⧗² ⧗¹ ⧗⁰ ⧗⁷ ⧗¹⁰ ⧗⁶ ⧗⁵ ⧗³
+  ⧗¹ ○ ᛖ ⋔ ⦃ ᚣᚺ ⦄ ⦃ ᚣᚻ ⦄ ⁼
+⸫ ᚣᚼ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᚽ c: c continues a chunk ⍝
+⦃ ⧖ ⧗⁰ ᛋ ⧗⁰ ▽○△▽△△○△△ ᛖ ⋏ ⧗⁰ ᚸ ⋏ ⧗⁰ △▽○△▽△ ᛖ ⋏ ᚡᚠ ⦄ ⟨ ℤ ⊸ ŧ ⟩ ᚣᚽ ⸫
+
+⍝ ᚣᚾ …: on an odd line the marks follow «
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚡᚿ ⊟ △ ⧗⁵ ⊞ △ ⧗⁷ ⧗¹
+  ⍝ errors in these marks point at the chunk that follows them, as in s1
+  ⊞ △ ⊟ ⧗⁵ ⧗⁰ ⊞ △ ⊟ ⧗⁵ ⊞ △ ⧗⁸
+  ⧗⁰ ⧗⁶ ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗² ⧗⁰ ᚳ ᚣᚽ ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖
+  ᚣᚼ ⧗⁰ ⊟ △ ⧗¹ ⊞ △ ⧗⁹ ⧗¹¹ ⧗⁵ ⧗⁴ ⧗³ ⧗²
+  ○△ ⧗⁸ ⧗¹ ⊞ ⧗⁹ ⊟ ᚡᚧ
+⸫ ᚣᚾ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᚿ …: on an even line the marks were carried from the chunk before » ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ △ ᚳ ⧖ ⟗ ▽△ ᚳ ⧖ ⧖
+  ᚡᚤ ᚡᚧ ▽ ▽△ ᚡᚧ ▽ △ ⧗⁰
+  ⧗⁴ ⧗⁵ ⧗⁶ ⧗¹² ⧗² ⧗¹ ⧗¹¹ ⧗⁷ ⊟ △ ⊞ ᚣᚼ
+  ᚡᚧ ⊞ △ ⧗⁹ ○△
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᚿ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗² ⧗³ ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ᛈᛟ ⧗⁴ ⊟ △ ⊞ ᚡᚪ »↵gnirts detanimretnu« ⎙̵
+  ↯ ⌁̵ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛀ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ᛈᛟ ⧖
+  ⧖ ᛈᛟ ⧗⁸ ⧗⁶ ⧗⁵ ⧗⁴
+  ⧗¹ ⧗⁰ ᚡᚥ ⧖
+  ⧖ ᚡᚦ ⧗¹ ⧗²
+  ⧗⁴ ⟗ ᚴ ⧖ ⧖
+  ⧖ ⊟ △ ⊟ ⧗³ ⧗²
+  ⧗¹ ○△△ ⍆̵ ⧗¹⁰ ⍆̵ ⧗⁴ ⧗¹¹ ⊟ △ ⊞ ⍆̵ ○ ⍆̵ ○○▽ ⍆̵ ○ ⍆̵ ○ ⍆̵ ⧗⁰ ⍆̵
+  ᚡᚤ ᚡᚨ ᚣᚹ ⧗³ ⧗⁴ ⧗⁸
+  ⧗⁸ ⧗⁹ ⧗¹⁰ ⧗¹¹ ⧗¹² ⧗¹⁴ ⧗⁵ ⧗⁴ ⧗²
+  ⁼ ⦃ ᚣᚿ ⦄ ⦃ ᚣᚾ ⦄ ⋔ ᚹ ⧗¹⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛁ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⦶ ᚣᚱ ᚡᚤ
+  ⧖ ⧖ ᚳ ○△ ⟗
+  ⧗³ ⧗⁵ ⧗⁶ ⧗⁷ ⧗¹ △ ⊞ ᚣᚶ ⧖
+  ⧗⁰ ⧗² ⧗⁸ ⧗⁷ ⧗⁶ ⧗⁵ ⧗⁴ ⧗¹
+  ⧗⁰ ⧗⁸ ⧗⁷ ⊟ ᛖ ⋔ ⦃ ᚣᛀ ⦄ ⦃ ᚣᛁ ⦄ ⁼
+⸫ ᚣᛂ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+---- lines ⍝
+
+ᚣᛃ c: 0 space, 1 comment, 2 bracket, 3 string, 4 anything else ⍝
+⦃
+  △△ ⧖
+  ⧗⁰ △▽○△▽△ ᛖ ⋔ ⦃ ⌁ ○△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ▽△ ⌁ ⦄ ⋔ ᚸ ⧗⁰
+  ⧗⁰ ▽○△▽△△○△△ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ○ ⌁ ⦄ ⋔ ᛋ ⧗⁰
+⦄ ⟨ ℤ ⊸ ℤ ⟩ ᚣᛃ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ○△ ᚳ ⧖ ⧖
+  ⧖ ᚣᛃ ᚳ ᛈᛟ ⧗¹ ⧗⁷ ⧗⁶ ⧗⁵ ⧗³
+  ⧗¹ ⧗⁴ ⧗⁵ ⧗⁶ ⧗⁷ ⧗⁸ ⧗⁰
+  ⦄ ⦃ ᚣᚳ ⌁ ⦄ ⋔ ᛖ ○ ⍿⁰
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ᚣᚲ ⦄ ⦃
+  ⦄ ⦃ ᚣᚵ ⌁ ⦄ ⋔ ᛖ ▽△ ⍿⁰
+  ○△ ᛖ ⋔ ⦃ ᚣᛂ ⦄ ⦃ ᚣᚴ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⸫ ᚣᛄ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚳ ○△ ⟗ ⧗⁰
+  ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗⁷
+  ⦃ ᚣᛄ ⦄ ⁼ ⦃ ᚣᚲ ⦄ ⋔ ≶ ⊟ ⧗⁶ ⧗⁷ ⧗¹
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛅ ⸫
+
+⍝ ᚣᛆ out cps path line ls le: the tokens of the line ls … le−1
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ᚡᚤ ᚡᚧ ○ ▽▽△ ᚡᚧ ▽ △△ ᚡᚧ ○ ○△ ⧗⁰
+  ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ᚡᚤ ᚣᛅ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+    ⟗ ▽▽△ ᚳ ⧖ ⧖
+    ⧗⁷ ⧗⁶ ⧗⁵ ⧗⁴ ⧗³ ⧗⁰
+    ⧗¹ ○ ᛖ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦃
+  ⌁ ⌁ ⌁ ⌁̱ ⌁̱
+⸫ ᚣᛆ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᛇ cps i: the index of the next newline at or after i, or the length ⍝
+⦃
+  ⧖ ⧖
+  ⧗⁰ ⧗¹
+  ⦄ ⥀
+    ⧖ ⧖
+    ⧖ ᚳ ⧗¹ ⧗⁰
+    ⧗¹ ⧗²
+    ⁼ ⦃ ⊕ ⊞ △ ⦄ ⦃ ⦶ ⦄ ⋔ ⋏ ᛖ ▽ ⧗⁰ ᛖ △○△ ⧗⁰
+  ⦄
+  ⧗² ⌁̱ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ⊸ ℤ ⟩ ᚣᛇ ⸫
+
+⍝ ᚣᛈ cps path: the token buffer of a whole file
+⦄
+  ⧖ ⧖
+  ⟦ ○ ▽ ○ ▽ ▽ ○ ○ ⟧
+  ⧗⁰ ⧗¹ ○ △
+  the loop carries [out cps path ls line] ⍝
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗¹ ⧗³ ᚣᛇ ⧖
+    ᚡᚤ ᚣᛆ ⧗⁰ ⧗⁴ ⧗⁵ ⧗³ ⧗² ⧗¹
+    ⧗² ⧗³ ⧗⁰ △ ⊞ ⧗⁵ △ ⊞
+    ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ᚴ ⧗² ⧗⁰
+  ⦄
+  ⌁̱ ⌁̱ ⌁ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ʃ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛈ ⸫
+
+⦃ ⧖ ⧖ ⧗¹ ⟗ ⧗⁰ ᚣᛈ ⧖ ⌁̵ ⧗⁰ ⦄ ⟨ ⟗ʃ ⟦ ℤ ⟧ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛉ ⸫
+
+⍝ ==== s2 parser (spec §9, §18): token buffer → item tree, then tangle (§9.3)
+The parser state is one array of ℤ after a sentinel. Slots 0 … 3 are ⍝
+⍝ registers: position (in tokens), result (a node slot), start of the
+tangled items, loop flag. Nodes follow in preorder: kind, token, size ⍝
+⍝ (slots of the node and everything under it), fields, then children.
+1 lit  2 call  3 anti-call  4 inverse-call  5 op         (leaves) ⍝
+⍝ 6 shape-call: sig          7 quote: block     8 array: ops
+9 block: ops               10 select: 3 faces 11 rselect: 3 faces, block ⍝
+⍝ 12 face ⁼  13 face ∅       14 loop, 15 postselect, 16 prayer: block
+17 handle: ok block, fail block ⍝
+⍝ 20 sig [nin saw]: types    21 type [np prefix tokens…]: element type (⟦…⟧)
+30 fragment [name rev ordinal hasSig]: body, sig ⍝
+⍝ 31 particle [name]: type   32 ffi [name cname]: sig
+40 fn [name rev nfr ordinals…]: sig, ops (after tangling) ⍝
+⍝ Token slots point into the token buffer; −1 is the end of the file.
+
+⍝ ---- the token buffer's index (slot 3: where it starts, slot 4: count)
+
+⦃
+  ⧖
+  ⧗⁰ ⟗ ᚴ ⧖ ⧖
+  ᚡᚤ ᚡᚧ ⧗¹ ○△ ⧗⁰
+  ○▽△ ⧗¹
+  the loop carries [a j end] ⍝
+  ⥀ ⦃
+    ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ⧗¹ ⧗² ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⊕ ⧗⁴ ⊞ ⧗¹ ⊞ ▽○△ ⧗³ ⍆̵ ⧗³ ⧗⁰ ⧖ ⧖ ᚳ ⊞ △▽△ ⧗¹ ⟗ ⧗⁰ ⧖ ⧖ ⧖ ⦄
+  ⦄
+  ⧖ ⌁ ⌁
+  ⧗⁰ ⟗ ᚴ ⧖ ⧖
+  ᚡᚧ ⊟ ⧗⁵ ⧗¹ △△ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛊ ⸫
+
+⍝ ---- tokens (T is the token buffer, t a record slot)
+
+⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗¹ ○ ≶ ⋔ ⦃ ᚳ ⦄ ⦃ ᚳ ⦄ ⦃ ⌁ ⌁̱ ○ ⦄ ⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ⊸ ℤ ⟩ ᚣᛋ ⸫
+
+⍝ ᚣᛌ T t kind cp: token t has this kind and the one-code-point text cp
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ᛖ ⧗² ᚣᛋ ⧗¹ ⧗⁰
+  ⧗¹ ○ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋎
+  ⋎ ᛖ △ ᚳ ⊞ △▽△ ⧗¹ ⧗⁰
+  ⧗⁰ ⧗¹ ▽○△ ⊞ ᚳ ⧗³ ᛖ ⋎
+⸫ ᚣᛌ ⟨ ŧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚣᛍ T t: a type prefix (a tprefix token, or one of ◌ ⟗ ⟖ ⸮ ⁖) ⍝
+⦃
+  ⧖ ⧖
+  ⧗⁰ ⧗¹ ᚣᛋ △○△ ᛖ
+  ⋏ ᚣᛌ △○▽○○○▽▽▽△ ▽○△ ⧗¹ ⧗⁰ ⋏ ᚣᛌ ▽△▽○○○▽▽▽△ ▽○△ ⧗¹ ⧗⁰ ⋏ ᚣᛌ △○△△▽△△△△ ▽○△ ⧗¹ ⧗⁰
+  ⧗⁰ ⧗¹ ▽○△ ▽▽○○▽△△▽▽△ ᚣᛌ ⋏ ⧗⁰ ⧗¹ ▽○△ △▽▽△○△▽△△ ᚣᛌ ⋏
+⸫ ᚣᛍ ⟨ ŧ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚣᛎ st T: the current token, or −1 ⍝
+⦃
+  ⧖ ⧖
+  ⧗⁰ ○ ᚳ ⧖
+  ᚳ ⊞ ⧗⁰ ᚳ ○△ ⧗² ⧗²
+  ⧗⁰ ⧗² △△ ᚳ ≶ ⋔ ⦃ ⌁ ▽ ⦄ ⁼ ∅
+⸫ ᚣᛎ ⟨ ℤ ⊸ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⸫ ᚣᛏ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ⟦ ℤ ⟧ ⟩ ⦃ ᚡᚧ ⊞ △ ⧗⁰ ○ ⧖ ᚳ ○ ⟗ ⦄
+⦃ ⟗ ○ ᚳ ⧖ ○ ⧗⁰ △ ⊟ ᚡᚧ ⦄ ⟨ ⟦ ℤ ⟧ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛐ ⸫
+⸫ ᚣᛑ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ⟦ ℤ ⟧ ⟩ ⦃ ᚡᚧ ⧗¹ △ ⧗⁰ ⧖ ⧖ ⦄
+⦃ ⧖ ⧖ ⧗⁰ ○△ ⧗¹ ᚡᚧ ⦄ ⟨ ⟦ ℤ ⟧ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛒ ⸫
+
+⍝ ᚣᛓ st kind tok: append a node with no fields yet; the result is its slot
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚴ ⟗ ⧗⁰
+  ⧗⁰ △ ⧗¹ ᚡᚧ ⧗³ ⍆̵ ⧗⁴ ⍆̵ ○△ ⍆̵
+⸫ ᚣᛓ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᛔ st node: the node's size covers everything appended since; the result is the node ⍝
+⦃
+  ⧖ ⧖
+  ⧗⁰ ⟗ ᚴ ⧖ ⧖
+  ᚡᚧ ⧗³ △ ᚡᚧ ⊟ ⧗³ ⧗¹ ⊞ ▽△ ⧗³ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛔ ⸫
+
+⍝ ᚣᛕ st: the result register
+⸫ ᚣᛕ ⟨ ℤ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ⟩ ⦃ ᚳ △ ⟗ ⦄
+
+---- errors ⍝
+
+ᚣᛖ F T t: "path:line:col: error: " (or "path: error: " at the end of the file) ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ⧗² ○ ≶ ⋔
+    ⁼ ⦃ ᚡᚪ ᚳ ⊞ ▽△ ⧗² ⧗¹ ᚳ ⊞ △ ⧗² ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⦄
+    ⦃ ⌁ ⌁̱ ⎙̱ » :rorre :« ⎙̵ ⦄
+⸫ ᚣᛖ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟗ʃ ⟩ ⦃
+
+ᚣᛗ t: " at end of file" when t is −1, then the newline ⍝
+⦃ ⧖ ⧗⁰ ▽ ᛖ ⋔ ⦃ »elif fo dne ta « ⎙̵ ⦄ ∅ ⁼ »↵« ⎙̵ ⦄ ⟨ ℤ ⊸ ⟩ ᚣᛗ ⸫
+
+⍝ ᚣᛘ T t: a function name (⌁ before an antiparticle's)
+⦄
+  ⧖ ⧖
+  ⁼ ∅ ⦃ ⎙̵ «⌁» ⦄ ⋔ ᛖ ○△ ᚣᛋ ⧗¹ ⧗⁰
+  ⧗⁰ ⧗¹ ▽○△ ⊞ ⧗⁰ ⧗¹ △▽△ ⊞ ᚳ ᚡᚫ
+⸫ ᚣᛘ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚣᛙ T t: the text of token t ⍝
+⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ▽○△ ⊞ ⧗⁰ ⧗¹ △▽△ ⊞ ᚳ ᚡᚫ ⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ⊸ ⟩ ᚣᛙ ⸫
+
+⍝ ᚣᛚ T t: "end of file", "a string" or "kind text"
+⦄
+  ⧖ ⧖
+  ⦃ ⎙̵ «elif fo dne» ⌁̱ ⌁ ⦄ ⋔ ᛖ ▽ ⧗¹ ⧗¹ ⧗⁰
+    ⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⧗¹ ᚣᛋ ○△△ ᛖ ⋔ ⦃ ⌁ ⌁̱ »gnirts a« ⎙̵ ⦄ ⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ᚣᛋ ᚡᚮ » « ⎙̵ ⧗⁰ ⧗¹ ᚣᛙ ⦄ ⁼ ⦄ ⁼
+⸫ ᚣᛚ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚣᛛ st F T t: print "… error: " + a message chosen by code, at t, and fail ⍝
+⍝ codes: 1 unterminated signature, 2 type prefix without a type, 3 a signature
+has exactly one ⊸, 4 signature is missing ⊸, 5 the first face cannot be ⁼, ⍝
+⍝ 6 types only in signatures, 7 a prayer needs a count, 8 a function name
+cannot carry marks, 9 expected a fragment ordinal, 10 expected a particle ⍝
+⍝ name, 11 expected the C function name as a string
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ᚣᛖ ⧗³ ⧗² ⧗¹
+  ⧗⁴ △ ᛖ ⋔ ⦃ »erutangis detanimretnu« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «epyt a tuohtiw xiferp epyt» ⦄ ⋔ ᛖ ▽△ ⧗⁴
+  ⧗⁴ ○△ ᛖ ⋔ ⦃ »⊸ eno yltcaxe sah erutangis a« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «⊸ gnissim si erutangis» ⦄ ⋔ ᛖ △△ ⧗⁴
+  ⧗⁴ ▽▽△ ᛖ ⋔ ⦃ »⁼ eb tonnac ecaf tsrif eht« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «)3§( snoitaralced elcitrap dna sgnidnib IFF ,serutangis ni nettirw ylno era sepyt» ⦄ ⋔ ᛖ ○▽△ ⧗⁴
+  ⧗⁴ △▽△ ᛖ ⋔ ⦃ »¹⍤ .g.e ,tnuoc a sdeen reyarp a« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «skram yrrac tonnac noitinifed a ni eman noitcnuf a» ⦄ ⋔ ᛖ ▽○△ ⧗⁴
+  ⧗⁴ ○○△ ᛖ ⋔ ⦃ »lanidro tnemgarf a detcepxe« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «)srettel mahgO( eman elcitrap a detcepxe» ⦄ ⋔ ᛖ △○△ ⧗⁴
+  ⧗⁴ ▽△△ ᛖ ⋔ ⦃ »gnirts a sa eman noitcnuf C eht detcepxe« ⎙̵ ⦄ ∅ ⁼
+  ᚣᛗ ⧗³
+  ⧗⁰ ⌁̵ ↯
+⸫ ᚣᛛ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟗ʃ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᛜ st F T t code: "<message>, found <t>" ⍝
+⍝ codes: 1 expected a type, 2 expected a face (⦃…⦄, ⁼ or ∅), 3 expected a
+function name (Runic letters), 4 a fragment ordinal is a balanced-ternary ⍝
+⍝ integer, 5 expected a particle name (Ogham letters), 6 expected the C
+function name as a string, 7 expected an item (…) ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ⧗² ⧗³ ᚣᛖ
+  ⁼ ∅ ⦃ ⎙̵ «epyt a detcepxe» ⦄ ⋔ ᛖ △ ⧗⁴
+  ⧗⁴ ▽△ ᛖ ⋔ ⦃ »)∅ ro ⁼ ,⦄…⦃( ecaf a detcepxe« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «)srettel cinuR( eman noitcnuf a detcepxe» ⦄ ⋔ ᛖ ○△ ⧗⁴
+  ⧗⁴ △△ ᛖ ⋔ ⦃ »regetni yranret-decnalab a si lanidro tnemgarf a« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «)srettel mahgO( eman elcitrap a detcepxe» ⦄ ⋔ ᛖ ▽▽△ ⧗⁴
+  ⧗⁴ ○▽△ ᛖ ⋔ ⦃ »gnirts a sa eman noitcnuf C eht detcepxe« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «)gnidnib ⎔ ro elcitrap ⚛ ,noitcnuf elbisrever ⇋ ,noitcnuf ⦃( meti na detcepxe» ⦄ ⋔ ᛖ △▽△ ⧗⁴
+  » dnuof ,« ⎙̵ ⧗² ⧗³ ᚣᛚ
+  ᚣᛗ ⧗³
+  ⧗⁰ ⌁̵ ↯
+⸫ ᚣᛜ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟗ʃ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᛝ st F T t cp code: 1 "expected <cp>, found <t>", 2 "unclosed <cp>", ⍝
+⍝ 3 "unexpected <t's text>", 4 "unexpected <t's text> inside a block",
+5 "<cp> needs a superscript index, e.g. <cp>⁰" ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ⧗² ⧗³ ᚣᛖ
+  ⁼ ∅ ⦃ ⎙̵ « detcepxe» ⦄ ⋔ ᛖ △ ⧗⁵
+  ⧗⁵ ▽△ ᛖ ⋔ ⦃ » desolcnu« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ « detcepxenu» ⦄ ⋔ ⋏ ᛖ △△ ⧗⁵ ᛖ ○△ ⧗⁵
+  ⧗⁴ ⧗⁵ △ ▽△ ᛦ ⧗⁵ ▽▽△ ᛖ ⋏ ⋔ ⦃ ᚢ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⁼ ⦃ ⌁̱ ⌁ ⦄ ⦃ ᚣᛙ ⦄ ⋔ ᛦ △△ ○△ ⧗⁵ ⧗³ ⧗²
+  ⧗⁵ △ ᛖ ⋔ ⦃ » dnuof ,« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ⦃ ⌁̱ ⌁ ⦄ ⦃ ᚣᛚ ⦄ ⋔ ᛖ △ ⧗⁵ ⧗³ ⧗²
+  ⧗⁵ △△ ᛖ ⋔ ⦃ »kcolb a edisni « ⎙̵ ⦄ ∅ ⁼
+  ⁼ ⦃ ⌁ ⦄ ⦃ ⎙̵ «⁰» ᚢ ⎙̵ « .g.e ,xedni tpircsrepus a sdeen » ⦄ ⋔ ᛖ ▽▽△ ⧗⁵ ⧗⁴
+  ⧗³ ᚣᛗ
+  ↯ ⌁̵ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ʃ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛝ ⸫
+
+⍝ ᚣᛞ st T F kind cp: consume a token of this kind and text; the result is the token
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗¹ ⟗ ⧗⁰
+  ⧗⁰ ⧗⁴ ⧗³ ⧗¹ ⧗⁶
+  ⁼ ⦃ ᚣᛝ △ ⦄ ⦃ ᚣᛑ ⧗³ ᚣᛏ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔ ᚣᛌ ⧗⁶ ⧗⁵ ⧗¹ ⧗³
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛞ ⸫
+
+⍝ ---- types and signatures (§3)
+
+⍝ ᚣᛟ st T F node t: the part after the prefixes
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⧗¹ ⧗⁴ ᚣᛋ ○○△ ᛖ ⧗¹ ⧗⁴ ᚣᛋ ▽△ ᛖ ⋏
+  ⦃ ᚣᛒ △ ᚣᛏ ᚡᚧ ⧗⁴ ⊞ △ ⧗³ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔
+    ⦃ ⧖ ⧖ ⧖ ⧖ ⧖
+      ⦃ ᚣᛠ ⦄ ⋔ ᚣᛌ ▽○△○○○▽▽▽△ ▽△△ ⧗⁴ ⧗¹ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+        ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗² ⧗¹ ⧗⁴ ⧗⁴ ▽ ᛖ ⋔ ⦃ △ ᚣᛛ ⦄ ⦃ △ ᚣᛜ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⸫ ᚣᛟ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ᚣᛒ △ ᚣᛞ ○○△○○○▽▽▽△ ▽△△ ⧗² ⧗¹ ᚣᛡ ⧗² ⧗¹ ᚣᛏ ᚡᚧ ⧗⁴ ⊞ △ ⧗³ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛠ ⸫
+
+⍝ ᚣᛢ st T F node t: prefix t; a bare ◌ before ⊸ or ⟩ is a whole type
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⍆̵ ⧗⁴ ⧗⁰
+  ⧗⁰ ⟗ ⧗⁴ ○△ ⊞ ᚳ ⧖ ⧖
+  ⧖ ᚡᚤ ᚣᛏ ᚡᚧ ⊞ △ ⧗¹ ⊞ ○△ ⧗⁶ ⧗⁰
+  ⧗⁰ ⟗ ⧗⁵ ᚣᛎ ⧖ ⧖
+  ⧗¹⁰ ⧗⁷ ⧗⁸ ⧗⁰
+  ⧗⁷ ⧗¹ ▽○△ ▽▽△▽▽△○△△ ᚣᛌ ⧗⁷ ⧗¹ ▽△△ ▽△△○○○▽▽▽△ ᚣᛌ ⋏
+  ⦃ ⁼ ⦃ ᚣᛛ ▽△ ⦄ ⦃ ᚣᛒ △ ⌁̱ ⌁̱ ⌁ ⦄ ⋔ ᚣᛌ △○△△▽△△△△ ▽○△ ⧗³ ⧗² ⧗³ ⧗² ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔
+    ⦃ ⌁ ⌁̱ ⌁̱ ○ ᚣᛒ ⦄ ⁼
+⸫ ᚣᛢ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗¹ ⟗ ⧗⁰
+  ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗¹
+  ⁼ ⦃ ᚣᛟ ⦄ ⦃ ᚣᛢ ⦄ ⋔ ᚣᛍ ⧗¹ ⧗³
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛣ ⸫
+
+⍝ ᚣᛡ st T F: a type node [21 base size np prefixes…] (base −1: a bare ◌)
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛕ ⍆̵ ○ ᚡᚤ ᚣᛓ ▽ ○△▽△ ⧗⁰
+  ⧗⁰ ⧗³ ⧗⁴ ⧗¹
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ⧖ ⧖ ᚳ ○△ ⟗ ᚡᚤ ᚣᛣ ⧗³ ⧗² ⧗¹ ⧗⁰
+    ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗¹ ○ ᛖ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦃
+  ⌁ ⌁̱ ⌁̱ ⧗⁵ ᚣᛔ
+⸫ ᚣᛡ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗¹ ⟗ ⧗⁰
+  ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗¹
+  ⦃ ᚣᛒ △ ᚣᛏ ⌁̱ ⌁̱ ⌁ ⌁ ⦄ ⋔ ᚣᛌ ▽△△○○○▽▽▽△ ▽△△ ⧗¹ ⧗³
+    ⦃ ⧖ ⧖ ⧖ ⧖ ⧖
+      ⦃ ᚣᛤ ⦄ ⋔ ᚣᛌ ▽▽△▽▽△○△△ ▽○△ ⧗⁴ ⧗¹ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+        ⦃ ⧖ ⧖ ⧖ ⧖ ⧖
+          a type: an input until ⊸ is seen ⍝
+          ⧗⁰ ⟗ ⧗³ △△ ⊞ ᚳ ⧖ ⟗ ⧗⁴ ○△ ⊞ ᚳ ⧖ ⧖
+          ⁼ ⦃ ⁼ ⦃ ᚣᛒ ○ ᚣᛡ ⧗⁵ ⧗⁴ ᚡᚧ ⁼ ∅ ⦃ ⊞ △ ⦄ ⋔ ᛖ ○ ⧗² ⧗¹ ⊞ ○△ ⧗⁶ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛥ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ⧗³ △△ ⊞ ᚳ ⧖ ⧖
+  ⧗⁵ ⧗⁶ ⧗³ ⧗⁴ ⧗⁰
+  ⧗¹ △ ᛖ ⋔ ⦃ ⌁ ○△ ᚣᛛ ⦄ ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗⁴ △△ ⊞ △ ᚡᚧ ᚣᛏ ○ ᚣᛒ ⦄ ⁼
+⸫ ᚣᛤ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᛦ st T F: ⟨ inputs ⊸ outputs ⟩ as [20 ⟨ size nin saw] and the types ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ▽△△ △○△○○○▽▽▽△ ᚣᛞ ᚡᚤ ᚣᛕ ⧖ ⧖
+  ⧖ ⧖ ᚣᛕ ⍆̵ ○ ⍆̵ ○ ᚡᚤ ᚣᛓ ⧗¹ ▽△▽△ ⧗⁰
+  ⧗⁰ ⧗⁵ ⧗⁶ ⧗¹
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ⧖ ⧖ ᚳ ○△ ⟗ ᚡᚤ ᚣᛥ ⧗³ ⧗² ⧗¹ ⧗⁰
+    ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗¹ ○ ᛖ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦃
+  ⌁ ⌁̱ ⌁̱ ⟗ ⧗⁵ △△ ⊞ ᚳ ⧖ ⧖
+  ⧗⁷ ⧗¹¹ ⧗⁵ ⧗⁶ ⧗⁰
+  ⧗¹ ○ ᛖ ⋔ ⦃ ⌁ △△ ᚣᛛ ⦄ ⦃ ⧖ ⌁ ⌁̱ ⌁̱ ⧗⁰ ᚣᛔ ⦄ ⁼
+⸫ ᚣᛦ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+---- code (§4–§12) ⍝
+
+ᚣᛧ st T F opener closer kind: a node of this kind holding the ops up to the closer ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ▽△△ ⧗³ ᚣᛞ ᚡᚤ ᚣᛕ ⧖ ⧖
+  ⧖ ⧖ ᚣᛕ ᚡᚤ ᚣᛓ ⧗¹ ⧗⁷ ⧗⁰
+  ⧗⁰ ⧗⁵ ⧗⁶ ⧗³ ⧗⁸
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧖ ⧖ ᚳ ○△ ⟗ ᚡᚤ ᚣᛨ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+    ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗¹ ○ ᛖ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦃
+  ⌁ ⌁ ⌁̱ ⌁̱ ⧗⁸ ᚣᛔ
+⸫ ᚣᛧ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗¹ ⟗ ⧗⁰
+  ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗¹
+  ⋔ ᛖ ▽ ⧗¹
+    ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗² ⧗¹ ⧗³ ⧗¹ ⧗³ ▽○△ ⊞ ᚳ ▽△ ᚣᛝ ⦄
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+      ⧗⁰ ⧗¹ ⧗² ⧗¹ ⧗⁵ ▽△△ ⧗⁴ ᚣᛌ ⋔ ⦃ ⌁̱ ⌁̱ ᚣᛏ △ ᚣᛒ ⦄ ⦃ ᚣᛩ ○ ᚣᛒ ⦄ ⁼ ⦄ ⁼
+⸫ ᚣᛨ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚣᛪ st T F first: ⦃…⦄, ⁼ (not first) or ∅ ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ⧗¹ ᚣᛎ ⧖ ⧖
+  ⧗⁵ ⧗¹ ⧗⁴ ⧗³ ⧗⁰
+  ⧗³ ⧗¹ ▽○△ ○○○▽△△▽△△ ᚣᛌ ⋔
+    ⦃ ⁼ ⦃ ᚣᛓ ⧗³ ○△△ ᚣᛏ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⦄ ⦃ ᚣᛛ ▽▽△ ⦄ ⋔ ᛖ △ ⧗⁴ ⧗³ ⧗¹ ⧗² ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+    ⦃ ⧖ ⧖ ⧖ ⧖ ⧖
+      ⦃ ᚣᛓ ⧗³ △△△ ᚣᛏ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔ ᚣᛌ ○▽▽▽○○○△△ ▽○△ ⧗³ ⧗¹ ⧗³ ⧗² ⧗¹ ⧗⁰
+        ⦃ ⧖ ⧖ ⧖ ⧖
+          ⦃ ᚣᛧ ○○△ ▽○▽△▽▽○▽▽△ △▽▽△▽▽○▽▽△ ⌁ ⦄ ⋔ ᚣᛌ △▽▽△▽▽○▽▽△ ▽△△ ⧗³ ⧗¹ ⧗³ ⧗² ⧗¹ ⧗⁰
+            ⦃ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗² ⧗¹ ⧗³ ▽△ ᚣᛜ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⸫ ᚣᛪ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛕ ᚡᚤ ᚣᛓ ⧗³ ⧗⁴ ⧗⁰
+  ⧗⁰ ⧗³ ⧗⁴ △ ᚣᛪ ⧗³ ⧗⁴ ○ ᚣᛪ ⧗³ ⧗⁴ ○ ᚣᛪ ⧗¹ ᚣᛔ
+⸫ ᚤᚠ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛕ ᚡᚤ ᚣᛓ ⧗³ ⧗⁴ ⧗⁰
+  ⧗⁰ ⧗³ ⧗⁴ △ ᚣᛪ ⧗³ ⧗⁴ ○ ᚣᛪ ⧗³ ⧗⁴ ○ ᚣᛪ ⧗³ ⧗⁴ △▽▽△▽▽○▽▽△ ▽○▽△▽▽○▽▽△ ○○△ ᚣᛧ ⧗¹ ᚣᛔ
+⸫ ᚤᚢ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚤᚤ st T F t kind: a node of this kind holding one block ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗⁴ ⧗³ ᚣᛓ ᚡᚤ ᚣᛕ ⧖ ⧖
+  ᚣᛔ ⧗¹ ᚣᛧ ○○△ ▽○▽△▽▽○▽▽△ △▽▽△▽▽○▽▽△ ⧗⁴ ⧗³ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚤ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗⁴ ⧗³ ᚣᛓ ᚡᚤ ᚣᛕ ⧖ ⧖
+  ᚣᛔ ⧗¹ ᚣᛧ ○○△ ▽○▽△▽▽○▽▽△ △▽▽△▽▽○▽▽△ ⧗⁴ ⧗³ ᚣᛧ ○○△ ▽○▽△▽▽○▽▽△ △▽▽△▽▽○▽▽△ ⧗⁴ ⧗³ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚥ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗² ⧗¹ ⧗³
+  ⁼ ⦃ ᚤᚤ △▽▽△ ⧗³ ⧗¹ ⧗² ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⦄ ⦃ ᚣᛛ △▽△ ⦄ ⋔ ᛖ ○○▽ ᚳ ⊞ △△ ⧗³ ⧗¹
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚦ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ᚣᛐ ⧗⁴ ⧗³ ᚣᛓ ᚡᚤ ᚣᛕ ⧖ ⧖
+  ᚣᛔ ⧗¹ ᚣᛦ ⧗⁴ ⧗³ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚧ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ᚣᛐ ⧗⁴ ⧗³ ᚣᛓ ᚡᚤ ᚣᛕ ⧖ ⧖
+  ᚣᛔ ⧗¹ ᚣᛧ ○○△ ▽○▽△▽▽○▽▽△ △▽▽△▽▽○▽▽△ ⧗⁴ ⧗³ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚨ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ᚣᛐ ⧗¹ ⧗² ▽○△○○○▽▽▽△ ○○△○○○▽▽▽△ ▽○△ ᚣᛧ
+⸫ ᚤᚩ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⸫ ᚤᚪ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃ ᚣᛓ ⧗³ ⧗⁴ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗² ⧗¹ ⧗³ ○ ⧗⁴ ᚣᛝ ⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚫ ⸫
+⸫ ᚤᚬ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃ ᚣᛛ ○▽△ ⧗³ ⧗¹ ⧗² ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗² ⧗¹ ⧗³ ⧗¹ ⧗³ ▽○△ ⊞ ᚳ ▽▽△ ᚣᛝ ⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚭ ⸫
+
+⍝ ᚤᚮ T t: what to do with token t inside a block, as the code of the
+handler and the node kind; see ᚣᛩ ⍝
+⦃
+  ⧖ ⧖
+  ⧗⁰ ⧗¹ ᚣᛋ ⧖
+  ⧖ ᚳ ⊞ ▽○△ ⧗² ⧗¹
+  ⧗² ⧗³ △▽△ ⊞ ᚳ ⧖
+  ⧖ ᛖ ○○▽ ᚳ ⊞ △△ ⧗⁴ ⧗³
+  ⧗³ ▽○△ ᛖ ⧗¹ △ ᛖ ⋎ ⧖
+  default: an op ⍝
+  △ ▽▽△
+  ⁼ ∅ ⦃ △△ △△ ⌁ ⌁ ⦄ ⋔ ⋎ ⋏ ᛖ ○○△△△△○△△ ⧗⁰ ⋏ ᛖ △○○○▽▽▽▽▽△ ⧗⁰ ⋏ ᛖ ▽△△▽▽○○△△ ⧗⁰ ⋏ ᛖ ○▽▽▽○○○△△ ⧗⁰ ⋏ ᛖ ○○○▽△△▽△△ ⧗⁰ ⋏ ᛖ ▽▽△▽▽△○△△ ⧗⁰ ⋏ ᛖ ○△△○▽△△▽▽△ ⧗⁰ ᛖ ▽△▽○▽△△▽▽△ ⧗⁰ ⧖ ⧗³ ⧗⁰
+  ⧗¹ ⧗⁴ ⧖ ⧗⁰ △○▽△○▽○▽▽△ ᛖ ⧗⁰ ○▽▽△△△○△△ ᛖ ⋏ ⋎ ⧗³ ⋎ ⋔ ⦃ ⌁ ⌁ ▽△△ ○ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ △▽▽△ △○△ ⌁ ⌁ ⦄ ⋔ ⋎ ᛖ ○▽▽○△△○△△ ⧗⁵ ⧗²
+  ⧗² ⧗⁵ △○○○○△▽△△ ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ ○○△ ▽○▽△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ○▽▽△ ▽○△ ⌁ ⌁ ⦄ ⋔ ⋎ ᛖ △▽○○○○▽▽▽△ ⧗⁵ ⧗²
+  ⧗² ⧗⁵ ○△○△△△▽▽▽△ ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ ▽○△ ▽▽▽△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ▽△△ △▽△ ⌁ ⌁ ⦄ ⋔ ⋎ ᛖ ▽△△▽▽○○△△ ᚳ ⊞ ○○△ ⧗⁸ ⧗⁷ ⋎ ᛖ ○▽△○▽△○△△ ⧗⁵ ⋎ ᛖ ▽△ ⧗⁴ ᛖ ▽○△ ⧗⁶
+  ⧗² ⧗⁵ ○▽△○▽△○△△ ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ ○▽△ △○△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ○ ○△△ ⌁ ⌁ ⦄ ⋔ ⋏ ᛖ △○△ ⧗⁶ ⋏ ᛖ ▽△ ⧗⁶ ᛖ ○○△ ⧗⁶
+  ⧗⁶ △△ ᛖ ⋔ ⦃ ⌁ ⌁ △ △△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ○△ △ ⌁ ⌁ ⦄ ⋔ ᛖ ○△ ⧗⁶
+  ⧗⁶ △ ᛖ ⋔ ⦃ ⌁ ⌁ △ ▽△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ △ △ ⌁ ⌁ ⦄ ⋔ ⋏ ᛖ ○△△ ⧗⁶ ⋏ ᛖ △▽△ ⧗⁶ ⋏ ᛖ ○▽△ ⧗⁶ ᛖ ▽▽△ ⧗⁶
+  ⧗⁶ ▽△△ ᛖ ⋔ ⦃ ⌁ ⌁ ○△ ○△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ▽○△ △△△ ⌁ ⌁ ⦄ ⋔ ⋎ ᛖ ▽○△○○○▽▽▽△ ⧗⁵ ᛖ ▽△△ ⧗⁶
+  ⧗⁶ ▽△△ ᛖ ⧗⁵ △○△○○○▽▽▽△ ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ ▽▽▽△ ○▽△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ △▽△ ○▽▽△ ⌁ ⌁ ⦄ ⋔ ⋎ ᛖ △▽▽△▽▽○▽▽△ ⧗⁵ ᛖ ▽△△ ⧗⁶
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ⊸ ℤ ℤ ⟩ ᚤᚮ ⸫
+
+⍝ ᚣᛩ st T F: one operation; handlers: 1 leaf, 3 unexpected, 4 unexpected
+inside a block, 6 select, 7 rselect, 8 block holder, 9 handle, 10 prayer, ⍝
+⍝ 11 missing index, 12 type, 13 array, 14 shape-call, 15 quote
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗¹ ⟗ ⧗⁰
+  ⧗³ ⧗¹ ᚤᚮ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗³ ⧗⁶ ⧗⁵ ᚣᛏ ⧗²
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ᚤᚪ ⦄ ⦃
+  ⦄ ⦃ ᚤᚫ ⌁ ⦄ ⋔ ⋏ ᛖ △△ ⍿¹ ᛖ ○△ ⍿⁰
+  ⍿⁰ ○▽△ ᛖ ⋔ ⦃ ⌁ ᚤᚠ ⦄ ⦃
+  ⦄ ⦃ ᚤᚢ ⌁ ⦄ ⋔ ᛖ △▽△ ⍿⁰
+  ⍿⁰ ▽○△ ᛖ ⋔ ⦃ ⌁ ᚤᚤ ⦄ ⦃
+  ⦄ ⦃ ᚤᚥ ⌁ ⦄ ⋔ ᛖ ○○△ ⍿⁰
+  ⍿⁰ △○△ ᛖ ⋔ ⦃ ⌁ ᚤᚦ ⦄ ⦃
+  ⦄ ⦃ ᚤᚭ ⌁ ⦄ ⋔ ᛖ ▽△△ ⍿⁰
+  ⍿⁰ ○△△ ᛖ ⋔ ⦃ ⌁ ᚤᚬ ⦄ ⦃
+  ⦄ ⦃ ᚤᚩ ⌁ ⦄ ⋔ ᛖ △△△ ⍿⁰
+  ▽▽▽△ ᛖ ⋔ ⦃ ᚤᚧ ⦄ ⦃ ᚤᚨ ⦄ ⁼
+  ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚣᛩ ⸫
+
+⍝ ---- items
+
+⍝ ᚤᚯ st T F node: "⸾ ordinal"
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚡᚤ ᚣᛏ ⧖ ᚣᛎ ⧗¹ ⟗ ᚡᚤ ᚣᛏ ⧗⁰
+  ⧗⁰ ⧗⁴ ⧗³ ⧗¹ ⧗⁵
+  ⦃ ᚣᛛ ○○△ ⌁ ⦄ ⋔ ᛖ ▽ ⧗¹
+    ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗² ⧗³ ᚣᛋ ▽▽△ ᛖ
+      ⁼ ⦃ ⁼ ⦃ ᚣᛜ △△ ⌁ ⦄ ⦃ ᚡᚧ ⧗³ ⊞ ▽▽△ ⧗⁴ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚯ ⸫
+
+⍝ ᚤᚰ st F T nt node: the name, an optional ordinal and ⸫
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚡᚤ ᚣᛏ ᚡᚧ ⧗³ ⊞ ○△ ⧗⁴ ⧗⁰
+  ⧗⁰ ⧗² ⧗³ ⧗⁴ ⧗⁵
+  ⋔ ᛖ ○ ᚳ ⊞ ○△ ⧗⁴ ⧗³
+    ⦃ ⧖ ⧖ ⧖ ⧖ ⧖
+      ⧖ ⧖ ᚣᛎ ⧗² ⟗ ⧗⁰
+      ⧗⁰ ⧗⁴ ⧗³ ⧗⁶ ⧗⁴ ⧗¹ ▽○△ ○△△○▽△△▽▽△ ᚣᛌ ⋔ ⦃ ᚤᚯ ᚡᚤ ⦄ ⦃ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+      ⦃ ᚣᛔ ⧗⁶ ᚣᛞ ▽△▽○▽△△▽▽△ ▽○△ ⧗³ ⧗⁴
+    ⦃ ⌁ ▽○△ ᚣᛛ ⦄ ⁼
+⸫ ᚤᚰ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟗ʃ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚤᚱ st T F rev: block [sig] name [⸾ ordinal] ⸫ as a fragment ⍝
+⍝ [30 ⦃ size name rev ordinal hasSig]: body, sig
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗¹ ⟗ ⧗⁰
+  ⧗⁰ ○△○△ ⧗¹ ᚣᛓ ᚡᚤ ▽ ⍆̵ ⧗⁵ ⍆̵ ▽ ⍆̵ ○ ⍆̵ ᚣᛕ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗⁵ ⟗ ᚡᚤ ᚣᛧ ○○△ ▽○▽△▽▽○▽▽△ △▽▽△▽▽○▽▽△ ⧗⁶ ⧗⁵ ⧗⁰
+  ⧗⁰ ⧗⁷ ⧗⁸ ⧗³ ⧗⁷ ⧗¹ ▽△△ △○△○○○▽▽▽△ ᚣᛌ
+  ⁼ ⦃ ⌁̱ ⌁̱ ⌁ ⦄ ⦃ ᚡᚤ ᚡᚧ △ ⊞ ○▽△ ⧗³ ᚣᛦ ⧗² ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔
+  ⟗ ⧗⁷ ᚣᛎ ⧖ ⧖
+  ⧗⁵ ⧗¹ ⧗⁹ ⧗¹⁰ ⧗⁰
+  ⧗⁹ ⧗¹ ᚣᛋ △ ᛖ ⧗⁹ ⧗¹ ᚣᛋ ○△ ᛖ ⋏ ⋔ ⦃ ᚤᚰ ⦄ ⦃ ⌁ ○△ ᚣᛜ ⦄ ⁼
+⸫ ᚤᚱ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚤᚲ st T F nt node: the item's name and ⸫ ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗⁴ ○△ ⊞ ⧗³ ᚡᚧ ᚣᛏ ⧗¹ ⧗² ▽○△ ▽△▽○▽△△▽▽△ ᚣᛞ ⧗⁴ ᚣᛔ
+⸫ ᚤᚲ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚤᚳ st T F: ⚛ type name ⸫ as [31 ⚛ size name]: type ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ⧗¹ ᚣᛎ ⧖ ⧖
+  ⧖ ⧖ ᚣᛕ ⍆̵ ▽ ᚡᚤ ᚣᛓ ⧗¹ △△○△ ᚣᛏ ⧗⁰
+  ⧗⁰ ⧗⁵ ⧗⁶ ᚣᛡ ᚡᚤ ⟗ ⧗⁵ ᚣᛎ ⧖ ⧖
+  ⧗³ ⧗¹ ⧗⁸ ⧗⁷ ⧗⁰
+  ⧗¹ ▽ ᛖ ⋔ ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗² ⧗¹ ⧗³ △○△ ᚣᛛ ⦄
+    ᛖ ▽△ ᚣᛋ ⧗³ ⧗¹ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+      ⋔ ⦃ ᚤᚲ ⦄ ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗² ⧗¹ ⧗³ ▽▽△ ᚣᛜ ⦄ ⁼ ⦄ ⁼
+⸫ ᚤᚳ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗¹ ⟗ ᚡᚤ ᚣᛦ ⧗² ⧗¹ ᚣᛏ ᚡᚧ ⧗³ ⊞ △△ ⧗⁴ ⧗⁰
+  ⧗⁰ ⧗³ ⧗⁴ ⧗¹ ⧗⁶
+  ⁼ ⦃ ᚣᛜ ○△ ⧗³ ⧗¹ ⧗² ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄ ⦃ ᚤᚲ ⦄ ⋔ ᛖ △ ᚣᛋ ⧗¹ ⧗³
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚴ ⸫
+
+⍝ ᚤᚵ st T F: ⎔ »cname« sig name ⸫ as [32 ⎔ size name cname]: sig
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗¹ ⟗ ⧗⁰
+  ⧗⁰ ᚣᛏ ▽▽△△ ⧗¹ ᚣᛓ ᚡᚤ ▽ ⍆̵ ▽ ⍆̵ ᚣᛕ ⧖ ⧖
+  ⧖ ⧖ ᚣᛎ ⧗⁵ ⟗ ⧗⁰
+  ⧗⁰ ⧗⁷ ⧗⁸ ⧗¹ ⧗³
+  ⦃ ᚣᛛ ▽△△ ⧗³ ⧗¹ ⧗² ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄ ⋔ ᛖ ▽ ⧗¹
+    ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗¹ ⧗³ ᚣᛋ ○△△ ᛖ
+      ⁼ ⦃ ⁼ ⦃ ᚣᛜ ○▽△ ⧗³ ⧗¹ ⧗² ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄ ⦃ ᚤᚴ ⦄ ⋔
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚵ ⸫
+
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ⧗¹ ᚣᛎ ⧖ ⧖
+  ⧗¹ ⧗⁴ ⧗³ ⧗⁰
+  ⧗³ ⧗¹ ▽○△ △○○○▽▽▽▽▽△ ᚣᛌ ⋔ ⦃ ⌁ ᚤᚳ ⦄
+    ⦃ ᚤᚵ ⌁ ⦄ ⋔ ᚣᛌ ○○△△△△○△△ ▽○△ ⧗³ ⧗¹ ⧗³ ⧗² ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⦄
+      ⦃ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗¹ ⧗³ ▽○△ ▽△△▽▽○○△△ ᚣᛌ ⋔ ⦃ ⌁ ⧖ ⧖ ᚣᛏ ⧗⁰ ⧗¹ △ ᚤᚱ ⦄
+        ⦃ ᚤᚱ ○ ⌁ ⦄ ⋔ ᚣᛌ △▽▽△▽▽○▽▽△ ▽△△ ⧗³ ⧗¹ ⧗³ ⧗² ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⦄
+          ⦃ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗² ⧗¹ ⧗³ △▽△ ᚣᛜ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⸫ ᚤᚶ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖
+  ⧗² ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖
+    ⧗⁰ ⟗ ⧗¹ ᚣᛎ ⧖ ⧖
+    ⁼ ⦃ ⊕ ⧗² ⧗¹ ᚡᚤ ᚤᚶ ⧗² ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⦄ ⦃ ⦶ ⦄ ⋔ ᛖ ▽ ⧗¹ ⧗⁴ ⧗³ ⧗⁰
+  ⦄
+  ⌁̱ ⌁̱
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚷ ⸫
+
+⍝ ---- tangle (§9.3): fragments → functions
+
+⦃ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼ ⦄ ⟨ ŧ ŧ ⊸ ŧ ⟩ ᚤᚸ ⸫
+
+⍝ ᚤᚹ T i j n: slots i … i+n−1 equal j … j+n−1 (n ≥ 1)
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⦶ ⊞ ⧗³ ⧗¹ ⧗² ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ △ ⊞ ⧗² △ ⊞ ⧗³
+    ⋎ ᛖ ᚳ ⧗² ⧗⁰ ᚳ ⧗¹ ⧗⁰ ⧗⁴
+    ⧗¹ △ ⊞ ⧗³ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁴
+⸫ ᚤᚹ ⟨ ŧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᚺ T a b: tokens a and b have the same text ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ △▽△ ⊞ ᚳ ⧗⁰ ⧗² △▽△ ⊞ ᚳ ᛖ
+  ⋎ ᚤᚹ ᚳ ⊞ △▽△ ⧗¹ ⧗⁰ ⊞ ▽○△ ⧗² ⊞ ▽○△ ⧗¹ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ŧ ⟩ ᚤᚺ ⸫
+
+⍝ ᚤᚻ T a b: the same name (an antiparticle's carries its ⌁)
+⦄
+  ⧖ ⧖ ⧖
+  ⋎ ᚤᚺ ⧗² ⧗¹ ⧗⁰ ᚤᚸ ᛖ ○△ ᚣᛋ ⧗² ⧗⁰ ᛖ ○△ ᚣᛋ ⧗¹ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ŧ ⟩ ᚤᚻ ⸫
+
+⍝ ᚤᚼ T kj nj ni mode: item j (kind kj, name nj) matches name ni:
+1 a non-fragment of that name, 2 anything of that name, 3 a fragment of ⍝
+⍝ that name, 4 the antiparticle fragment of particle ni
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚤᚻ ⧗³ ⧗² ⧗⁰
+  ⧗² ○△○△ ᛖ ⧖
+  ⊕
+  ⧗⁶ △ ᛖ ⧗¹ ⋎ ⧗⁰ ᚡᚠ ⋎ ⋔ ⦃ ⌁ ⦶ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⦶ ⌁ ⦄ ⋔ ⋎ ⧗¹ ᛖ ▽△ ⧗⁶
+  ⧗⁶ ○△ ᛖ ⧗¹ ⋎ ⧗⁰ ⋎ ⋔ ⦃ ⌁ ⦶ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⦶ ⌁ ⦄ ⋔ ⋎ ᚤᚺ ⧗⁵ ⧗⁴ ⧗² ⋎ ᛖ ○△ ᚣᛋ ⧗⁴ ⧗² ⋎ ⧗⁰ ᛖ △△ ⧗⁶
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ⊸ ŧ ⟩ ᚤᚼ ⸫
+
+⍝ ᚤᚽ st T to ni mode: some item before slot to matches (see ᚤᚼ)
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⊕ ○▽△ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗⁵ ⧗² ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+        ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁰ ⧗⁵ ▽△ ⊞ ᚳ ⊞
+        ⋏ ᚤᚼ ⧗⁴ ⧗³ ᚳ ⊞ ○△ ⧗⁵ ⧗⁰ ᚳ ⧗⁵ ⧗⁰ ⧗¹ ⧗⁶
+        ⧗⁵ ⧗⁰ ⧗⁵ ▽△ ⊞ ᚳ ⊞ ⧗² ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⦄
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁶
+⸫ ᚤᚽ ⟨ ŧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᚾ st T F i: item i must not reuse an earlier item's name ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ⧗³ ᚳ ⧖ ⟗ ⧗⁴ ○△ ⊞ ᚳ ⧖ ⟗ ⧗⁵ △ ⊞ ᚳ ⧖ ⧖
+  ⧖ ⧖ ᚤᚽ ⁼ ⦃ ▽△ ⦄ ⦃ △ ⦄ ⋔ ᛖ ○△○△ ⧗³ ⧗² ⧗⁷ ⧗⁵ ⟗ ⧗⁰
+  ⧗⁴ ⧗³ ⧗⁵ ○△○△ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖
+  ⧗⁵ ⧗⁰ ⧗⁸ ⧗⁹ ⧗¹
+  ⧗² ⋔ ⦃ ᚤᚿ ᚡᚤ ⦄ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+⸫ ᚤᚾ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ↯ ⌁̵ ⧗⁰ ⎙̵ «↵» ᚣᛘ ⧗⁴ ⧗² ⎙̵ « :eciwt denifed eman» ᚣᛖ ⧗³ ⧗² ⧗¹
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ʃ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᚿ ⸫
+
+⍝ ᚤᛀ st T f: fragment f's ordinal (○ when it has none)
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ᚳ ⊞ ▽▽△ ⧗² ⧗⁰
+  ⧗² ⧗⁰ ⧗⁰ ▽ ᛖ ⋔ ⦃ ⌁ ⌁̱ ○ ⦄ ⦃ ▽▽△ ⊞ ᚳ ⦄ ⁼
+⸫ ᚤᛀ ⟨ ℤ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᛁ st F T f g: f repeats g's ordinal ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ⧗³ ○△ ⊞ ᚳ ⧖ ⟗ ⧗⁴ ▽▽△ ⊞ ᚳ ⧖ ⟗ ⧗⁶ ▽▽△ ⊞ ᚳ ⧖ ⧖
+  ᚣᛖ ⧗³ ⧗⁶ ⧗⁵
+  ⧗⁶ ⧗³ ⧗² ▽ ᛖ ⧗¹ ▽ ᛖ ⋎ ⋔
+    ⦃ ⎙̵ «eciwt denifed si » ᚣᛘ ⎙̵ « noitcnuf» ⦄
+    ⦃ » rof lanidro tnemgarf etacilpud« ⎙̵ ᚣᛘ ⦄ ⁼
+  ↯ ⌁̵ ⧗⁰ ⎙̵ «↵»
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ʃ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᛁ ⸫
+
+⍝ ᚤᛂ st T i f ni: the first fragment of name ni in i … f−1 with f's ordinal, or −1
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚤᛀ ⧗³ ⧗¹ ⧗⁰
+  ⧗¹ ⧗² ⧗⁴ ⧗⁵ ⧗⁰ ⧗³ ▽
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗² ⧗⁵ ⧗⁶ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+      ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+        ⊞ ᚳ ⊞ ▽△ ⧗⁵ ⧗⁰ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+        ⧗⁶ ⧗⁵
+        ⋎ ᛖ ⧗⁴ ᚤᛀ ⧗⁵ ⧗¹ ⧗⁰ ⋎ ᚤᚼ ○△ ⧗³ ᚳ ⊞ ○△ ⧗⁵ ⧗⁰ ᚳ ⧗⁵ ⧗⁰ ⧗¹ ᛖ ▽ ⧗⁶
+        ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+        ⦃ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗² ⊞ ᚳ ⊞ ▽△ ⧗⁵ ⧗⁰ ⧗⁵
+  ⦄
+  ⧗⁶ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ℤ ⟩ ᚤᛂ ⸫
+
+⍝ ᚤᛃ st T F i f ni: fragment f (of the group starting at i) must not repeat an ordinal
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚤᛂ ⧗⁵ ⧗⁴ ⧗³ ⧗¹ ⟗ ⧗⁰
+  ⧗⁰ ⧗⁴ ⧗³ ⧗⁶ ⧗¹ ⧗¹ ▽ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⦃ ᚤᛁ ᚡᚤ ⦄ ⁼
+⸫ ᚤᛃ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚤᛄ st T F i ni: no two fragments of the group share an ordinal ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ▽△ ᚳ ⧖ ⧖
+  ⧗¹ ⧗⁵ ⧗⁶ ⧗⁵ ⧗⁴ ⧗³ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗⁵ ⧗⁶ ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+        ⧗⁰ ⟗ ⧗⁵ ᚳ ⧖ ⟗ ⧗⁶ ○△ ⊞ ᚳ ⧖ ⟗ ⧗⁷ ▽△ ⊞ ᚳ ⧖ ⧖
+        ⧗⁸ ⧗⁹ ⧗⁷ ⧗⁶ ⧗⁵ ⧗⁰
+        ⧗³ ○△○△ ᛖ ⧗⁵ ⧗² ⧗⁸ ᚤᚻ ⋎ ⋔ ⦃ ᚤᛃ ᚡᚤ ⦄ ⦃ ⌁ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+        ⦃ ⊕ ⧗¹⁰ ⊞ ⧗¹ ⧗⁹ ⧗⁸ ⧗⁷ ⧗⁶ ⧗⁵
+  ⦄
+  ⌁̱ ⌁̱ ⌁ ⌁ ⌁ ⌁
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᛄ ⸫
+
+⍝ ᚤᛅ st T i ni prev: the fragment of name ni (from i on) with the
+smallest ordinal above prev, or −1 ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗⁰ ▽△ ᚳ ⧖ ⌁̱
+  ▽ ⧗³ ⧗⁰ ⧗⁵ ⧗⁴ ⧗² ⧗¹
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗⁵ ⧗⁴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+        ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁰ ⧗⁵ ▽△ ⊞ ᚳ ⊞
+        ⧗⁵ ⧗⁶
+        ⧗¹ ⧗⁰ ⧗⁵ ᚳ ⧗⁰ ⧗⁵ ○△ ⊞ ᚳ ⧗² ○△ ᚤᚼ
+        ⋎ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋔ ≶ ⧗³ ᚤᛀ ⧗⁵ ⧗¹ ⧗⁰
+        ⧗⁶ ▽ ᛖ ⧗⁰ ⧗¹ ⧗⁵ ᚤᛀ ⧗⁰ ⧗¹ ⧗⁶ ᚤᛀ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋏ ⋎
+        ⁼ ⦃ ⌁ ⦄ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⋔
+        ⧗⁵ ⧗⁰ ⧗⁵ ▽△ ⊞ ᚳ ⊞ ⧗⁴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⦄
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁶
+⸫ ᚤᛅ ⟨ ℤ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᛆ st from n: append slots from … from+n−1 of st to st ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗¹ ⧗² ⊞
+  ⦄ ⥀
+    ⧖ ⧖ ⧖
+    ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗² ⧗¹ ⧗² ⧗¹ ⧗⁰
+      ⦃ ⧖ ⧖ ⧖ ⧗⁰ ⟗ ⧗¹ ᚳ ⍆̵ ⧗¹ △ ⊞ ⧗² ⊕ ⦄
+  ⦃
+  ⌁ ⌁
+⸫ ᚤᛆ ⟨ ⟦ ℤ ⟧ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
+
+⸫ ᚤᛇ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃ ᚡᚧ ⧗³ ⊞ ○△ ⧗¹ ᚡᚧ ⧗² ⊞ △ ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⦄
+
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⎙̵ «↵erutangis eht yrrac yam » ᚣᛘ ⧗³ ⧗² ⎙̵ « fo tnemgarf eno ylno» ᚣᛖ ⧗³ ⧗² ⧗¹
+  ⧗⁰ ⌁̵ ↯
+⸫ ᚤᛈ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟗ʃ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⧗⁵ ▽ ᛖ ⋔ ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ △△ ⧗⁴ ᚡᚧ ⦄ ⦃ ⌁ ᚤᛈ ⦄ ⁼
+⸫ ᚤᛉ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟗ʃ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚤᛊ st T F node f: count fragment f into fn node; one signature only ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ⧗³ ▽▽△ ⊞ ᚳ ⧖ ⟗ ⧗⁴ △△ ⊞ ᚳ ⧖ ⟗ ⧗⁶ △△ ⊞ ᚳ ⧖
+    ⧖ ⧖ ᚳ ⊞ ○△ ⧗¹⁰ ⟗ ⧖ ᚳ ⊞ △ ⧗⁹ ⟗ ⧖ ᚳ △△ ⟗ ⧖ ᚳ ⊞ ○▽△ ⧗⁷ ⟗
+  ⧗⁰ ⧗¹¹ ▽▽△ ⊞ ⧗⁷ △ ⊞ ᚡᚧ ⧗¹¹ △△ ⊞ ⧗⁶ ⧗⁵ ⋓ ᚡᚧ ᚡᚤ ⧖
+  the first fragment names the function ⍝
+  ⧗⁰ ⧗¹² ⧗³ ⧗² ⧗⁸ ○ ᛖ ⋔ ⦃ ᚤᛇ ᚡᚤ ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖
+  ⁼ ⦃ ⌁̱ ⌁̱ ⌁ ⌁ ⌁ ⦄ ⦃ ᚡᚤ ᚤᛉ ⦄ ⋔ ᛖ △ ⧗⁶ ⧗⁵ ⧗¹⁴ ⧗³ ⧗¹¹ ⧗¹² ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᛊ ⸫
+
+⍝ ᚤᛋ st T F node f mode: 1 count and check, 2 append the ordinal, 3 append the body's ops
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⁼ ⦃ ⌁̱ ⌁̱ ⌁ ⌁ ⦄ ⦃ ᚡᚤ ᚤᛊ ⦄ ⋔ ᛖ △ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⟗ ⧗⁴ ▽▽△ ⊞ ᚳ ⧖ ⟗ ⧗⁵ ○○△ ⊞ ᚳ ⧖ ⧖
+  ⧗⁸ ⧗¹ ⧗⁷ ⧗² ⧗⁰
+  ⍿⁰ ▽△ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⍆̵ ⦄
+    ⁼ ⦃ ⁼ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ᚤᛆ ⊟ ○△ ⧗¹ ⊞ △○△ ⧗⁰ ⌁ ⧖ ⧖ ⦄ ⋔ ᛖ ○△ ⦄
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᛋ ⸫
+
+⍝ ᚤᛌ st T F i ni node mode: the fragments of name ni in ordinal order
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ▽○△○△▽△△△△△▽△○○▽△▽ ⧗⁶ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⟗ ⧗¹ ⧗³ ⧗⁴ ⧗⁷ ᚤᛅ ⧖ ⧖
+    ⧗¹ ⧗⁹ ⧗⁸ ⧗⁷ ⧗⁶ ⧗⁵ ⧗⁴ ⧗³ ⧗⁰
+    ⧗¹ ▽ ᛖ ⋔ ⦃ ⌁ ⦶ ⦄
+      ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
+        ⧗⁰ ⧗¹ ⧗² ⧗⁵ ⧗⁸ ⧗⁶ ᚤᛋ ᚡᚤ ⟗ ⧗¹ ⧗⁸ ᚤᛀ ⧖ ⧖
+        ⁼ ⦃ ⊕ ⧗¹ ⧗⁸ ⧗⁷ ⧗⁶ ⧗⁵ ⧗⁴ ⧗³ ⧗⁰
+  ⦄
+  ⌁̱ ⌁̱ ⌁ ⌁ ⌁ ⌁ ⌁
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᛌ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ⧗² ⧗³ ᚣᛖ
+  ⋔ ᛖ △ ⧗⁴ ⧗³ ⧗²
+    ⦃ » noitcnuf« ⎙̵ ᚣᛘ »⟩… ⊸ …⟨ erutangis on sah « ⎙̵ ⦄
+    ⁼ ⦃ ⎙̵ «erutangis a seirrac » ᚣᛘ ⎙̵ « fo tnemgarf on» ⦄
+  »↵« ⎙̵ ⧗⁰ ⌁̵ ↯
+⸫ ᚤᛍ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟗ʃ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚤᛎ st T F i: the function whose first fragment is item i ⍝
+⍝ [40 ⦃ size name rev nfr ordinals…]: sig, ops
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚳ ⊞ ○△ ⧗³ ⟗ ⧗⁰
+  ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗¹ ᚤᛄ ᚡᚤ
+  ⧖ ⧖ ᚣᛕ ⍆̵ ○ ⍆̵ ○ ⍆̵ ▽ ᚡᚤ ᚣᛓ ▽ △△△△
+  ⧗⁰ △△ ▽ ᚡᚧ ⧗⁵ ⧗⁶ ⧗⁷ ⧗³ ⧗¹ △ ᚤᛌ ᚡᚤ
+  ⧖ ⧖ ᚳ ⊞ ○△ ⧗³ ⟗ ⧖ ᚳ ⊞ ▽▽△ ⧗² ⟗ ⧖ ᚳ △△ ⟗
+  ⧗⁰ ⧗¹⁰ ⧗⁹ ⧗¹ ⧗² ⧗³ ▽ ᛖ ⋔ ⦃ ᚤᛍ ᚡᚤ ⦄ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+  the ordinals, the signature, then the bodies ⍝
+  ⧗⁹ ⧗¹⁰ ⧗¹¹ ⧗⁷ ⧗⁵ ▽△ ᚤᛌ ᚡᚤ
+  ⧖ ⧖ ᚳ ⊞ ○○△ ⧗³ ⟗
+  ⧗⁵ △▽△ ⊞ ⧗¹ ⊞ ⧖
+  ⧖ ⧖ ᚳ ⊞ ▽△ ⧗⁰ ⟗ ⧗¹
+  ⧗⁰ ⧗² ⧗¹ ᚤᛆ
+  ᚣᛔ ⧗¹⁰ ᚤᛌ ○△ ⧗¹⁰ ⧗¹² ⧗¹⁶ ⧗¹⁵ ⧗¹⁴
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᛎ ⸫
+
+⍝ ᚤᛏ st T F i: copy a particle or binding; tangle a function at its first fragment
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚳ ⊞ ○△ ⧗⁵ ⟗ ⧖ ᚳ ⊞ ▽△ ⧗⁴ ⟗ ⧖ ᚳ ⧗³ ⟗ ⧗⁰
+  ⧗⁰ ⟗ ⧗⁵ ⧗⁷ ⧗¹ ○△ ᚤᚽ ⧖ ⧖
+  ⧖ ⁼ ∅ ⦃ △ ⌁ ⦄ ⋔ ᚡᚠ ᛖ ○△○△ ⧗⁵ ⁼ ∅ ⦃ ○ ⌁ ⦄ ⋔ ⧗¹ ▽△
+  ⧗¹ ⧗⁸ ⧗⁹ ⧗¹⁰ ⧗⁵ ⧗⁰
+  ⦃ ⌁̱ ⌁̱ ⌁ ⌁ ⌁ ⦄ ⋔ ᛖ ○ ⍿⁰
+    ⦃ △ ᛖ ⋔ ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗³ ⧗⁴ ᚤᛆ ⦄ ⦃ ⌁ ᚤᛎ ᚡᚤ ⦄ ⁼ ⦄ ⁼
+⸫ ᚤᛏ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⎙̵ «↵» ᚣᛙ ⧗⁴ ⧗² ⎙̵ «⌁ elcitrapitna on sah » ᚣᛙ ⧗⁴ ⧗² ⎙̵ « elcitrap» ᚣᛖ ⧗³ ⧗² ⧗¹
+  ⧗⁰ ⌁̵ ↯
+⸫ ᚤᛐ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟗ʃ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚤᛑ st T F i: a particle needs an antiparticle ⌁T (§8.6) ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⟗ ⧗³ ᚳ ⧖ ⟗ ⧗⁴ ○△ ⊞ ᚳ ⧖ ⟗ ⧗⁵ △ ⊞ ᚳ ⧖ ⟗ ▽△ ᚳ ⧖ ⧖
+  ⧖ ⧖ ᚤᚽ △△ ⧗³ ⧗¹ ⧗⁶ ⟗ ⧗⁰
+  ⧗⁰ ⧗⁹ ⧗⁸ ⧗⁴ ⧗⁵ ⧗⁶ △△○△ ᛖ ⧗¹ ᚡᚠ ⋎ ⋔ ⦃ ᚤᛐ ᚡᚤ ⦄ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+⸫ ᚤᛑ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ℤ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟩ ⦃
+
+ᚤᛒ st T F from end pass: run pass 1 (ᚤᚾ), 2 (ᚤᛏ) or 3 (ᚤᛑ) on the items from … end−1 ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗⁴ ⧗³ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+      ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+        ⧖ ⧖ ᚳ ⊞ ▽△ ⧗³ ⟗ ⧗⁰
+        ⧗⁰ ⧗³ ⧗⁴ ⧗⁵ ⧗⁷ ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ᚤᚾ ᚡᚤ ⦄ ⦃ ▽△ ᛖ ⋔ ⦃ ᚤᛏ ᚡᚤ ⦄ ⦃ ᚤᛑ ᚡᚤ ⦄ ⁼ ⦄ ⁼
+        ⦃ ⊕ ⧗⁷ ⧗⁶ ⊞ ⧗¹ ⧗⁵ ⧗⁴ ⧗³
+  ⦄
+  ⌁̱ ⌁̱ ⌁ ⌁ ⌁
+⦄ ⟨ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌ ⟦ ℤ ⟧ ⟩ ᚤᛒ ⸫
+
+⍝ ᚤᛓ T F: the tangled item tree of a token buffer
+⦄
+  ⧖ ⧖
+  ⧖ ⧖ ᚴ ⟗ ᚡᚤ ᚤᚷ ⧗¹ ⧗⁰ ⟦ ○ ○ ○ ○ ○ ○ ○ ⟧
+  ⧗⁰ ▽△ ⧗¹ ᚡᚧ ⧗² ⧗³ ○▽△ ⧗¹ △ ᚤᛒ ⧗² ⧗³ ○▽△ ⧗¹ ▽△ ᚤᛒ ᚡᚤ
+  ⧖ ⧖ ᚴ ⟗
+  ⧗⁰ ⧗⁴ ⧗⁵ ⧗³ ⧗¹ ○△ ᚤᛒ
+⸫ ᚤᛓ ⟨ ⟦ ℤ ⟧ ◌ ⊸ ⟗ʃ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+---- the item tree, printed as trithc --ast prints it ⍝
+
+⸫ ᚤᛔ ⟨ ⊸ ℤ ⟩ ⦃ ⦃ ⌁ ⦄ ⦃ ᚤᛔ ⊟ △ ⎙̵ «  » ⦄ ⦃ ⌁ ⦄ ⋔ ≶ ○ ⧗⁰ ⧗⁰ ⧖ ⦄
+
+ᚤᛕ T t: " [mark,mark]" ⍝
+⦃
+  ⧖ ⧖
+  ⧗⁰ ⧗¹ ○△ ⊞ ᚳ ⧖
+  ⁼ ∅ ⦃ ⎙̵ «[ » ⦄ ⋔ ᚡᚠ ᛖ ○ ⧗⁰
+  ⧗⁰ △ ⦶
+  ⦄ ⥀
+    ⧖ ⧖ ⧖
+    ⧖ ᚡᚠ ᛖ ○ ⋒ ⧗¹ ⧗⁰
+    ⧗⁰ ⧗³ ᚡᚠ ⋎ ⋔ ⦃ »,« ⎙̵ ⦄ ∅ ⁼
+    ⁼ ⦃ ⌁ ⦄ ⦃ ᛗᚾ ⦄ ⋔ ⧗⁰ ⧗²
+    ⧗¹ ⧗² △ ≪ ⧗³ ⧗⁰ ⋔ ⦃ ⌁ ⊕ ⦄ ∅ ⁼
+    ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ▽△▽▽▽△ ⧗²
+  ⦄
+  ⌁ ⌁ ⌁
+  ⧗¹ ○ ᛖ ᚡᚠ ⋔ ⦃ »]« ⎙̵ ⦄ ∅ ⁼
+⸫ ᚤᛕ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᛖ st T from n: the texts of tokens st[from] … st[from+n−1] ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ⧗² ⧗³ ⊞
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗³ ⧗² ⧗³ ⧗² ⧗¹ ⧗⁰
+      ⦃ ⧖ ⧖ ⧖ ⧖ ⧗¹ ⧗⁰ ⧗² ᚳ ᚣᛙ ⧗⁰ ⧗¹ ⧗² △ ⊞ ⧗³ ⊕ ⦄
+  ⦃
+  ⌁ ⌁ ⌁̱ ⌁̱
+⸫ ᚤᛖ ⟨ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᛗ st T c np base: the base of a type node ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ⧗⁴ ᚣᛋ ⧖
+  ⧖ ᚳ ⊞ △▽△ ⧗⁵ ⧗²
+  ⧗³ ⧗⁶ ○▽△ ⊞ ᚳ ⧖
+  ⁼ ⦃ ⌁̱ ⌁ ⦄ ⦃ ᚣᛙ ⦄ ⋔ ᛖ ▽△ ⧗² ⧗⁷ ⧗⁴
+  ⧗⁴ ⧗⁷ ▽○△ ⊞ ⧗¹ ⧗⁰ ⧗⁰ ○ ≶ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄
+  ⁼ ⦃ ⌁̱ ⌁ ⌁ ⦄ ⦃ ᚡᚫ ⦄ ⋔ ᛖ ○○△ ⧗²
+  ⧗⁴ ⧗⁷ ○○△ ⊞ ⧗⁰ ⊞ ⧗⁷ △▽△ ⊞ ⧗¹ ⊞
+  ⁼ ⦃ ⌁̱ ⌁ ⌁ ⦄ ⦃ ⎙̵ «⁾» ᚡᚲ ⎙̵ «⁽» ⦄ ⋔ ⋎ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ○ ⧗⁰ ᛖ ○○△ ⧗²
+  ⧗³ ⧗⁴ ⧗⁵ △△ ⊞ ⧗⁶ ⊞
+  ⁼ ⦃ ⌁̱ ⌁̱ ⌁ ⦄ ⦃ ⎙̵ «⟧» ⌁ ᚤᛘ ⎙̵ «⟦» ⦄ ⋔ ᛖ ▽△△ ⧗²
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ⟩ ᚤᛗ ⸫
+
+⍝ ᚤᛘ st T c: a type node, giving the slot after it
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ᚳ ⊞ △ ⧗² ⧗⁰
+  ⧗¹ ⧗³ ▽△ ⊞ ᚳ ⧖
+  ⧖ ᚳ ⊞ ○△ ⧗⁴ ⧗²
+  ⧗³ ⧗⁴ ⧗⁵ △△ ⊞ ⧗⁰ ᚤᛖ
+  ⁼ ⦃ ᚤᛗ ⦄ ⦃ ⌁̱ ⌁̱ ⌁ ⌁ ⌁ ⦄ ⋔ ᛖ ▽ ⧗² ⧗² ⧗⁰ ⧗⁵ ⧗⁴ ⧗³
+  ⧗⁵ ⧗¹ ⊞
+⸫ ᚤᛘ ⟨ ℤ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᛙ st T from count end lead: up to count types before slot end, ⍝
+⍝ separated by spaces (and one before the first if lead); the slot after them
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵
+    ⋎ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋔ ≶ ⧗⁴ ⧗² ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋔ ≶ ○ ⧗³
+    ⋔ ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+        ⁼ ∅ ⦃ ⎙̵ « » ⦄ ⋔ ⧗⁵
+        ⧗⁰ ⧗¹ ⧗⁰ ⧗¹ ⧗² ᚤᛘ ⧗³ △ ⊟ ⧗⁴ ⦶ ⊕ ⦄
+      ⁼ ⦃ ⦶ ⦄
+  ⦄
+  ⧗² ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ŧ ⊸ ℤ ⟩ ᚤᛙ ⸫
+
+⍝ ᚤᛚ st T s: ⟨ins ⊸ outs⟩
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ᚳ ⊞ ○△ ⧗² ⧗⁰
+  ⧗¹ ⧗³ ▽△ ⊞ ᚳ ⧗³ ⊞ ⧖
+  ⎙̵ «⟨»
+  ⧗² ⧗³ ⧗⁴ ▽▽△ ⊞ ⧗¹ ⧗⁰ ⊕ ᚤᛙ ⧖
+  ∅ ⦃ ⎙̵ « » ⦄ ∅ ⋔ ≶ ○ ⧗²
+  »⊸« ⎙̵
+  ⌁ ᚤᛙ ⦶ ⧗¹ △○○▽△▽△△▽○▽○▽△ ⧗⁰ ⧗⁴ ⧗³
+  »⟩« ⎙̵
+⸫ ᚤᛚ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᛛ T t: " = value" of a numeral ⍝
+⦃
+  ⧖ ⧖
+  ⧗⁰ ⧗¹ ᚣᛋ ⧖
+  ⧖ ᚳ ⊞ ▽▽△ ⧗² ⧗¹
+  ⧗² ⧗³ ○▽△ ⊞ ᚳ ⧖
+  ⁼ ∅ ⦃ ⎙̵ « = » ⦄ ⋔ ⋏ ᛖ ○▽△ ⧗² ᛖ ▽▽△ ⧗²
+  ⧗² ⧗¹ ⧗⁰ ᚤᛜ
+⸫ ᚤᛛ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖
+  ⁼ ⦃ ⌁ ⦄ ⦃ ᛁ ⦄ ⋔ ⋏ ᛖ ○▽△ ⧗⁰ ᛖ ▽▽△ ⧗⁰ ⧗¹
+  ⧗² ⧗⁰ ○▽△ ᛖ ⧗² △ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ »/« ⎙̵ ᛁ ⦄ ⦃ ⌁ ⦄ ⁼
+⸫ ᚤᛜ ⟨ ⊸ ℤ ℤ ℤ ⟩ ⦃
+
+ᚤᛝ st T from to ind: the ops from … to−1 ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² ⧗³ ⧗⁴
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗³ ⧗² ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+      ⦃ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗¹ ⧗⁰ ⧗¹ ⧗² ⧗⁴ ᚤᛞ ⧗³ ⧗⁴ ⊕ ⦄
+  ⦃
+  ⌁ ⌁ ⌁ ⌁̱ ⌁̱
+⸫ ᚤᛝ ⟨ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᛟ st T b ind: the ops of block b, giving the slot after it ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗² ▽△ ⊞ ᚳ ⧗² ⊞ ⧖
+  ᚤᛝ ⧗⁴ ⧗⁰ ⊞ ○△ ⧗³ ⧗² ⧗¹
+  ⧗⁰
+⸫ ᚤᛟ ⟨ ℤ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚤᛠ st T c ind: one face, giving the slot after it ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗² ᚳ ⧖
+  ᚤᛔ ⧗⁴
+  ⧗⁰ ○△△ ᛖ ⋔ ⦃ »↵⁼ ecaf« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «↵∅ ecaf» ⦄ ⋔ ᛖ △△△ ⧗⁰
+  ⧗¹ ⧗² ⧗³ ⧗⁴ △ ⊞
+  ⁼ ⦃ ⊞ ○△ ⧗⁰ ⌁̱ ⌁̱ ⧖ ⌁ ⦄ ⦃ ᚤᛟ ⎙̵ «↵ecaf» ⦄ ⋔ ᛖ ○○△ ⧗⁰
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ℤ ⟩ ᚤᛠ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗³ △ ⊞ ᚤᛔ »↵tressa« ⎙̵ ⧗⁰ ⧗¹ ⧗² ⧗³ ▽△ ⊞ ᚤᛟ ⌁
+⸫ ᚤᛡ ⟨ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+op printers: st T i ind t sz (k) ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  » til« ⎙̵ ⧗¹ ⧗⁴ ᚣᛋ ᚡᚮ » « ⎙̵
+  ⁼ ⦃ ᚡᚫ ⦄ ⦃ ᚡᚭ ⦄ ⋔ ᛖ ○△△ ᚣᛋ ⧗⁴ ⧗¹ ᚳ ⊞ △▽△ ⧗⁴ ⧗¹ ⊞ ▽○△ ⧗⁴ ⧗¹
+  ⧗¹ ⧗⁴ ᚤᛛ ⧗¹ ⧗⁴ ᚤᛕ »↵« ⎙̵
+⸫ ᚤᛢ ⟨ ⊸ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⁼ ∅ ⦃ ⎙̵ « llac» ⦄ ⋔ ᛖ ▽△ ⧗⁶
+  ⧗⁶ ○△ ᛖ ⋔ ⦃ » llac-itna« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ « llac-esrevni» ⦄ ⋔ ᛖ △△ ⧗⁶
+  ⧗¹ ⧗⁴ ᚣᛘ ⧗¹ ⧗⁴ ᚤᛕ »↵« ⎙̵
+⸫ ᚤᛣ ⟨ ⊸ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⎙̵ «↵» ᚤᛕ ⧗⁴ ⧗¹ ᚡᚶ ᚳ ⊞ △△ ⧗⁴ ⧗¹ ᚣᛙ ⧗⁴ ⧗¹ ⎙̵ « po»
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ⊸ ⟩ ᚤᛤ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  » llac-epahs« ⎙̵ ⧗⁰ ⧗¹ ⧗² ○△ ⊞ ᚤᛚ »↵« ⎙̵
+⸫ ᚤᛥ ⟨ ⊸ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⌁ ᚤᛟ ⊞ △ ⧗³ ⊞ ○△ ⧗² ⧗¹ ⧗⁰ ⎙̵ «↵etouq»
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ⊸ ⟩ ᚤᛦ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  »↵yarra« ⎙̵ ⧗⁰ ⧗¹ ⧗² ○△ ⊞ ⧗² ⧗⁵ ⊞ ⧗³ △ ⊞ ᚤᛝ
+⸫ ᚤᛧ ⟨ ⊸ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⁼ ⦃ ⎙̵ «tcelesr» ⦄ ⦃ ⎙̵ «tceles» ⦄ ⋔ ᛖ △○△ ⧗⁶
+  ⧗¹ ⧗⁴ ᚤᛕ »↵« ⎙̵
+  ⧖ ᚤᛠ ⊞ △ ⧗³ ᚤᛠ ⊞ △ ⧗³ ᚤᛠ ⊞ △ ⧗³ ⊞ ○△ ⧗² ⧗¹ ⧗⁰ ⧗¹ ⧗⁰ ⧗¹ ⧗⁰
+  ⧗¹ ⧗² ⧗⁰ ⧗⁴ ⧗⁷ ▽△△ ᛖ ⋔ ⦃ ᚤᛡ ⦄ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+⸫ ᚤᛨ ⟨ ⊸ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⁼ ∅ ⦃ ⎙̵ «pool» ⦄ ⋔ ᛖ ▽▽▽△ ⧗⁶
+  ⧗⁶ ○▽▽△ ᛖ ⋔ ⦃ »tcelestsop« ⎙̵ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ⎙̵ «reyarp» ⦄ ⋔ ᛖ △▽▽△ ⧗⁶
+  ⧗¹ ⧗⁴ △△ ⊞ ᚳ ⧖
+  ⁼ ∅ ⦃ ⎙̵ «=n » ⦄ ⋔ ᚡᚠ ᛖ ○○▽ ⧗⁰
+  ⧗⁰ ⧗⁰ ○○▽ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ᛁ ⦄ ⁼
+  ⎙̵ «↵» ᚤᛕ ⧗⁵ ⧗²
+  ⧗¹ ⧗² ⧗³ ○△ ⊞ ⧗⁴ △ ⊞ ᚤᛟ ⌁
+⸫ ᚤᛩ ⟨ ⊸ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⎙̵ «↵» ᚤᛕ ⧗⁴ ⧗¹ ⎙̵ «eldnah»
+  ⧗³ △ ⊞ ᚤᛔ »↵ko« ⎙̵
+  ⧖ ᚤᛟ ⊞ ▽△ ⧗³ ⊞ ○△ ⧗² ⧗¹ ⧗⁰
+  ⧗⁴ △ ⊞ ᚤᛔ »↵liaf« ⎙̵
+  ⌁ ᚤᛟ ⊞ ▽△ ⧗⁴ ⧗⁰ ⧗² ⧗¹
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ⊸ ⟩ ᚤᛪ ⸫
+
+⍝ ᚤᛞ st T i ind: one op, giving the slot after it
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚳ ⧗² ⧗⁰
+  ⧗¹ ⧗³ △ ⊞ ᚳ ⧖
+  ⧖ ᚳ ⊞ ▽△ ⧗⁴ ⧗²
+  ⧗⁶ ᚤᛔ
+  ⧗² ⧗⁰ ⧗¹ ⧗⁶ ⧗⁵ ⧗⁴ ⧗³
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ᚤᛢ ⦄ ⦃
+  ⦄ ⦃ ᚤᛣ ⦄ ⋔ ᛦ △△ ▽△ ⍿⁰
+  ⍿⁰ ▽▽△ ᛖ ⋔ ⦃ ⌁ ᚤᛤ ⦄ ⦃
+  ⦄ ⦃ ᚤᛥ ⌁ ⦄ ⋔ ᛖ ○▽△ ⍿⁰
+  ⍿⁰ △▽△ ᛖ ⋔ ⦃ ⌁ ᚤᛦ ⦄ ⦃
+  ⦄ ⦃ ᚤᛧ ⌁ ⦄ ⋔ ᛖ ▽○△ ⍿⁰
+  ⍿⁰ △○△ ▽△△ ᛦ ⋔ ⦃ ᚤᛨ ⦄ ⦃
+  ⁼ ⦃ ᚤᛩ ⦄ ⦃ ᚤᛪ ⌁ ⦄ ⋔ ᛖ ▽○▽△ ⍿⁰
+  ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ⊞ ⧗⁰ ⧗⁵
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ℤ ⟩ ᚤᛞ ⸫
+
+⍝ ᚥᚠ st T i nfr: " fragments=…" unless the function is one unnumbered (or ○) fragment
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⧖ ᚳ ⊞ ○▽△ ⧗² ⧗⁰
+  ⧗² ⧗⁰ △▽△ ⊞ ᚳ △ ᛖ ⧗² ⧗⁰ ▽○△ ⊞ ᚳ ○○△△▽△△△△ ᛖ ⋎ ⧗⁰ ▽ ᛖ ⋏ ⧖
+  ⧗⁵ ⧗⁴ ⧗³ ⧗²
+  ⧗⁵ △ ᛖ ⧗⁰ ⋎ ⋔ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⦃ »=stnemgarf « ⎙̵ ᚥᚢ ⦄ ⁼
+⸫ ᚥᚠ ⟨ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⊞ ⧗³ ⊞ ○▽△ ⧗² ⊞ ○▽△ ⧗² ⊞ ○▽△ ⧗² ⧗¹ ⧗⁰
+  ⍝ the loop carries [st T j first end]
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ∅ ⦃ ⎙̵ «,» ⦄ ∅ ⋔ ≶ ⧗³ ⧗²
+    ⧗⁰ ⧗² ᚳ ⧖
+    ⁼ ⦃ ᚣᛙ ⦄ ⦃ ⎙̵ «○» ⌁̱ ⌁ ⦄ ⋔ ᛖ ▽ ⧗⁰ ⧗⁰ ⧗²
+    ⧗¹ ⧗² ⧗³ △ ⊞ ⧗⁴ ⧗⁵
+    ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗⁵ ⊞ △ ⧗³
+  ⦄
+  ⌁̱ ⌁̱ ⌁ ⌁ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ⟩ ᚥᚢ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗² ▽▽△ ⊞ ᚳ ⧖
+  ⧖ ᚳ ⊞ △△ ⧗³ ⧗¹
+  ⧗⁴ ○▽△ ⊞ ⧗¹ ⊞ ⧖
+  ⧖ ⊞ ⧗⁰ ᚳ ⊞ ▽△ ⧗⁰ ⧗³
+  ⧗⁴ ⧗⁶ ▽△ ⊞ ᚳ ⧗⁶ ⊞ ⧖
+  ᚤᛚ ⧗² ⧗⁶ ⧗⁵ ⎙̵ « » ᚣᛘ ⧗⁸ ⧗⁶ ⎙̵ « nf»
+  ⧗³ ○ ᛖ ᚡᚠ ⋔ ⦃ »elbisrever « ⎙̵ ⦄ ∅ ⁼
+  ⎙̵ «↵» ᚥᚠ ⧗⁴ ⧗⁷ ⧗⁶ ⧗⁵
+  ⧗⁵ ⧗⁶ ⧗¹ ⧗⁰ △ ᚤᛝ
+⸫ ᚥᚤ ⟨ ⊸ ℤ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖ ⧖
+  ⎙̵ «↵» ⌁ ᚤᛘ ⊞ △△ ⧗² ⧗¹ ⧗⁰ ⎙̵ « » ᚣᛙ ⧗³ ⧗¹ ⎙̵ « elcitrap»
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ⟩ ᚥᚥ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗² △△ ⊞ ᚳ ⧖
+  ⎙̵ «↵» ᚤᛚ ⊞ ▽▽△ ⧗³ ⧗² ⧗¹ ⎙̵ « » ᚡᚭ ᚳ ⊞ △▽△ ⧗⁰ ⧗² ⊞ ▽○△ ⧗⁰ ⧗² ⎙̵ « » ᚣᛘ ⧗⁴ ⧗² ⎙̵ « iff»
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ℤ ℤ ⊸ ⟩ ᚥᚦ ⸫
+
+⍝ ᚥᚧ st T i: one tangled item, giving the slot after it
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ᚳ ⧗² ⧗⁰
+  ⧗¹ ⧗³ ▽△ ⊞ ᚳ ⧖
+  ⧖ ᚳ ⊞ ○△ ⧗⁴ ⧗²
+  ⧗³ ⧗⁴ ⧗⁵ ⧗⁰ ⧗²
+  ⁼ ⦃ ⁼ ⦃ ᚥᚦ ⦄ ⦃ ᚥᚥ ⦄ ⋔ ᛖ △△○△ ⦄ ⦃ ᚥᚤ ⌁ ⦄ ⋔ ᛖ △△△△ ⧗²
+  ⧗⁵ ⧗¹ ⊞
+⸫ ᚥᚧ ⟨ ℤ ⊸ ℤ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+
+ᚥᚨ st T: every tangled item ⍝
+⦃
+  ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗⁰ ▽△ ᚳ ⧗⁰ ᚴ
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ⦃ ⊕ ⧗³ ᚥᚧ ⧗² ⧗¹ ⧗⁰ ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⦄ ⁼ ⦃ ⦶ ⦄ ⋔ ≶ ⧗³ ⧗² ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⦄
+  ⌁̱ ⌁̱ ⌁ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟗ ⟦ ℤ ⟧ ⊸ ⟩ ᚥᚨ ⸫
+
+⍝ ==== s2 driver: s2c file.trh --tokens | --ast prints what trithc prints
+
+⍝ ᚥᚩ a b: the strings are equal
+⦄
+  ⧖ ⧖
+  ⦶ ○ ⧗¹ ⧗⁰
+  ⍝ the loop carries [a b i acc]
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖
+    ⧖ ᛒ ⧗² ⧗⁰
+    ⧗¹ ⧗² ⧗³ △ ⊞ ⧗⁴ ⧗⁰ ⧗² ⧗³ ᛒ ᛖ ⋎
+    ⁼ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋔ ᛖ ▽ ⧗⁰
+  ⦄
+  ⧗³ ⧖ ⧖ ⧖ ⧖
+⦄ ⟨ ⟗ʃ ⟗ʃ ⊸ ŧ ⟩ ᚥᚩ ⸫
+
+⦃ ⧖ ⧖ ⧗¹ ⟗ ⧗⁰ ᚥᚩ ⧖ ⌁̵ ⧗⁰ ⦄ ⟨ ⟗ʃ ʃ ⊸ ŧ ⟩ ᚥᚪ ⸫
+
+⍝ ᚥᚫ arg: 1 for --tokens, 2 for --ast, else 0
+⦄
+  ⟗ »snekot--« ᚥᚪ ⧖ ⟗ »tsa--« ᚥᚪ ⧖ ⌁̵
+  ⁼ ∅ ⦃ △ ⌁ ⦄ ⋔ ⧗¹ ⁼ ∅ ⦃ ▽△ ⌁ ⦄ ⋔ ⧗⁰ ○
+⦄ ⟨ ʃ ⊸ ℤ ⟩ ᚥᚫ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⎙̵ » :ecnalabmi :rorre :« ⎙̵ ⧗² ᛁ » ,snekot « ⎙̵ ⧗³ ᛁ »↵waL ecnalaB yranreT eht rof ynam oot « ⎙̵
+  ᚡᚢ △ ⌁̵ ⧗¹
+⦄ ⟨ ʃ ⟦ ℤ ⟧ ℤ ℤ ⊸ ⟩ ᚥᚬ ⸫
+
+⦃ ⧖ ⧖ ⧗¹ ⟗ ⧗⁰ ᚥᚨ ⌁̵ ⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⊸ ⟩ ᚥᚭ ⸫
+
+⍝ ᚥᚮ path toks: parse, tangle and print the item tree
+⦄
+  ⧖ ⧖
+  ⌁̵ ᚥᚭ ⧗⁰ ⟗ ⧖ ᚤᛓ ⧗⁰ ⟗ ᚡᚤ ᚣᛊ ⧗¹
+⦄ ⟨ ⟗ʃ ⟦ ℤ ⟧ ⊸ ◌ ⟩ ᚥᚮ ⸫
+
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗¹ ⧗² △ ᛖ
+  ⦃ ⌁̵ ⌁̵ ᚡᚹ ⟗ ⧗⁰ ⧖ ⦄ ⋔
+    ⦃ ⧖ ⟗ ⧗⁰ ᚥᚮ ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ᚡᚢ ⦄ ⦄ ⁼
+⸫ ᚥᚯ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ʃ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚳ ○ ⟗ ⧗²
+  ⧗¹ ○△ ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ ○△ ⊞ ⦄ ⧖
+  ⧗⁴ ⧗⁰ ⧗² ⧗¹ ⧗³
+  ⧗⁰ ○ ᛖ ⋔ ⦃ ⧖ ⌁ ⌁ ⧗⁰ ᚥᚯ ⦄ ⦃ ⌁ ᚥᚬ ⦄ ⁼
+⸫ ᚥᚰ ⟨ ⊸ ⟦ ℤ ⟧ ℤ ʃ ⟩ ⦃
+
+⦄
+  ⧖ ⧖ ⧖
+  ⌁̵ ⧖ ᛞ ⟗ ⧗²
+  ⧗¹ ⟗ ⧗⁰ ᚣᛉ ⧗² ⍿¹ ⁇ ⦃ ᚥᚰ ⦄ ⦃ ⌁ ⌁̵ △ ᚡᚢ ⦄
+⸫ ᚥᚱ ⟨ ⊸ ʃ ℤ ʃ ⟩ ⦃
+
+⦄
+  ⧖ ⧖
+  ⁇ ⍿¹ ⧗¹ ᚠ ⟗ ⧗⁰
+    ⦃ ⟗ ⍴̱ ○ ᛖ ⋔ ⦃ ⌁̵ ⌁ ⎙̵ »↵)ytpme si elif ro( elif daer tonnac :rorre :« ⎙̵ △ ᚡᚢ ⦄ ⦃ ᚥᚱ ⦄ ⁼ ⦄
+    ⦃ ᚡᚢ △ ⎙̵ «↵)ytpme si elif ro( elif daer tonnac :rorre :» ⎙̵ ⌁ ⦄
+⦄ ⟨ ʃ ℤ ⊸ ⟩ ᚥᚲ ⸫
+
+⦃ »↵tsa-- | snekot-- >hrt.elif< c2s :egasu« ⎙̵ ▽△ ᚡᚢ ⦄ ⟨ ⊸ ⟩ ᚥᚳ ⸫
+
+⦃
+  ⁇ ᚨ △
+    ⦃ ▽△ ᚨ ⁇
+        ⦃ ⁼ ⦃ ᚥᚲ ⦄ ⦃ ᚥᚳ ⌁̵ ⌁ ⦄ ⋔ ᛖ ○ ⍿⁰ ᚥᚫ ⦄
+        ⦃ ⌁̵ ᚥᚳ ⦄ ⦄
+    ⦃ ᚥᚳ ⦄
+⦄ ⟨ ⊸ ⟩ ᛟ ⸫
+

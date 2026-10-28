@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Differential fuzzing of the s2 lexer against s1 (trithc --tokens).
 
-usage: fuzz.py S2LEX TRITHC WORKDIR [SEED] [COUNT]
+usage: fuzz.py S2C TRITHC WORKDIR [SEED] [COUNT]
 
 Writes random small .trh files to WORKDIR (numerals, names, types with
 charges, indexed glyphs, strings, marks, comments, both line directions,
@@ -15,7 +15,7 @@ import random
 import subprocess
 import sys
 
-s2lex, trithc, work = sys.argv[1:4]
+s2c, trithc, work = sys.argv[1:4]
 R = random.Random(int(sys.argv[4]) if len(sys.argv) > 4 else 1)
 N = int(sys.argv[5]) if len(sys.argv) > 5 else 300
 BADP = float(os.environ.get('BADP', '0.03'))
@@ -79,7 +79,7 @@ for i in range(N):
         src = src.rstrip('\n') + '\n' + ' ⸱' * (3 - r)
         with open(p, 'w') as f:
             f.write(src)
-    a, b = dump([s2lex, p]), dump([trithc, p, '--tokens'])
+    a, b = dump([s2c, p, '--tokens']), dump([trithc, p, '--tokens'])
     if a != b:
         bad += 1
         if bad <= 5:

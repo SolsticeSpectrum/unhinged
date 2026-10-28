@@ -1,0 +1,1107 @@
+⍝ ==== s2 parser (spec §9, §18): token buffer → item tree, then tangle (§9.3)
+⍝ The parser state is one array of ℤ after a sentinel. Slots 0 … 3 are
+⍝ registers: position (in tokens), result (a node slot), start of the
+⍝ tangled items, loop flag. Nodes follow in preorder: kind, token, size
+⍝ (slots of the node and everything under it), fields, then children.
+⍝   1 lit  2 call  3 anti-call  4 inverse-call  5 op         (leaves)
+⍝   6 shape-call: sig          7 quote: block     8 array: ops
+⍝   9 block: ops               10 select: 3 faces 11 rselect: 3 faces, block
+⍝   12 face ⁼  13 face ∅       14 loop, 15 postselect, 16 prayer: block
+⍝   17 handle: ok block, fail block
+⍝   20 sig [nin saw]: types    21 type [np prefix tokens…]: element type (⟦…⟧)
+⍝   30 fragment [name rev ordinal hasSig]: body, sig
+⍝   31 particle [name]: type   32 ffi [name cname]: sig
+⍝   40 fn [name rev nfr ordinals…]: sig, ops (after tangling)
+⍝ Token slots point into the token buffer; −1 is the end of the file.
+
+⍝ ---- the token buffer's index (slot 3: where it starts, slot 4: count)
+
+⦃
+  ⧖:a
+  ⧗:a ⟗ ᚴ ⧖:end ⧖:a
+  ⧗:a #3# ⧗:end ‹set› ‹ok›
+  #6# ⧗:end
+  ⍝ the loop carries [a j end]
+  ⥀ ⦃
+    ⧖:a,j,end
+    ⧗:a,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:a,j,end ⧗:a ⟗ ⧗:j #7# ⊞ ᚳ ⧖:n ⧖:a ⧗:a ⧗:j ⍆̵ ⧗:j #8# ⊞ ⧗:n ⊞ ⧗:end ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⧖:a
+  ⧗:a ⟗ ᚴ ⧖:len ⧖:a
+  ⧗:a #4# ⧗:len ⧗:end ⊟ ‹set›
+⦄ ⟨⟦ℤ⟧ ⊸ ◌⟦ℤ⟧⟩ ‹tindex› ⸫
+
+⍝ ---- tokens (T is the token buffer, t a record slot)
+
+⦃ ⧖:T,t ⧗:T,t ⧗:t ○ ≶ ⋔ ⦃ ᚳ ⦄ ⦃ ᚳ ⦄ ⦃ ⌁ ⌁̱ ○ ⦄ ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ‹tkind› ⸫
+
+⍝ ‹is1› T t kind cp: token t has this kind and the one-code-point text cp
+⦃
+  ⧖:T,t,kind,cp
+  ⧗:T,t ‹tkind› ⧗:kind ᛖ
+  ⧗:t ○ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋎
+  ⧗:T ⧗:t #7# ⊞ ᚳ △ ᛖ ⋎
+  ⧗:T ⧗:t #8# ⊞ ᚳ ⧗:cp ᛖ ⋎
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ŧ⟩ ‹is1› ⸫
+
+⍝ ‹isprefix› T t: a type prefix (a tprefix token, or one of ◌ ⟗ ⟖ ⸮ ⁖)
+⦃
+  ⧖:T,t
+  ⧗:T,t ‹tkind› #10# ᛖ
+  ⧗:T,t #8# #9676# ‹is1› ⋏ ⧗:T,t #8# #10199# ‹is1› ⋏ ⧗:T,t #8# #10198# ‹is1› ⋏
+  ⧗:T,t #8# #11822# ‹is1› ⋏ ⧗:T,t #8# #8278# ‹is1› ⋏
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ŧ⟩ ‹isprefix› ⸫
+
+⍝ ‹peek› st T: the current token, or −1
+⦃
+  ⧖:st,T
+  ⧗:st ○ ᚳ ⧖:pos
+  ⧗:T ⧗:T #3# ᚳ ⧗:pos ⊞ ᚳ
+  ⧗:pos ⧗:T #4# ᚳ ≶ ⋔ ⦃ ⌁ #-1# ⦄ ⁼ ∅
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ⊸ ℤ⟩ ‹peek› ⸫
+
+⦃ ⟗ ○ ᚳ ⧖:p ○ ⧗:p △ ⊞ ‹set› ⦄ ⟨⟦ℤ⟧ ⊸ ◌⟦ℤ⟧⟩ ‹adv› ⸫
+⦃ ⟗ ○ ᚳ ⧖:p ○ ⧗:p △ ⊟ ‹set› ⦄ ⟨⟦ℤ⟧ ⊸ ◌⟦ℤ⟧⟩ ‹back› ⸫
+⦃ ⧖:st,v ⧗:st △ ⧗:v ‹set› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹setres› ⸫
+⦃ ⧖:st,v ⧗:st #3# ⧗:v ‹set› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹setflag› ⸫
+
+⍝ ‹emitn› st kind tok: append a node with no fields yet; the result is its slot
+⦃
+  ⧖:st,kind,tok
+  ⧗:st ⟗ ᚴ ⧖:r ⧖:st
+  ⧗:st △ ⧗:r ‹set› ⧗:kind ⍆̵ ⧗:tok ⍆̵ #3# ⍆̵
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹emitn› ⸫
+
+⍝ ‹close› st node: the node's size covers everything appended since; the result is the node
+⦃
+  ⧖:st,node
+  ⧗:st ⟗ ᚴ ⧖:len ⧖:st
+  ⧗:st ⧗:node #2# ⊞ ⧗:len ⧗:node ⊟ ‹set› △ ⧗:node ‹set›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹close› ⸫
+
+⍝ ‹res› st: the result register
+⦃ ⟗ △ ᚳ ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹res› ⸫
+
+⍝ ---- errors
+
+⍝ ‹perr› F T t: "path:line:col: error: " (or "path: error: " at the end of the file)
+⦃
+  ⧖:F,T,t
+  ⧗:F,T,t ⧗:t ○ ≶ ⋔
+    ⦃ ⧖:F,T,t ⧗:F ⧗:T,t △ ⊞ ᚳ ⧗:T ⧗:t #2# ⊞ ᚳ ‹errat› ⦄ ⁼
+    ⦃ ⌁ ⌁̱ ⎙̱ $: error: $ ⎙̵ ⦄
+⦄ ⟨⟗ʃ ⟗⟦ℤ⟧ ℤ ⊸⟩ ‹perr› ⸫
+
+⍝ ‹pend› t: " at end of file" when t is −1, then the newline
+⦃ ⧖:t ⧗:t #-1# ᛖ ⋔ ⦃ $ at end of file$ ⎙̵ ⦄ ∅ ⁼ $\n$ ⎙̵ ⦄ ⟨ℤ ⊸⟩ ‹pend› ⸫
+
+⍝ ‹pname› T t: a function name (⌁ before an antiparticle's)
+⦃
+  ⧖:T,t
+  ⧗:T,t ‹tkind› #3# ᛖ ⋔ ⦃ $⌁$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:T ⧗:t #8# ⊞ ⧗:T ⧗:t #7# ⊞ ᚳ ‹ptext›
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸⟩ ‹pname› ⸫
+
+⍝ ‹ptok› T t: the text of token t
+⦃ ⧖:T,t ⧗:T ⧗:t #8# ⊞ ⧗:T ⧗:t #7# ⊞ ᚳ ‹ptext› ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸⟩ ‹ptok› ⸫
+
+⍝ ‹pdesc› T t: "end of file", "a string" or "kind text"
+⦃
+  ⧖:T,t
+  ⧗:T,t ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ ⌁̱ $end of file$ ⎙̵ ⦄
+    ⦃ ⧖:T,t ⧗:T,t ⧗:T,t ‹tkind› #12# ᛖ ⋔ ⦃ ⌁ ⌁̱ $a string$ ⎙̵ ⦄ ⦃ ⧖:T,t ⧗:T,t ‹tkind› ‹pkind› $ $ ⎙̵ ⧗:T,t ‹ptok› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸⟩ ‹pdesc› ⸫
+
+⍝ ‹fail1› st F T t: print "… error: " + a message chosen by code, at t, and fail
+⍝ codes: 1 unterminated signature, 2 type prefix without a type, 3 a signature
+⍝ has exactly one ⊸, 4 signature is missing ⊸, 5 the first face cannot be ⁼,
+⍝ 6 types only in signatures, 7 a prayer needs a count, 8 a function name
+⍝ cannot carry marks, 9 expected a fragment ordinal, 10 expected a particle
+⍝ name, 11 expected the C function name as a string
+⦃
+  ⧖:st,F,T,t,code
+  ⧗:F,T,t ‹perr›
+  ⧗:code △ ᛖ ⋔ ⦃ $unterminated signature$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #2# ᛖ ⋔ ⦃ $type prefix without a type$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #3# ᛖ ⋔ ⦃ $a signature has exactly one ⊸$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #4# ᛖ ⋔ ⦃ $signature is missing ⊸$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #5# ᛖ ⋔ ⦃ $the first face cannot be ⁼$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #6# ᛖ ⋔ ⦃ $types are only written in signatures, FFI bindings and particle declarations (§3)$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #7# ᛖ ⋔ ⦃ $a prayer needs a count, e.g. ⍤¹$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #8# ᛖ ⋔ ⦃ $a function name in a definition cannot carry marks$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #9# ᛖ ⋔ ⦃ $expected a fragment ordinal$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #10# ᛖ ⋔ ⦃ $expected a particle name (Ogham letters)$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #11# ᛖ ⋔ ⦃ $expected the C function name as a string$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:t ‹pend›
+  ⧗:st ⌁̵ ↯
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹fail1› ⸫
+
+⍝ ‹fail2› st F T t code: "<message>, found <t>"
+⍝ codes: 1 expected a type, 2 expected a face (⦃…⦄, ⁼ or ∅), 3 expected a
+⍝ function name (Runic letters), 4 a fragment ordinal is a balanced-ternary
+⍝ integer, 5 expected a particle name (Ogham letters), 6 expected the C
+⍝ function name as a string, 7 expected an item (…)
+⦃
+  ⧖:st,F,T,t,code
+  ⧗:F,T,t ‹perr›
+  ⧗:code △ ᛖ ⋔ ⦃ $expected a type$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #2# ᛖ ⋔ ⦃ $expected a face (⦃…⦄, ⁼ or ∅)$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #3# ᛖ ⋔ ⦃ $expected a function name (Runic letters)$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #4# ᛖ ⋔ ⦃ $a fragment ordinal is a balanced-ternary integer$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #5# ᛖ ⋔ ⦃ $expected a particle name (Ogham letters)$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #6# ᛖ ⋔ ⦃ $expected the C function name as a string$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #7# ᛖ ⋔ ⦃ $expected an item (⦃ function, ⇋ reversible function, ⚛ particle or ⎔ binding)$ ⎙̵ ⦄ ∅ ⁼
+  $, found $ ⎙̵ ⧗:T,t ‹pdesc›
+  ⧗:t ‹pend›
+  ⧗:st ⌁̵ ↯
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹fail2› ⸫
+
+⍝ ‹failx› st F T t cp code: 1 "expected <cp>, found <t>", 2 "unclosed <cp>",
+⍝ 3 "unexpected <t's text>", 4 "unexpected <t's text> inside a block",
+⍝ 5 "<cp> needs a superscript index, e.g. <cp>⁰"
+⦃
+  ⧖:st,F,T,t,cp,code
+  ⧗:F,T,t ‹perr›
+  ⧗:code △ ᛖ ⋔ ⦃ $expected $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #2# ᛖ ⋔ ⦃ $unclosed $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:code #3# ᛖ ⧗:code #4# ᛖ ⋏ ⋔ ⦃ $unexpected $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:cp ⧗:code △ #2# ᛦ ⧗:code #5# ᛖ ⋏ ⋔ ⦃ ᚢ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:T,t ⧗:code #3# #4# ᛦ ⋔ ⦃ ‹ptok› ⦄ ⦃ ⌁ ⌁̱ ⦄ ⁼
+  ⧗:code △ ᛖ ⋔ ⦃ $, found $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:T,t ⧗:code △ ᛖ ⋔ ⦃ ‹pdesc› ⦄ ⦃ ⌁ ⌁̱ ⦄ ⁼
+  ⧗:code #4# ᛖ ⋔ ⦃ $ inside a block$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:cp ⧗:code #5# ᛖ ⋔ ⦃ $ needs a superscript index, e.g. $ ⎙̵ ᚢ $⁰$ ⎙̵ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:t ‹pend›
+  ⧗:st ⌁̵ ↯
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹failx› ⸫
+
+⍝ ‹expect› st T F kind cp: consume a token of this kind and text; the result is the token
+⦃
+  ⧖:st,T,F,kind,cp
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+  ⧗:st,F,T,t,cp
+  ⧗:T,t,kind,cp ‹is1› ⋔ ⦃ ⧖:st,F,T,t,cp ⧗:st ‹adv› ⧗:t ‹setres› ⦄ ⦃ △ ‹failx› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹expect› ⸫
+
+⍝ ---- types and signatures (§3)
+
+⍝ ‹tybase› st T F node t: the part after the prefixes
+⦃
+  ⧖:st,T,F,node,t
+  ⧗:st,T,F,node,t
+  ⧗:T,t ‹tkind› #9# ᛖ ⧗:T,t ‹tkind› #2# ᛖ ⋏
+  ⋔ ⦃ ⧖:st,T,F,node,t ⧗:st ⧗:node △ ⊞ ⧗:t ‹set› ‹adv› △ ‹setflag› ⦄
+    ⦃ ⧖:st,T,F,node,t
+      ⧗:st,T,F,node,t ⧗:T,t #11# #10214# ‹is1› ⋔ ⦃ ‹tyarray› ⦄
+        ⦃ ⧖:st,T,F,node,t ⧗:st,F,T,t ⧗:t #-1# ᛖ ⋔ ⦃ △ ‹fail1› ⦄ ⦃ △ ‹fail2› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tybase› ⸫
+
+⦃
+  ⧖:st,T,F,node,t
+  ⧗:st ⧗:node △ ⊞ ⧗:t ‹set› ‹adv› ⧗:T,F ‹type› ⧗:T,F #11# #10215# ‹expect› △ ‹setflag›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tyarray› ⸫
+
+⍝ ‹typfx› st T F node t: prefix t; a bare ◌ before ⊸ or ⟩ is a whole type
+⦃
+  ⧖:st,T,F,node,t
+  ⧗:st ⧗:t ⍆̵ ⧖:st
+  ⧗:st ⟗ ⧗:node #3# ⊞ ᚳ ⧖:np ⧖:st
+  ⧗:st ⧗:node #3# ⊞ ⧗:np △ ⊞ ‹set› ‹adv› ‹ok› ⧖:st
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:u ⧖:st
+  ⧗:st,F,T,t
+  ⧗:T,u #8# #8888# ‹is1› ⧗:T,u #11# #10217# ‹is1› ⋏
+  ⋔ ⦃ ⧖:st,F,T,t ⧗:st,F,T,t ⧗:T,t #8# #9676# ‹is1› ⋔ ⦃ ⌁ ⌁̱ ⌁̱ △ ‹setflag› ⦄ ⦃ #2# ‹fail1› ⦄ ⁼ ⦄
+    ⦃ ⌁ ⌁̱ ⌁̱ ○ ‹setflag› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹typfx› ⸫
+
+⦃
+  ⧖:st,T,F,node
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+  ⧗:st,T,F,node,t
+  ⧗:T,t ‹isprefix› ⋔ ⦃ ‹typfx› ⦄ ⦃ ‹tybase› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹type1› ⸫
+
+⍝ ‹type› st T F: a type node [21 base size np prefixes…] (base −1: a bare ◌)
+⦃
+  ⧖:st,T,F
+  ⧗:st #21# #-1# ‹emitn› ‹ok› ○ ⍆̵ ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F,node
+  ⥀ ⦃
+    ⧖:st,T,F,node
+    ⧗:st,T,F,node ‹type1› ‹ok› ⟗ #3# ᚳ ⧖:done ⧖:st
+    ⧗:st,T,F,node ⧗:done ○ ᛖ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⌁ ⌁̱ ⌁̱ ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹type› ⸫
+
+⦃
+  ⧖:st,T,F,node
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+  ⧗:st,T,F,node,t
+  ⧗:T,t #11# #10217# ‹is1› ⋔ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ‹adv› △ ‹setflag› ⦄
+    ⦃ ⧖:st,T,F,node,t
+      ⧗:st,T,F,node,t ⧗:T,t #8# #8888# ‹is1› ⋔ ⦃ ‹sigarrow› ⦄
+        ⦃ ⧖:st,T,F,node,t
+          ⍝ a type: an input until ⊸ is seen
+          ⧗:st ⟗ ⧗:node #4# ⊞ ᚳ ⧖:saw ⟗ ⧗:node #3# ⊞ ᚳ ⧖:nin ⧖:st
+          ⧗:st ⧗:node #3# ⊞ ⧗:nin ⧗:saw ○ ᛖ ⋔ ⦃ △ ⊞ ⦄ ∅ ⁼ ‹set› ⧗:T,F ‹type› ○ ‹setflag› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹sig1› ⸫
+
+⦃
+  ⧖:st,T,F,node,t
+  ⧗:st ⟗ ⧗:node #4# ⊞ ᚳ ⧖:saw ⧖:st
+  ⧗:st,F,T,t,node
+  ⧗:saw △ ᛖ ⋔ ⦃ ⌁ #3# ‹fail1› ⦄ ⦃ ⧖:st,F,T,t,node ⧗:st ⧗:node #4# ⊞ △ ‹set› ‹adv› ○ ‹setflag› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹sigarrow› ⸫
+
+⍝ ‹sig› st T F: ⟨ inputs ⊸ outputs ⟩ as [20 ⟨ size nin saw] and the types
+⦃
+  ⧖:st,T,F
+  ⧗:st,T,F #11# #10216# ‹expect› ‹ok› ‹res› ⧖:open ⧖:st
+  ⧗:st #20# ⧗:open ‹emitn› ‹ok› ○ ⍆̵ ○ ⍆̵ ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F,node
+  ⥀ ⦃
+    ⧖:st,T,F,node
+    ⧗:st,T,F,node ‹sig1› ‹ok› ⟗ #3# ᚳ ⧖:done ⧖:st
+    ⧗:st,T,F,node ⧗:done ○ ᛖ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⌁ ⌁̱ ⌁̱ ⟗ ⧗:node #4# ⊞ ᚳ ⧖:saw ⧖:st
+  ⧗:st,F,T,open,node
+  ⧗:saw ○ ᛖ ⋔ ⦃ ⌁ #4# ‹fail1› ⦄ ⦃ ⧖:nd ⌁ ⌁̱ ⌁̱ ⧗:nd ‹close› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹sig› ⸫
+
+⍝ ---- code (§4–§12)
+
+⍝ ‹block› st T F opener closer kind: a node of this kind holding the ops up to the closer
+⦃
+  ⧖:st,T,F,opener,closer,kind
+  ⧗:st,T,F #11# ⧗:opener ‹expect› ‹ok› ‹res› ⧖:open ⧖:st
+  ⧗:st ⧗:kind ⧗:open ‹emitn› ‹ok› ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F,open,closer
+  ⥀ ⦃
+    ⧖:st,T,F,open,closer
+    ⧗:st,T,F,open,closer ‹blk1› ‹ok› ⟗ #3# ᚳ ⧖:done ⧖:st
+    ⧗:st,T,F,open,closer ⧗:done ○ ᛖ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⌁ ⌁ ⌁̱ ⌁̱ ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹block› ⸫
+
+⦃
+  ⧖:st,T,F,open,closer
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+  ⧗:st,T,F,open,closer,t
+  ⧗:t #-1# ᛖ ⋔
+    ⦃ ⧖:st,T,F,open,closer,t ⧗:st,F,T,open ⧗:T ⧗:open #8# ⊞ ᚳ #2# ‹failx› ⦄
+    ⦃ ⧖:st,T,F,open,closer,t
+      ⧗:st,T,F ⧗:T,t #11# ⧗:closer ‹is1› ⋔ ⦃ ⌁̱ ⌁̱ ‹adv› △ ‹setflag› ⦄ ⦃ ‹op› ○ ‹setflag› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹blk1› ⸫
+
+⍝ ‹face› st T F first: ⦃…⦄, ⁼ (not first) or ∅
+⦃
+  ⧖:st,T,F,first
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+  ⧗:st,T,F,t,first
+  ⧗:T,t #8# #8316# ‹is1› ⋔
+    ⦃ ⧖:st,T,F,t,first ⧗:st,F,T,t ⧗:first △ ᛖ ⋔ ⦃ #5# ‹fail1› ⦄ ⦃ ⧖:st,F,T,t ⧗:st ‹adv› #12# ⧗:t ‹emitn› ⦄ ⁼ ⦄
+    ⦃ ⧖:st,T,F,t,first
+      ⧗:st,T,F,t ⧗:T,t #8# #8709# ‹is1› ⋔ ⦃ ⧖:st,T,F,t ⧗:st ‹adv› #13# ⧗:t ‹emitn› ⦄
+        ⦃ ⧖:st,T,F,t
+          ⧗:st,T,F,t ⧗:T,t #11# #10627# ‹is1› ⋔ ⦃ ⌁ #10627# #10628# #9# ‹block› ⦄
+            ⦃ ⧖:st,T,F,t ⧗:st,F,T,t #2# ‹fail2› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹face› ⸫
+
+⦃
+  ⧖:st,T,F,t,kind
+  ⧗:st ⧗:kind ⧗:t ‹emitn› ‹ok› ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F △ ‹face› ⧗:T,F ○ ‹face› ⧗:T,F ○ ‹face› ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹select› ⸫
+
+⦃
+  ⧖:st,T,F,t,kind
+  ⧗:st ⧗:kind ⧗:t ‹emitn› ‹ok› ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F △ ‹face› ⧗:T,F ○ ‹face› ⧗:T,F ○ ‹face› ⧗:T,F #10627# #10628# #9# ‹block› ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹rselect› ⸫
+
+⍝ ‹wrap› st T F t kind: a node of this kind holding one block
+⦃
+  ⧖:st,T,F,t,kind
+  ⧗:st ⧗:kind ⧗:t ‹emitn› ‹ok› ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F #10627# #10628# #9# ‹block› ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹wrap› ⸫
+
+⦃
+  ⧖:st,T,F,t,kind
+  ⧗:st ⧗:kind ⧗:t ‹emitn› ‹ok› ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F #10627# #10628# #9# ‹block› ⧗:T,F #10627# #10628# #9# ‹block› ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹handle› ⸫
+
+⦃
+  ⧖:st,T,F,t,kind
+  ⧗:st,F,T,t
+  ⧗:T ⧗:t #4# ⊞ ᚳ #-9# ᛖ ⋔ ⦃ #7# ‹fail1› ⦄ ⦃ ⧖:st,F,T,t ⧗:st,T,F,t #16# ‹wrap› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹prayer› ⸫
+
+⦃
+  ⧖:st,T,F,t,kind
+  ⧗:st ‹back› ⧗:kind ⧗:t ‹emitn› ‹ok› ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F ‹sig› ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹shape› ⸫
+
+⦃
+  ⧖:st,T,F,t,kind
+  ⧗:st ‹back› ⧗:kind ⧗:t ‹emitn› ‹ok› ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F #10627# #10628# #9# ‹block› ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹quote› ⸫
+
+⦃
+  ⧖:st,T,F,t,kind
+  ⧗:st ‹back› ⧗:T,F #10214# #10215# #8# ‹block›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹array› ⸫
+
+⦃ ⧖:st,T,F,t,kind ⧗:st ⧗:kind ⧗:t ‹emitn› ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹leaf› ⸫
+⦃ ⧖:st,T,F,t,kind ⧗:st,F,T,t ○ ⧗:kind ‹failx› ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹unexp› ⸫
+⦃ ⧖:st,T,F,t,kind ⧗:st,F,T,t #6# ‹fail1› ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹typeop› ⸫
+⦃ ⧖:st,T,F,t,kind ⧗:st,F,T,t ⧗:T ⧗:t #8# ⊞ ᚳ #5# ‹failx› ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹noidx› ⸫
+
+⍝ ‹opclass› T t: what to do with token t inside a block, as the code of the
+⍝ handler and the node kind; see ‹op›
+⦃
+  ⧖:T,t
+  ⧗:T,t ‹tkind› ⧖:k
+  ⧗:T ⧗:t #8# ⊞ ᚳ ⧖:c
+  ⧗:T ⧗:t #7# ⊞ ᚳ ⧖:n
+  ⧗:T ⧗:t #4# ⊞ ᚳ #-9# ᛖ ⧖:noidx
+  ⧗:k #8# ᛖ ⧗:n △ ᛖ ⋎ ⧖:g1
+  ⍝ default: an op
+  △ #5#
+  ⧗:g1 ⧗:c ⧖ @any(11819,11838,8888,8316,8709,8651,9883,9108)@ ⋎ ⋔ ⦃ ⌁ ⌁ #4# #4# ⦄ ∅ ⁼
+  ⧗:g1 ⧗:c ⧖ @any(10711,9087)@ ⋎ ⧗:noidx ⋎ ⋔ ⦃ ⌁ ⌁ #11# ○ ⦄ ∅ ⁼
+  ⧗:g1 ⧗:c #9060# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #10# #16# ⦄ ∅ ⁼
+  ⧗:g1 ⧗:c #8263# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #9# #17# ⦄ ∅ ⁼
+  ⧗:g1 ⧗:c #10204# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #8# #15# ⦄ ∅ ⁼
+  ⧗:g1 ⧗:c #10560# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #8# #14# ⦄ ∅ ⁼
+  ⧗:k #8# ᛖ ⧗:n #2# ᛖ ⋎ ⧗:c #8916# ᛖ ⋎ ⧗:T ⧗:t #9# ⊞ ᚳ #8651# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #7# #11# ⦄ ∅ ⁼
+  ⧗:g1 ⧗:c #8916# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #6# #10# ⦄ ∅ ⁼
+  ⧗:k #9# ᛖ ⧗:k #2# ᛖ ⋏ ⧗:k #10# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ #12# ○ ⦄ ∅ ⁼
+  ⧗:k #4# ᛖ ⋔ ⦃ ⌁ ⌁ △ #4# ⦄ ∅ ⁼
+  ⧗:k #3# ᛖ ⋔ ⦃ ⌁ ⌁ △ #3# ⦄ ∅ ⁼
+  ⧗:k △ ᛖ ⋔ ⦃ ⌁ ⌁ △ #2# ⦄ ∅ ⁼
+  ⧗:k #5# ᛖ ⧗:k #6# ᛖ ⋏ ⧗:k #7# ᛖ ⋏ ⧗:k #12# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ △ △ ⦄ ∅ ⁼
+  ⧗:k #11# ᛖ ⋔ ⦃ ⌁ ⌁ #3# #3# ⦄ ∅ ⁼
+  ⧗:k #11# ᛖ ⧗:c #10214# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #13# #8# ⦄ ∅ ⁼
+  ⧗:k #11# ᛖ ⧗:c #10216# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #14# #6# ⦄ ∅ ⁼
+  ⧗:k #11# ᛖ ⧗:c #10627# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #15# #7# ⦄ ∅ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ ℤ⟩ ‹opclass› ⸫
+
+⍝ ‹op› st T F: one operation; handlers: 1 leaf, 3 unexpected, 4 unexpected
+⍝ inside a block, 6 select, 7 rselect, 8 block holder, 9 handle, 10 prayer,
+⍝ 11 missing index, 12 type, 13 array, 14 shape-call, 15 quote
+⦃
+  ⧖:st,T,F
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+  ⧗:T,t ‹opclass› ⧖:h,kind
+  ⧗:st ‹adv› ⧗:T,F,t,kind ⧗:h
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹leaf› ⦄ ⦃
+  ⍿⁰ #3# ᛖ ⍿¹ #4# ᛖ ⋏ ⋔ ⦃ ⌁ ‹unexp› ⦄ ⦃
+  ⍿⁰ #6# ᛖ ⋔ ⦃ ⌁ ‹select› ⦄ ⦃
+  ⍿⁰ #7# ᛖ ⋔ ⦃ ⌁ ‹rselect› ⦄ ⦃
+  ⍿⁰ #8# ᛖ ⋔ ⦃ ⌁ ‹wrap› ⦄ ⦃
+  ⍿⁰ #9# ᛖ ⋔ ⦃ ⌁ ‹handle› ⦄ ⦃
+  ⍿⁰ #10# ᛖ ⋔ ⦃ ⌁ ‹prayer› ⦄ ⦃
+  ⍿⁰ #11# ᛖ ⋔ ⦃ ⌁ ‹noidx› ⦄ ⦃
+  ⍿⁰ #12# ᛖ ⋔ ⦃ ⌁ ‹typeop› ⦄ ⦃
+  ⍿⁰ #13# ᛖ ⋔ ⦃ ⌁ ‹array› ⦄ ⦃
+  #14# ᛖ ⋔ ⦃ ‹shape› ⦄ ⦃ ‹quote› ⦄ ⁼
+  ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹op› ⸫
+
+⍝ ---- items
+
+⍝ ‹ford1› st T F node: "⸾ ordinal"
+⦃
+  ⧖:st,T,F,node
+  ⧗:st ‹adv› ‹ok› ⟗ ⧗:T ‹peek› ⧖:ot ‹adv› ‹ok› ⧖:st
+  ⧗:st,F,T,ot,node
+  ⧗:ot #-1# ᛖ ⋔ ⦃ ⌁ #9# ‹fail1› ⦄
+    ⦃ ⧖:st,F,T,ot,node ⧗:st,F,T,ot,node ⧗:T,ot ‹tkind› #5# ᛖ
+      ⋔ ⦃ ⧖:st,F,T,ot,node ⧗:st ⧗:node #5# ⊞ ⧗:ot ‹set› ⦄ ⦃ ⌁ #4# ‹fail2› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹ford1› ⸫
+
+⍝ ‹fname› st F T nt node: the name, an optional ordinal and ⸫
+⦃
+  ⧖:st,F,T,nt,node
+  ⧗:st ⧗:node #3# ⊞ ⧗:nt ‹set› ‹adv› ‹ok› ⧖:st
+  ⧗:st,F,T,nt,node
+  ⧗:T ⧗:nt #3# ⊞ ᚳ ○ ᛖ ⋔
+    ⦃ ⧖:st,F,T,nt,node
+      ⧗:st ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+      ⧗:st,T,F,node ⧗:T,t #8# #11838# ‹is1› ⋔ ⦃ ‹ford1› ‹ok› ⦄ ⦃ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+      ⧗:T,F #8# #11819# ‹expect› ⧗:node ‹close› ⦄
+    ⦃ ⌁ #8# ‹fail1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹fname› ⸫
+
+⍝ ‹function› st T F rev: block [sig] name [⸾ ordinal] ⸫ as a fragment
+⍝ [30 ⦃ size name rev ordinal hasSig]: body, sig
+⦃
+  ⧖:st,T,F,rev
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:start ⧖:st
+  ⧗:st #30# ⧗:start ‹emitn› ‹ok› #-1# ⍆̵ ⧗:rev ⍆̵ #-1# ⍆̵ ○ ⍆̵ ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F #10627# #10628# #9# ‹block› ‹ok› ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+  ⧗:st,T,F,node ⧗:T,t #11# #10216# ‹is1›
+  ⋔ ⦃ ⧖:st,T,F,node ⧗:st,T,F ‹sig› ⧗:node #6# ⊞ △ ‹set› ‹ok› ⦄ ⦃ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+  ⟗ ⧗:T ‹peek› ⧖:nt ⧖:st
+  ⧗:st,F,T,nt,node
+  ⧗:T,nt ‹tkind› △ ᛖ ⧗:T,nt ‹tkind› #3# ᛖ ⋏ ⋔ ⦃ ‹fname› ⦄ ⦃ ⌁ #3# ‹fail2› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹function› ⸫
+
+⍝ ‹iname› st T F nt node: the item's name and ⸫
+⦃
+  ⧖:st,T,F,nt,node
+  ⧗:st ⧗:node #3# ⊞ ⧗:nt ‹set› ‹adv› ⧗:T,F #8# #11819# ‹expect› ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹iname› ⸫
+
+⍝ ‹particle› st T F: ⚛ type name ⸫ as [31 ⚛ size name]: type
+⦃
+  ⧖:st,T,F
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:start ⧖:st
+  ⧗:st ‹adv› #31# ⧗:start ‹emitn› ‹ok› #-1# ⍆̵ ‹res› ⧖:node ⧖:st
+  ⧗:st,T,F ‹type› ‹ok› ⟗ ⧗:T ‹peek› ⧖:nt ⧖:st
+  ⧗:st,T,F,nt,node
+  ⧗:nt #-1# ᛖ ⋔ ⦃ ⧖:st,T,F,nt,node ⧗:st,F,T,nt #10# ‹fail1› ⦄
+    ⦃ ⧖:st,T,F,nt,node ⧗:st,T,F,nt,node ⧗:T,nt ‹tkind› #2# ᛖ
+      ⋔ ⦃ ‹iname› ⦄ ⦃ ⧖:st,T,F,nt,node ⧗:st,F,T,nt #5# ‹fail2› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹particle› ⸫
+
+⦃
+  ⧖:st,T,F,s,node
+  ⧗:st ⧗:node #4# ⊞ ⧗:s ‹set› ‹adv› ⧗:T,F ‹sig› ‹ok› ⟗ ⧗:T ‹peek› ⧖:nt ⧖:st
+  ⧗:st,T,F,nt,node
+  ⧗:T,nt ‹tkind› △ ᛖ ⋔ ⦃ ‹iname› ⦄ ⦃ ⧖:st,T,F,nt,node ⧗:st,F,T,nt #3# ‹fail2› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹ffi2› ⸫
+
+⍝ ‹ffi› st T F: ⎔ »cname« sig name ⸫ as [32 ⎔ size name cname]: sig
+⦃
+  ⧖:st,T,F
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:start ⧖:st
+  ⧗:st ‹adv› #32# ⧗:start ‹emitn› ‹ok› #-1# ⍆̵ #-1# ⍆̵ ‹res› ⧖:node ⧖:st
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:s ⧖:st
+  ⧗:st,T,F,s,node
+  ⧗:s #-1# ᛖ ⋔ ⦃ ⧖:st,T,F,s,node ⧗:st,F,T,s #11# ‹fail1› ⦄
+    ⦃ ⧖:st,T,F,s,node ⧗:st,T,F,s,node ⧗:T,s ‹tkind› #12# ᛖ
+      ⋔ ⦃ ‹ffi2› ⦄ ⦃ ⧖:st,T,F,s,node ⧗:st,F,T,s #6# ‹fail2› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹ffi› ⸫
+
+⦃
+  ⧖:st,T,F
+  ⧗:st ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+  ⧗:st,T,F,t
+  ⧗:T,t #8# #9883# ‹is1› ⋔ ⦃ ⌁ ‹particle› ⦄
+    ⦃ ⧖:st,T,F,t ⧗:st,T,F,t ⧗:T,t #8# #9108# ‹is1› ⋔ ⦃ ⌁ ‹ffi› ⦄
+      ⦃ ⧖:st,T,F,t ⧗:st,T,F,t ⧗:T,t #8# #8651# ‹is1› ⋔ ⦃ ⌁ ⧖:T2,F2 ‹adv› ⧗:T2,F2 △ ‹function› ⦄
+        ⦃ ⧖:st,T,F,t ⧗:st,T,F,t ⧗:T,t #11# #10627# ‹is1› ⋔ ⦃ ⌁ ○ ‹function› ⦄
+          ⦃ ⧖:st,T,F,t ⧗:st,F,T,t #7# ‹fail2› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹item› ⸫
+
+⦃
+  ⧖:st,T,F
+  ⧗:st,T,F
+  ⥀ ⦃
+    ⧖:st,T,F
+    ⧗:st ⟗ ⧗:T ‹peek› ⧖:t ⧖:st
+    ⧗:st,T,F ⧗:t #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:st,T,F ⧗:st,T,F ‹item› ‹ok› ⧗:T,F ⊕ ⦄ ⁼
+  ⦄
+  ⌁̱ ⌁̱
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹items› ⸫
+
+⍝ ---- tangle (§9.3): fragments → functions
+
+⦃ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⁼ ⦄ ⟨ŧ ŧ ⊸ ŧ⟩ ‹teq› ⸫
+
+⍝ ‹rangeeq› T i j n: slots i … i+n−1 equal j … j+n−1 (n ≥ 1)
+⦃
+  ⧖:T,i,j,n
+  ⧗:T,i,j ⧗:i ⧗:n ⊞ ⦶
+  ⥀ ⦃
+    ⧖:T,i,j,end,acc
+    ⧗:T ⧗:i △ ⊞ ⧗:j △ ⊞ ⧗:end
+    ⧗:acc ⧗:T,i ᚳ ⧗:T,j ᚳ ᛖ ⋎
+    ⧗:i △ ⊞ ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦄
+  ⧖:T,i,j,end,acc ⧗:acc
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ŧ⟩ ‹rangeeq› ⸫
+
+⍝ ‹texteq› T a b: tokens a and b have the same text
+⦃
+  ⧖:T,a,b
+  ⧗:T ⧗:a #7# ⊞ ᚳ ⧗:T ⧗:b #7# ⊞ ᚳ ᛖ
+  ⧗:T ⧗:a #8# ⊞ ⧗:b #8# ⊞ ⧗:T ⧗:a #7# ⊞ ᚳ ‹rangeeq› ⋎
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ŧ⟩ ‹texteq› ⸫
+
+⍝ ‹nameeq› T a b: the same name (an antiparticle's carries its ⌁)
+⦃
+  ⧖:T,a,b
+  ⧗:T,a ‹tkind› #3# ᛖ ⧗:T,b ‹tkind› #3# ᛖ ‹teq› ⧗:T,a,b ‹texteq› ⋎
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ŧ⟩ ‹nameeq› ⸫
+
+⍝ ‹pred› T kj nj ni mode: item j (kind kj, name nj) matches name ni:
+⍝ 1 a non-fragment of that name, 2 anything of that name, 3 a fragment of
+⍝ that name, 4 the antiparticle fragment of particle ni
+⦃
+  ⧖:T,kj,nj,ni,mode
+  ⧗:T,nj,ni ‹nameeq› ⧖:eq
+  ⧗:kj #30# ᛖ ⧖:isfr
+  ⊕
+  ⧗:mode △ ᛖ ⧗:eq ⋎ ⧗:isfr ‹not› ⋎ ⋔ ⦃ ⌁ ⦶ ⦄ ∅ ⁼
+  ⧗:mode #2# ᛖ ⧗:eq ⋎ ⋔ ⦃ ⌁ ⦶ ⦄ ∅ ⁼
+  ⧗:mode #3# ᛖ ⧗:eq ⋎ ⧗:isfr ⋎ ⋔ ⦃ ⌁ ⦶ ⦄ ∅ ⁼
+  ⧗:mode #4# ᛖ ⧗:isfr ⋎ ⧗:T,nj ‹tkind› #3# ᛖ ⋎ ⧗:T,nj,ni ‹texteq› ⋎ ⋔ ⦃ ⌁ ⦶ ⦄ ∅ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ŧ⟩ ‹pred› ⸫
+
+⍝ ‹scan› st T to ni mode: some item before slot to matches (see ‹pred›)
+⦃
+  ⧖:st,T,to,ni,mode
+  ⧗:st,T,to,ni,mode #6# ⊕
+  ⥀ ⦃
+    ⧖:st,T,to,ni,mode,j,acc
+    ⧗:st,T,to,ni,mode,j,acc ⧗:j ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:st,T,to,ni,mode,j,acc
+        ⧗:st,T,to,ni,mode ⧗:j ⧗:st ⧗:j #2# ⊞ ᚳ ⊞
+        ⧗:acc ⧗:T ⧗:st,j ᚳ ⧗:st ⧗:j #3# ⊞ ᚳ ⧗:ni,mode ‹pred› ⋏
+        ⧗:j ⧗:st ⧗:j #2# ⊞ ᚳ ⊞ ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⦄
+  ⦄
+  ⧖:st,T,to,ni,mode,j,acc ⧗:acc
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ŧ⟩ ‹scan› ⸫
+
+⍝ ‹dupi› st T F i: item i must not reuse an earlier item's name
+⦃
+  ⧖:st,T,F,i
+  ⧗:st ⟗ ⧗:i ᚳ ⧖:ki ⟗ ⧗:i #3# ⊞ ᚳ ⧖:ni ⟗ ⧗:i △ ⊞ ᚳ ⧖:itok ⧖:st
+  ⧗:st ⟗ ⧗:T,i,ni ⧗:ki #30# ᛖ ⋔ ⦃ △ ⦄ ⦃ #2# ⦄ ⁼ ‹scan› ⧖:hit ⧖:st
+  ⧗:ni ⧗:itok ⧗:ki #30# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:at
+  ⧗:st,F,T,at,ni
+  ⧗:hit ⋔ ⦃ ‹duperr› ‹ok› ⦄ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹dupi› ⸫
+
+⦃
+  ⧖:st,F,T,at,ni
+  ⧗:F,T,at ‹perr› $name defined twice: $ ⎙̵ ⧗:T,ni ‹pname› $\n$ ⎙̵ ⧗:st ⌁̵ ↯
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹duperr› ⸫
+
+⍝ ‹key› st T f: fragment f's ordinal (○ when it has none)
+⦃
+  ⧖:st,T,f
+  ⧗:st ⧗:f #5# ⊞ ᚳ ⧖:o
+  ⧗:T,o ⧗:o #-1# ᛖ ⋔ ⦃ ⌁ ⌁̱ ○ ⦄ ⦃ #5# ⊞ ᚳ ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ‹key› ⸫
+
+⍝ ‹grpmsg› st F T f g: f repeats g's ordinal
+⦃
+  ⧖:st,F,T,f,g
+  ⧗:st ⟗ ⧗:f #3# ⊞ ᚳ ⧖:nt ⟗ ⧗:f #5# ⊞ ᚳ ⧖:of ⟗ ⧗:g #5# ⊞ ᚳ ⧖:og ⧖:st
+  ⧗:F,T,nt ‹perr›
+  ⧗:T,nt ⧗:of #-1# ᛖ ⧗:og #-1# ᛖ ⋎ ⋔
+    ⦃ $function $ ⎙̵ ‹pname› $ is defined twice$ ⎙̵ ⦄
+    ⦃ $duplicate fragment ordinal for $ ⎙̵ ‹pname› ⦄ ⁼
+  $\n$ ⎙̵ ⧗:st ⌁̵ ↯
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹grpmsg› ⸫
+
+⍝ ‹samekey› st T i f ni: the first fragment of name ni in i … f−1 with f's ordinal, or −1
+⦃
+  ⧖:st,T,i,f,ni
+  ⧗:st,T,f ‹key› ⧖:kf
+  ⧗:st,T,f,ni,kf ⧗:i #-1#
+  ⥀ ⦃
+    ⧖:st,T,f,ni,kf,j,found
+    ⧗:st,T,f,ni,kf,j,found ⧗:j ⧗:f ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:st,T,f,ni,kf,j,found
+        ⧗:st,T,f,ni,kf ⧗:j ⧗:st ⧗:j #2# ⊞ ᚳ ⊞
+        ⧗:found ⧗:j
+        ⧗:found #-1# ᛖ ⧗:T ⧗:st,j ᚳ ⧗:st ⧗:j #3# ⊞ ᚳ ⧗:ni #3# ‹pred› ⋎ ⧗:st,T,j ‹key› ⧗:kf ᛖ ⋎
+        ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+        ⧗:j ⧗:st ⧗:j #2# ⊞ ᚳ ⊞ ⧗:f ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⦄
+  ⦄
+  ⧖:st,T,f,ni,kf,j,found ⧗:found
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ℤ⟩ ‹samekey› ⸫
+
+⍝ ‹grpdup1› st T F i f ni: fragment f (of the group starting at i) must not repeat an ordinal
+⦃
+  ⧖:st,T,F,i,f,ni
+  ⧗:st ⟗ ⧗:T,i,f,ni ‹samekey› ⧖:g ⧖:st
+  ⧗:st,F,T,f,g ⧗:g #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⦃ ‹grpmsg› ‹ok› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹grpdup1› ⸫
+
+⍝ ‹grpdup› st T F i ni: no two fragments of the group share an ordinal
+⦃
+  ⧖:st,T,F,i,ni
+  ⧗:st ⟗ #2# ᚳ ⧖:end ⧖:st
+  ⧗:st,T,F,i,ni,i,end
+  ⥀ ⦃
+    ⧖:st,T,F,i,ni,f,end
+    ⧗:st,T,F,i,ni,f,end ⧗:f ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:st,T,F,i,ni,f,end
+        ⧗:st ⟗ ⧗:f ᚳ ⧖:kf ⟗ ⧗:f #3# ⊞ ᚳ ⧖:nf ⟗ ⧗:f #2# ⊞ ᚳ ⧖:sz ⧖:st
+        ⧗:st,T,F,i,f,ni
+        ⧗:kf #30# ᛖ ⧗:T,nf,ni ‹nameeq› ⋎ ⋔ ⦃ ‹grpdup1› ‹ok› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+        ⧗:T,F,i,ni ⧗:f ⧗:sz ⊞ ⧗:end ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⌁̱ ⌁̱
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹grpdup› ⸫
+
+⍝ ‹nextfrag› st T i ni prev: the fragment of name ni (from i on) with the
+⍝ smallest ordinal above prev, or −1
+⦃
+  ⧖:st,T,i,ni,prev
+  ⧗:st ⧗:st #2# ᚳ ⧖:end ⌁̱
+  ⧗:st,T,ni,prev,end ⧗:i #-1#
+  ⥀ ⦃
+    ⧖:st,T,ni,prev,end,j,best
+    ⧗:st,T,ni,prev,end,j,best ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:st,T,ni,prev,end,j,best
+        ⧗:st,T,ni,prev,end ⧗:j ⧗:st ⧗:j #2# ⊞ ᚳ ⊞
+        ⧗:best ⧗:j
+        ⧗:T ⧗:st,j ᚳ ⧗:st ⧗:j #3# ⊞ ᚳ ⧗:ni #3# ‹pred›
+        ⧗:st,T,j ‹key› ⧗:prev ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎
+        ⧗:best #-1# ᛖ ⧗:st,T,j ‹key› ⧗:st,T,best ‹key› ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋏ ⋎
+        ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+        ⧗:j ⧗:st ⧗:j #2# ⊞ ᚳ ⊞ ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⦄
+  ⦄
+  ⧖:st,T,ni,prev,end,j,best ⧗:best
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ℤ⟩ ‹nextfrag› ⸫
+
+⍝ ‹copyr› st from n: append slots from … from+n−1 of st to st
+⦃
+  ⧖:st,from,n
+  ⧗:st,from ⧗:from ⧗:n ⊞
+  ⥀ ⦃
+    ⧖:st,j,end
+    ⧗:st,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:st,j,end ⧗:st ⟗ ⧗:j ᚳ ⍆̵ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+  ⦄
+  ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹copyr› ⸫
+
+⦃ ⧖:st,node,ftok,fname ⧗:st ⧗:node △ ⊞ ⧗:ftok ‹set› ⧗:node #3# ⊞ ⧗:fname ‹set› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹fnname› ⸫
+
+⦃
+  ⧖:st,F,T,fname
+  ⧗:F,T,fname ‹perr› $only one fragment of $ ⎙̵ ⧗:T,fname ‹pname› $ may carry the signature\n$ ⎙̵
+  ⧗:st ⌁̵ ↯
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹sigmany› ⸫
+
+⦃
+  ⧖:st,F,T,fname,f,sigf
+  ⧗:st,F,T,fname,f
+  ⧗:sigf #-1# ᛖ ⋔ ⦃ ⧖:st,F,T,fname,f ⧗:st #4# ⧗:f ‹set› ⦄ ⦃ ⌁ ‹sigmany› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹sigone› ⸫
+
+⍝ ‹sweep1› st T F node f: count fragment f into fn node; one signature only
+⦃
+  ⧖:st,T,F,node,f
+  ⧗:st ⟗ ⧗:node #5# ⊞ ᚳ ⧖:nfr ⟗ ⧗:node #4# ⊞ ᚳ ⧖:rev ⟗ ⧗:f #4# ⊞ ᚳ ⧖:frev
+    ⟗ ⧗:f #6# ⊞ ᚳ ⧖:has ⟗ #4# ᚳ ⧖:sigf ⟗ ⧗:f △ ⊞ ᚳ ⧖:ftok ⟗ ⧗:f #3# ⊞ ᚳ ⧖:fname ⧖:st
+  ⧗:st ⧗:node #5# ⊞ ⧗:nfr △ ⊞ ‹set› ⧗:node #4# ⊞ ⧗:rev ⧗:frev ⋓ ‹set› ‹ok› ⧖:st
+  ⍝ the first fragment names the function
+  ⧗:st,node,ftok,fname ⧗:nfr ○ ᛖ ⋔ ⦃ ‹fnname› ‹ok› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:st
+  ⧗:st,F,T,fname,f,sigf ⧗:has △ ᛖ ⋔ ⦃ ‹sigone› ‹ok› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹sweep1› ⸫
+
+⍝ ‹sweepdo› st T F node f mode: 1 count and check, 2 append the ordinal, 3 append the body's ops
+⦃
+  ⧖:st,T,F,node,f,mode
+  ⧗:st,T,F,node,f ⧗:mode △ ᛖ ⋔ ⦃ ‹sweep1› ‹ok› ⦄ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+  ⟗ ⧗:f #5# ⊞ ᚳ ⧖:o ⟗ ⧗:f #9# ⊞ ᚳ ⧖:bsz ⧖:st
+  ⧗:st,o,f,bsz,mode
+  ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⍆̵ ⦄
+    ⦃ #3# ᛖ ⋔ ⦃ ⧖:b ⧖:f2 ⌁ ⧗:f2 #10# ⊞ ⧗:b #3# ⊟ ‹copyr› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹sweepdo› ⸫
+
+⍝ ‹sweep› st T F i ni node mode: the fragments of name ni in ordinal order
+⦃
+  ⧖:st,T,F,i,ni,node,mode
+  ⧗:st,T,F,i,ni,node,mode #-100000000#
+  ⥀ ⦃
+    ⧖:st,T,F,i,ni,node,mode,prev
+    ⧗:st ⟗ ⧗:T,i,ni,prev ‹nextfrag› ⧖:f ⧖:st
+    ⧗:st,T,F,i,ni,node,mode,prev,f
+    ⧗:f #-1# ᛖ ⋔ ⦃ ⌁ ⦶ ⦄
+      ⦃ ⧖:st,T,F,i,ni,node,mode,prev,f
+        ⧗:st,T,F,node,f,mode ‹sweepdo› ‹ok› ⟗ ⧗:T,f ‹key› ⧖:k ⧖:st
+        ⧗:st,T,F,i,ni,node,mode,k ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̱ ⌁̱
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹sweep› ⸫
+
+⦃
+  ⧖:st,F,T,fname,nfr
+  ⧗:F,T,fname ‹perr›
+  ⧗:T,fname ⧗:nfr △ ᛖ ⋔
+    ⦃ $function $ ⎙̵ ‹pname› $ has no signature ⟨… ⊸ …⟩$ ⎙̵ ⦄
+    ⦃ $no fragment of $ ⎙̵ ‹pname› $ carries a signature$ ⎙̵ ⦄ ⁼
+  $\n$ ⎙̵ ⧗:st ⌁̵ ↯
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹nosig› ⸫
+
+⍝ ‹group› st T F i: the function whose first fragment is item i
+⍝ [40 ⦃ size name rev nfr ordinals…]: sig, ops
+⦃
+  ⧖:st,T,F,i
+  ⧗:st ⟗ ⧗:i #3# ⊞ ᚳ ⧖:ni ⧖:st
+  ⧗:st,T,F,i,ni ‹grpdup› ‹ok›
+  #40# #-1# ‹emitn› ‹ok› #-1# ⍆̵ ○ ⍆̵ ○ ⍆̵ ‹res› ⧖:node ⧖:st
+  ⧗:st #4# #-1# ‹set› ⧗:T,F,i,ni,node △ ‹sweep› ‹ok›
+  ⟗ #4# ᚳ ⧖:sigf ⟗ ⧗:node #5# ⊞ ᚳ ⧖:nfr ⟗ ⧗:node #3# ⊞ ᚳ ⧖:fname ⧖:st
+  ⧗:st,F,T,fname,nfr ⧗:sigf #-1# ᛖ ⋔ ⦃ ‹nosig› ‹ok› ⦄ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+  ⍝ the ordinals, the signature, then the bodies
+  ⧗:T,F,i,ni,node #2# ‹sweep› ‹ok›
+  ⟗ ⧗:sigf #9# ⊞ ᚳ ⧖:bsz ⧖:st
+  ⧗:sigf #7# ⊞ ⧗:bsz ⊞ ⧖:sigslot
+  ⧗:st ⟗ ⧗:sigslot #2# ⊞ ᚳ ⧖:ssz ⧖:st
+  ⧗:st ⧗:sigslot ⧗:ssz ‹copyr›
+  ⧗:T,F,i,ni,node #3# ‹sweep› ⧗:node ‹close›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹group› ⸫
+
+⍝ ‹tangle1› st T F i: copy a particle or binding; tangle a function at its first fragment
+⦃
+  ⧖:st,T,F,i
+  ⧗:st ⟗ ⧗:i ᚳ ⧖:k ⟗ ⧗:i #2# ⊞ ᚳ ⧖:sz ⟗ ⧗:i #3# ⊞ ᚳ ⧖:ni ⧖:st
+  ⧗:st ⟗ ⧗:T,i,ni #3# ‹scan› ⧖:seen ⧖:st
+  #2# ⧗:seen ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧗:k #30# ᛖ ‹not› ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:a
+  ⧗:st,T,F,i,sz ⧗:a
+  ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁̱ ⌁̱ ⦄
+    ⦃ △ ᛖ ⋔ ⦃ ⧖:st,T,F,i,sz ⧗:st,i,sz ‹copyr› ⦄ ⦃ ⌁ ‹group› ‹ok› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tangle1› ⸫
+
+⦃
+  ⧖:st,F,T,itok,ni
+  ⧗:F,T,itok ‹perr› $particle $ ⎙̵ ⧗:T,ni ‹ptok› $ has no antiparticle ⌁$ ⎙̵ ⧗:T,ni ‹ptok› $\n$ ⎙̵
+  ⧗:st ⌁̵ ↯
+⦄ ⟨⟦ℤ⟧ ⟗ʃ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹noanti› ⸫
+
+⍝ ‹anti1› st T F i: a particle needs an antiparticle ⌁T (§8.6)
+⦃
+  ⧖:st,T,F,i
+  ⧗:st ⟗ ⧗:i ᚳ ⧖:k ⟗ ⧗:i #3# ⊞ ᚳ ⧖:ni ⟗ ⧗:i △ ⊞ ᚳ ⧖:itok ⟗ #2# ᚳ ⧖:pe ⧖:st
+  ⧗:st ⟗ ⧗:T,pe,ni #4# ‹scan› ⧖:has ⧖:st
+  ⧗:st,F,T,itok,ni ⧗:k #31# ᛖ ⧗:has ‹not› ⋎ ⋔ ⦃ ‹noanti› ‹ok› ⦄ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹anti1› ⸫
+
+⍝ ‹tpass› st T F from end pass: run pass 1 (‹dupi›), 2 (‹tangle1›) or 3 (‹anti1›) on the items from … end−1
+⦃
+  ⧖:st,T,F,from,end,pass
+  ⧗:st,T,F,from,end,pass
+  ⥀ ⦃
+    ⧖:st,T,F,i,end,pass
+    ⧗:st,T,F,i,end,pass ⧗:i ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:st,T,F,i,end,pass
+        ⧗:st ⟗ ⧗:i #2# ⊞ ᚳ ⧖:sz ⧖:st
+        ⧗:st,T,F,i,pass ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹dupi› ‹ok› ⦄ ⦃ #2# ᛖ ⋔ ⦃ ‹tangle1› ‹ok› ⦄ ⦃ ‹anti1› ‹ok› ⦄ ⁼ ⦄ ⁼
+        ⧗:T,F ⧗:i ⧗:sz ⊞ ⧗:end,pass ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁̱ ⌁̱
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tpass› ⸫
+
+⍝ ‹parse› T F: the tangled item tree of a token buffer
+⦃
+  ⧖:T,F
+  ⟦ ○ ○ ○ ○ ○ ○ ○ ⟧ ⧗:T,F ‹items› ‹ok› ⟗ ᚴ ⧖:e ⧖:st
+  ⧗:st #2# ⧗:e ‹set› ⧗:T,F #6# ⧗:e △ ‹tpass› ⧗:T,F #6# ⧗:e #2# ‹tpass› ‹ok›
+  ⟗ ᚴ ⧖:e2 ⧖:st
+  ⧗:st,T,F,e,e2 #3# ‹tpass›
+⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹parse› ⸫
+
+⍝ ---- the item tree, printed as trithc --ast prints it
+
+⦃ ⧖:n ⧗:n ⧗:n ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ $  $ ⎙̵ △ ⊟ ‹pind› ⦄ ⦃ ⌁ ⦄ ⦄ ⟨ℤ ⊸⟩ ‹pind› ⸫
+
+⍝ ‹pmk› T t: " [mark,mark]"
+⦃
+  ⧖:T,t
+  ⧗:T ⧗:t #3# ⊞ ᚳ ⧖:mask
+  ⧗:mask ○ ᛖ ‹not› ⋔ ⦃ $ [$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:mask △ ⦶
+  ⥀ ⦃
+    ⧖:mask,bit,first
+    ⧗:mask ⧗:bit ⋒ ○ ᛖ ‹not› ⧖:on
+    ⧗:on ⧗:first ‹not› ⋎ ⋔ ⦃ $,$ ⎙̵ ⦄ ∅ ⁼
+    ⧗:bit ⧗:on ⋔ ⦃ ᛗᚾ ⦄ ⦃ ⌁ ⦄ ⁼
+    ⧗:mask ⧗:bit △ ≪ ⧗:first ⧗:on ⋔ ⦃ ⌁ ⊕ ⦄ ∅ ⁼
+    ⧗:bit #128# ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁
+  ⧗:mask ○ ᛖ ‹not› ⋔ ⦃ $]$ ⎙̵ ⦄ ∅ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸⟩ ‹pmk› ⸫
+
+⍝ ‹ptoks› st T from n: the texts of tokens st[from] … st[from+n−1]
+⦃
+  ⧖:st,T,from,n
+  ⧗:st,T,from ⧗:from ⧗:n ⊞
+  ⥀ ⦃
+    ⧖:st,T,j,end
+    ⧗:st,T,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:st,T,j,end ⧗:T ⧗:st,j ᚳ ‹ptok› ⧗:st,T ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁̱ ⌁̱
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹ptoks› ⸫
+
+⍝ ‹ptbase› st T c np base: the base of a type node
+⦃
+  ⧖:st,T,c,np,base
+  ⧗:T,base ‹tkind› ⧖:k
+  ⧗:T ⧗:base #7# ⊞ ᚳ ⧖:n
+  ⧗:T ⧗:base #6# ⊞ ᚳ ⧖:copen
+  ⧗:T,base ⧗:k #2# ᛖ ⋔ ⦃ ‹ptok› ⦄ ⦃ ⌁ ⌁̱ ⦄ ⁼
+  ⧗:T ⧗:base #8# ⊞ ⧗:n ⧗:copen ⧗:copen ○ ≶ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄
+  ⧗:k #9# ᛖ ⋔ ⦃ ‹ptext› ⦄ ⦃ ⌁ ⌁ ⌁̱ ⦄ ⁼
+  ⧗:T ⧗:base #9# ⊞ ⧗:copen ⊞ ⧗:base #7# ⊞ ⧗:n ⊞
+  ⧗:k #9# ᛖ ⧗:copen ○ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ $⁽$ ⎙̵ ‹pcharge› $⁾$ ⎙̵ ⦄ ⦃ ⌁ ⌁ ⌁̱ ⦄ ⁼
+  ⧗:st,T ⧗:c #4# ⊞ ⧗:np ⊞
+  ⧗:k #11# ᛖ ⋔ ⦃ $⟦$ ⎙̵ ‹ptyp› ⌁ $⟧$ ⎙̵ ⦄ ⦃ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸⟩ ‹ptbase› ⸫
+
+⍝ ‹ptyp› st T c: a type node, giving the slot after it
+⦃
+  ⧖:st,T,c
+  ⧗:st ⧗:c △ ⊞ ᚳ ⧖:base
+  ⧗:st ⧗:c #2# ⊞ ᚳ ⧖:sz
+  ⧗:st ⧗:c #3# ⊞ ᚳ ⧖:np
+  ⧗:st,T ⧗:c #4# ⊞ ⧗:np ‹ptoks›
+  ⧗:st,T,c,np,base ⧗:base #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⦃ ‹ptbase› ⦄ ⁼
+  ⧗:c ⧗:sz ⊞
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ‹ptyp› ⸫
+
+⍝ ‹ptypes› st T from count end lead: up to count types before slot end,
+⍝ separated by spaces (and one before the first if lead); the slot after them
+⦃
+  ⧖:st,T,from,count,end,lead
+  ⧗:st,T,from,count,end,lead
+  ⥀ ⦃
+    ⧖:st,T,c,count,end,lead
+    ⧗:st,T,c,count,end,lead
+    ⧗:count ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:c ⧗:end ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎
+    ⋔ ⦃ ⧖:st,T,c,count,end,lead
+        ⧗:lead ⋔ ⦃ $ $ ⎙̵ ⦄ ∅ ⁼
+        ⧗:st,T ⧗:st,T,c ‹ptyp› ⧗:count △ ⊟ ⧗:end ⦶ ⊕ ⦄
+      ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:st,T,c,count,end,lead ⧗:c
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ŧ ⊸ ℤ⟩ ‹ptypes› ⸫
+
+⍝ ‹psig› st T s: ⟨ins ⊸ outs⟩
+⦃
+  ⧖:st,T,s
+  ⧗:st ⧗:s #3# ⊞ ᚳ ⧖:nin
+  ⧗:st ⧗:s #2# ⊞ ᚳ ⧗:s ⊞ ⧖:end
+  $⟨$ ⎙̵
+  ⧗:st,T ⧗:s #5# ⊞ ⧗:nin ⧗:end ⊕ ‹ptypes› ⧖:c
+  ⧗:nin ○ ≶ ⋔ ∅ ⦃ $ $ ⎙̵ ⦄ ∅
+  $⊸$ ⎙̵
+  ⧗:st,T,c #1000000# ⧗:end ⦶ ‹ptypes› ⌁
+  $⟩$ ⎙̵
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ⊸⟩ ‹psig› ⸫
+
+⍝ ‹pval› T t: " = value" of a numeral
+⦃
+  ⧖:T,t
+  ⧗:T,t ‹tkind› ⧖:k
+  ⧗:T ⧗:t #5# ⊞ ᚳ ⧖:v1
+  ⧗:T ⧗:t #6# ⊞ ᚳ ⧖:v2
+  ⧗:k #5# ᛖ ⧗:k #6# ᛖ ⋏ ⋔ ⦃ $ = $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:k,v1,v2 ‹pvalue2›
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸⟩ ‹pval› ⸫
+
+⦃
+  ⧖:kind,v1,v2
+  ⧗:v1 ⧗:kind #5# ᛖ ⧗:kind #6# ᛖ ⋏ ⋔ ⦃ ᛁ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:v2 ⧗:kind #6# ᛖ ⧗:v2 △ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⋔ ⦃ $/$ ⎙̵ ᛁ ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨ℤ ℤ ℤ ⊸⟩ ‹pvalue2› ⸫
+
+⍝ ‹dops› st T from to ind: the ops from … to−1
+⦃
+  ⧖:st,T,from,to,ind
+  ⧗:st,T,from,to,ind
+  ⥀ ⦃
+    ⧖:st,T,c,to,ind
+    ⧗:st,T,c,to,ind ⧗:c ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:st,T,c,to,ind ⧗:st,T ⧗:st,T,c,ind ‹dop› ⧗:to,ind ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁̱ ⌁̱
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ⊸⟩ ‹dops› ⸫
+
+⍝ ‹dblock› st T b ind: the ops of block b, giving the slot after it
+⦃
+  ⧖:st,T,b,ind
+  ⧗:st ⧗:b #2# ⊞ ᚳ ⧗:b ⊞ ⧖:end
+  ⧗:st,T ⧗:b #3# ⊞ ⧗:end,ind ‹dops›
+  ⧗:end
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ⟩ ‹dblock› ⸫
+
+⍝ ‹dface› st T c ind: one face, giving the slot after it
+⦃
+  ⧖:st,T,c,ind
+  ⧗:st,c ᚳ ⧖:k
+  ⧗:ind ‹pind›
+  ⧗:k #12# ᛖ ⋔ ⦃ $face ⁼\n$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:k #13# ᛖ ⋔ ⦃ $face ∅\n$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:st,T,c ⧗:ind △ ⊞
+  ⧗:k #9# ᛖ ⋔ ⦃ $face\n$ ⎙̵ ‹dblock› ⦄ ⦃ ⌁ ⧖:c ⌁̱ ⌁̱ ⧗:c #3# ⊞ ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ⟩ ‹dface› ⸫
+
+⦃
+  ⧖:st,T,c,ind
+  ⧗:ind △ ⊞ ‹pind› $assert\n$ ⎙̵ ⧗:st,T,c ⧗:ind #2# ⊞ ‹dblock› ⌁
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹dassert› ⸫
+
+⍝ op printers: st T i ind t sz (k)
+⦃
+  ⧖:st,T,i,ind,t,sz
+  $lit $ ⎙̵ ⧗:T,t ‹tkind› ‹pkind› $ $ ⎙̵
+  ⧗:T ⧗:t #8# ⊞ ⧗:T ⧗:t #7# ⊞ ᚳ ⧗:T,t ‹tkind› #12# ᛖ ⋔ ⦃ ‹pquoted› ⦄ ⦃ ‹ptext› ⦄ ⁼
+  ⧗:T,t ‹pval› ⧗:T,t ‹pmk› $\n$ ⎙̵
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸⟩ ‹dlit› ⸫
+
+⦃
+  ⧖:st,T,i,ind,t,sz,k
+  ⧗:k #2# ᛖ ⋔ ⦃ $call $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:k #3# ᛖ ⋔ ⦃ $anti-call $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:k #4# ᛖ ⋔ ⦃ $inverse-call $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:T,t ‹pname› ⧗:T,t ‹pmk› $\n$ ⎙̵
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸⟩ ‹dcall› ⸫
+
+⦃
+  ⧖:st,T,i,ind,t,sz
+  $op $ ⎙̵ ⧗:T,t ‹ptok› ⧗:T ⧗:t #4# ⊞ ᚳ ‹pidx› ⧗:T,t ‹pmk› $\n$ ⎙̵
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸⟩ ‹dopx› ⸫
+
+⦃
+  ⧖:st,T,i,ind,t,sz
+  $shape-call $ ⎙̵ ⧗:st,T ⧗:i #3# ⊞ ‹psig› $\n$ ⎙̵
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸⟩ ‹dshape› ⸫
+
+⦃
+  ⧖:st,T,i,ind,t,sz
+  $quote\n$ ⎙̵ ⧗:st,T ⧗:i #3# ⊞ ⧗:ind △ ⊞ ‹dblock› ⌁
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸⟩ ‹dquote› ⸫
+
+⦃
+  ⧖:st,T,i,ind,t,sz
+  $array\n$ ⎙̵ ⧗:st,T ⧗:i #3# ⊞ ⧗:i ⧗:sz ⊞ ⧗:ind △ ⊞ ‹dops›
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸⟩ ‹darray› ⸫
+
+⦃
+  ⧖:st,T,i,ind,t,sz,k
+  ⧗:k #10# ᛖ ⋔ ⦃ $select$ ⎙̵ ⦄ ⦃ $rselect$ ⎙̵ ⦄ ⁼
+  ⧗:T,t ‹pmk› $\n$ ⎙̵
+  ⧗:st,T ⧗:st,T ⧗:st,T ⧗:i #3# ⊞ ⧗:ind △ ⊞ ‹dface› ⧗:ind △ ⊞ ‹dface› ⧗:ind △ ⊞ ‹dface› ⧖:c
+  ⧗:st,T,c,ind ⧗:k #11# ᛖ ⋔ ⦃ ‹dassert› ⦄ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸⟩ ‹dsel› ⸫
+
+⦃
+  ⧖:st,T,i,ind,t,sz,k
+  ⧗:k #14# ᛖ ⋔ ⦃ $loop$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:k #15# ᛖ ⋔ ⦃ $postselect$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:k #16# ᛖ ⋔ ⦃ $prayer$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:T ⧗:t #4# ⊞ ᚳ ⧖:n
+  ⧗:n #-9# ᛖ ‹not› ⋔ ⦃ $ n=$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:n ⧗:n #-9# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ᛁ ⦄ ⁼
+  ⧗:T,t ‹pmk› $\n$ ⎙̵
+  ⧗:st,T ⧗:i #3# ⊞ ⧗:ind △ ⊞ ‹dblock› ⌁
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸⟩ ‹dwrap› ⸫
+
+⦃
+  ⧖:st,T,i,ind,t,sz
+  $handle$ ⎙̵ ⧗:T,t ‹pmk› $\n$ ⎙̵
+  ⧗:ind △ ⊞ ‹pind› $ok\n$ ⎙̵
+  ⧗:st,T ⧗:i #3# ⊞ ⧗:ind #2# ⊞ ‹dblock› ⧖:c
+  ⧗:ind △ ⊞ ‹pind› $fail\n$ ⎙̵
+  ⧗:st,T,c ⧗:ind #2# ⊞ ‹dblock› ⌁
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸⟩ ‹dhandle› ⸫
+
+⍝ ‹dop› st T i ind: one op, giving the slot after it
+⦃
+  ⧖:st,T,i,ind
+  ⧗:st,i ᚳ ⧖:k
+  ⧗:st ⧗:i △ ⊞ ᚳ ⧖:t
+  ⧗:st ⧗:i #2# ⊞ ᚳ ⧖:sz
+  ⧗:ind ‹pind›
+  ⧗:st,T,i,ind,t,sz,k
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹dlit› ⦄ ⦃
+  ⍿⁰ #2# #4# ᛦ ⋔ ⦃ ‹dcall› ⦄ ⦃
+  ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ‹dopx› ⦄ ⦃
+  ⍿⁰ #6# ᛖ ⋔ ⦃ ⌁ ‹dshape› ⦄ ⦃
+  ⍿⁰ #7# ᛖ ⋔ ⦃ ⌁ ‹dquote› ⦄ ⦃
+  ⍿⁰ #8# ᛖ ⋔ ⦃ ⌁ ‹darray› ⦄ ⦃
+  ⍿⁰ #10# #11# ᛦ ⋔ ⦃ ‹dsel› ⦄ ⦃
+  ⍿⁰ #17# ᛖ ⋔ ⦃ ⌁ ‹dhandle› ⦄ ⦃ ‹dwrap› ⦄ ⁼
+  ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ⧗:i ⧗:sz ⊞
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ℤ⟩ ‹dop› ⸫
+
+⍝ ‹pfrags› st T i nfr: " fragments=…" unless the function is one unnumbered (or ○) fragment
+⦃
+  ⧖:st,T,i,nfr
+  ⧗:st ⧗:i #6# ⊞ ᚳ ⧖:o
+  ⧗:T ⧗:o #7# ⊞ ᚳ △ ᛖ ⧗:T ⧗:o #8# ⊞ ᚳ #9675# ᛖ ⋎ ⧗:o #-1# ᛖ ⋏ ⧖:plain
+  ⧗:st,T,i,nfr
+  ⧗:nfr △ ᛖ ⧗:plain ⋎ ⋔ ⦃ ⌁ ⌁ ⌁̱ ⌁̱ ⦄ ⦃ $ fragments=$ ⎙̵ ‹pords› ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹pfrags› ⸫
+
+⦃
+  ⧖:st,T,i,nfr
+  ⧗:st,T ⧗:i #6# ⊞ ⧗:i #6# ⊞ ⧗:i #6# ⊞ ⧗:nfr ⊞
+  ⍝ the loop carries [st T j first end]
+  ⥀ ⦃
+    ⧖:st,T,j,first,end
+    ⧗:j ⧗:first ≶ ⋔ ∅ ⦃ $,$ ⎙̵ ⦄ ∅
+    ⧗:st,j ᚳ ⧖:o
+    ⧗:T,o ⧗:o #-1# ᛖ ⋔ ⦃ ⌁ ⌁̱ $○$ ⎙̵ ⦄ ⦃ ‹ptok› ⦄ ⁼
+    ⧗:st,T ⧗:j △ ⊞ ⧗:first,end
+    ⧗:j △ ⊞ ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁̱ ⌁̱
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹pords› ⸫
+
+⦃
+  ⧖:st,T,i,name
+  ⧗:st ⧗:i #5# ⊞ ᚳ ⧖:nfr
+  ⧗:st ⧗:i #4# ⊞ ᚳ ⧖:rev
+  ⧗:i #6# ⊞ ⧗:nfr ⊞ ⧖:s
+  ⧗:st ⧗:s #2# ⊞ ᚳ ⧗:s ⊞ ⧖:body
+  ⧗:st ⧗:i #2# ⊞ ᚳ ⧗:i ⊞ ⧖:end
+  $fn $ ⎙̵ ⧗:T,name ‹pname› $ $ ⎙̵ ⧗:st,T,s ‹psig›
+  ⧗:rev ○ ᛖ ‹not› ⋔ ⦃ $ reversible$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:st,T,i,nfr ‹pfrags› $\n$ ⎙̵
+  ⧗:st,T,body,end △ ‹dops›
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹dfn› ⸫
+
+⦃
+  ⧖:st,T,i,name
+  $particle $ ⎙̵ ⧗:T,name ‹ptok› $ $ ⎙̵ ⧗:st,T ⧗:i #4# ⊞ ‹ptyp› ⌁ $\n$ ⎙̵
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹dpart› ⸫
+
+⦃
+  ⧖:st,T,i,name
+  ⧗:st ⧗:i #4# ⊞ ᚳ ⧖:cn
+  $ffi $ ⎙̵ ⧗:T,name ‹pname› $ $ ⎙̵ ⧗:T ⧗:cn #8# ⊞ ⧗:T ⧗:cn #7# ⊞ ᚳ ‹pquoted› $ $ ⎙̵ ⧗:st,T ⧗:i #5# ⊞ ‹psig› $\n$ ⎙̵
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹dffi› ⸫
+
+⍝ ‹ditem› st T i: one tangled item, giving the slot after it
+⦃
+  ⧖:st,T,i
+  ⧗:st,i ᚳ ⧖:k
+  ⧗:st ⧗:i #2# ⊞ ᚳ ⧖:sz
+  ⧗:st ⧗:i #3# ⊞ ᚳ ⧖:name
+  ⧗:st,T,i,name,k
+  ⧗:k #40# ᛖ ⋔ ⦃ ⌁ ‹dfn› ⦄ ⦃ #31# ᛖ ⋔ ⦃ ‹dpart› ⦄ ⦃ ‹dffi› ⦄ ⁼ ⦄ ⁼
+  ⧗:i ⧗:sz ⊞
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ‹ditem› ⸫
+
+⍝ ‹adump› st T: every tangled item
+⦃
+  ⧖:st,T
+  ⧗:st,T ⧗:st #2# ᚳ ⧗:st ᚴ
+  ⥀ ⦃
+    ⧖:st,T,i,end
+    ⧗:st,T,i,end ⧗:i ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:st,T,i,end ⧗:st,T ⧗:st,T,i ‹ditem› ⧗:end ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁̱ ⌁̱
+⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ⊸⟩ ‹adump› ⸫

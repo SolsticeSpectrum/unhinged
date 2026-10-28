@@ -40,17 +40,18 @@ clean:
 
 # s2: the compiler rewritten in Trith (spec §17), compiled by s1. The sources
 # in trith/s2/src are authored in logical order with named moments; the
-# committed trith/s2/*.trh are generated from them by `make s2-regen`.
-S2_LEX_SRC := trith/s2/src/util.trhx trith/s2/src/chars.trhx trith/s2/src/lexer.trhx trith/s2/src/lexmain.trhx
+# committed trith/s2/s2c.trh is generated from them by `make s2-regen`.
+S2_SRC := trith/s2/src/util.trhx trith/s2/src/chars.trhx trith/s2/src/lexer.trhx trith/s2/src/parser.trhx trith/s2/src/main.trhx
 s2: trith
-	$(TRITHC) trith/s2/s2lex.trh -o build/s2lex
+	$(TRITHC) trith/s2/s2c.trh -o build/s2c
 
 s2-regen: trith
-	python3 trith/s2/tools/trx.py $(S2_LEX_SRC) > build/s2lex.logical.trh
-	$(TRITHC) build/s2lex.logical.trh --plough > trith/s2/s2lex.trh
+	python3 trith/s2/tools/trx.py $(S2_SRC) > build/s2c.logical.trh
+	$(TRITHC) build/s2c.logical.trh --plough > trith/s2/s2c.trh
 
 s2-test: s2
-	TRITHC=$(TRITHC) S2LEX=build/s2lex trith/s2/test.sh
+	TRITHC=$(TRITHC) S2C=build/s2c trith/s2/test.sh
 
 s2-fuzz: s2
-	python3 trith/s2/tools/fuzz.py build/s2lex $(TRITHC) output/s2-fuzz 1 1000
+	python3 trith/s2/tools/fuzz.py build/s2c $(TRITHC) output/s2-fuzz 1 1000
+	python3 trith/s2/tools/fuzzparse.py build/s2c $(TRITHC) output/s2-fuzzparse 1 500

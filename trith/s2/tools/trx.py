@@ -36,7 +36,12 @@ class Group:
         self.n = n
         self.faces = []       # lists of names
 
+FILES = []  # (path, first line, line count)
+
 def fail(lineno, msg):
+    for path, first, n in FILES:
+        if first <= lineno < first + n:
+            sys.exit(f'{path}:{lineno - first + 1}: {msg}')
     sys.exit(f'trx:{lineno}: {msg}')
 
 def process(src):
@@ -127,15 +132,23 @@ def literals(src):
     src = re.sub(r'#(-?\d+)#', lambda m: bt(int(m.group(1))), src)
     return re.sub(r'‹([^›\s]+)›', runic, src)
 
+PREFIXES = 'ᚡᚣᚤᚥᚧ'  # never used as names on their own
 RUNES = [chr(c) for c in range(0x16A0, 0x16EB) if c not in (0x16A1, 0x16A3)]
 NAMES = {}
 def runic(m):
     nm = m.group(1)
     if nm not in NAMES:
         i = len(NAMES)
-        NAMES[nm] = ('ᚡ', 'ᚣ')[i // len(RUNES)] + RUNES[i % len(RUNES)]
+        NAMES[nm] = PREFIXES[i // len(RUNES)] + RUNES[i % len(RUNES)]
     return NAMES[nm]
 
 if __name__ == '__main__':
-    src = ''.join(open(p).read() + '\n' for p in sys.argv[1:])
+    parts = []
+    line = 1
+    for p in sys.argv[1:]:
+        text = open(p).read() + '\n'
+        FILES.append((p, line, text.count('\n')))
+        line += text.count('\n')
+        parts.append(text)
+    src = ''.join(parts)
     sys.stdout.write(literals(process(src)))

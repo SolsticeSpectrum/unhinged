@@ -79,7 +79,7 @@ Done so far:
 
 Generated code runs at C speed (within about 0.9–1.06× of `clang -O2`) on all four benchmarks: fib, Collatz, n-body and Game of Life.
 
-Milestone 6, rewriting the compiler in Trith itself (stage s2), is under way. The lexer is done (`trith/s2/`). It is compiled by s1, and it prints exactly what `trithc --tokens` prints, error messages included, for every Trith file in the repository. Unlike s1, it exits with status 1 after an error.
+Milestone 6, rewriting the compiler in Trith itself (stage s2), is under way. The lexer and the parser (with tangling) are done in `trith/s2/`. They are compiled by s1 into `build/s2c`, which prints exactly what `trithc --tokens` and `trithc --ast` print, error messages included, for every Trith file in the repository. Unlike s1, it exits with status 1 after an error.
 
 ```bash
 make trith          # builds build/trithc
@@ -99,15 +99,16 @@ make trith-memcheck # valgrind over every test program: no invalid accesses, no 
 
 Writing on-disk Trith by hand is error-prone (even lines run right to left, and the token count must divide by 3). Write the logical order and run `--plough`.
 
-The s2 sources (`trith/s2/src/*.trhx`) are logical-order Trith with a few authoring shorthands, expanded by `trith/s2/tools/trx.py`. Named moments `⧖:x` / `⧗:x` become `⧖` / `⧗ⁿ` with the index counted for you, following Trith's own scope rules. `‹name›` gets a unique Runic function name, `#42#` becomes a balanced-ternary literal, and `$text$` becomes a string literal. The generated, ploughed `trith/s2/s2lex.trh` is committed, so building s2 needs no Python.
+The s2 sources (`trith/s2/src/*.trhx`) are logical-order Trith with a few authoring shorthands, expanded by `trith/s2/tools/trx.py`. Named moments `⧖:x` / `⧗:x` become `⧖` / `⧗ⁿ` with the index counted for you, following Trith's own scope rules. `‹name›` gets a unique Runic function name, `#42#` becomes a balanced-ternary literal, and `$text$` becomes a string literal. The generated, ploughed `trith/s2/s2c.trh` is committed, so building s2 needs no Python.
 
 ```bash
-make s2             # builds build/s2lex from trith/s2/s2lex.trh with s1
-make s2-test        # s2 and s1 token dumps must agree on every .trh file (also run by make test)
-make s2-fuzz        # 1000 random lexer inputs, s2 against s1
-make s2-regen       # regenerate trith/s2/s2lex.trh from trith/s2/src (needs python3)
+make s2             # builds build/s2c from trith/s2/s2c.trh with s1
+make s2-test        # s2 and s1 must agree on --tokens and --ast for every .trh file (also run by make test)
+make s2-fuzz        # random lexer inputs and random programs, s2 against s1
+make s2-regen       # regenerate trith/s2/s2c.trh from trith/s2/src (needs python3)
 
-./build/s2lex file.trh               # same output as trithc file.trh --tokens
+./build/s2c file.trh --tokens        # same output as trithc file.trh --tokens
+./build/s2c file.trh --ast           # same output as trithc file.trh --ast
 ```
 
 Golden tests: `trith/tests/<suite>/<name>.trh` is compared with `<name>.out`. To regenerate the `.out` files after an intended change, run `BLESS=1 TRITHC=build/trithc build/trith-tests` and review the diff.

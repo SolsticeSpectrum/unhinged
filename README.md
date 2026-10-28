@@ -79,7 +79,7 @@ Done so far:
 
 Generated code runs at C speed (within about 0.9–1.06× of `clang -O2`) on all four benchmarks: fib, Collatz, n-body and Game of Life.
 
-Milestone 6, rewriting the compiler in Trith itself (stage s2), is under way. The lexer, the parser (with tangling) and the check pass are done in `trith/s2/`. They are compiled by s1 into `build/s2c`, which prints exactly what `trithc --tokens`, `trithc --ast` and `trithc --check` print, traces and error messages included, for every Trith file in the repository. Unlike s1, it exits with status 1 after an error.
+- Milestone 6: the compiler rewritten in Trith itself (stage s2, in `trith/s2/`), passing the fixpoint. s1 compiles it into `build/s2c`, which prints exactly what `trithc` prints for `--tokens`, `--ast`, `--check` and `--emit-llvm` (traces and error messages included) for every Trith file in the repository, and compiles programs the same way. s2 compiled by itself (s3) emits the same IR and is the same executable. Unlike s1, s2 exits with status 1 after an error, and it is much faster: it compiles its own 8,000-line source to IR in 0.35 s, where s1 takes 11 s.
 
 ```bash
 make trith          # builds build/trithc
@@ -103,13 +103,14 @@ The s2 sources (`trith/s2/src/*.trhx`) are logical-order Trith with a few author
 
 ```bash
 make s2             # builds build/s2c from trith/s2/s2c.trh with s1
-make s2-test        # s2 and s1 must agree on --tokens, --ast and --check for every .trh file (also run by make test)
+make s2-test        # s2 and s1 agree on every dump of every .trh file, and on every compiled test program
+make s3             # builds build/s3c: s2 compiled by s2
+make s2-fixpoint    # s3 must emit exactly what s2 emits, be the same executable, and pass s2-test (also run by make test)
 make s2-fuzz        # random lexer inputs, random programs and mutated tests, s2 against s1
 make s2-regen       # regenerate trith/s2/s2c.trh from trith/s2/src (needs python3)
 
-./build/s2c file.trh --tokens        # same output as trithc file.trh --tokens
-./build/s2c file.trh --ast           # same output as trithc file.trh --ast
-./build/s2c file.trh --check         # same output as trithc file.trh --check
+./build/s2c main.trh -o main         # compile, as trithc does (run from the repo root; needs clang)
+./build/s2c file.trh --tokens        # same output as trithc for --tokens, --ast, --check and --emit-llvm
 ```
 
 Golden tests: `trith/tests/<suite>/<name>.trh` is compared with `<name>.out`. To regenerate the `.out` files after an intended change, run `BLESS=1 TRITHC=build/trithc build/trith-tests` and review the diff.
@@ -122,7 +123,7 @@ Golden tests: `trith/tests/<suite>/<name>.trh` is compared with `<name>.out`. To
 - `tests/` Embedded test runner and helpers.
 - `examples/` Example programs (compile outputs into `output/`).
 - `docs/TRITH.md` Trith (v2) language spec.
-- `trith/` Trith compiler (s1 in `trith/src/`, written in UNHINGED), its golden tests and benchmarks, and the self-hosted compiler in progress (`trith/s2/`, written in Trith).
+- `trith/` Trith compiler (s1 in `trith/src/`, written in UNHINGED), its golden tests and benchmarks, and the self-hosted compiler (`trith/s2/`, written in Trith).
 
 ## Examples
 

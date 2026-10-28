@@ -1,4 +1,8 @@
-⍝ ==== s2 driver: s2c file.trh --tokens | --ast prints what trithc prints
+⍝ ==== s2 driver: s2c file.trh [-o out] [--tokens | --ast | --check | --emit-llvm] [--debug]
+⍝ The dumps print what trithc prints; without one, the program is compiled as trithc does.
+
+⎔ $trith_write_file$ ⟨⟗ʃ ⟗ʃ ⊸ ℤ⟩ ‹wfile› ⸫
+⎔ $system$ ⟨⟗ʃ ⊸ ℤ⟩ ‹system› ⸫
 
 ⍝ ‹streq2› a b: the strings are equal
 ⦃
@@ -16,10 +20,12 @@
 
 ⦃ ⧖:a,b ⧗:b ⟗ ⧗:a ‹streq2› ⧖:r ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ŧ⟩ ‹streqo› ⸫
 
-⍝ ‹modeof› arg: 1 for --tokens, 2 for --ast, 3 for --check, 4 for --emit-llvm, else 0
+⍝ ‹modeof› arg: 1 for --tokens, 2 for --ast, 3 for --check, 4 for --emit-llvm, 6 for -o,
+⍝ 15 for --debug (compile with -O0), else 0
 ⦃
-  ⟗ $--tokens$ ‹streqo› ⧖:r1 ⟗ $--ast$ ‹streqo› ⧖:r2 ⟗ $--check$ ‹streqo› ⧖:r3 ⟗ $--emit-llvm$ ‹streqo› ⧖:r4 ⌁̵
-  ○ ⧗:r4 ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼ ⧗:r3 ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧗:r2 ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:r1 ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
+  ⟗ $--tokens$ ‹streqo› ⧖:r1 ⟗ $--ast$ ‹streqo› ⧖:r2 ⟗ $--check$ ‹streqo› ⧖:r3 ⟗ $--emit-llvm$ ‹streqo› ⧖:r4
+  ⟗ $-o$ ‹streqo› ⧖:r6 ⟗ $--debug$ ‹streqo› ⧖:r15 ⌁̵
+  ○ ⧗:r15 ⋔ ⦃ ⌁ #15# ⦄ ∅ ⁼ ⧗:r6 ⋔ ⦃ ⌁ #6# ⦄ ∅ ⁼ ⧗:r4 ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼ ⧗:r3 ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧗:r2 ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:r1 ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
 ⦄ ⟨ʃ ⊸ ℤ⟩ ‹modeof› ⸫
 
 ⦃
@@ -42,18 +48,98 @@
   ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st △ ‹cinit› ‹check› ⌁̵ $ok\n$ ⎙̵ ⌁̵
 ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹checkw› ⸫
 
-⍝ ‹emitw› path toks: parse, tangle, check and print the LLVM IR
+⍝ ‹emitw› path toks debug: parse, tangle, check and print the LLVM IR
 ⦃
-  ⧖:path,toks
-  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st ○ ‹cinit› ‹check› ○ ‹egen› ⌁̵ ⌁̵
-⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹emitw› ⸫
+  ⧖:path,toks,dbg
+  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st ○ ‹cinit› ‹check› ⧗:dbg ‹egen› ⌁̵ ⌁̵
+⦄ ⟨⟗ʃ ⟦ℤ⟧ ℤ ⊸ ◌⟩ ‹emitw› ⸫
+
+⍝ ‹compilew› path toks mode: compile to an executable, as trithc does (5: next to the source, 6: -o)
+⦃
+  ⧖:path,toks,mode
+  ⧗:mode #10# ≶ ⋔ ⦃ △ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⧖:dbg
+  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st ○ ‹cinit› ‹check› ⧗:dbg ‹eir› ⧖:C,q
+  ⧗:C,q,mode,dbg ‹ebuild› ⌁̵ ⌁̵
+⦄ ⟨⟗ʃ ⟦ℤ⟧ ℤ ⊸ ◌⟩ ‹compilew› ⸫
+
+⍝ ‹eheapstr› cps C: code points (after a sentinel) as a heap string
+⦃
+  ⧖:pc,C
+  ⧗:C ‹sbeg› ⧖:C,e
+  ⧗:pc,C,e ○ ⧗:pc ᚴ
+  ⥀ ⦃
+    ⧖:pc,C,e,j,n
+    ⧗:pc,C,e,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:pc,C,e,j,n ⧗:pc ⧗:C,e ⧗:pc,j ᚳ ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⧖:e ⧖:C ⌁̱ ⧗:C,e
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eheapstr› ⸫
+⍝ ‹eoutname› C mode: the output path: argument 3 after -o, else the source without .trh (or .ŧ)
+⦃
+  ⧖:C,mode
+  ⧗:mode ⧗:mode #10# ≶ ⋔ ∅ ⦃ #10# ⊟ ⦄ ∅ ⧖:m
+  ⧗:C ⧗:m #6# ᛖ ⋔ ⦃ ‹eoutarg› ⦄ ⦃ ‹estripext› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eoutname› ⸫
+⦃
+  ⧖:C
+  ⧗:C #3# ᚨ ⁇ ⦃ ⟗ ᛞ ⧖:oc ⌁̵ ⧖:CC ⧗:oc ⟗ ⧗:CC ‹eheapstr› ⧖:CC2,s ⌁̵ ⧗:CC2,s ⦄ ⦃ ‹usage› #-1# ⦄
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eoutarg› ⸫
+⦃
+  ⧖:C
+  ⧗:C #6# ‹reg› ⧖:C,p
+  ⧗:C,p ‹slen› ⧖:C,n
+  ⧗:C,p ⧗:n #4# ⊟ ‹sat› ⧖:C,dot
+  ⧗:C,p ○ ⧗:n #2# ⊟ ⧗:n #4# ⊟ ⧗:dot #46# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ‹ssub›
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹estripext› ⸫
+⍝ ‹etextof› C s: a heap string as text
+⦃ ⧖:C,s ⧗:C »« ⧗:s ‹estext› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ʃ⟩ ‹etextof› ⸫
+⍝ ‹ewrite› C path q: write the lines of q to the file path (both heap strings)
+⦃
+  ⧖:C,path,q
+  ⧗:C,q »« ‹eqtext› ⧖:C,text
+  ⧗:C,path ‹etextof› ⧖:C,pt
+  ⧗:pt ⟗ ⧗:text ‹wfile2› ⧖:r ⌁̵
+  ⧗:C,path ⧗:r ○ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹spr› $: error: cannot write\n$ ⎙̵ △ ‹exit› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ewrite› ⸫
+⦃ ⧖:p,t ⧗:t ⟗ ⧗:p ⍿¹ ‹wfile› ⧖:r ⌁̱ ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ℤ⟩ ‹wfile2› ⸫
+⍝ ‹esys› C cmd: run a shell command (a heap string); stop if it fails
+⦃
+  ⧖:C,cmd
+  ⧗:C,cmd ‹etextof› ⧖:C,ct
+  ⧗:ct ⟗ ‹system› ⧖:r ⌁̵
+  ⧗:C ⧗:r ○ ᛖ ⋔ ⦃ ⦄ ⦃ △ ‹exit› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹esys› ⸫
+⍝ ‹ebuild› C q mode dbg: write the IR (and the FFI glue), then let clang and llvm-link make the executable
+⦃
+  ⧖:C,q,mode,dbg
+  ⧗:C,mode ‹eoutname› ⧖:C,out
+  ⧗:C %%{out}.ll%% ⧖:C,ll
+  ⧗:C,ll,q ‹ewrite› ⧖:C
+  ⧗:C ‹qnew› ‹eglue› ⧖:C,gq
+  ⧗:C ⧗:gq #2# ⊞ ‹rd› ⧖:C,ng
+  ⧗:C ⧗:dbg △ ᛖ ⋔ ⦃ %%-O0 -g%% ⦄ ⦃ %%-O2%% ⦄ ⁼ ⧖:C,opt
+  ⧗:C %%clang -S -emit-llvm {opt} -w -o {out}.c0.ll trith/runtime/trith_rt.c 2>&1%% ‹esys› ⧖:C
+  ⧗:C,out,gq,opt ⧗:ng ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ %%%% ⦄ ⦃ ‹eglueb› ⦄ ⁼ ⧖:C,more
+  ⧗:C %%llvm-link -o {out}.bc {ll} {out}.c0.ll{more} 2>&1%% ‹esys› ⧖:C
+  ⧗:C %%clang {opt} -w -o {out} {out}.bc -lm 2>&1%% ‹esys›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebuild› ⸫
+⍝ the FFI glue as C: written, compiled, and named for the link
+⦃
+  ⧖:C,out,gq,opt
+  ⧗:C %%{out}.ffi.c%% ⧖:C,gp
+  ⧗:C,gp,gq ‹ewrite› ⧖:C
+  ⧗:C %%clang -S -emit-llvm {opt} -w -o {out}.c1.ll {gp} 2>&1%% ‹esys› ⧖:C
+  ⧗:C %% {out}.c1.ll%%
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eglueb› ⸫
 
 ⦃
   ⧖:path,out,mode
   ⧗:path,out,mode ⍿⁰ △ ᛖ
   ⋔ ⦃ ⌁ ⧖:o ⧗:o ⟗ ‹dump› ⌁̵ ⌁̵ ⦄
     ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⧖:o ⟗ ⧗:o ‹astw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
-      ⦃ #3# ᛖ ⋔ ⦃ ⧖:o ⟗ ⧗:o ‹checkw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⦃ ⧖:o ⟗ ⧗:o ‹emitw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+      ⦃ ⍿⁰ #3# ᛖ ⋔ ⦃ ⌁ ⧖:o ⟗ ⧗:o ‹checkw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
+        ⦃ ⍿⁰ #4# ᛖ ⍿¹ #14# ᛖ ⋏ ⋔ ⦃ #14# ᛖ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧖:d ⧖:o ⟗ ⧗:o,d ‹emitw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
+          ⦃ ⧖:o,m ⟗ ⧗:o,m ‹compilew› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹run› ⸫
 
 ⦃
@@ -77,12 +163,19 @@
     ⦃ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄
 ⦄ ⟨ʃ ℤ ⊸⟩ ‹main1› ⸫
 
-⦃ $usage: s2c <file.trh> --tokens | --ast | --check | --emit-llvm\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
+⦃ $usage: s2c <file.trh> [-o <output>] [--tokens | --ast | --check | --emit-llvm] [--debug]\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
+
+⍝ ‹isdebug› i: argument i is --debug
+⦃ ᚨ ⁇ ⦃ ⟗ $--debug$ ‹streqo› ⧖:r ⌁̵ ⧗:r ⦄ ⦃ ⊕ ⦄ ⦄ ⟨ℤ ⊸ ŧ⟩ ‹isdebug› ⸫
+⍝ ‹modefix› m: a --debug after the mode (or after -o's path) adds 10, where it matters
+⦃
+  ⍿⁰ #6# ᛖ ⋔ ⦃ #4# ‹isdebug› ⋔ ⦃ #10# ⊞ ⦄ ∅ ⁼ ⦄ ⦃ ⍿⁰ #4# ᛖ ⋔ ⦃ #3# ‹isdebug› ⋔ ⦃ #10# ⊞ ⦄ ∅ ⁼ ⦄ ∅ ⁼ ⦄ ⁼
+⦄ ⟨ℤ ⊸ ℤ⟩ ‹modefix› ⸫
 
 ⦃
   △ ᚨ ⁇
     ⦃ #2# ᚨ ⁇
-        ⦃ ‹modeof› ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁̵ ‹usage› ⦄ ⦃ ‹main1› ⦄ ⁼ ⦄
-        ⦃ ⌁̵ ‹usage› ⦄ ⦄
+        ⦃ ‹modeof› ‹modefix› ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁̵ ‹usage› ⦄ ⦃ ‹main1› ⦄ ⁼ ⦄
+        ⦃ #5# ‹main1› ⦄ ⦄
     ⦃ ‹usage› ⦄
 ⦄ ⟨⊸⟩ ᛟ ⸫

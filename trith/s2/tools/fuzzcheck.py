@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Differential fuzzing of the s2 checker against s1 (trithc --check).
+"""Differential fuzzing of the s2 checker and code generator against s1.
 
 usage: fuzzcheck.py S2C TRITHC WORKDIR [SEED] [COUNT]
 
 Takes the Trith files under trith/tests and mutates them at the token level
 (drop, duplicate, swap neighbours, or replace a token with one from the same
 file), rebalances the breaths and mostly keeps mutants that still parse, and
-compares the two --check outputs, traces and errors included. Most mutants
-fail to check, each at a different point, so every rule gets both its
-passing and its failing paths exercised. Exits 1 if any case differs.
+compares the two --check outputs (traces and errors included) and the two
+--emit-llvm outputs. Most mutants fail to check, each at a different point,
+so every rule gets both its passing and its failing paths exercised. Exits 1
+if any case differs.
 """
 import glob
 import os
@@ -83,6 +84,8 @@ for k in range(N):
         if b'error' not in run([trithc, p, '--ast']) or R.random() < 0.1:
             break
     a, b = run([s2c, p, '--check']), run([trithc, p, '--check'])
+    if a == b and b.endswith(b'ok\n'):
+        a, b = run([s2c, p, '--emit-llvm']), run([trithc, p, '--emit-llvm'])
     if a != b:
         bad += 1
         if bad <= 5:

@@ -3,6 +3,8 @@
 ⍝ scanner's registers: token count (breaths included), carried marks lo and
 ⍝ hi, reading index k, chunk start k0 (−1: none), line done. Records follow:
 ⍝ kind line col marks idx v1 v2 n, then the n code points of the text.
+⍝ After the text come rn and the token's raw text as written (marks included,
+⍝ in physical order), which the check pass shows in its traces.
 ⍝ Kinds: 1 name 2 tname 3 anti 4 inverse 5 int 6 real 7 trit 8 glyph
 ⍝ 9 type 10 tprefix 11 bracket 12 string. idx −9 is none, −1 is ⁻, −2 is ⁺.
 ⍝ int: v1 value; real: v1/v2; type and tprefix: v1 prefix length, v2 slot of ⁽ or −1.
@@ -207,7 +209,7 @@
   ⧗:a ⧗:j #8# ⊞ ⧗:kind,v1,v2,n ‹ptype›
   ⧗:marks ᛗᛈ
   $\n$ ⎙̵
-  ⧗:j #8# ⊞ ⧗:n ⊞
+  ⧗:j #9# ⊞ ⧗:n ⊞ ⧗:a ⧗:j #8# ⊞ ⧗:n ⊞ ᚳ ⊞
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ‹prec› ⸫
 
 ⍝ ‹dump› a: every record, one per line
@@ -748,22 +750,23 @@
 
 ⍝ ---- tokens
 
-⍝ ‹emit1› out bs line col kind idx v1 v2 skip n mask: append a record
+⍝ ‹emit1› out bs line col kind idx v1 v2 skip n mask cps fb hi: append a record
 ⦃
-  ⧖:out,bs,line,col,kind,idx,v1,v2,skip,n,mask
+  ⧖:out,bs,line,col,kind,idx,v1,v2,skip,n,mask,cps,fb,hi
   ⧗:out ⧗:kind ⍆̵ ⧗:line ⍆̵ ⧗:col ⍆̵ ⧗:mask ⍆̵ ⧗:idx ⍆̵ ⧗:v1 ⍆̵ ⧗:v2 ⍆̵ ⧗:n ⍆̵ ⧖:out
-  ⧗:bs ⟗ ⧗:out,skip,n ‹copy› ⧖:out ⌁̵ ⧗:out
-⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹emit1› ⸫
+  ⧗:bs ⟗ ⧗:out,skip,n ‹copy› ⧖:out ⌁̵
+  ⧗:cps ⧗:out ⧗:hi ⧗:fb ⊟ △ ⊞ ⍆̵ ⧗:fb ⧗:hi ⧗:fb ⊟ △ ⊞ ‹copy›
+⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹emit1› ⸫
 
-⍝ ‹emit› out bs path line col kind idx v1 v2 skip n mask: count the token; record it unless it is a breath
+⍝ ‹emit› out bs path line col kind idx v1 v2 skip n mask cps fb hi: count the token; record it unless it is a breath
 ⦃
-  ⧖:out,bs,path,line,col,kind,idx,v1,v2,skip,n,mask
+  ⧖:out,bs,path,line,col,kind,idx,v1,v2,skip,n,mask,cps,fb,hi
   ⧗:bs ⟗ ⧗:skip ᚳ ⧖:c0 ⧖:bs
   ⧗:out ‹count1› ‹ok›
-  ⧗:bs,line,col,kind,idx,v1,v2,skip,n,mask
+  ⧗:bs,line,col,kind,idx,v1,v2,skip,n,mask,cps,fb,hi
   ⧗:kind #8# ᛖ ⧗:n △ ᛖ ⋎ ⧗:c0 #11825# ᛖ ⋎
-  ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̵ ⦄ ⦃ ‹emit1› ⦄ ⁼
-⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹emit› ⸫
+  ⋔ ⦃ ⌁ ⌁ ⌁̱ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁̵ ⦄ ⦃ ‹emit1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⟗⟦ℤ⟧ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹emit› ⸫
 
 ⦃
   ⧖:out,bs,path,line,col,kind,idx,v1,v2,skip,n,mask,code,bit
@@ -776,8 +779,8 @@
   ⧖:out,bs,cps,path,line,col,fb,hi,kind,idx,v1,v2,skip,n
   ⧗:bs ⟗ ⧗:skip ᚳ ⧖:c0 ⧖:bs
   ⧗:cps,fb,hi,kind,c0 ‹marks› ⧖:mask,code,bit
-  ⧗:out,bs,path,line,col,kind,idx,v1,v2,skip,n,mask,code,bit
-  ⧗:code ○ ᛖ ⋔ ⦃ ⌁ ⌁ ‹emit› ⦄ ⦃ ‹markerr› ⦄ ⁼
+  ⧗:out,bs,path,line,col,kind,idx,v1,v2,skip,n,mask,code,bit,cps,fb,hi
+  ⧗:code ○ ᛖ ⋔ ⦃ ⧖:cps2,fb2,hi2 ⌁ ⌁ ⧗:cps2,fb2,hi2 ‹emit› ⦄ ⦃ ⌁ ⌁ ⌁̱ ‹markerr› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹tokok› ⸫
 
 ⦃
@@ -849,7 +852,7 @@
   ⟗ #3# ᚳ ⧖:k ⧖:out
   ⧗:line,ls,le,k ᛈᛟ ⧖:p
   ⧗:cps,p ᚳ ⧗:line ᚹ ⋔ ∅ ⦃ ᛘ ⦄ ⁼ ⧖:b
-  ⧗:out #11# ⍆̵ ⧗:line ⍆̵ ⧗:p ⧗:ls ⊟ △ ⊞ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ○ ⍆̵ ○ ⍆̵ △ ⍆̵ ⧗:b ⍆̵
+  ⧗:out #11# ⍆̵ ⧗:line ⍆̵ ⧗:p ⧗:ls ⊟ △ ⊞ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ○ ⍆̵ ○ ⍆̵ △ ⍆̵ ⧗:b ⍆̵ △ ⍆̵ ⧗:b ⍆̵
   ‹count1› ‹kstep›
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹cbracket› ⸫
 
@@ -933,25 +936,42 @@
 ⍝ ‹chunkc› c: c continues a chunk
 ⦃ ⧖ ⧗⁰ ᛋ ⧗⁰ #9053# ᛖ ⋏ ⧗⁰ ᚸ ⋏ ⧗⁰ #187# ᛖ ⋏ ‹not› ⦄ ⟨ℤ ⊸ ŧ⟩ ‹chunkc› ⸫
 
+⍝ ‹copyn› b out from n: ‹copy›, but n may be 0 (or below)
+⦃
+  ⧖:b,out,from,n
+  ⧗:b,out,from,n ⧗:n ○ ≶ ⋔ ⦃ ⌁ ⌁ ⧖:o ⌁̱ ⧗:o ⦄ ⦃ ‹copy› ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹copyn› ⸫
+
+⍝ ‹sraw› out cps a b mlo mhi: a string's raw text: »content« and the marks mlo … mhi (none if mlo is −1)
+⦃
+  ⧖:out,cps,a,b,mlo,mhi
+  ⧗:mhi ⧗:mlo ⊟ △ ⊞ ⧗:mlo #-1# ᛖ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:nm
+  ⧗:b ⧗:a ⊟ △ ⊟ ⧖:nc
+  ⧗:cps ⧗:out ⧗:nc ⧗:nm ⊞ #2# ⊞ ⍆̵ #187# ⍆̵ ⧗:a △ ⊞ ⧗:nc ‹copyn› #171# ⍆̵ ⧖:out
+  ⧗:cps ⧗:out ⧗:mlo ⧗:nm ‹copyn›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sraw› ⸫
+
 ⍝ ‹smodd› …: on an odd line the marks follow «
 ⦃
-  ⧖:out,cps,path,line,ls,le,kc,pc,left,r
+  ⧖:out,cps,path,line,ls,le,kc,pc,left,r,right
   ⧗:cps ⧗:pc △ ⊞ ⧗:le △ ⊟ ‹skipm› ⧖:q
   ⍝ errors in these marks point at the chunk that follows them, as in s1
   ⧗:pc △ ⊞ ⧗:ls ⊟ △ ⊞ ⧗:q ⧗:ls ⊟ △ ⊞
   ⧗:q ⧗:le ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:cps,q ᚳ ‹chunkc› ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:col
   ⧗:out,cps,path,line,r ⧗:pc △ ⊞ ⧗:q △ ⊟ ⧗:col ‹smarks›
+  ⧗:cps,left,right ⧗:pc △ ⊞ ⧗:q △ ⊟ ‹sraw›
   #3# ⧗:kc ⧗:q ⊞ ⧗:pc ⊟ ‹set›
-⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹smodd› ⸫
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹smodd› ⸫
 
 ⍝ ‹smeven› …: on an even line the marks were carried from the chunk before »
 ⦃
-  ⧖:out,cps,path,line,ls,le,kc,pc,left,r
+  ⧖:out,cps,path,line,ls,le,kc,pc,left,r,right
   ⧗:out ⟗ △ ᚳ ⧖:clo ⟗ #2# ᚳ ⧖:chi ⧖:out
   ⧗:out △ #-1# ‹set› #2# #-1# ‹set› ‹ok›
   ⧗:cps,path,line,r,clo,chi ⧗:left ⧗:ls ⊟ △ ⊞ ‹smarks›
+  ⧗:cps,left,right,clo,chi ‹sraw›
   #3# ⧗:kc △ ⊞ ‹set›
-⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹smeven› ⸫
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹smeven› ⸫
 
 ⦃
   ⧖:out,cps,path,line,ls,le,k,kc
@@ -969,7 +989,7 @@
   ⧗:right ⧗:left ⊟ △ ⊟ ⧖:n
   ⧗:out #12# ⍆̵ ⧗:line ⍆̵ ⧗:left ⧗:ls ⊟ △ ⊞ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ○ ⍆̵ ○ ⍆̵ ⧗:n ⍆̵
   ⧗:cps,left,right ‹decode› ‹count1› ‹ok›
-  ⧗:cps,path,line,ls,le,kc,pc,left,r
+  ⧗:cps,path,line,ls,le,kc,pc,left,r,right
   ⧗:line ᚹ ⋔ ⦃ ‹smodd› ⦄ ⦃ ‹smeven› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹string› ⸫
 

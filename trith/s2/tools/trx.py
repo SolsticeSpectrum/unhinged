@@ -14,6 +14,7 @@ their common prefix.  A name that is not visible is an error.
 """
 import re, sys
 
+LINEAR = {'C'}  # names that hold owned arrays: reading one moves it out
 SUP = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
 
 def bt(n):
@@ -108,7 +109,12 @@ def process(src):
                     ns = stack[-1].names
                     for i in range(len(ns) - 1, -1, -1):
                         if ns[i] == nm:
-                            rs.append('⧗' + str(len(ns) - 1 - i).translate(SUP)); break
+                            rs.append('⧗' + str(len(ns) - 1 - i).translate(SUP))
+                            if nm in LINEAR:
+                                ns[i] = '(moved ' + nm + ')'
+                            break
+                        if ns[i] == '(moved ' + nm + ')':
+                            fail(lineno, f'moment {nm} was already moved out (it holds an owned array)')
                     else:
                         fail(lineno, f'moment {nm} is not visible here')
                 r = ' '.join(rs)
@@ -127,12 +133,14 @@ def literals(src):
     src = re.sub(r'@any\(([-\d,]+)\)@', anyof, src)
     def strlit(m):
         t = m.group(1).replace('\\n', '↵')
-        return '»' + t[::-1] + '«'
+        # reverse by cluster: a combining mark stays after its base
+        return '»' + ''.join(re.findall(r'.[\u0300-\u036f]*', t)[::-1]) + '«'
     src = re.sub(r'\$([^$\n]*)\$', strlit, src)
     src = re.sub(r'#(-?\d+)#', lambda m: bt(int(m.group(1))), src)
     return re.sub(r'‹([^›\s]+)›', runic, src)
 
-PREFIXES = 'ᚡᚣᚤᚥᚧ'  # never used as names on their own
+PREFIXES = list('ᚡᚣᚤᚥᚧ')  # never used as names on their own
+PREFIXES += [a + b for a in 'ᚡᚣᚤᚥᚧ' for b in 'ᚡᚣᚤᚥᚧ']
 RUNES = [chr(c) for c in range(0x16A0, 0x16EB) if c not in (0x16A1, 0x16A3)]
 NAMES = {}
 def runic(m):

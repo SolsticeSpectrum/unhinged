@@ -79,7 +79,7 @@ Done so far:
 
 Generated code runs at C speed (within about 0.9–1.06× of `clang -O2`) on all four benchmarks: fib, Collatz, n-body and Game of Life.
 
-Milestone 6, rewriting the compiler in Trith itself (stage s2), is under way. The lexer and the parser (with tangling) are done in `trith/s2/`. They are compiled by s1 into `build/s2c`, which prints exactly what `trithc --tokens` and `trithc --ast` print, error messages included, for every Trith file in the repository. Unlike s1, it exits with status 1 after an error.
+Milestone 6, rewriting the compiler in Trith itself (stage s2), is under way. The lexer, the parser (with tangling) and the check pass are done in `trith/s2/`. They are compiled by s1 into `build/s2c`, which prints exactly what `trithc --tokens`, `trithc --ast` and `trithc --check` print, traces and error messages included, for every Trith file in the repository. Unlike s1, it exits with status 1 after an error.
 
 ```bash
 make trith          # builds build/trithc
@@ -103,12 +103,13 @@ The s2 sources (`trith/s2/src/*.trhx`) are logical-order Trith with a few author
 
 ```bash
 make s2             # builds build/s2c from trith/s2/s2c.trh with s1
-make s2-test        # s2 and s1 must agree on --tokens and --ast for every .trh file (also run by make test)
-make s2-fuzz        # random lexer inputs and random programs, s2 against s1
+make s2-test        # s2 and s1 must agree on --tokens, --ast and --check for every .trh file (also run by make test)
+make s2-fuzz        # random lexer inputs, random programs and mutated tests, s2 against s1
 make s2-regen       # regenerate trith/s2/s2c.trh from trith/s2/src (needs python3)
 
 ./build/s2c file.trh --tokens        # same output as trithc file.trh --tokens
 ./build/s2c file.trh --ast           # same output as trithc file.trh --ast
+./build/s2c file.trh --check         # same output as trithc file.trh --check
 ```
 
 Golden tests: `trith/tests/<suite>/<name>.trh` is compared with `<name>.out`. To regenerate the `.out` files after an intended change, run `BLESS=1 TRITHC=build/trithc build/trith-tests` and review the diff.

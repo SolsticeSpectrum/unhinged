@@ -16,10 +16,10 @@
 
 ⦃ ⧖:a,b ⧗:b ⟗ ⧗:a ‹streq2› ⧖:r ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ŧ⟩ ‹streqo› ⸫
 
-⍝ ‹modeof› arg: 1 for --tokens, 2 for --ast, else 0
+⍝ ‹modeof› arg: 1 for --tokens, 2 for --ast, 3 for --check, else 0
 ⦃
-  ⟗ $--tokens$ ‹streqo› ⧖:r1 ⟗ $--ast$ ‹streqo› ⧖:r2 ⌁̵
-  ○ ⧗:r2 ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:r1 ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
+  ⟗ $--tokens$ ‹streqo› ⧖:r1 ⟗ $--ast$ ‹streqo› ⧖:r2 ⟗ $--check$ ‹streqo› ⧖:r3 ⌁̵
+  ○ ⧗:r3 ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧗:r2 ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:r1 ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
 ⦄ ⟨ʃ ⊸ ℤ⟩ ‹modeof› ⸫
 
 ⦃
@@ -36,11 +36,18 @@
   ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:st ‹dumpw› ⌁̵
 ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹astw› ⸫
 
+⍝ ‹checkw› path toks: parse, tangle and check (printing the trace), then "ok"
+⦃
+  ⧖:path,toks
+  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st △ ‹cinit› ‹check› ⌁̵ $ok\n$ ⎙̵ ⌁̵
+⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹checkw› ⸫
+
 ⦃
   ⧖:path,out,mode
-  ⧗:path,out ⧗:mode △ ᛖ
-  ⋔ ⦃ ⧖:o ⧗:o ⟗ ‹dump› ⌁̵ ⌁̵ ⦄
-    ⦃ ⧖:o ⟗ ⧗:o ‹astw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼
+  ⧗:path,out,mode ⍿⁰ △ ᛖ
+  ⋔ ⦃ ⌁ ⧖:o ⧗:o ⟗ ‹dump› ⌁̵ ⌁̵ ⦄
+    ⦃ #2# ᛖ ⋔ ⦃ ⧖:o ⟗ ⧗:o ‹astw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
+      ⦃ ⧖:o ⟗ ⧗:o ‹checkw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹run› ⸫
 
 ⦃
@@ -64,7 +71,7 @@
     ⦃ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄
 ⦄ ⟨ʃ ℤ ⊸⟩ ‹main1› ⸫
 
-⦃ $usage: s2c <file.trh> --tokens | --ast\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
+⦃ $usage: s2c <file.trh> --tokens | --ast | --check\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
 
 ⦃
   △ ᚨ ⁇

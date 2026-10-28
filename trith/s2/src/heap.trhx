@@ -1,0 +1,194 @@
+⍝ ==== s2 heap: one owned ⟦ℤ⟧ (after a sentinel) holding everything a pass needs
+⍝ Slots 0 … 39 are registers; the arena follows. Nothing in the arena is ever
+⍝ freed. Strings are interned [next n cps…] (their slot is their identity);
+⍝ lists are [n elements…] and are never changed once built, except while being
+⍝ built, which must not interleave with other allocations.
+
+⦃ ⧖:i ⟗ ⧗:i ᚳ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rd› ⸫
+⦃ ⧖:C,i,v ⧗:C ⟗ ⍴̱ ⧖:len ⟖ ⧗:i △ ⊞ ⧗:len △ ≫ ⊟ ⧗:v ⍈̱ ⁇ ⦃ ⦄ ⦃ ⦄ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹wr› ⸫
+⦃ ⟗ ᚴ ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹len› ⸫
+⍝ ‹inc› C i: register i plus one, giving its old value
+⦃ ⧖:C,i ⧗:C,i ‹rd› ⧖:C,v ⧗:C,i ⧗:v △ ⊞ ‹wr› ⧗:v ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹inc› ⸫
+
+⍝ ---- strings
+
+⦃ ‹len› ⧖:e #-1# ⍆̵ ○ ⍆̵ ⧗:e ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹sbeg› ⸫
+⦃
+  ⧖:C,e,cp
+  ⧗:C ⧗:cp ⍆̵ ⧗:e △ ⊞ ‹rd› ⧖:C,n
+  ⧗:C ⧗:e △ ⊞ ⧗:n △ ⊞ ‹wr›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹scp› ⸫
+
+⍝ ‹sapp› C e s: append the code points of string s to the string being built at e
+⦃
+  ⧖:C,e,s
+  ⧗:C ⧗:s △ ⊞ ‹rd› ⧖:C,n
+  ⧗:C,e ⧗:s #2# ⊞ ⧗:s #2# ⊞ ⧗:n ⊞
+  ⥀ ⦃
+    ⧖:C,e,j,end
+    ⧗:C,e,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,e,j,end ⧗:C,j ‹rd› ⧖:C,c ⧗:C,e,c ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sapp› ⸫
+
+⍝ ‹seq› C a b: strings a and b are equal
+⦃
+  ⧖:C,a,b
+  ⧗:C ⧗:a △ ⊞ ‹rd› ⧖:C,na ⧗:C ⧗:b △ ⊞ ‹rd› ⧖:C,nb
+  ⧗:C ⧗:na ⧗:nb ᛖ ⧗:a #2# ⊞ ⧗:b #2# ⊞ ⧗:na
+  ⍝ the loop carries [C acc i j left]
+  ⥀ ⦃
+    ⧖:C,acc,i,j,left
+    ⧗:C,acc,i,j,left ○ ⧗:left ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,acc,i,j,left ⧗:C,i ‹rd› ⧖:C,x ⧗:C,j ‹rd› ⧖:C,y
+        ⧗:C ⧗:acc ⧗:x ⧗:y ᛖ ⋎ ⧗:i △ ⊞ ⧗:j △ ⊞ ⧗:left △ ⊟ ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹seq› ⸫
+
+⍝ ‹send› C e: intern the string built at e
+⦃
+  ⧖:C,e
+  ⧗:C #3# ‹rd› ⧖:C,head
+  ⧗:C,head,e #-1#
+  ⍝ the loop carries [C x e found]
+  ⥀ ⦃
+    ⧖:C,x,e,found
+    ⧗:C,x,e,found ⧗:x #-1# ᛖ ⧗:found #-1# ᛖ ‹not› ⋏ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,x,e,found ⧗:C,x,e ‹seq› ⧖:C,same ⧗:C,x ‹rd› ⧖:C,nx
+        ⧗:C ⧗:nx ⧗:e ⧗:x ⧗:found ⧗:same ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,x,e,found
+  ⧗:C,e,found ⧗:found #-1# ᛖ
+  ⋔ ⦃ ⧖:C,e,found ⧗:C #3# ‹rd› ⧖:C,head ⧗:C,e,head ‹wr› #3# ⧗:e ‹wr› ⧗:e ⦄ ⦃ ⧖:f ⌁ ⧗:f ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹send› ⸫
+
+⍝ ‹spr› C s: print string s
+⦃
+  ⧖:C,s
+  ⧗:C ⧗:s △ ⊞ ‹rd› ⧖:C,n
+  ⧗:C ⧗:s #2# ⊞ ⧗:s #2# ⊞ ⧗:n ⊞
+  ⥀ ⦃
+    ⧖:C,j,end
+    ⧗:C,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,j,end ⧗:C,j ‹rd› ᚢ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+  ⦄
+  ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹spr› ⸫
+
+⦃ ⧖:C,c ⧗:C ‹sbeg› ⧖:C,e ⧗:C,e,c ‹scp› ⧗:e ‹send› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹str1› ⸫
+⦃ ⧖:C,a,b ⧗:C ‹sbeg› ⧖:C,e ⧗:C,e,a ‹scp› ⧗:e,b ‹scp› ⧗:e ‹send› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹str2› ⸫
+⍝ ‹scat› C a b: a followed by b
+⦃ ⧖:C,a,b ⧗:C ‹sbeg› ⧖:C,e ⧗:C,e,a ‹sapp› ⧗:e,b ‹sapp› ⧗:e ‹send› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹scat› ⸫
+⍝ ‹spre› C cp s: cp followed by s
+⦃ ⧖:C,cp,s ⧗:C ‹sbeg› ⧖:C,e ⧗:C,e,cp ‹scp› ⧗:e,s ‹sapp› ⧗:e ‹send› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹spre› ⸫
+⍝ ‹slen› C s
+⦃ ⧖:C,s ⧗:C ⧗:s △ ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹slen› ⸫
+⍝ ‹sat› C s i: code point i of s, or −1
+⦃
+  ⧖:C,s,i
+  ⧗:C,s ‹slen› ⧖:C,n
+  ⧗:C ⧗:s #2# ⊞ ⧗:i ⊞ ‹rd› ⧗:i ⧗:n ≶ ⋔ ⦃ ⌁ #-1# ⦄ ⁼ ∅ ⧗:i ○ ≶ ⋔ ∅ ⁼ ⦃ ⌁ #-1# ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹sat› ⸫
+⍝ ‹ssub› C s from n: n code points of s from from
+⦃
+  ⧖:C,s,from,n
+  ⧗:C ‹sbeg› ⧖:C,e
+  ⧗:C,e ⧗:s #2# ⊞ ⧗:from ⊞ ⧗:n
+  ⥀ ⦃
+    ⧖:C,e,j,left
+    ⧗:C,e,j,left ○ ⧗:left ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,e,j,left ⧗:C,j ‹rd› ⧖:C,c ⧗:C,e,c ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:left △ ⊟ ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⧗:e ‹send›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ssub› ⸫
+⍝ ‹stail› C s: s without its first code point
+⦃ ⧖:C,s ⧗:C,s ‹slen› ⧖:C,n ⧗:C,s △ ⧗:n △ ⊟ ‹ssub› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹stail› ⸫
+⍝ ‹shead› C s: the first code point of s, or −1
+⦃ ○ ‹sat› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹shead› ⸫
+⍝ ‹spfx2› C s a b: s starts with a b
+⦃
+  ⧖:C,s,a,b
+  ⧗:C,s ○ ‹sat› ⧖:C,x ⧗:C,s △ ‹sat› ⧖:C,y
+  ⧗:C ⧗:x ⧗:a ᛖ ⧗:y ⧗:b ᛖ ⋎
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹spfx2› ⸫
+
+⍝ ---- lists
+
+⦃ ‹len› ⧖:L ○ ⍆̵ ⧗:L ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹lbeg› ⸫
+⦃ ⧖:C,L,v ⧗:C ⧗:v ⍆̵ ⧗:L ‹rd› ⧖:C,n ⧗:C,L ⧗:n △ ⊞ ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ladd› ⸫
+⦃ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹llen› ⸫
+⦃ ⧖:C,L,i ⧗:C ⧗:L △ ⊞ ⧗:i ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹lget› ⸫
+⍝ ‹lset› C L i v: change element i in place (only while the list is private)
+⦃ ⧖:C,L,i,v ⧗:C ⧗:L △ ⊞ ⧗:i ⊞ ⧗:v ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹lset› ⸫
+⍝ ‹lslice› C L a b: a new list of elements a … b−1
+⦃
+  ⧖:C,L,a,b
+  ⧗:C ‹lbeg› ⧖:C,M
+  ⧗:C,L,M,a,b
+  ⥀ ⦃
+    ⧖:C,L,M,j,b
+    ⧗:C,L,M,j,b ⧗:j ⧗:b ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,M,j,b ⧗:C,L,j ‹lget› ⧖:C,v ⧗:C,M,v ‹ladd› ⧗:L,M ⧗:j △ ⊞ ⧗:b ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⧗:M
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹lslice› ⸫
+⍝ ‹lcopy› C L
+⦃ ⧖:C,L ⧗:C,L ‹llen› ⧖:C,n ⧗:C,L ○ ⧗:n ‹lslice› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹lcopy› ⸫
+⍝ ‹lpush› C L v: a new list, L then v
+⦃ ⧖:C,L,v ⧗:C,L ‹lcopy› ⧖:C,M ⧗:C,M,v ‹ladd› ⧗:M ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹lpush› ⸫
+⍝ ‹lcat› C A B: a new list, A then B
+⦃
+  ⧖:C,A,B
+  ⧗:C,A ‹lcopy› ⧖:C,M
+  ⧗:C,B ‹llen› ⧖:C,n
+  ⧗:C,B,M ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,B,M,j,n
+    ⧗:C,B,M,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,B,M,j,n ⧗:C,B,j ‹lget› ⧖:C,v ⧗:C,M,v ‹ladd› ⧗:B,M ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⧗:M
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹lcat› ⸫
+⍝ ‹lhas› C L v: v is an element of L
+⦃
+  ⧖:C,L,v
+  ⧗:C,L ‹llen› ⧖:C,n
+  ⧗:C,L,v ○ ⧗:n ⊕
+  ⥀ ⦃
+    ⧖:C,L,v,j,n,acc
+    ⧗:C,L,v,j,n,acc ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,v,j,n,acc ⧗:C,L,j ‹lget› ⧖:C,x ⧗:C,L,v ⧗:j △ ⊞ ⧗:n ⧗:acc ⧗:x ⧗:v ᛖ ⋏ ⊕ ⦄
+  ⦄
+  ⧖:acc ⌁ ⌁ ⌁ ⌁ ⧗:acc
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹lhas› ⸫
+⍝ ‹lnew0› C: the empty list
+⦃ ‹lbeg› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹lnew0› ⸫
+⍝ ‹l1› C a: [a]
+⦃ ⧖:C,a ⧗:C ‹lbeg› ⧖:C,L ⧗:C,L,a ‹ladd› ⧗:L ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹l1› ⸫
+⍝ ‹leq› C A B: equal lists
+⦃
+  ⧖:C,A,B
+  ⧗:C,A ‹llen› ⧖:C,na ⧗:C,B ‹llen› ⧖:C,nb
+  ⧗:C ⧗:na ⧗:nb ᛖ ⧗:A △ ⊞ ⧗:B △ ⊞ ⧗:na
+  ⥀ ⦃
+    ⧖:C,acc,i,j,left
+    ⧗:C,acc,i,j,left ○ ⧗:left ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,acc,i,j,left ⧗:C,i ‹rd› ⧖:C,x ⧗:C,j ‹rd› ⧖:C,y
+        ⧗:C ⧗:acc ⧗:x ⧗:y ᛖ ⋎ ⧗:i △ ⊞ ⧗:j △ ⊞ ⧗:left △ ⊟ ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹leq› ⸫
+
+⍝ ‹cpyin› a C: append all of a (sentinel excluded) to C
+⦃
+  ⧖:a,C
+  ⧗:a,C ○ ⧗:a ᚴ
+  ⥀ ⦃
+    ⧖:a,C,j,n
+    ⧗:a,C,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:a,C,j,n ⧗:a ⧗:C ⧗:a,j ᚳ ⍆̵ ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⧖:C ⌁̱ ⧗:C
+⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cpyin› ⸫

@@ -1,5 +1,5 @@
 #!/bin/sh
-# s2 tests: s2c must print exactly what s1 prints for --tokens and --ast,
+# s2 tests: s2c must print exactly what s1 prints for --tokens, --ast and --check,
 # for every Trith file in the repository (errors included), its own source
 # among them. Run from the repo root after `make s2`.
 TRITHC=${TRITHC:-build/trithc}
@@ -8,7 +8,7 @@ mkdir -p output
 pass=0
 fail=0
 for f in $(find trith -name '*.trh' | sort); do
-    for mode in --tokens --ast; do
+    for mode in --tokens --ast --check; do
         "$S2C" "$f" $mode > output/s2.out 2>&1
         "$TRITHC" "$f" $mode > output/s1.out 2>&1
         if cmp -s output/s2.out output/s1.out; then

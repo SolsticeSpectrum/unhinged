@@ -1,0 +1,178 @@
+⍝ ==== s2 check pass: types (canonical strings, as in s1), charges, evidentials
+⍝ Registers: 0 next value id, 1 tracing, 2 the function may fail, 3 the
+⍝ interned strings, 4 token buffer base, 5 tree base, 6 path, 7 functions,
+⍝ 8 particles, 9 shapes, 10 … 20 common types: ŧ ℤ ℝ 𝔹 ʃ ◌ "" "*" ⟗ʃ ⟖ʃ ◌𝔹,
+⍝ 24 first tangled item, 25 end of the tree.
+⍝ Evidentials: 0 witnessed, 1 inferred, 2 hearsay. Charges are canonical
+⍝ strings ("" neutral, "*" a gluon, "u·d^-1").
+
+⦃ ⧖:C,t ⧗:C ○ ⧗:t ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹reg› ⸫
+
+⍝ ‹tis› C t r: type t is the common type in register r
+⦃ ⧖:C,t,r ⧗:C,r ‹rd› ⧖:C,x ⧗:C ⧗:t ⧗:x ᛖ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹tis› ⸫
+
+⍝ ‹isbasecp› c: ŧ ℤ ℝ 𝔹 ʃ
+⦃ ⧖ @any(359,8484,8477,120121,643)@ ⦄ ⟨ℤ ⊸ ŧ⟩ ‹isbasecp› ⸫
+
+⍝ ‹psiinner› C t: ψₙT → T
+⦃
+  ⧖:C,t
+  ⧗:C,t ‹slen› ⧖:C,n
+  ⧗:C,t △ ⧗:n
+  ⥀ ⦃
+    ⧖:C,t,i,n
+    ⧗:C,t,i ‹sat› ⧖:C,c
+    ⧗:C,t,i,n ⧗:c #8320# #8329# ᛦ ⧗:i ⧗:n ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⋔ ⦃ ⧖:n2 △ ⊞ ⧗:n2 ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:C,t,i,n ⧗:C,t,i ⧗:n ⧗:i ⊟ ‹ssub›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹psiinner› ⸫
+
+⍝ ‹psicount› C t: the number of alternatives of ψₙT (1 for other types)
+⦃
+  ⧖:C,t
+  ⧗:C,t ‹shead› ⧖:C,h
+  ⧗:C,t ⧗:h #968# ᛖ ⋔ ⦃ ‹psicount1› ⦄ ⦃ ⌁ △ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹psicount› ⸫
+⦃
+  ⧖:C,t
+  ⧗:C,t △ ○
+  ⥀ ⦃
+    ⧖:C,t,i,n
+    ⧗:C,t,i ‹sat› ⧖:C,c
+    ⧗:C,t,i,n,c ⧗:c #8320# #8329# ᛦ ⋔ ⦃ ⧖:i,n,c ⧗:i △ ⊞ ⧗:n #10# ⊠ ⧗:c #8320# ⊟ ⊞ ⊕ ⦄ ⦃ ⌁ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:C,t,i,n ⧗:C,n
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹psicount1› ⸫
+
+⦃
+  ⧖:C,t
+  ⧗:C,t ‹shead› ⧖:C,h
+  ⧗:C,t ⧗:h #968# ᛖ ⋔ ⦃ ‹psiinner› ⦄ ∅ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹psibase› ⸫
+
+⍝ ‹sdec› C e n: append n in decimal to the string being built at e
+⦃
+  ⧖:C,e,n
+  ⧗:C,e,n ⧗:n ○ ≶ ⋔ ⦃ ⌁ #48# ‹scp› ⦄ ⦃ ‹sdec1› ⦄ ⦃ ⧖:C,e,n ⧗:C,e #45# ‹scp› ⧗:e ⧗:n ⊝ ‹sdec1› ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sdec› ⸫
+⦃
+  ⧖:C,e,n
+  ⧗:n #10# ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ #10# ⊞ ⦄ ⧖:r
+  ⧗:n ⧗:r ⊟ #10# ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:q
+  ⧗:C,e,q ⧗:q ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹sdec1› ⦄ ⁼
+  ⧗:e ⧗:r #48# ⊞ ‹scp›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sdec1› ⸫
+
+⍝ ‹psitype› C n base: ψₙ base
+⦃
+  ⧖:C,n,base
+  ⧗:C ‹sbeg› ⧖:C,d ⧗:C,d,n ‹sdec›
+  ‹sbeg› ⧖:C,e ⧗:C,e #968# ‹scp› ⧖:C
+  ⍝ the decimal digits, as subscripts
+  ⧗:C,d ‹slen› ⧖:C,nd
+  ⧗:C,e,d ○ ⧗:nd
+  ⥀ ⦃
+    ⧖:C,e,d,i,nd
+    ⧗:C,e,d,i,nd ⧗:i ⧗:nd ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,e,d,i,nd ⧗:C ⧗:d #2# ⊞ ⧗:i ⊞ ‹rd› ⧖:C,c ⧗:C,e ⧗:c #8272# ⊞ ‹scp› ⧗:e,d ⧗:i △ ⊞ ⧗:nd ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⧗:e,base ‹sapp› ⧗:e ‹send›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹psitype› ⸫
+
+⍝ ‹tclass› C t: 0 classical, 1 borrowed, 2 superposed, 3 quantum (§3, §6.1)
+⦃
+  ⧖:C,t
+  ⧗:C,t #16# ‹tis› ⧖:C,e ⧗:C,t #15# ‹tis› ⧖:C,f ⧗:C,t ‹shead› ⧖:C,h
+  ⧗:C,t,h ⧗:e ⧗:f ⋏ ⋔ ⦃ ⌁ ⌁ ○ ⦄ ⦃ ‹tclass1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tclass› ⸫
+⦃
+  ⧖:C,t,h
+  ⧗:C,t,h ⧗:h #10199# ᛖ ⧗:h #10198# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ △ ⦄
+    ⦃ ⧖:C,t,h ⧗:C,t,h ⧗:h #968# ᛖ ⋔ ⦃ ⌁ ⌁ #2# ⦄
+      ⦃ ⧖:C,t,h ⧗:C,t,h ⧗:h #9676# ᛖ ⋔ ⦃ ⌁ ‹stail› ‹tclass› ⦄
+        ⦃ ⧖:h ⌁ ⧗:h ⧗:h ‹isbasecp› ⧗:h #643# ᛖ ‹not› ⋎ ⋔ ⦃ ⌁ ○ ⦄ ⦃ ⌁ #3# ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tclass1› ⸫
+
+⍝ ‹tcopy› C t: values of type t may be copied freely
+⦃
+  ⧖:C,t
+  ⧗:C,t #16# ‹tis› ⧖:C,e ⧗:C,t #15# ‹tis› ⧖:C,f ⧗:C,t ‹shead› ⧖:C,h
+  ⧗:C,t,h ⧗:e ⧗:f ⋏ ⧗:h #10199# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ ⦶ ⦄
+    ⦃ ⧖:C,t,h ⧗:C,t,h ⧗:h #9676# ᛖ ⋔ ⦃ ⌁ ‹stail› ‹tcopy› ⦄
+      ⦃ ⧖:C,t,h ⧗:C,t,h ⧗:h #968# ᛖ ⋔ ⦃ ⌁ ‹psiinner› ‹tcopy› ⦄ ⦃ ⌁ ‹tclass› ○ ᛖ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹tcopy› ⸫
+
+⍝ ‹tnum› C t: ℤ, ℝ or 𝔹
+⦃ ⧖:C,t ⧗:C,t #11# ‹tis› ⧖:C,a ⧗:C,t #12# ‹tis› ⧖:C,b ⧗:C,t #13# ‹tis› ⧖:C,c ⧗:C ⧗:a ⧗:b ⋏ ⧗:c ⋏ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹tnum› ⸫
+
+⍝ ---- evidentials and charges
+
+⦃ ⍿¹ ⍿¹ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦄ ⟨ℤ ℤ ⊸ ℤ⟩ ‹evmax› ⸫
+⍝ ‹evok› have want: a value with evidential have may flow where want is declared
+⦃
+  ⧖:have,want
+  ⧗:want #2# ᛖ ⧗:want △ ᛖ ⧗:have #2# ᛖ ‹not› ⋎ ⋏ ⧗:want ○ ᛖ ⧗:have ○ ᛖ ⋎ ⋏
+⦄ ⟨ℤ ℤ ⊸ ŧ⟩ ‹evok› ⸫
+⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ $hearsay ⸮$ ⎙̵ ⦄ ⦃ △ ᛖ ⋔ ⦃ $inferred ⁖$ ⎙̵ ⦄ ⦃ $witnessed$ ⎙̵ ⦄ ⁼ ⦄ ⁼ ⦄ ⟨ℤ ⊸⟩ ‹evname› ⸫
+
+⍝ ‹chvec› C c: the exponents of u d s c b t in canonical charge c
+⦃
+  ⧖:C,c
+  ⧗:C,c ‹slen› ⧖:C,n
+  ⍝ the loop carries [C c i n e1 … e6]
+  ⧗:C,c ○ ⧗:n ○ ○ ○ ○ ○ ○
+  ⥀ ⦃
+    ⧖:C,c,i,n,e1,e2,e3,e4,e5,e6
+    ⧗:C,c,i,n,e1,e2,e3,e4,e5,e6 ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹chfactor› ⊕ ⦄
+  ⦄
+  ⧖:C,c,i,n,e1,e2,e3,e4,e5,e6 ⧗:C,e1,e2,e3,e4,e5,e6
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹chvec› ⸫
+
+⍝ ‹chfactor› C c i n e1 … e6: read "f" or "f^e" at i (and a following ·)
+⦃
+  ⧖:C,c,i,n,e1,e2,e3,e4,e5,e6
+  ⧗:C,c,i ‹sat› ⧖:C,f
+  ⧗:C,c ⧗:i △ ⊞ ‹sat› ⧖:C,x
+  ⍝ an exponent: ^, an optional -, digits
+  ⧗:C,c ⧗:i △ ⊞ ⧗:x #94# ᛖ ⋔ ⦃ △ ⊞ ‹chexp› ⦄ ⦃ ⧖:k ⌁ ⧗:k △ ⊟ △ ⦄ ⁼ ⧖:C,j,e
+  ⧗:C,c ⧗:j #2# ⊞ ⧗:n
+  ⧗:e1 ⧗:e ⧗:f #117# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:e2 ⧗:e ⧗:f #100# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:e3 ⧗:e ⧗:f #115# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:e4 ⧗:e ⧗:f #99# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:e5 ⧗:e ⧗:f #98# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:e6 ⧗:e ⧗:f #116# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹chfactor› ⸫
+
+⍝ ‹chexp› C c i: a signed decimal at i: the slot after it and its value
+⦃
+  ⧖:C,c,i
+  ⧗:C,c,i ‹sat› ⧖:C,s
+  ⧗:C,c ⧗:i ⧗:s #45# ᛖ ⋔ ⦃ △ ⊞ ⦄ ∅ ⁼ ○
+  ⥀ ⦃
+    ⧖:C,c,j,v
+    ⧗:C,c,j ‹sat› ⧖:C,d
+    ⧗:C,c,j,v,d ⧗:d #48# #57# ᛦ ⋔ ⦃ ⧖:j,v,d ⧗:j △ ⊞ ⧗:v #10# ⊠ ⧗:d #48# ⊟ ⊞ ⊕ ⦄ ⦃ ⌁ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:C,c,j,v ⧗:C ⧗:j △ ⊟ ⧗:v ⧗:s #45# ᛖ ⋔ ⦃ ⊝ ⦄ ∅ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹chexp› ⸫
+
+⍝ ‹chfmt› C e1 … e6: the canonical charge string
+⦃
+  ⧖:C,e1,e2,e3,e4,e5,e6
+  ⧗:C ‹sbeg› ⧖:C,s
+  ⧗:C,s ⦶ ⧗:e1 #117# ‹chpart› ⧗:e2 #100# ‹chpart› ⧗:e3 #115# ‹chpart›
+    ⧗:e4 #99# ‹chpart› ⧗:e5 #98# ‹chpart› ⧗:e6 #116# ‹chpart›
+  ⌁ ⌁ ⧗:s ‹send›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹chfmt› ⸫
+
+⍝ ‹chpart› C s first e letter: append "letter^e" (if e is not 0) to s; whether nothing was written yet
+⦃
+  ⧖:C,s,first,e,letter
+  ⧗:C,s,first,e,letter ⧗:e ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⦄
+    ⦃ ⧖:C,s,first,e,letter
+      ⧗:C,s ⧗:first ⋔ ∅ ⦃ ⧖:ss ⧗:ss #183# ‹scp› ⧗:ss ⦄ ⁼ ⌁
+      ⧗:s,letter ‹scp›
+      ⧗:s,e ⧗:e △ ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:s,e ⧗:s #94# ‹scp› ⧗:s,e ‹sdec› ⦄ ⁼
+      ⧗:s ⊕ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ŧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ŧ⟩ ‹chpart› ⸫

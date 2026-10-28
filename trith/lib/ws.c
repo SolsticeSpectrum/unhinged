@@ -1,11 +1,12 @@
-/* Trith standard library: WebSocket (RFC 6455) over plain sockets (no TLS: ws:// only).
+/* Trith standard library: WebSocket (RFC 6455), plain (ws://) or over TLS (wss://, tls.inc).
  * A connection is a handle (its socket). Server: trith_ws_listen, then trith_ws_accept
- * waits for a client and completes the opening handshake. Client: trith_ws_connect.
+ * waits for a client and completes the opening handshake (trith_ws_listen_tls serves wss
+ * with a certificate and key). Client: trith_ws_connect.
  * Both sides then trith_ws_send and trith_ws_receive text messages and trith_ws_close.
  * trith_ws_receive answers pings, joins fragmented messages and returns NULL when the
  * peer closes. Frames a client sends are masked, as the protocol requires.
  * Bind with ⎔ and build with --include trith/lib/ws.h --link trith/lib/ws.c
- * (trith/lib/README.md). Strings come back in a buffer that the next call reuses (the
+ * --link -lssl --link -lcrypto (trith/lib/README.md). Strings come back in a buffer that the next call reuses (the
  * FFI glue copies them at once); NULL and −1 are failures, which ◌ bindings see as ◌. */
 #include <arpa/inet.h>
 #include <errno.h>
@@ -18,6 +19,8 @@
 #include <strings.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+#include "tls.inc"
 
 static char *errbuf;
 
@@ -156,11 +159,8 @@ static void set_client(int fd, int v) {
 static int send_all(int fd, const void *p, size_t n) {
     const char *s = p;
     while (n > 0) {
-        ssize_t k = send(fd, s, n, MSG_NOSIGNAL);
-        if (k <= 0) {
-            if (k < 0 && errno == EINTR) continue;
-            return -1;
-        }
+        ssize_t k = net_send(fd, s, n);
+        if (k <= 0) return -1;
         s += k;
         n -= (size_t)k;
     }
@@ -170,11 +170,8 @@ static int send_all(int fd, const void *p, size_t n) {
 static int recv_all(int fd, void *p, size_t n) {
     char *s = p;
     while (n > 0) {
-        ssize_t k = recv(fd, s, n, 0);
-        if (k <= 0) {
-            if (k < 0 && errno == EINTR) continue;
-            return -1;
-        }
+        ssize_t k = net_recv(fd, s, n);
+        if (k <= 0) return -1;
         s += k;
         n -= (size_t)k;
     }
@@ -237,6 +234,19 @@ int64_t trith_ws_listen(int64_t port) {
     return fd;
 }
 
+/* listen on port and serve wss with the certificate chain and private key in the PEM
+ * files cert and key; the server's handle, or −1 */
+int64_t trith_ws_listen_tls(int64_t port, const char *cert, const char *key) {
+    int64_t fd = trith_ws_listen(port);
+    if (fd < 0) return -1;
+    if (net_tls_listen((int)fd, cert, key) < 0) {
+        net_close((int)fd);
+        set_error(net_err);
+        return -1;
+    }
+    return fd;
+}
+
 /* wait for a client and complete its handshake; the connection's handle, or −1 */
 int64_t trith_ws_accept(int64_t server) {
     for (;;) {
@@ -246,11 +256,15 @@ int64_t trith_ws_accept(int64_t server) {
             set_error("cannot accept");
             return -1;
         }
+        if (net_tls_accept((int)server, fd) < 0) {
+            close(fd);
+            continue;
+        }
         char head[8192], key[128], answer[29], resp[256];
         if (read_head(fd, head, sizeof head) < 0 || header_in(head, "Sec-WebSocket-Key", key, sizeof key) < 0) {
             const char *bad = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
             send_all(fd, bad, strlen(bad));
-            close(fd);
+            net_close(fd);
             continue;
         }
         accept_for(key, answer);
@@ -259,7 +273,7 @@ int64_t trith_ws_accept(int64_t server) {
                  "Sec-WebSocket-Accept: %s\r\n\r\n",
                  answer);
         if (send_all(fd, resp, strlen(resp)) < 0) {
-            close(fd);
+            net_close(fd);
             continue;
         }
         set_client(fd, 0);
@@ -269,17 +283,14 @@ int64_t trith_ws_accept(int64_t server) {
 
 /* ---- client */
 
-/* connect to ws://host[:port][/path] and complete the handshake; the handle, or −1 */
+/* connect to ws[s]://host[:port][/path] and complete the handshake; the handle, or −1 */
 int64_t trith_ws_connect(const char *url) {
-    if (strncmp(url, "wss://", 6) == 0) {
-        set_error("wss is not supported (no TLS)");
+    int tls = strncmp(url, "wss://", 6) == 0;
+    if (!tls && strncmp(url, "ws://", 5) != 0) {
+        set_error("the URL must start with ws:// or wss://");
         return -1;
     }
-    if (strncmp(url, "ws://", 5) != 0) {
-        set_error("the URL must start with ws://");
-        return -1;
-    }
-    const char *h = url + 5;
+    const char *h = url + (tls ? 6 : 5);
     const char *slash = strchr(h, '/');
     const char *path = slash ? slash : "/";
     size_t hlen = slash ? (size_t)(slash - h) : strlen(h);
@@ -296,7 +307,7 @@ int64_t trith_ws_connect(const char *url) {
         memcpy(port, colon + 1, hlen - namelen - 1);
         port[hlen - namelen - 1] = '\0';
     } else {
-        snprintf(port, sizeof port, "80");
+        snprintf(port, sizeof port, tls ? "443" : "80");
     }
     struct addrinfo hints, *res = NULL;
     memset(&hints, 0, sizeof hints);
@@ -319,6 +330,11 @@ int64_t trith_ws_connect(const char *url) {
         set_error("cannot connect");
         return -1;
     }
+    if (tls && net_tls_connect(fd, host) < 0) {
+        close(fd);
+        set_error(net_err);
+        return -1;
+    }
     uint8_t raw[16];
     char key[25], want[29], got[64], req[1024], head[8192];
     random_bytes(raw, sizeof raw);
@@ -331,7 +347,7 @@ int64_t trith_ws_connect(const char *url) {
     if (send_all(fd, req, strlen(req)) < 0 || read_head(fd, head, sizeof head) < 0 ||
         strncmp(head, "HTTP/1.1 101", 12) != 0 || header_in(head, "Sec-WebSocket-Accept", got, sizeof got) < 0 ||
         strcmp(got, want) != 0) {
-        close(fd);
+        net_close(fd);
         set_error("the handshake failed");
         return -1;
     }
@@ -457,5 +473,5 @@ int64_t trith_ws_close(int64_t conn) {
     int fd = (int)conn;
     send_frame(fd, 0x8, "\x03\xe8", 2);
     if ((size_t)fd < nclient) is_client[fd] = 0;
-    return close(fd) == 0 ? 0 : -1;
+    return net_close(fd) == 0 ? 0 : -1;
 }

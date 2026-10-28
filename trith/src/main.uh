@@ -92,7 +92,15 @@
     gpath em "glue" ⌈ ⌉ ⟪ write_file ⟫ → _ ¿
     csrcs gpath ⟪ .append ⟫ ¿
   ⌫ ¿
-  csrcs links ⊞⊞ → csrcs ¿
+  ⍝ a --link of -lNAME is a library for the final link, not a C file
+  "" → libs ¿
+  0 → li ¿
+  links ⟪ len ⟫ → nl ¿
+  li nl ≺ ⟲ ↵
+    links li ⌈ ⌉ → lk ¿
+    lk 0 2 ⟪ substr ⟫ "-l" ≡ ⤴ ↵ libs " " ⊞⊞ lk ⊞⊞ → libs ¿ ⌫ ⤵ ↵ csrcs lk ⟪ .append ⟫ ¿ ⌫ ¿
+    li 1 ⊞ → li ¿
+  ⌫ ¿
   【llpath】 → lls ¿
   0 → ci ¿
   csrcs ⟪ len ⟫ → nc ¿
@@ -117,7 +125,7 @@
     lout ⊢ ¿
     1 ⇄ ¿
   ⌫ ¿
-  【"clang " opt " -w -o " output " " bc " -lm 2>&1"】 "" ⟪ join ⟫ → cmd ¿
+  【"clang " opt " -w -o " output " " bc libs " -lm 2>&1"】 "" ⟪ join ⟫ → cmd ¿
   cmd ⟪ syscall ⟫ → out ¿
   out "" ≢ ⤴ ↵
     out ⊢ ¿
@@ -171,7 +179,7 @@ input "" ≡ bad ∨ ⤴ ↵
   "  (default)   compile to a native binary with clang -O2 (run from the repo root)" ⊢ ¿
   "  --debug     compile with -O0; prayers (⍤) trap instead of informing the optimiser" ⊢ ¿
   "  --include h make C header h visible to FFI bindings (⎔)" ⊢ ¿
-  "  --link f.c  compile and link C file f.c (for FFI bindings)" ⊢ ¿
+  "  --link f.c  compile and link C file f.c (for FFI bindings); --link -lNAME links a library" ⊢ ¿
   "  --tokens    print the token stream (after the Boustrophedon Rule)" ⊢ ¿
   "  --ast       print the parsed and tangled item tree" ⊢ ¿
   "  --check     type-check and print the virtual stack after every operation" ⊢ ¿

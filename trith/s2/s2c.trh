@@ -9151,7 +9151,7 @@ quotations are beyond s1's evaluator (a quoted block before ⊨ is its predicate
   ⧗̵⁰ ⧗¹³ ⧗¹ ᚥᛍ
 ⸫ ᚣᚤᛑ ⟨ ℤ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
 
-==== s2 driver: s2c main.trh [-o out] [--debug] [--include h] [--link f.c] [--tokens | --ast | --check | --emit-llvm] ⍝
+==== s2 driver: s2c main.trh [-o out] [--debug] [--include h] [--link f.c | -lNAME] [--tokens | --ast | --check | --emit-llvm] ⍝
 ⍝ The dumps print what trithc prints; without one, the program is compiled as trithc does.
 
 ⎔ »elif_etirw_htirt« ⟨ ⟗ʃ ⟗ʃ ⊸ ℤ ⟩ ᚣᚤᛒ ⸫
@@ -9220,26 +9220,28 @@ quotations are beyond s1's evaluator (a quoted block before ⊨ is its predicate
   ⧗¹ ⧗̵⁰ ⌁̱ ⧖ ⧖ ⌁ ⌁
 ⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ℤ ⟩ ᚣᚤᛝ ⸫
 ᚣᚤᛞ C: what the arguments say for the build: the output path (−1: next to the source), ⍝
-⍝ the #include lines for --include, and the C files of --link
+⍝ the #include lines for --include, the C files of --link, and its libraries (--link -lssl)
 ⦄
   ⧖
-  ⧖ ⧖ ᚥᛔ ⧗̵⁰ ⧖ ⧖ ᚥᛔ ⧗̵⁰
-  ⧗̵⁰ ⧗³ ⧗¹ ▽ △
+  ⧖ ⧖ ᚥᛔ ⧗̵⁰ ⧖ ⧖ ᚥᛔ ⧗̵⁰ ⧖ ⧖ ᚥᛔ ⧗̵⁰
+  ⧗̵⁰ ⧗⁵ ⧗³ ⧗¹ ▽ △
   ⦄ ⥀
-    ⧖ ⧖ ⧖ ⧖ ⧖
-    ⧖ ᚣᚤᛟ ⧗⁴
-    ⧗̵¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁰ ⧗⁰ ▽ ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ᚣᚤᛠ ⊕ ⦄ ⁼
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧖ ᚣᚤᛟ ⧗⁵
+    ⧗̵¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁶ ⧗⁰ ⧗⁰ ▽ ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ᚣᚤᛠ ⊕ ⦄ ⁼
   ⦃
-  ⌁ ⧖ ⧖ ⧖ ⧖ ⧗̵⁰ ⧗³ ⧗¹ ⧗²
-⸫ ᚣᚤᛞ ⟨ ℤ ℤ ℤ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ⟩ ⦃
+  ⌁ ⧖ ⧖ ⧖ ⧖ ⧖ ⧗̵⁰ ⧗⁴ ⧗¹ ⧗² ⧗³
+⸫ ᚣᚤᛞ ⟨ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ⟩ ⦃
 ⦃
-  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
-  ⧗̵⁰ ⧗⁴ △ ⊞ ᚣᚤᛡ ⧖ ⧖
-  ⧖ ⧖ ⁼ ⦃ ⌁ ⦄ ⦃ ⧗¹ ⧖ ⧖ ⦄ ⋔ ᛖ ○▽△ ⧗⁷ ⧗¹ ⧗⁵ ⧗̵⁰
-  ⧗̵⁰ ⧗⁵ ⧗³ ⧗⁹ △▽△ ᛖ ⋔ ⦃ ⧖ ⧖ ᚥᚰ ⧖ ⧗⁰ »" edulcni#« ᚥᚷ ⧗⁰ ⧗² ᚥᚲ ⧗⁰ »"« ᚥᚷ ⧗⁰ ⧖ ⧗² ⧗⁰ ᚥᛖ ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
-  ⁼ ⦃ ⌁ ⌁ ⦄ ⦃ ᚥᛖ ⦄ ⋔ ᛖ ▽○△ ⧗⁹ ⧗³ ⧗⁶
-  ⧗⁵ ⧗⁶ ⧗¹ ⧗⁸ ⧗⁹ ○▽△ ▽○△ ᛦ ⋔ ⦃ ▽△ ⦄ ⦃ △ ⦄ ⁼ ⊞
-⸫ ᚣᚤᛠ ⟨ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗̵⁰ ⧗⁵ △ ⊞ ᚣᚤᛡ ⧖ ⧖
+  ⧖ ⧖ ⁼ ⦃ ⌁ ⦄ ⦃ ⧗¹ ⧖ ⧖ ⦄ ⋔ ᛖ ○▽△ ⧗⁸ ⧗¹ ⧗⁶ ⧗̵⁰
+  ⧗̵⁰ ⧗⁵ ⧗³ ⧗¹⁰ △▽△ ᛖ ⋔ ⦃ ⧖ ⧖ ᚥᚰ ⧖ ⧗⁰ »" edulcni#« ᚥᚷ ⧗⁰ ⧗² ᚥᚲ ⧗⁰ »"« ᚥᚷ ⧗⁰ ⧖ ⧗² ⧗⁰ ᚥᛖ ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖
+  ⧖ ⧖ ᚥᛅ ○○○△△ ○○▽▽△ ⧗⁴ ⧗̵⁰
+  ⧗⁹ ⧗¹⁰ ⧗¹ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖
+  ⁼ ⦃ ⌁ ⌁ ⦄ ⦃ ᚥᛖ ⦄ ⋔ ᛖ ▽○△ ⧗¹⁴ ⧗⁷ ⧗⁰ ⧗̵¹
+  ⧗⁹ ⧗¹⁰ ⧗¹¹ ⧗⁵ ⧗¹³ ⧗¹⁴ ○▽△ ▽○△ ᛦ ⋔ ⦃ ▽△ ⦄ ⦃ △ ⦄ ⁼ ⊞
+⸫ ᚣᚤᛠ ⟨ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
 ⍝ ᚣᚤᛡ C i: argument i as a heap string (−1 if there is none)
 ⦄
   ⧖ ⧖
@@ -9274,13 +9276,13 @@ quotations are beyond s1's evaluator (a quoted block before ⊨ is its predicate
 executable: the runtime, the glue and every --link file become IR and are linked into one module ⍝
 ⦃
   ⧖ ⧖ ⧖ ⧖
-  ⧗̵⁰ ᚣᚤᛞ ⧖ ⧖ ⧖ ⧖
+  ⧗̵⁰ ᚣᚤᛞ ⧖ ⧖ ⧖ ⧖ ⧖
   ⧖ ⧖ ⁼ ∅ ⦃ ᚣᚤᛢ ⌁ ⦄ ⋔ ᛖ ▽ ⧗¹ ⧗¹ ⧗̵⁰
   ⧗̵⁰ ᚥᚰ ⧖ ⧗⁰ ⧗² ᚥᚲ ⧗⁰ »ll.« ᚥᚷ ⧗⁰ ⧖ ⧖
-  ⧖ ᚣᚤᛤ ⧗¹⁰ ⧗¹ ⧗̵⁰
+  ⧖ ᚣᚤᛤ ⧗¹¹ ⧗¹ ⧗̵⁰
   ⧗̵⁰ ⧗⁸ ᚣᚣᚻ ⧖ ⧖
   ⧖ ⧖ ᚥᚬ ⊞ ▽△ ⧗¹ ⧗̵⁰
-  ⧗̵⁰ ⧗¹⁷ △ ᛖ ⋔ ⦃ ᚥᚰ ⧖ ⧗⁰ »g- 0O-« ᚥᚷ ⧗⁰ ⦄ ⦃ ᚥᚰ ⧖ ⧗⁰ »2O-« ᚥᚷ ⧗⁰ ⦄ ⁼ ⧖ ⧖
+  ⧗̵⁰ ⧗¹⁸ △ ᛖ ⋔ ⦃ ᚥᚰ ⧖ ⧗⁰ »g- 0O-« ᚥᚷ ⧗⁰ ⦄ ⦃ ᚥᚰ ⧖ ⧗⁰ »2O-« ᚥᚷ ⧗⁰ ⦄ ⁼ ⧖ ⧖
   ⧖ ᚣᚤᛦ ⧗⁰ ᚥᚷ «1&>2 c.tr_htirt/emitnur/htirt ll.0c.» ⧗⁰ ᚥᚲ ⧗¹³ ⧗⁰ ᚥᚷ « o- . I- w- » ⧗⁰ ᚥᚲ ⧗² ⧗⁰ ᚥᚷ « mvll-time- S- gnalc» ⧗⁰ ⧖ ᚥᚰ ⧗̵⁰
   ⧗̵⁰ ⧗¹⁴ ⧗⁸ ⧗³ ⧗⁶ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ᚥᚰ ⧖ ⧗⁰ △ ⦄ ⦃ ᚣᚤᛧ ⦄ ⁼ ⧖ ⧖ ⧖
   ⧖ ⧖ ᚥᚬ ⧗²¹ ⧗̵⁰
@@ -9291,105 +9293,106 @@ executable: the runtime, the glue and every --link file become IR and are linked
   ⦄
   ⧖ ⧖ ⧖ ⧖ ⌁ ⌁
   ⧗̵⁰ ᚥᚰ ⧖ ⧗⁰ » o- knil-mvll« ᚥᚷ ⧗⁰ ⧗² ᚥᚲ ⧗⁰ » cb.« ᚥᚷ ⧗⁰ ⧗²⁷ ᚥᚲ ⧗⁰ » « ᚥᚷ ⧗⁰ ⧗² ᚥᚲ ⧗⁰ »ll.0c.« ᚥᚷ ⧗⁰ ⧗⁴ ᚥᚲ ⧗⁰ »1&>2 « ᚥᚷ ⧗⁰ ᚣᚤᛦ ⧖
-  ᚣᚤᛦ ⧗⁰ ᚥᚷ «1&>2 ml- cb.» ⧗⁰ ᚥᚲ ⧗⁴ ⧗⁰ ᚥᚷ « » ⧗⁰ ᚥᚲ ⧗⁴ ⧗⁰ ᚥᚷ « o- w- » ⧗⁰ ᚥᚲ ⧗⁵ ⧗⁰ ᚥᚷ « gnalc» ⧗⁰ ⧖ ᚥᚰ ⧗̵⁰
-⦄ ⟨ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟩ ᚣᚤᛜ ⸫
-the FFI glue as C: written, compiled, and named for the link ⍝
-⦃
+  ⧖ ⧖ ᚥᛘ ▽△ ⧗³⁶ ⧗̵⁰
+  ⧗̵⁰ ᚥᚰ ⧖ ⧗⁰ » gnalc« ᚥᚷ ⧗⁰ ⧗⁷ ᚥᚲ ⧗⁰ » o- w- « ᚥᚷ ⧗⁰ ⧗⁶ ᚥᚲ ⧗⁰ » « ᚥᚷ ⧗⁰ ⧗⁶ ᚥᚲ ⧗⁰ » cb.« ᚥᚷ ⧗⁰ ⧗² ᚥᚲ ⧗⁰ »1&>2 ml- « ᚥᚷ ⧗⁰ ᚣᚤᛦ
+⸫ ᚣᚤᛜ ⟨ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
+⍝ the FFI glue as C: written, compiled, and named for the link
+⦄
   ⧖ ⧖ ⧖ ⧖
-  ⧗̵⁰ ᚥᚰ ⧖ ⧗⁰ ⧗² ᚥᚲ ⧗⁰ »c.iff.« ᚥᚷ ⧗⁰ ⧖ ⧖
-  ⧖ ᚣᚤᛤ ⧗⁵ ⧗¹ ⧗̵⁰
-  ⧗̵⁰ ᚥᚰ ⧖ ⧗⁰ » mvll-time- S- gnalc« ᚥᚷ ⧗⁰ ⧗⁸ ᚥᚲ ⧗⁰ » o- . I- w- « ᚥᚷ ⧗⁰ ⧗⁶ ᚥᚲ ⧗⁰ » ll.1c.« ᚥᚷ ⧗⁰ ⧗³ ᚥᚲ ⧗⁰ »1&>2 « ᚥᚷ ⧗⁰ ᚣᚤᛦ ⧖
-  ▽△ ⧗⁰ ᚥᚷ «ll.1c.» ⧗⁰ ᚥᚲ ⧗⁸ ⧗⁰ ᚥᚷ « » ⧗⁰ ⧖ ᚥᚰ ⧗̵⁰
-⦄ ⟨ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ℤ ℤ ⟩ ᚣᚤᛧ ⸫
-one --link file: compiled to IR and named for the link ⍝
-⦃
+  ⧖ ⧖ ⧗⁰ ᚥᚷ «c.iff.» ⧗⁰ ᚥᚲ ⧗² ⧗⁰ ⧖ ᚥᚰ ⧗̵⁰
+  ⧗̵⁰ ⧗¹ ⧗⁵ ᚣᚤᛤ ⧖
+  ⧖ ᚣᚤᛦ ⧗⁰ ᚥᚷ «1&>2 » ⧗⁰ ᚥᚲ ⧗³ ⧗⁰ ᚥᚷ « ll.1c.» ⧗⁰ ᚥᚲ ⧗⁶ ⧗⁰ ᚥᚷ « o- . I- w- » ⧗⁰ ᚥᚲ ⧗⁸ ⧗⁰ ᚥᚷ « mvll-time- S- gnalc» ⧗⁰ ⧖ ᚥᚰ ⧗̵⁰
+  ⧗̵⁰ ᚥᚰ ⧖ ⧗⁰ » « ᚥᚷ ⧗⁰ ⧗⁸ ᚥᚲ ⧗⁰ »ll.1c.« ᚥᚷ ⧗⁰ ▽△
+⸫ ᚣᚤᛧ ⟨ ℤ ℤ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
+⍝ one --link file: compiled to IR and named for the link
+⦄
   ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
-  ⧗̵⁰ ⧗⁵ △ ⊞ ᚥᚬ ⧖ ⧖
-  ⧖ ᚣᚤᛦ ⧗⁰ ᚥᚷ «1&>2 » ⧗⁰ ᚥᚲ ⧗² ⧗⁰ ᚥᚷ « ll.» ⧗⁰ ᚥᚹ ⧗⁷ ⧗⁰ ᚥᚷ «c.» ⧗⁰ ᚥᚲ ⧗⁴ ⧗⁰ ᚥᚷ « o- . I- w- » ⧗⁰ ᚥᚲ ⧗⁵ ⧗⁰ ᚥᚷ « mvll-time- S- gnalc» ⧗⁰ ⧖ ᚥᚰ ⧗̵⁰
-  ⧗̵⁰ ᚥᚰ ⧖ ⧗⁰ ⧗⁸ ᚥᚲ ⧗⁰ » « ᚥᚷ ⧗⁰ ⧗⁶ ᚥᚲ ⧗⁰ »c.« ᚥᚷ ⧗⁰ ⧗⁹ ᚥᚹ ⧗⁰ »ll.« ᚥᚷ ⧗⁰ ⧖ ⧖
-  ⧖ ⧖ ᚥᚬ ⧗¹² ⧗̵⁰
-  ⧗̵⁰ ⧗¹⁰ ⧗¹¹ ⧗³ ⧗¹³ △ ⊞ ⧗¹
-⸫ ᚣᚤᛨ ⟨ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
+  ⧖ ⧖ ᚥᚬ ⊞ △ ⧗⁵ ⧗̵⁰
+  ⧗̵⁰ ᚥᚰ ⧖ ⧗⁰ » mvll-time- S- gnalc« ᚥᚷ ⧗⁰ ⧗⁵ ᚥᚲ ⧗⁰ » o- . I- w- « ᚥᚷ ⧗⁰ ⧗⁴ ᚥᚲ ⧗⁰ »c.« ᚥᚷ ⧗⁰ ⧗⁷ ᚥᚹ ⧗⁰ » ll.« ᚥᚷ ⧗⁰ ⧗² ᚥᚲ ⧗⁰ »1&>2 « ᚥᚷ ⧗⁰ ᚣᚤᛦ ⧖
+  ⧖ ⧖ ⧗⁰ ᚥᚷ «ll.» ⧗⁰ ᚥᚹ ⧗⁹ ⧗⁰ ᚥᚷ «c.» ⧗⁰ ᚥᚲ ⧗⁶ ⧗⁰ ᚥᚷ « » ⧗⁰ ᚥᚲ ⧗⁸ ⧗⁰ ⧖ ᚥᚰ ⧗̵⁰
+  ⧗̵⁰ ⧗¹² ᚥᚬ ⧖ ⧖
+  ⧗¹ ⊞ △ ⧗¹³ ⧗³ ⧗¹¹ ⧗¹⁰ ⧗̵⁰
+⦄ ⟨ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ℤ ℤ ℤ ℤ ℤ ⟩ ᚣᚤᛨ ⸫
 
-⦄
+⦃
   ⧖ ⧖ ⧖
-  ᛖ △ ⍿⁰ ⧗² ⧗̵¹ ⧗̵⁰
-  ⋔ ⦃ ⌁ ⧖ ⧗̵⁰ ⟗ ᚡᚹ ⌁̵ ⌁̵ ⦄
-    ⦃ ⦃ ᚡᚢ △ ⌁̵ ⦄ ⦃ ⌁̵ ⦄ ⁇ ᚣᚤᛘ ⧗̵⁰ ⟗ ⧖ ⌁ ⦄ ⋔ ᛖ ▽△ ⍿⁰ ⦄
-      ⦃ ⍿⁰ ○△ ᛖ ⋔ ⦃ ⌁ ⧖ ⟗ ⧗̵⁰ ᚣᚤᛙ ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ᚡᚢ ⦄ ⦄
-        ⦃ ⦃ ᚡᚢ △ ⌁̵ ⦄ ⦃ ⌁̵ ⦄ ⁇ ᚣᚤᛚ ⧗¹ ⧗̵⁰ ⟗ ⧖ ⧖ ⁼ ⦃ ○ ⦄ ⦃ △ ⦄ ⋔ ᛖ ▽▽▽△ ⦄ ⋔ ⋏ ᛖ ▽▽▽△ ⍿¹ ᛖ △△ ⍿⁰ ⦄
-          ⦃ ⧖ ⧖ ⟗ ⧗̵⁰ ⧗¹ ᚣᚤᛛ ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ᚡᚢ ⦄ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
-⸫ ᚣᚤᛩ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ʃ ⟩ ⦃
+  ⧗̵⁰ ⧗̵¹ ⧗² ⍿⁰ △ ᛖ
+  ⦃ ⌁̵ ⌁̵ ᚡᚹ ⟗ ⧗̵⁰ ⧖ ⌁ ⦄ ⋔
+    ⦃ ⍿⁰ ▽△ ᛖ ⋔ ⦃ ⌁ ⧖ ⟗ ⧗̵⁰ ᚣᚤᛘ ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ᚡᚢ ⦄ ⦄
+      ⦃ ⦃ ᚡᚢ △ ⌁̵ ⦄ ⦃ ⌁̵ ⦄ ⁇ ᚣᚤᛙ ⧗̵⁰ ⟗ ⧖ ⌁ ⦄ ⋔ ᛖ ○△ ⍿⁰ ⦄
+        ⦃ ⍿⁰ △△ ᛖ ⍿¹ ▽▽▽△ ᛖ ⋏ ⋔ ⦃ ▽▽▽△ ᛖ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧖ ⧖ ⟗ ⧗̵⁰ ⧗¹ ᚣᚤᛚ ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ᚡᚢ ⦄ ⦄
+          ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⁼ ⦃ ⦃ ᚡᚢ △ ⌁̵ ⦄ ⦃ ⌁̵ ⦄ ⁇ ᚣᚤᛛ ⧗¹ ⧗̵⁰ ⟗ ⧖ ⧖ ⦄
+⦄ ⟨ ʃ ⟦ ℤ ⟧ ℤ ⊸ ⟩ ᚣᚤᛩ ⸫
 
-⦄
+⦃
   ⧖ ⧖ ⧖
-  ⧖ ⧖ ᚳ ○ ⟗ ⧗̵²
-  ⧗¹ ○△ ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ ○△ ⊞ ⦄ ⧖
-  ⧗⁴ ⧗⁰ ⧗² ⧗̵¹ ⧗̵³
-  ⧗⁰ ○ ᛖ ⋔ ⦃ ⧖ ⌁ ⌁ ⧗⁰ ᚣᚤᛩ ⦄ ⦃ ⌁ ᚣᚤᛖ ⦄ ⁼
-⸫ ᚣᚤᛪ ⟨ ⊸ ⟦ ℤ ⟧ ℤ ʃ ⟩ ⦃
+  ⧗̵² ⟗ ○ ᚳ ⧖ ⧖
+  ⧖ ⦃ ⊞ ○△ ⦄ ∅ ∅ ⋔ ≶ ○ ⍿⁰ ⦃ ○ ⦄ ⦃ ⦄ ⁇ ⊜ ○△ ⧗¹
+  ⧗̵³ ⧗̵¹ ⧗² ⧗⁰ ⧗⁴
+  ⁼ ⦃ ᚣᚤᛖ ⌁ ⦄ ⦃ ᚣᚤᛩ ⧗⁰ ⌁ ⌁ ⧖ ⦄ ⋔ ᛖ ○ ⧗⁰
+⦄ ⟨ ʃ ℤ ⟦ ℤ ⟧ ⊸ ⟩ ᚣᚤᛪ ⸫
 
-⦄
+⦃
   ⧖ ⧖ ⧖
-  ⌁̵ ⧖ ᛞ ⟗ ⧗̵²
-  ⧗̵¹ ⟗ ⧗̵⁰ ᚣᛋ ⧗² ⍿¹ ⁇ ⦃ ᚣᚤᛪ ⦄ ⦃ ⌁ ⌁̵ △ ᚡᚢ ⦄
-⸫ ᚣᚥᚠ ⟨ ⊸ ʃ ℤ ʃ ⟩ ⦃
+  ⧗̵² ⟗ ᛞ ⧖ ⌁̵
+  ⦃ ᚡᚢ △ ⌁̵ ⌁ ⦄ ⦃ ᚣᚤᛪ ⦄ ⁇ ⍿¹ ⧗² ᚣᛋ ⧗̵⁰ ⟗ ⧗̵¹
+⦄ ⟨ ʃ ℤ ʃ ⊸ ⟩ ᚣᚥᚠ ⸫
 
-⦄
+⦃
   ⧖ ⧖
-  ⁇ ⍿¹ ⧗¹ ᚠ ⟗ ⧗̵⁰
-    ⦃ ⟗ ⍴̱ ○ ᛖ ⋔ ⦃ ⌁̵ ⌁ ⎙̵ »↵)ytpme si elif ro( elif daer tonnac :rorre :« ⎙̵ △ ᚡᚢ ⦄ ⦃ ᚣᚥᚠ ⦄ ⁼ ⦄
-    ⦃ ᚡᚢ △ ⎙̵ «↵)ytpme si elif ro( elif daer tonnac :rorre :» ⎙̵ ⌁ ⦄
-⦄ ⟨ ʃ ℤ ⊸ ⟩ ᚣᚥᚢ ⸫
+  ⧗̵⁰ ⟗ ᚠ ⧗¹ ⍿¹ ⁇
+    ⦃ ⁼ ⦃ ᚣᚥᚠ ⦄ ⦃ ᚡᚢ △ ⎙̵ «↵)ytpme si elif ro( elif daer tonnac :rorre :» ⎙̵ ⌁ ⌁̵ ⦄ ⋔ ᛖ ○ ⍴̱ ⟗ ⦄
+    ⦃ ⌁ ⎙̵ »↵)ytpme si elif ro( elif daer tonnac :rorre :« ⎙̵ △ ᚡᚢ ⦄
+⸫ ᚣᚥᚢ ⟨ ⊸ ℤ ʃ ⟩ ⦃
 
-⦃ »↵]mvll-time-- | kcehc-- | tsa-- | snekot--[ ]c.f knil--[ ]h edulcni--[ ]gubed--[ ]>tuptuo< o-[ >hrt.niam< c2s :egasu« ⎙̵ ▽△ ᚡᚢ ⦄ ⟨ ⊸ ⟩ ᚣᚥᚤ ⸫
+⸫ ᚣᚥᚤ ⟨ ⊸ ⟩ ⦃ ᚡᚢ ▽△ ⎙̵ «↵]mvll-time-- | kcehc-- | tsa-- | snekot--[ ]EMANl- | c.f knil--[ ]h edulcni--[ ]gubed--[ ]>tuptuo< o-[ >hrt.niam< c2s :egasu» ⦄
 
-⍝ ---- arguments, as trithc reads them: flags in any order, the first other argument is the source
+---- arguments, as trithc reads them: flags in any order, the first other argument is the source ⍝
 
-⍝ ᚣᚥᚥ s i: argument i is the literal s
-⸫ ᚣᚥᚥ ⟨ ŧ ⊸ ℤ ʃ ⟩ ⦃ ⦃ ⊕ ⌁̵ ⦄ ⦃ ⧗⁰ ⌁̵ ⧖ ᚣᚤᛕ ⍿² ⟗ ⦄ ⁇ ᚨ ⧗¹ ⧗̵⁰ ⧖ ⧖ ⦄
-⍝ ᚣᚤᛟ i: −1 none, 1 --tokens, 2 --ast, 3 --check, 4 --emit-llvm, 5 --debug, 6 -o, 7 --include,
-8 --link, 9 --plough or --unplough (s1 only), 0 anything else ⍝
-⦃
+ᚣᚥᚥ s i: argument i is the literal s ⍝
+⦃ ⧖ ⧖ ⧗̵⁰ ⧗¹ ᚨ ⁇ ⦃ ⟗ ⍿² ᚣᚤᛕ ⧖ ⌁̵ ⧗⁰ ⦄ ⦃ ⌁̵ ⊕ ⦄ ⦄ ⟨ ʃ ℤ ⊸ ŧ ⟩ ᚣᚥᚥ ⸫
+ᚣᚤᛟ i: −1 none, 1 --tokens, 2 --ast, 3 --check, 4 --emit-llvm, 5 --debug, 6 -o, 7 --include, ⍝
+⍝ 8 --link, 9 --plough or --unplough (s1 only), 0 anything else
+⦄
   ⧖
-  ⧗⁰ ᚨ ⁇ ⦃ ⌁̵ ○ ⦄ ⦃ ▽ ⦄
-  ⁼ ∅ ⦃ ▽△ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «tsa--» ⁼ ∅ ⦃ △ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «snekot--»
-  »kcehc--« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ ○△ ⦄ ∅ ⁼ »mvll-time--« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ △△ ⦄ ∅ ⁼
-  ⁼ ∅ ⦃ ○▽△ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «o-» ⁼ ∅ ⦃ ▽▽△ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «gubed--»
-  »edulcni--« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ △▽△ ⦄ ∅ ⁼ »knil--« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ ▽○△ ⦄ ∅ ⁼
-  ⁼ ∅ ⦃ ○○△ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «hguolpnu--» ⁼ ∅ ⦃ ○○△ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «hguolp--»
-⦄ ⟨ ℤ ⊸ ℤ ⟩ ᚣᚤᛟ ⸫
-ᚣᚥᚦ: the mode (0 compile), --debug, the source's index (−1: none), and whether the arguments are bad ⍝
-⦃
-  ○ ▽ ○ ○ △
-  ⥀ ⦃
+  ⦃ ▽ ⦄ ⦃ ○ ⌁̵ ⦄ ⁇ ᚨ ⧗⁰
+  »snekot--« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ »tsa--« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ ▽△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ △△ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «mvll-time--» ⁼ ∅ ⦃ ○△ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «kcehc--»
+  »gubed--« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ ▽▽△ ⦄ ∅ ⁼ »o-« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ ○▽△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ▽○△ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «knil--» ⁼ ∅ ⦃ △▽△ ⌁ ⦄ ⋔ ᚣᚥᚥ ⧗⁰ «edulcni--»
+  »hguolp--« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ ○○△ ⦄ ∅ ⁼ »hguolpnu--« ⧗⁰ ᚣᚥᚥ ⋔ ⦃ ⌁ ○○△ ⦄ ∅ ⁼
+⸫ ᚣᚤᛟ ⟨ ℤ ⊸ ℤ ⟩ ⦃
+⍝ ᚣᚥᚦ: the mode (0 compile), --debug, the source's index (−1: none), and whether the arguments are bad
+⦄
+  △ ○ ○ ▽ ○
+  ⦄ ⥀
     ⧖ ⧖ ⧖ ⧖ ⧖
-    ⧗⁰ ᚣᚤᛟ ⧖
-    ⁼ ⦃ ⊕ ᚣᚥᚧ ⦄ ⦃ ⦶ ⌁ ⦄ ⋔ ᛖ ▽ ⧗⁰ ⧗⁰ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹
-  ⦄
-  ⧗⁴ ⧗³ ⧗² ⧗¹ ⧖ ⧖ ⧖ ⧖ ⧖
-⦄ ⟨ ⊸ ℤ ℤ ℤ ℤ ⟩ ᚣᚥᚦ ⸫
-⦄
-  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
-  ⧖ ⁼ ⦃ ⌁ ⦄ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⋔ ᛦ △△ △ ⧗⁵ ⧗⁵ ⧗¹
-  ⧗³ ⧗⁶ ▽▽△ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖
-  ⧖ ᚣᚤᛟ ⊞ △ ⧗²
-  ⧗⁸ ○▽△ ▽○△ ᛦ ⧖
-  ⧖ ⁼ ⦃ ⌁ ⦄ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⋔ ⋎ ᛖ ▽ ⧗⁷ ᛖ ○ ⧗⁹ ⧗⁴ ⧗⁷
-  ⧗⁹ ⧗¹ ⧗² ▽ ᛖ ⋎ ⧗¹⁰ ○○△ ᛖ ⋏ ⧗¹⁰ ○ ᛖ ⧗⁸ ▽ ᛖ ᚡᚠ ⋎ ⋏ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖
-  ⧖ ⊞ ⁼ ⦃ △ ⦄ ⦃ ▽△ ⦄ ⋔ ⧗² ⧗⁶
-  ⧗⁰ ⧗⁶ ⧗⁵ ⧗² ⧗¹
-⸫ ᚣᚥᚧ ⟨ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ⦃
-⍝ ᚣᚥᚨ mode dbg in: the run's mode (5 compile; +10 with --debug for --emit-llvm and compiling)
-⦄
-  ⧖ ⧖ ⧖
-  ⧖ ⁼ ∅ ⦃ ▽▽△ ⌁ ⦄ ⋔ ᛖ ○ ⧗⁰ ⧗⁰
-  ⧗⁰ ⧗⁰ △△ ᛖ ⧗⁰ ▽▽△ ᛖ ⋏ ⧗² △ ᛖ ⋎ ⋔ ⦃ △○△ ⊞ ⦄ ∅ ⁼ ⧖
-  ⦃ ᚣᚥᚤ ⌁ ⦄ ⦃ ᚣᚥᚢ ⧗⁰ ⧗̵¹ ⧖ ⧖ ⦄ ⁇ ᚨ ⧗⁴ ⧗⁰
-⦄ ⟨ ℤ ℤ ℤ ⊸ ⟩ ᚣᚥᚨ ⸫
-
+    ⧖ ᚣᚤᛟ ⧗⁰
+    ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁰ ⧗⁰ ▽ ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ᚣᚥᚧ ⊕ ⦄ ⁼
+  ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧗¹ ⧗² ⧗³ ⧗⁴
+⸫ ᚣᚥᚦ ⟨ ℤ ℤ ℤ ℤ ⊸ ⟩ ⦃
 ⦃
-  ⧖ ⧖ ⧖ ⧖ ᚣᚥᚦ
-  ⧗⁰ ⧗¹ ⧗² ⧗² ▽ ᛖ ⧗³ △ ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ ⌁ ᚣᚥᚤ ⦄ ⦃ ᚣᚥᚨ ⦄ ⁼
-⸱ ⸱ ⸫ ᛟ ⟨ ⊸ ⟩ ⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗¹ ⧗⁵ ⧗⁵ △ △△ ᛦ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖
+  ⧖ ⁼ ∅ ⦃ △ ⌁ ⦄ ⋔ ᛖ ▽▽△ ⧗⁶ ⧗³
+  ⧗² △ ⊞ ᚣᚤᛟ ⧖
+  ⧖ ᛦ ▽○△ ○▽△ ⧗⁸
+  ⧗⁷ ⧗⁴ ⧗⁹ ○ ᛖ ⧗⁷ ▽ ᛖ ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖
+  ⧖ ⁼ ∅ ⦃ △ ⌁ ⦄ ⋔ ⋏ ⋎ ᚡᚠ ᛖ ▽ ⧗⁸ ᛖ ○ ⧗¹⁰ ⋏ ᛖ ○○△ ⧗¹⁰ ⋎ ᛖ ▽ ⧗² ⧗¹ ⧗⁹
+  ⧗⁶ ⧗² ⋔ ⦃ ▽△ ⦄ ⦃ △ ⦄ ⁼ ⊞ ⧖
+  ⧗¹ ⧗² ⧗⁵ ⧗⁶ ⧗⁰
+⦄ ⟨ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ⟩ ᚣᚥᚧ ⸫
+ᚣᚥᚨ mode dbg in: the run's mode (5 compile; +10 with --debug for --emit-llvm and compiling) ⍝
+⦃
+  ⧖ ⧖ ⧖
+  ⧗⁰ ⧗⁰ ○ ᛖ ⋔ ⦃ ⌁ ▽▽△ ⦄ ∅ ⁼ ⧖
+  ⧖ ⁼ ∅ ⦃ ⊞ △○△ ⦄ ⋔ ⋎ ᛖ △ ⧗² ⋏ ᛖ ▽▽△ ⧗⁰ ᛖ △△ ⧗⁰ ⧗⁰
+  ⧗⁰ ⧗⁴ ᚨ ⁇ ⦃ ⧖ ⧖ ⧗̵¹ ⧗⁰ ᚣᚥᚢ ⦄ ⦃ ⌁ ᚣᚥᚤ ⦄
+⸫ ᚣᚥᚨ ⟨ ⊸ ℤ ℤ ℤ ⟩ ⦃
+
+⦄
+  ᚣᚥᚦ ⧖ ⧖ ⧖ ⧖
+  ⁼ ⦃ ᚣᚥᚨ ⦄ ⦃ ᚣᚥᚤ ⌁ ⌁ ⌁ ⦄ ⋔ ⋏ ᛖ △ ⧗³ ᛖ ▽ ⧗² ⧗² ⧗¹ ⧗⁰
+⦄ ⟨ ⊸ ⟩ ᛟ ⸫
 

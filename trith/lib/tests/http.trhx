@@ -1,6 +1,8 @@
-⍝ trith/lib/http.c: a server and its client in one program, split by fork
+⍝ trith/lib/http.c: servers (plain and TLS) and their client in one program, split by fork.
+⍝ The test runner makes the certificate and has the client trust it (SSL_CERT_FILE)
 ⎔ $fork$ ⟨⊸ ℤ⟩ ‹fork› ⸫
 ⎔ $trith_http_listen$ ⟨ℤ ⊸ ◌ℤ⟩ ‹listen› ⸫
+⎔ $trith_http_listen_tls$ ⟨ℤ ʃ ʃ ⊸ ◌ℤ⟩ ‹listentls› ⸫
 ⎔ $trith_http_accept$ ⟨ℤ ⊸ ◌ℤ⟩ ‹accept› ⸫
 ⎔ $trith_http_req_path$ ⟨ℤ ⊸ ⸮◌ʃ⟩ ‹rqpath› ⸫
 ⎔ $trith_http_req_body$ ⟨ℤ ⊸ ⸮◌ʃ⟩ ‹rqbody› ⸫
@@ -30,23 +32,45 @@
     ⦃ ⦄
 ⦄ ⟨ℤ ⊸⟩ ‹srvecho› ⸫
 
-⍝ ‹child› server: serve the two requests the parent makes, then stop
-⦃ ⧖:s ⧗:s ‹srvpath› ⧗:s ‹srvecho› ⧗:s ‹hclose› ⌁ ⦄ ⟨ℤ ⊸⟩ ‹child› ⸫
-
-⍝ ‹parent› server: the client side, the only one that prints
+⍝ ‹child› server tls: serve the two requests the parent makes of each, then stop
 ⦃
-  ‹hclose› ⌁
+  ⧖:s,t
+  ⧗:s ‹srvpath› ⧗:s ‹srvecho› ⧗:s ‹hclose› ⌁
+  ⧗:t ‹srvpath› ⧗:t ‹srvecho› ⧗:t ‹hclose› ⌁
+⦄ ⟨ℤ ℤ ⊸⟩ ‹child› ⸫
+
+⍝ ‹parent› server tls: the client side, the only one that prints
+⦃
+  ‹hclose› ⌁ ‹hclose› ⌁
   $http://127.0.0.1:8471/hello$ ‹get› ⁇ ⦃ ⎙̵ ⦄ ⦃ $GET failed: $ ⎙̵ ‹herror› ⎙̵ ⦄ $\n$ ⎙̵
   $POST$ $http://127.0.0.1:8471/echo$ $X-Trith: text/x-trith$ $ping$ ‹request›
     ⁇ ⦃ ⎙ ⦄ ⦃ $POST failed: $ ⎙̵ ‹herror› ⎙̵ $\n$ ⎙̵ ⦄
   ‹rbody› ⎙̵ $\n$ ⎙̵
   $content-type$ ‹rheader› ‹or› ⎙̵ $\n$ ⎙̵
-  $https://example.com/$ ‹get› ⁇ ⦃ ⎙̵ ⦄ ⦃ ‹herror› ⎙̵ ⦄ $\n$ ⎙̵
+  ⍝ the certificate is for localhost and 127.0.0.1, so 127.0.0.2 (also this machine) is refused
+  $https://127.0.0.2:8476/$ ‹get› ⁇ ⦃ ⎙̵ ⦄ ⦃ ‹herror› ⎙̵ ⦄ $\n$ ⎙̵
+  $https://localhost:8476/secure$ ‹get› ⁇ ⦃ ⎙̵ ⦄ ⦃ $GET failed: $ ⎙̵ ‹herror› ⎙̵ ⦄ $\n$ ⎙̵
+  $POST$ $https://127.0.0.1:8476/echo$ $X-Trith: text/x-tls$ $pong$ ‹request›
+    ⁇ ⦃ ⎙ ⦄ ⦃ $POST failed: $ ⎙̵ ‹herror› ⎙̵ $\n$ ⎙̵ ⦄
+  ‹rbody› ⎙̵ $\n$ ⎙̵
   $http://127.0.0.1:1/$ ‹get› ⁇ ⦃ ⎙̵ ⦄ ⦃ ‹herror› ⎙̵ ⦄ $\n$ ⎙̵
-⦄ ⟨ℤ ⊸⟩ ‹parent› ⸫
+⦄ ⟨ℤ ℤ ⊸⟩ ‹parent› ⸫
+
+⍝ ‹both› server tls: fork into the servers and the client
+⦃
+  ⧖:s,t
+  ⧗:s,t ‹fork› ○ ≶ ⋔ ⦃ ‹child› ⦄ ⦃ ‹parent› ⦄ ⦃ ‹hclose› ⌁ ‹hclose› ⌁ $fork failed\n$ ⎙̵ ⦄
+⦄ ⟨ℤ ℤ ⊸⟩ ‹both› ⸫
+
+⍝ ‹start› server: open the TLS server too
+⦃
+  ⧖:s
+  ⧗:s #8476# $output/lib-test/cert.pem$ $output/lib-test/key.pem$ ‹listentls›
+    ⁇ ⦃ ‹both› ⦄ ⦃ $cannot listen: $ ⎙̵ ‹herror› ⎙̵ $\n$ ⎙̵ ‹hclose› ⌁ ⦄
+⦄ ⟨ℤ ⊸⟩ ‹start› ⸫
 
 ⦃
   #8471# ‹listen› ⁇
-    ⦃ ⧖:s ⧗:s ‹fork› ○ ≶ ⋔ ⦃ ‹child› ⦄ ⦃ ‹parent› ⦄ ⦃ ‹hclose› ⌁ $fork failed\n$ ⎙̵ ⦄ ⦄
+    ⦃ ‹start› ⦄
     ⦃ $cannot listen: $ ⎙̵ ‹herror› ⎙̵ $\n$ ⎙̵ ⦄
 ⦄ ⟨⊸⟩ ᛟ ⸫

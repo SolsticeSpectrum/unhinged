@@ -1,4 +1,4 @@
-⍝ ==== s2 driver: s2c main.trh [-o out] [--debug] [--include h] [--link f.c] [--tokens | --ast | --check | --emit-llvm]
+⍝ ==== s2 driver: s2c main.trh [-o out] [--debug] [--include h] [--link f.c | -lNAME] [--tokens | --ast | --check | --emit-llvm]
 ⍝ The dumps print what trithc prints; without one, the program is compiled as trithc does.
 
 ⎔ $trith_write_file$ ⟨⟗ʃ ⟗ʃ ⊸ ℤ⟩ ‹wfile› ⸫
@@ -67,26 +67,28 @@
   ⌁ ⌁ ⧖:e ⧖:C ⌁̱ ⧗:C̵,e
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eheapstr› ⸫
 ⍝ ‹bargs› C: what the arguments say for the build: the output path (−1: next to the source),
-⍝ the #include lines for --include, and the C files of --link
+⍝ the #include lines for --include, the C files of --link, and its libraries (--link -lssl)
 ⦃
   ⧖:C
-  ⧗:C̵ ‹qnew› ⧖:C,inc ⧗:C̵ ‹qnew› ⧖:C,lnk
-  ⧗:C̵,inc,lnk #-1# △
+  ⧗:C̵ ‹qnew› ⧖:C,inc ⧗:C̵ ‹qnew› ⧖:C,lnk ⧗:C̵ ‹qnew› ⧖:C,lib
+  ⧗:C̵,inc,lnk,lib #-1# △
   ⥀ ⦃
-    ⧖:C,inc,lnk,out,i
+    ⧖:C,inc,lnk,lib,out,i
     ⧗:i ‹argcode› ⧖:k
-    ⧗:C̵,inc,lnk,out,i,k ⧗:k #-1# ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ‹bargs1› ⊕ ⦄ ⁼
+    ⧗:C̵,inc,lnk,lib,out,i,k ⧗:k #-1# ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ‹bargs1› ⊕ ⦄ ⁼
   ⦄
-  ⌁ ⧖:C,inc,lnk,out ⧗:C̵,out,inc,lnk
-⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹bargs› ⸫
+  ⌁ ⧖:C,inc,lnk,lib,out ⧗:C̵,out,inc,lnk,lib
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹bargs› ⸫
 ⦃
-  ⧖:C,inc,lnk,out,i,k
+  ⧖:C,inc,lnk,lib,out,i,k
   ⧗:C̵ ⧗:i △ ⊞ ‹eargheap› ⧖:C,v
   ⧗:C̵,out,v ⧗:k #6# ᛖ ⋔ ⦃ ⧖:o,vv ⧗:vv ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,out2
-  ⧗:C̵,inc,v ⧗:k #7# ᛖ ⋔ ⦃ ⧖:q,vv %%#include "{vv}"%% ⧖:l ⧗:q,l ‹qadd› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
-  ⧗:lnk,v ⧗:k #8# ᛖ ⋔ ⦃ ‹qadd› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
-  ⧗:inc,lnk,out2 ⧗:i ⧗:k #6# #8# ᛦ ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ⊞
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹bargs1› ⸫
+  ⧗:C̵,inc,v ⧗:k #7# ᛖ ⋔ ⦃ ⧖:q,vv %%#include "{vv}"%% ⧖:l ⧗:q,l ‹qadd› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,v #45# #108# ‹spfx2› ⧖:C,isl
+  ⧗:lnk ⧗:lib ⧗:isl ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:tq
+  ⧗:C̵,tq,v ⧗:k #8# ᛖ ⋔ ⦃ ‹qadd› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:inc,lnk,lib,out2 ⧗:i ⧗:k #6# #8# ᛦ ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ⊞
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ⟩ ‹bargs1› ⸫
 ⍝ ‹eargheap› C i: argument i as a heap string (−1 if there is none)
 ⦃
   ⧖:C,i
@@ -121,7 +123,7 @@
 ⍝ executable: the runtime, the glue and every --link file become IR and are linked into one module
 ⦃
   ⧖:C,q,mode,dbg
-  ⧗:C̵ ‹bargs› ⧖:C,out0,inc,lnk
+  ⧗:C̵ ‹bargs› ⧖:C,out0,inc,lnk,lib
   ⧗:C̵,out0 ⧗:out0 #-1# ᛖ ⋔ ⦃ ⌁ ‹estripext› ⦄ ∅ ⁼ ⧖:C,out
   ⧗:C̵ %%{out}.ll%% ⧖:C,ll
   ⧗:C̵,ll,q ‹ewrite› ⧖:C
@@ -138,7 +140,8 @@
   ⦄
   ⌁ ⌁ ⧖:C,out,opt,more
   ⧗:C̵ %%llvm-link -o {out}.bc {ll} {out}.c0.ll{more} 2>&1%% ‹esys› ⧖:C
-  ⧗:C̵ %%clang {opt} -w -o {out} {out}.bc -lm 2>&1%% ‹esys›
+  ⧗:C̵,lib #2# ‹qjoin› ⧖:C,libs
+  ⧗:C̵ %%clang {opt} -w -o {out} {out}.bc {libs} -lm 2>&1%% ‹esys›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebuild› ⸫
 ⍝ the FFI glue as C: written, compiled, and named for the link
 ⦃
@@ -189,7 +192,7 @@
     ⦃ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄
 ⦄ ⟨ʃ ℤ ⊸⟩ ‹main1› ⸫
 
-⦃ $usage: s2c <main.trh> [-o <output>] [--debug] [--include h] [--link f.c] [--tokens | --ast | --check | --emit-llvm]\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
+⦃ $usage: s2c <main.trh> [-o <output>] [--debug] [--include h] [--link f.c | -lNAME] [--tokens | --ast | --check | --emit-llvm]\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
 
 ⍝ ---- arguments, as trithc reads them: flags in any order, the first other argument is the source
 

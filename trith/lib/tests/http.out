@@ -2,6 +2,9 @@
 201
 ping
 text/x-trith
-https is not supported (no TLS)
+TLS: the server's certificate is not trusted (IP address mismatch)
+/secure
+201
+pong
 cannot connect
 exit=0

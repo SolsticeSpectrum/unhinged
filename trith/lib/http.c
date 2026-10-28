@@ -1,11 +1,12 @@
-/* Trith standard library: HTTP/1.1 over plain sockets (no TLS: http:// only).
+/* Trith standard library: HTTP/1.1, plain (http://) or over TLS (https://, tls.inc).
  * Client: trith_http_request sends one request and reads the whole response; its
  * status comes back, and the body and headers stay readable until the next request.
  * Server: Trith has no callbacks, so a server is a loop: trith_http_accept waits for
  * the next request and gives a handle, the trith_http_req_* functions read it, and
- * trith_http_respond answers it and closes the connection.
+ * trith_http_respond answers it and closes the connection. trith_http_listen_tls serves
+ * HTTPS with a certificate and key.
  * Bind with ⎔ and build with --include trith/lib/http.h --link trith/lib/http.c
- * (trith/lib/README.md). Strings come back in buffers that the next call of the same
+ * --link -lssl --link -lcrypto (trith/lib/README.md). Strings come back in buffers that the next call of the same
  * kind reuses (the FFI glue copies them at once); NULL and −1 are failures, which ◌
  * bindings see as ◌. */
 #include <arpa/inet.h>
@@ -19,6 +20,8 @@
 #include <strings.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+#include "tls.inc"
 
 typedef struct {
     char *s;
@@ -54,11 +57,8 @@ const char *trith_http_error(void) {
 
 static int send_all(int fd, const char *s, size_t n) {
     while (n > 0) {
-        ssize_t k = send(fd, s, n, MSG_NOSIGNAL);
-        if (k <= 0) {
-            if (k < 0 && errno == EINTR) continue;
-            return -1;
-        }
+        ssize_t k = net_send(fd, s, n);
+        if (k <= 0) return -1;
         s += k;
         n -= (size_t)k;
     }
@@ -135,17 +135,14 @@ static int dial(const char *host, const char *port) {
     return fd;
 }
 
-/* split http://host[:port][/path] */
-static int split_url(const char *url, char *host, size_t hcap, char *port, size_t pcap, const char **path) {
-    if (strncmp(url, "https://", 8) == 0) {
-        set_error("https is not supported (no TLS)");
+/* split http[s]://host[:port][/path]; *tls says which */
+static int split_url(const char *url, char *host, size_t hcap, char *port, size_t pcap, const char **path, int *tls) {
+    *tls = strncmp(url, "https://", 8) == 0;
+    if (!*tls && strncmp(url, "http://", 7) != 0) {
+        set_error("the URL must start with http:// or https://");
         return -1;
     }
-    if (strncmp(url, "http://", 7) != 0) {
-        set_error("the URL must start with http://");
-        return -1;
-    }
-    const char *h = url + 7;
+    const char *h = url + (*tls ? 8 : 7);
     const char *slash = strchr(h, '/');
     *path = slash ? slash : "/";
     size_t hlen = slash ? (size_t)(slash - h) : strlen(h);
@@ -166,7 +163,7 @@ static int split_url(const char *url, char *host, size_t hcap, char *port, size_
         memcpy(port, colon + 1, plen);
         port[plen] = '\0';
     } else {
-        snprintf(port, pcap, "80");
+        snprintf(port, pcap, *tls ? "443" : "80");
     }
     return 0;
 }
@@ -176,13 +173,19 @@ static int split_url(const char *url, char *host, size_t hcap, char *port, size_
 int64_t trith_http_request(const char *method, const char *url, const char *headers, const char *body) {
     char host[256], port[16];
     const char *path;
+    int tls;
     last_status = -1;
     free(last_head);
     last_head = NULL;
     last_body.n = 0;
-    if (split_url(url, host, sizeof host, port, sizeof port, &path) < 0) return -1;
+    if (split_url(url, host, sizeof host, port, sizeof port, &path, &tls) < 0) return -1;
     int fd = dial(host, port);
     if (fd < 0) return -1;
+    if (tls && net_tls_connect(fd, host) < 0) {
+        close(fd);
+        set_error(net_err);
+        return -1;
+    }
     Buf req = {0};
     char line[512];
     snprintf(line, sizeof line, "%s %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nContent-Length: %zu\r\n",
@@ -202,7 +205,7 @@ int64_t trith_http_request(const char *method, const char *url, const char *head
     buf_str(&req, body);
     if (send_all(fd, req.s, req.n) < 0) {
         free(req.s);
-        close(fd);
+        net_close(fd);
         set_error("cannot send the request");
         return -1;
     }
@@ -210,8 +213,8 @@ int64_t trith_http_request(const char *method, const char *url, const char *head
     Buf resp = {0};
     char chunk[4096];
     ssize_t k;
-    while ((k = recv(fd, chunk, sizeof chunk, 0)) > 0) buf_add(&resp, chunk, (size_t)k);
-    close(fd);
+    while ((k = net_recv(fd, chunk, sizeof chunk)) > 0) buf_add(&resp, chunk, (size_t)k);
+    net_close(fd);
     char *sep = resp.s ? strstr(resp.s, "\r\n\r\n") : NULL;
     if (!sep || strncmp(resp.s, "HTTP/", 5) != 0) {
         free(resp.s);
@@ -279,6 +282,19 @@ int64_t trith_http_listen(int64_t port) {
     return fd;
 }
 
+/* listen on port and serve HTTPS with the certificate chain and private key in the PEM
+ * files cert and key; the server's handle, or −1 */
+int64_t trith_http_listen_tls(int64_t port, const char *cert, const char *key) {
+    int64_t fd = trith_http_listen(port);
+    if (fd < 0) return -1;
+    if (net_tls_listen((int)fd, cert, key) < 0) {
+        net_close((int)fd);
+        set_error(net_err);
+        return -1;
+    }
+    return fd;
+}
+
 static void req_free(Req *r) {
     free(r->method);
     free(r->path);
@@ -297,17 +313,22 @@ int64_t trith_http_accept(int64_t server) {
             set_error("cannot accept");
             return -1;
         }
+        /* a client that fails the handshake is dropped, like one that sends no request */
+        if (net_tls_accept((int)server, fd) < 0) {
+            close(fd);
+            continue;
+        }
         Buf in = {0};
         char chunk[4096];
         char *sep = NULL;
         ssize_t k;
-        while (!sep && (k = recv(fd, chunk, sizeof chunk, 0)) > 0) {
+        while (!sep && (k = net_recv(fd, chunk, sizeof chunk)) > 0) {
             buf_add(&in, chunk, (size_t)k);
             sep = strstr(in.s, "\r\n\r\n");
         }
         if (!sep) {
             free(in.s);
-            close(fd);
+            net_close(fd);
             continue;
         }
         size_t headlen = (size_t)(sep - in.s) + 2;
@@ -316,7 +337,7 @@ int64_t trith_http_accept(int64_t server) {
         size_t want = cl ? strtoul(cl, NULL, 10) : 0;
         free(cl);
         size_t have = in.n - headlen - 2;
-        while (have < want && (k = recv(fd, chunk, sizeof chunk, 0)) > 0) {
+        while (have < want && (k = net_recv(fd, chunk, sizeof chunk)) > 0) {
             buf_add(&in, chunk, (size_t)k);
             have += (size_t)k;
         }
@@ -400,7 +421,7 @@ int64_t trith_http_respond(int64_t req, int64_t status, const char *content_type
              "HTTP/1.1 %lld %s\r\nContent-Type: %s\r\nContent-Length: %zu\r\nConnection: close\r\n\r\n",
              (long long)status, reason(status), content_type, strlen(body));
     int ok = send_all(r->fd, head, strlen(head)) == 0 && send_all(r->fd, body, strlen(body)) == 0;
-    close(r->fd);
+    net_close(r->fd);
     req_free(r);
     if (!ok) set_error("cannot send the response");
     return ok ? 0 : -1;
@@ -408,5 +429,5 @@ int64_t trith_http_respond(int64_t req, int64_t status, const char *content_type
 
 /* stop listening */
 int64_t trith_http_close(int64_t server) {
-    return close((int)server) == 0 ? 0 : -1;
+    return net_close((int)server) == 0 ? 0 : -1;
 }

@@ -5,6 +5,9 @@ not sent: cannot connect
 exit=0
 --- connection 1
 EHLO (host)
+STARTTLS
+(TLS TLSv1.3)
+EHLO (host)
 AUTH PLAIN AG1haWxlcgBodW50ZXIy
 MAIL FROM:<trith@example.com>
 RCPT TO:<ada@example.com>
@@ -22,9 +25,15 @@ DATA
 QUIT
 --- connection 2
 EHLO (host)
+STARTTLS
+(TLS TLSv1.3)
+EHLO (host)
 AUTH PLAIN AG1haWxlcgBndWVzcw==
 QUIT
 --- connection 3
+EHLO (host)
+STARTTLS
+(TLS TLSv1.3)
 EHLO (host)
 MAIL FROM:<trith@example.com>
 RCPT TO:<ghost@nowhere.invalid>

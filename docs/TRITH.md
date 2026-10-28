@@ -612,7 +612,7 @@ FFI binding:
 - The second binds `read` as ᛞ. Its result is declared hearsay and possibly failed.
 - FFI results that come from the outside world must be declared `⸮`.
 
-The v1 standard library (HTTP, SMTP, WebSocket, SHA-256, AES, JSON) is ported as FFI-bound modules: `trith/lib/X.c` with its prototypes in `X.h`, which a program binds with `⎔` and builds with `--include trith/lib/X.h --link trith/lib/X.c`. `trith/lib/README.md` lists the functions and their bindings.
+The v1 standard library (HTTP, SMTP, WebSocket, SHA-256, AES, JSON) is ported as FFI-bound modules: `trith/lib/X.c` with its prototypes in `X.h`, which a program binds with `⎔` and builds with `--include trith/lib/X.h --link trith/lib/X.c`. `--link -lNAME` links a library; the network modules use OpenSSL for TLS (`https://`, `wss://`, SMTP STARTTLS), so they add `--link -lssl --link -lcrypto`. `trith/lib/README.md` lists the functions and their bindings.
 
 ---
 

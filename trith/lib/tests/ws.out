@@ -1,6 +1,9 @@
 hello, socket
 héllo ✓
 a long message comes back with length 200
-wss is not supported (no TLS)
+TLS: the server's certificate is not trusted (IP address mismatch)
+hello, socket
+héllo ✓
+a long message comes back with length 200
 cannot connect
 exit=0

@@ -1,52 +1,71 @@
-⍝ trith/lib/ws.c: an echo server and its client in one program, split by fork
-⸫ ᚡᚠ ⟨ ℤ ⊸ ⟩ «krof» ⎔
-⎔ »netsil_sw_htirt« ⟨ ℤ ⊸ ◌ℤ ⟩ ᚡᚢ ⸫
-⸫ ᚡᚤ ⟨ ◌ℤ ⊸ ℤ ⟩ «tpecca_sw_htirt» ⎔
-⎔ »tcennoc_sw_htirt« ⟨ ʃ ⊸ ◌ℤ ⟩ ᚡᚥ ⸫
-⸫ ᚡᚦ ⟨ ◌ℤ ⊸ ⸮ʃ ℤ ⟩ «dnes_sw_htirt» ⎔
-⎔ »eviecer_sw_htirt« ⟨ ℤ ⊸ ⸮◌ʃ ⟩ ᚡᚧ ⸫
-⸫ ᚡᚨ ⟨ ℤ ⊸ ℤ ⟩ «esolc_sw_htirt» ⎔
-⎔ »rorre_sw_htirt« ⟨ ⊸ ʃ ⟩ ᚡᚩ ⸫
+⍝ trith/lib/ws.c: echo servers (plain and TLS) and their client in one program, split by fork.
+The test runner makes the certificate and has the client trust it (SSL_CERT_FILE) ⍝
+⎔ »krof« ⟨ ⊸ ℤ ⟩ ᚡᚠ ⸫
+⸫ ᚡᚢ ⟨ ◌ℤ ⊸ ℤ ⟩ «netsil_sw_htirt» ⎔
+⎔ »slt_netsil_sw_htirt« ⟨ ℤ ʃ ʃ ⊸ ◌ℤ ⟩ ᚡᚤ ⸫
+⸫ ᚡᚥ ⟨ ◌ℤ ⊸ ℤ ⟩ «tpecca_sw_htirt» ⎔
+⎔ »tcennoc_sw_htirt« ⟨ ʃ ⊸ ◌ℤ ⟩ ᚡᚦ ⸫
+⸫ ᚡᚧ ⟨ ◌ℤ ⊸ ⸮ʃ ℤ ⟩ «dnes_sw_htirt» ⎔
+⎔ »eviecer_sw_htirt« ⟨ ℤ ⊸ ⸮◌ʃ ⟩ ᚡᚨ ⸫
+⸫ ᚡᚩ ⟨ ℤ ⊸ ℤ ⟩ «esolc_sw_htirt» ⎔
+⎔ »rorre_sw_htirt« ⟨ ⊸ ʃ ⟩ ᚡᚪ ⸫
 
-⍝ ᚡᚪ s: the text, or ? if there is none (what came over the network is hearsay, ⸮)
-⸫ ᚡᚪ ⟨ ⸮ʃ ⊸ ⸮◌ʃ ⟩ ⦃ ⦃ «?» ⦄ ⦃ ⦄ ⁇ ⦄
+⍝ ᚡᚫ s: the text, or ? if there is none (what came over the network is hearsay, ⸮)
+⸫ ᚡᚫ ⟨ ⸮ʃ ⊸ ⸮◌ʃ ⟩ ⦃ ⦃ «?» ⦄ ⦃ ⦄ ⁇ ⦄
 
-ᚡᚫ conn: send every message back until the client closes ⍝
+ᚡᚬ conn: send every message back until the client closes ⍝
 ⦃
   ⦄ ⥀
     ⧖
-    ⦃ ⦶ ⌁ ⦄ ⦃ ⊕ ⦃ ⦄ ⦃ ⌁ ⦄ ⁇ ᚡᚦ ⦄ ⁇ ᚡᚧ ⧗⁰ ⧗⁰ ⧗⁰
+    ⦃ ⦶ ⌁ ⦄ ⦃ ⊕ ⦃ ⦄ ⦃ ⌁ ⦄ ⁇ ᚡᚧ ⦄ ⁇ ᚡᚨ ⧗⁰ ⧗⁰ ⧗⁰
   ⦄
-  ⌁ ᚡᚨ
-⦄ ⟨ ℤ ⊸ ⟩ ᚡᚫ ⸫
+  ⌁ ᚡᚩ
+⦄ ⟨ ℤ ⊸ ⟩ ᚡᚬ ⸫
 
-⍝ ᚡᚬ server: serve one client, then stop
-⸫ ᚡᚬ ⟨ ⊸ ℤ ⟩ ⦃ ⌁ ᚡᚨ ⧗⁰ ⦃ ⦄ ⦃ ᚡᚫ ⦄ ⁇ ᚡᚤ ⧗⁰ ⧖ ⦄
+⍝ ᚡᚭ server: serve one client, then stop
+⸫ ᚡᚭ ⟨ ⊸ ℤ ⟩ ⦃ ⌁ ᚡᚩ ⧗⁰ ⦃ ⦄ ⦃ ᚡᚬ ⦄ ⁇ ᚡᚥ ⧗⁰ ⧖ ⦄
+⍝ ᚡᚮ server tls: one client of each
+⸫ ᚡᚮ ⟨ ⊸ ℤ ℤ ⟩ ⦃ ᚡᚭ ⧗¹ ᚡᚭ ⧗⁰ ⧖ ⧖ ⦄
 
-ᚡᚭ conn text: send text and print what comes back ⍝
-⦃ ⧖ ⧖ ⧗⁰ ⧗̵¹ ᚡᚦ ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⧗⁰ ᚡᚧ ᚡᚪ ⎙̵ »↵« ⎙̵ ⦄ ⟨ ℤ ʃ ⊸ ⟩ ᚡᚭ ⸫
+ᚡᚯ conn text: send text and print what comes back ⍝
+⦃ ⧖ ⧖ ⧗⁰ ⧗̵¹ ᚡᚧ ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⧗⁰ ᚡᚨ ᚡᚫ ⎙̵ »↵« ⎙̵ ⦄ ⟨ ℤ ʃ ⊸ ⟩ ᚡᚯ ⸫
 
-⍝ ᚡᚮ conn: the client's side of the conversation
+⍝ ᚡᚰ conn: the client's side of the conversation
 ⦄
   ⧖
-  ᚡᚭ «tekcos ,olleh» ⧗⁰
-  ⧗⁰ »✓ olléh« ᚡᚭ
-  ⦃ ⦄ ⦃ ⌁ ⦄ ⁇ ᚡᚦ «98765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210» ⧗⁰
-  » htgnel htiw kcab semoc egassem gnol a« ⎙̵ ⧗⁰ ᚡᚧ ᚡᚪ ⟗ ⍴̱ ⎙ ⌁̵
-  ⌁ ᚡᚨ ⧗⁰
-⦄ ⟨ ℤ ⊸ ⟩ ᚡᚮ ⸫
+  ᚡᚯ «tekcos ,olleh» ⧗⁰
+  ⧗⁰ »✓ olléh« ᚡᚯ
+  ⦃ ⦄ ⦃ ⌁ ⦄ ⁇ ᚡᚧ «98765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210» ⧗⁰
+  » htgnel htiw kcab semoc egassem gnol a« ⎙̵ ⧗⁰ ᚡᚨ ᚡᚫ ⟗ ⍴̱ ⎙ ⌁̵
+  ⌁ ᚡᚩ ⧗⁰
+⦄ ⟨ ℤ ⊸ ⟩ ᚡᚰ ⸫
 
-⍝ ᚡᚯ server: the client, the only side that prints
+⍝ ᚡᚱ server tls: the client, the only side that prints
 ⦄
-  ᚡᚨ ⌁
-  ⦃ ⎙̵ «↵» ⎙̵ ᚡᚩ ⎙̵ « :tcennoc tonnac» ⦄ ⦃ ᚡᚮ ⦄ ⁇ ᚡᚥ «tahc/2748:1.0.0.721//:sw»
-  »/moc.elpmaxe//:ssw« ᚡᚥ ⁇ ⦃ ᚡᚨ ⌁ ⦄ ⦃ ᚡᚩ ⎙̵ »↵« ⎙̵ ⦄
-  ⦃ ⎙̵ «↵» ⎙̵ ᚡᚩ ⦄ ⦃ ⌁ ᚡᚨ ⦄ ⁇ ᚡᚥ «/1:1.0.0.721//:sw»
-⦄ ⟨ ℤ ⊸ ⟩ ᚡᚯ ⸫
+  ᚡᚩ ⌁ ᚡᚩ ⌁
+  ⦃ ⎙̵ «↵» ⎙̵ ᚡᚪ ⎙̵ « :tcennoc tonnac» ⦄ ⦃ ᚡᚰ ⦄ ⁇ ᚡᚦ «tahc/2748:1.0.0.721//:sw»
+  ⍝ the certificate is for localhost and 127.0.0.1, so 127.0.0.2 (also this machine) is refused
+  ⦃ ⎙̵ «↵» ⎙̵ ᚡᚪ ⦄ ⦃ ⌁ ᚡᚩ ⦄ ⁇ ᚡᚦ «/7748:2.0.0.721//:ssw»
+  »tahc/7748:tsohlacol//:ssw« ᚡᚦ ⁇ ⦃ ᚡᚰ ⦄ ⦃ » :tcennoc tonnac« ⎙̵ ᚡᚪ ⎙̵ »↵« ⎙̵ ⦄
+  ⦃ ⎙̵ «↵» ⎙̵ ᚡᚪ ⦄ ⦃ ⌁ ᚡᚩ ⦄ ⁇ ᚡᚦ «/1:1.0.0.721//:sw»
+⦄ ⟨ ℤ ℤ ⊸ ⟩ ᚡᚱ ⸫
 
-⦃
-  ⁇ ᚡᚢ ○△▽▽○▽○△△
-    ⦃ ⧖ ⧗⁰ ᚡᚠ ○ ≶ ⋔ ⦃ ᚡᚬ ⦄ ⦃ ᚡᚯ ⦄ ⦃ ᚡᚨ ⌁ »↵deliaf krof« ⎙̵ ⦄ ⦄
-    ⦃ ⎙̵ «↵» ⎙̵ ᚡᚩ ⎙̵ « :netsil tonnac» ⦄
-⦄ ⟨ ⊸ ⟩ ᛟ ⸫ ⸱ ⸱
+⍝ ᚡᚲ server tls: fork into the servers and the client
+⦄
+  ⧖ ⧖
+  ⦃ ⎙̵ «↵deliaf krof» ⌁ ᚡᚩ ⌁ ᚡᚩ ⦄ ⦃ ᚡᚱ ⦄ ⦃ ᚡᚮ ⦄ ⋔ ≶ ○ ᚡᚠ ⧗¹ ⧗⁰
+⦄ ⟨ ℤ ℤ ⊸ ⟩ ᚡᚲ ⸫
+
+⍝ ᚡᚳ server: open the TLS server too
+⦄
+  ⧖
+  ᚡᚤ «mep.yek/tset-bil/tuptuo» «mep.trec/tset-bil/tuptuo» ▽○○▽○▽○△△ ⧗⁰
+    ⁇ ⦃ ᚡᚲ ⦄ ⦃ » :netsil tonnac« ⎙̵ ᚡᚪ ⎙̵ »↵« ⎙̵ ᚡᚩ ⌁ ⦄
+⸫ ᚡᚳ ⟨ ⊸ ℤ ⟩ ⦃
+
+⦄
+  ○△▽▽○▽○△△ ᚡᚢ ⁇
+    ⦃ ᚡᚳ ⦄
+    ⦃ » :netsil tonnac« ⎙̵ ᚡᚪ ⎙̵ »↵« ⎙̵ ⦄
+⸱ ⸫ ᛟ ⟨ ⊸ ⟩ ⦃
 

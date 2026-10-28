@@ -1,53 +1,77 @@
-⍝ trith/lib/http.c: a server and its client in one program, split by fork
-⸫ ᚡᚠ ⟨ ℤ ⊸ ⟩ «krof» ⎔
-⎔ »netsil_ptth_htirt« ⟨ ℤ ⊸ ◌ℤ ⟩ ᚡᚢ ⸫
-⸫ ᚡᚤ ⟨ ◌ℤ ⊸ ℤ ⟩ «tpecca_ptth_htirt» ⎔
-⎔ »htap_qer_ptth_htirt« ⟨ ℤ ⊸ ⸮◌ʃ ⟩ ᚡᚥ ⸫
-⸫ ᚡᚦ ⟨ ⸮◌ʃ ⊸ ℤ ⟩ «ydob_qer_ptth_htirt» ⎔
-⎔ »redaeh_qer_ptth_htirt« ⟨ ℤ ʃ ⊸ ⸮◌ʃ ⟩ ᚡᚧ ⸫
-⸫ ᚡᚨ ⟨ ◌ℤ ⊸ ⸮ʃ ⸮ʃ ℤ ℤ ⟩ «dnopser_ptth_htirt» ⎔
-⎔ »esolc_ptth_htirt« ⟨ ℤ ⊸ ℤ ⟩ ᚡᚩ ⸫
-⸫ ᚡᚪ ⟨ ⸮◌ʃ ⊸ ʃ ⟩ «teg_ptth_htirt» ⎔
-⎔ »tseuqer_ptth_htirt« ⟨ ʃ ʃ ʃ ʃ ⊸ ⸮◌ℤ ⟩ ᚡᚫ ⸫
-⸫ ᚡᚬ ⟨ ⸮ʃ ⊸ ⟩ «ydob_esnopser_ptth_htirt» ⎔
-⎔ »redaeh_esnopser_ptth_htirt« ⟨ ʃ ⊸ ⸮◌ʃ ⟩ ᚡᚭ ⸫
-⸫ ᚡᚮ ⟨ ʃ ⊸ ⟩ «rorre_ptth_htirt» ⎔
+⍝ trith/lib/http.c: servers (plain and TLS) and their client in one program, split by fork.
+The test runner makes the certificate and has the client trust it (SSL_CERT_FILE) ⍝
+⎔ »krof« ⟨ ⊸ ℤ ⟩ ᚡᚠ ⸫
+⸫ ᚡᚢ ⟨ ◌ℤ ⊸ ℤ ⟩ «netsil_ptth_htirt» ⎔
+⎔ »slt_netsil_ptth_htirt« ⟨ ℤ ʃ ʃ ⊸ ◌ℤ ⟩ ᚡᚤ ⸫
+⸫ ᚡᚥ ⟨ ◌ℤ ⊸ ℤ ⟩ «tpecca_ptth_htirt» ⎔
+⎔ »htap_qer_ptth_htirt« ⟨ ℤ ⊸ ⸮◌ʃ ⟩ ᚡᚦ ⸫
+⸫ ᚡᚧ ⟨ ⸮◌ʃ ⊸ ℤ ⟩ «ydob_qer_ptth_htirt» ⎔
+⎔ »redaeh_qer_ptth_htirt« ⟨ ℤ ʃ ⊸ ⸮◌ʃ ⟩ ᚡᚨ ⸫
+⸫ ᚡᚩ ⟨ ◌ℤ ⊸ ⸮ʃ ⸮ʃ ℤ ℤ ⟩ «dnopser_ptth_htirt» ⎔
+⎔ »esolc_ptth_htirt« ⟨ ℤ ⊸ ℤ ⟩ ᚡᚪ ⸫
+⸫ ᚡᚫ ⟨ ⸮◌ʃ ⊸ ʃ ⟩ «teg_ptth_htirt» ⎔
+⎔ »tseuqer_ptth_htirt« ⟨ ʃ ʃ ʃ ʃ ⊸ ⸮◌ℤ ⟩ ᚡᚬ ⸫
+⸫ ᚡᚭ ⟨ ⸮ʃ ⊸ ⟩ «ydob_esnopser_ptth_htirt» ⎔
+⎔ »redaeh_esnopser_ptth_htirt« ⟨ ʃ ⊸ ⸮◌ʃ ⟩ ᚡᚮ ⸫
+⸫ ᚡᚯ ⟨ ʃ ⊸ ⟩ «rorre_ptth_htirt» ⎔
 
-ᚡᚯ s: the text, or ? if there is none (what came over the network is hearsay, ⸮) ⍝
-⦃ ⁇ ⦃ ⦄ ⦃ »?« ⦄ ⦄ ⟨ ⸮◌ʃ ⊸ ⸮ʃ ⟩ ᚡᚯ ⸫
+ᚡᚰ s: the text, or ? if there is none (what came over the network is hearsay, ⸮) ⍝
+⦃ ⁇ ⦃ ⦄ ⦃ »?« ⦄ ⦄ ⟨ ⸮◌ʃ ⊸ ⸮ʃ ⟩ ᚡᚰ ⸫
 
-⍝ ᚡᚰ server: answer the next request with its path
+⍝ ᚡᚱ server: answer the next request with its path
 ⦄
-  ᚡᚤ ⁇
-    ⦃ ⦃ ⦄ ⦃ ⌁ ⦄ ⁇ ᚡᚨ ᚡᚯ ᚡᚥ ⧗⁰ «nialp/txet» ▽△△△▽△ ⧗⁰ ⧖ ⦄
+  ᚡᚥ ⁇
+    ⦃ ⦃ ⦄ ⦃ ⌁ ⦄ ⁇ ᚡᚩ ᚡᚰ ᚡᚦ ⧗⁰ «nialp/txet» ▽△△△▽△ ⧗⁰ ⧖ ⦄
     ⦃ ⦄
-⸫ ᚡᚰ ⟨ ⊸ ℤ ⟩ ⦃
+⸫ ᚡᚱ ⟨ ⊸ ℤ ⟩ ⦃
 
-ᚡᚱ server: answer the next request with its body, typed as its X-Trith header says ⍝
+ᚡᚲ server: answer the next request with its body, typed as its X-Trith header says ⍝
 ⦃
-  ⁇ ᚡᚤ
-    ⦃ ⧖ ⧗⁰ ○△△△▽△ ⧗⁰ »htirT-X« ᚡᚧ ᚡᚯ ⧗⁰ ᚡᚦ ᚡᚯ ᚡᚨ ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⦄
+  ⁇ ᚡᚥ
+    ⦃ ⧖ ⧗⁰ ○△△△▽△ ⧗⁰ »htirT-X« ᚡᚨ ᚡᚰ ⧗⁰ ᚡᚧ ᚡᚰ ᚡᚩ ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⦄
     ⦃ ⦄
-⦄ ⟨ ℤ ⊸ ⟩ ᚡᚱ ⸫
+⦄ ⟨ ℤ ⊸ ⟩ ᚡᚲ ⸫
 
-⍝ ᚡᚲ server: serve the two requests the parent makes, then stop
-⸫ ᚡᚲ ⟨ ⊸ ℤ ⟩ ⦃ ⌁ ᚡᚩ ⧗⁰ ᚡᚱ ⧗⁰ ᚡᚰ ⧗⁰ ⧖ ⦄
+⍝ ᚡᚳ server tls: serve the two requests the parent makes of each, then stop
+⦄
+  ⧖ ⧖
+  ⌁ ᚡᚪ ⧗⁰ ᚡᚲ ⧗⁰ ᚡᚱ ⧗⁰
+  ⧗¹ ᚡᚱ ⧗¹ ᚡᚲ ⧗¹ ᚡᚪ ⌁
+⸫ ᚡᚳ ⟨ ⊸ ℤ ℤ ⟩ ⦃
 
-ᚡᚳ server: the client side, the only one that prints ⍝
+ᚡᚴ server tls: the client side, the only one that prints ⍝
 ⦃
-  ⌁ ᚡᚩ
-  »olleh/1748:1.0.0.721//:ptth« ᚡᚪ ⁇ ⦃ ⎙̵ ⦄ ⦃ » :deliaf TEG« ⎙̵ ᚡᚮ ⎙̵ ⦄ »↵« ⎙̵
-  ᚡᚫ «gnip» «htirt-x/txet :htirT-X» «ohce/1748:1.0.0.721//:ptth» «TSOP»
-    ⁇ ⦃ ⎙ ⦄ ⦃ » :deliaf TSOP« ⎙̵ ᚡᚮ ⎙̵ »↵« ⎙̵ ⦄
-  ⎙̵ «↵» ⎙̵ ᚡᚬ
-  »epyt-tnetnoc« ᚡᚭ ᚡᚯ ⎙̵ »↵« ⎙̵
-  ⎙̵ «↵» ⦃ ⎙̵ ᚡᚮ ⦄ ⦃ ⎙̵ ⦄ ⁇ ᚡᚪ «/moc.elpmaxe//:sptth»
-  »/1:1.0.0.721//:ptth« ᚡᚪ ⁇ ⦃ ⎙̵ ⦄ ⦃ ᚡᚮ ⎙̵ ⦄ »↵« ⎙̵
-⸫ ᚡᚳ ⟨ ⊸ ℤ ⟩ ⦃
+  ⌁ ᚡᚪ ⌁ ᚡᚪ
+  »olleh/1748:1.0.0.721//:ptth« ᚡᚫ ⁇ ⦃ ⎙̵ ⦄ ⦃ » :deliaf TEG« ⎙̵ ᚡᚯ ⎙̵ ⦄ »↵« ⎙̵
+  ᚡᚬ «gnip» «htirt-x/txet :htirT-X» «ohce/1748:1.0.0.721//:ptth» «TSOP»
+    ⁇ ⦃ ⎙ ⦄ ⦃ » :deliaf TSOP« ⎙̵ ᚡᚯ ⎙̵ »↵« ⎙̵ ⦄
+  ⎙̵ «↵» ⎙̵ ᚡᚭ
+  »epyt-tnetnoc« ᚡᚮ ᚡᚰ ⎙̵ »↵« ⎙̵
+  the certificate is for localhost and 127.0.0.1, so 127.0.0.2 (also this machine) is refused ⍝
+  »/6748:2.0.0.721//:sptth« ᚡᚫ ⁇ ⦃ ⎙̵ ⦄ ⦃ ᚡᚯ ⎙̵ ⦄ »↵« ⎙̵
+  ⎙̵ «↵» ⦃ ⎙̵ ᚡᚯ ⎙̵ « :deliaf TEG» ⦄ ⦃ ⎙̵ ⦄ ⁇ ᚡᚫ «eruces/6748:tsohlacol//:sptth»
+  »TSOP« »ohce/6748:1.0.0.721//:sptth« »slt-x/txet :htirT-X« »gnop« ᚡᚬ
+    ⦃ ⎙̵ «↵» ⎙̵ ᚡᚯ ⎙̵ « :deliaf TSOP» ⦄ ⦃ ⎙ ⦄ ⁇
+  ᚡᚭ ⎙̵ »↵« ⎙̵
+  ⎙̵ «↵» ⦃ ⎙̵ ᚡᚯ ⦄ ⦃ ⎙̵ ⦄ ⁇ ᚡᚫ «/1:1.0.0.721//:ptth»
+⦄ ⟨ ℤ ℤ ⊸ ⟩ ᚡᚴ ⸫
+
+⍝ ᚡᚵ server tls: fork into the servers and the client
+⦄
+  ⧖ ⧖
+  ⦃ ⎙̵ «↵deliaf krof» ⌁ ᚡᚪ ⌁ ᚡᚪ ⦄ ⦃ ᚡᚴ ⦄ ⦃ ᚡᚳ ⦄ ⋔ ≶ ○ ᚡᚠ ⧗¹ ⧗⁰
+⦄ ⟨ ℤ ℤ ⊸ ⟩ ᚡᚵ ⸫
+
+⍝ ᚡᚶ server: open the TLS server too
+⦄
+  ⧖
+  ᚡᚤ «mep.yek/tset-bil/tuptuo» «mep.trec/tset-bil/tuptuo» △▽○▽○▽○△△ ⧗⁰
+    ⁇ ⦃ ᚡᚵ ⦄ ⦃ » :netsil tonnac« ⎙̵ ᚡᚯ ⎙̵ »↵« ⎙̵ ᚡᚪ ⌁ ⦄
+⸫ ᚡᚶ ⟨ ⊸ ℤ ⟩ ⦃
 
 ⦄
   ▽△▽▽○▽○△△ ᚡᚢ ⁇
-    ⦃ ⦃ ⎙̵ «↵deliaf krof» ⌁ ᚡᚩ ⦄ ⦃ ᚡᚳ ⦄ ⦃ ᚡᚲ ⦄ ⋔ ≶ ○ ᚡᚠ ⧗⁰ ⧖ ⦄
-    ⦃ » :netsil tonnac« ⎙̵ ᚡᚮ ⎙̵ »↵« ⎙̵ ⦄
-⸫ ᛟ ⟨ ⊸ ⟩ ⦃
+    ⦃ ᚡᚶ ⦄
+    ⦃ » :netsil tonnac« ⎙̵ ᚡᚯ ⎙̵ »↵« ⎙̵ ⦄
+⸱ ⸱ ⸫ ᛟ ⟨ ⊸ ⟩ ⦃
 

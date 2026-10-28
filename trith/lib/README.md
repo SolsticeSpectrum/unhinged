@@ -11,7 +11,13 @@ its prototypes in `X.h`. Build a program that uses one with both flags:
 
 Both may be repeated to use several modules. `--include` puts the header into the
 generated FFI glue, so the C compiler checks every binding against the real
-prototype; `--link` compiles the C file into the program's LLVM module.
+prototype; `--link` compiles the C file into the program's LLVM module, and
+`--link -lNAME` links a library. The network modules (http, ws, smtp) speak TLS
+through OpenSSL, so they also need `--link -lssl --link -lcrypto`:
+
+```bash
+./build/trithc main.trh --include trith/lib/http.h --link trith/lib/http.c --link -lssl --link -lcrypto -o main
+```
 
 Conventions, chosen so that every function binds directly:
 
@@ -24,7 +30,12 @@ Conventions, chosen so that every function binds directly:
   declare `⸮ʃ` on parameters that may send hearsay back out.
 - Each network module has an error getter that says, in words, why the last call
   failed.
-- There is no TLS: `http://`, `ws://` and plain SMTP only.
+- TLS is OpenSSL's, shared by the network modules (`tls.inc`). Clients verify the
+  server's certificate against the system's trusted ones and against the host name or
+  IP address in the URL; `SSL_CERT_FILE` or `SSL_CERT_DIR` choose other roots. TLS 1.2
+  is the oldest version accepted. Servers take a certificate chain and a private key
+  as PEM files. While a TLS connection is open, SIGPIPE is ignored (unless the program
+  handles it), so a peer that goes away makes a call fail instead of ending the program.
 
 The snippets below are in logical order (every line left to right); run
 `trithc --plough` on a file before compiling it.
@@ -69,7 +80,8 @@ the whole document.
 
 ## http: HTTP/1.1 client and server
 
-Client. `headers` holds extra `Name: value` lines separated by newlines (`""` for none).
+Client. URLs are `http://` or `https://`. `headers` holds extra `Name: value` lines
+separated by newlines (`""` for none).
 
 | Function | Result |
 |---|---|
@@ -84,6 +96,7 @@ respond.
 | Function | Result |
 |---|---|
 | `trith_http_listen(port)` | the server's handle, or −1 |
+| `trith_http_listen_tls(port, cert, key)` | the same, serving HTTPS |
 | `trith_http_accept(server)` | the next request's handle, or −1 |
 | `trith_http_req_method(req)`, `_path(req)`, `_body(req)` | parts of the request |
 | `trith_http_req_header(req, name)` | one of its headers, or NULL |
@@ -101,8 +114,9 @@ respond.
 | Function | Result |
 |---|---|
 | `trith_ws_listen(port)` | the server's handle, or −1 |
+| `trith_ws_listen_tls(port, cert, key)` | the same, serving `wss://` |
 | `trith_ws_accept(server)` | a connection after the opening handshake, or −1 |
-| `trith_ws_connect(url)` | a connection to `ws://host[:port][/path]`, or −1 |
+| `trith_ws_connect(url)` | a connection to `ws://` or `wss://host[:port][/path]`, or −1 |
 | `trith_ws_send(conn, text)` | 0 or −1 (frames from a client are masked) |
 | `trith_ws_receive(conn)` | the next message; NULL when the peer closes (error `closed`) or the connection is lost |
 | `trith_ws_close(conn)` | sends a close frame and closes (also closes a server) |
@@ -119,5 +133,9 @@ at 16 MiB. It has been checked against Python's `websockets` in both directions.
 | `trith_smtp_error()` | the failed step and the server's reply, e.g. `AUTH: 535 5.7.8 authentication failed` |
 
 `to` is a comma-separated list; `from` and each recipient may be `Name <addr>`. An
-empty `user` skips authentication; otherwise AUTH PLAIN is used. The body is plain
+empty `user` skips authentication; otherwise AUTH PLAIN is used. Port 465 is TLS from
+the start; on any other port the connection switches to TLS with STARTTLS when the
+server offers it. The password is sent only over TLS, or to a server on this machine
+(`localhost`, `127.x.x.x`, `::1`); otherwise the error is
+`AUTH: the server offers no TLS, so the password is not sent`. The body is plain
 UTF-8 text: newlines become CRLF and leading dots are doubled.

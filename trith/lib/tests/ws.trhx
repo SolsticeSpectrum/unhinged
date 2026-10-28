@@ -1,6 +1,8 @@
-⍝ trith/lib/ws.c: an echo server and its client in one program, split by fork
+⍝ trith/lib/ws.c: echo servers (plain and TLS) and their client in one program, split by fork.
+⍝ The test runner makes the certificate and has the client trust it (SSL_CERT_FILE)
 ⎔ $fork$ ⟨⊸ ℤ⟩ ‹fork› ⸫
 ⎔ $trith_ws_listen$ ⟨ℤ ⊸ ◌ℤ⟩ ‹listen› ⸫
+⎔ $trith_ws_listen_tls$ ⟨ℤ ʃ ʃ ⊸ ◌ℤ⟩ ‹listentls› ⸫
 ⎔ $trith_ws_accept$ ⟨ℤ ⊸ ◌ℤ⟩ ‹accept› ⸫
 ⎔ $trith_ws_connect$ ⟨ʃ ⊸ ◌ℤ⟩ ‹connect› ⸫
 ⎔ $trith_ws_send$ ⟨ℤ ⸮ʃ ⊸ ◌ℤ⟩ ‹send› ⸫
@@ -20,8 +22,10 @@
   ‹wclose› ⌁
 ⦄ ⟨ℤ ⊸⟩ ‹echo› ⸫
 
-⍝ ‹child› server: serve one client, then stop
-⦃ ⧖:s ⧗:s ‹accept› ⁇ ⦃ ‹echo› ⦄ ⦃ ⦄ ⧗:s ‹wclose› ⌁ ⦄ ⟨ℤ ⊸⟩ ‹child› ⸫
+⍝ ‹serve› server: serve one client, then stop
+⦃ ⧖:s ⧗:s ‹accept› ⁇ ⦃ ‹echo› ⦄ ⦃ ⦄ ⧗:s ‹wclose› ⌁ ⦄ ⟨ℤ ⊸⟩ ‹serve› ⸫
+⍝ ‹child› server tls: one client of each
+⦃ ⧖:s,t ⧗:s ‹serve› ⧗:t ‹serve› ⦄ ⟨ℤ ℤ ⊸⟩ ‹child› ⸫
 
 ⍝ ‹say› conn text: send text and print what comes back
 ⦃ ⧖:c,t ⧗:c ⧗:t̵ ‹send› ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⧗:c ‹recv› ‹or› ⎙̵ $\n$ ⎙̵ ⦄ ⟨ℤ ʃ ⊸⟩ ‹say› ⸫
@@ -36,16 +40,31 @@
   ⧗:c ‹wclose› ⌁
 ⦄ ⟨ℤ ⊸⟩ ‹talk› ⸫
 
-⍝ ‹parent› server: the client, the only side that prints
+⍝ ‹parent› server tls: the client, the only side that prints
 ⦃
-  ‹wclose› ⌁
+  ‹wclose› ⌁ ‹wclose› ⌁
   $ws://127.0.0.1:8472/chat$ ‹connect› ⁇ ⦃ ‹talk› ⦄ ⦃ $cannot connect: $ ⎙̵ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
-  $wss://example.com/$ ‹connect› ⁇ ⦃ ‹wclose› ⌁ ⦄ ⦃ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
+  ⍝ the certificate is for localhost and 127.0.0.1, so 127.0.0.2 (also this machine) is refused
+  $wss://127.0.0.2:8477/$ ‹connect› ⁇ ⦃ ‹wclose› ⌁ ⦄ ⦃ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
+  $wss://localhost:8477/chat$ ‹connect› ⁇ ⦃ ‹talk› ⦄ ⦃ $cannot connect: $ ⎙̵ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
   $ws://127.0.0.1:1/$ ‹connect› ⁇ ⦃ ‹wclose› ⌁ ⦄ ⦃ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
-⦄ ⟨ℤ ⊸⟩ ‹parent› ⸫
+⦄ ⟨ℤ ℤ ⊸⟩ ‹parent› ⸫
+
+⍝ ‹both› server tls: fork into the servers and the client
+⦃
+  ⧖:s,t
+  ⧗:s,t ‹fork› ○ ≶ ⋔ ⦃ ‹child› ⦄ ⦃ ‹parent› ⦄ ⦃ ‹wclose› ⌁ ‹wclose› ⌁ $fork failed\n$ ⎙̵ ⦄
+⦄ ⟨ℤ ℤ ⊸⟩ ‹both› ⸫
+
+⍝ ‹start› server: open the TLS server too
+⦃
+  ⧖:s
+  ⧗:s #8477# $output/lib-test/cert.pem$ $output/lib-test/key.pem$ ‹listentls›
+    ⁇ ⦃ ‹both› ⦄ ⦃ $cannot listen: $ ⎙̵ ‹werror› ⎙̵ $\n$ ⎙̵ ‹wclose› ⌁ ⦄
+⦄ ⟨ℤ ⊸⟩ ‹start› ⸫
 
 ⦃
   #8472# ‹listen› ⁇
-    ⦃ ⧖:s ⧗:s ‹fork› ○ ≶ ⋔ ⦃ ‹child› ⦄ ⦃ ‹parent› ⦄ ⦃ ‹wclose› ⌁ $fork failed\n$ ⎙̵ ⦄ ⦄
+    ⦃ ‹start› ⦄
     ⦃ $cannot listen: $ ⎙̵ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
 ⦄ ⟨⊸⟩ ᛟ ⸫

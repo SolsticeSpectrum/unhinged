@@ -1,10 +1,11 @@
-/* Trith standard library: sending mail over SMTP (plain sockets, no TLS or STARTTLS:
- * meant for a local relay or a submission port that accepts plain text).
- * trith_smtp_send speaks the whole conversation: EHLO, AUTH PLAIN when a user is given,
- * MAIL FROM, one RCPT TO per address, DATA with the headers and the dot-stuffed body,
- * QUIT. On failure trith_smtp_error has the step and the server's reply.
+/* Trith standard library: sending mail over SMTP, with TLS (tls.inc).
+ * trith_smtp_send speaks the whole conversation: EHLO, STARTTLS and EHLO again when the
+ * server offers it (port 465 is TLS from the start instead), AUTH PLAIN when a user is
+ * given, MAIL FROM, one RCPT TO per address, DATA with the headers and the dot-stuffed
+ * body, QUIT. A password is only sent over TLS, or to a server on this machine. On
+ * failure trith_smtp_error has the step and the server's reply.
  * Bind with ⎔ and build with --include trith/lib/smtp.h --link trith/lib/smtp.c
- * (trith/lib/README.md). −1 is failure, which a ◌ℤ binding sees as ◌. */
+ * --link -lssl --link -lcrypto (trith/lib/README.md). −1 is failure, which a ◌ℤ binding sees as ◌. */
 #include <errno.h>
 #include <netdb.h>
 #include <stdint.h>
@@ -13,7 +14,10 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <time.h>
+#include <strings.h>
 #include <unistd.h>
+
+#include "tls.inc"
 
 typedef struct {
     char *s;
@@ -44,31 +48,32 @@ const char *trith_smtp_error(void) {
 
 static int send_all(int fd, const char *s, size_t n) {
     while (n > 0) {
-        ssize_t k = send(fd, s, n, MSG_NOSIGNAL);
-        if (k <= 0) {
-            if (k < 0 && errno == EINTR) continue;
-            return -1;
-        }
+        ssize_t k = net_send(fd, s, n);
+        if (k <= 0) return -1;
         s += k;
         n -= (size_t)k;
     }
     return 0;
 }
 
+/* whether the last reply had a line offering STARTTLS */
+static int offers_starttls;
+
 /* read one reply (all its lines) into line (its last line); its code, or −1 */
 static int reply(int fd, char *line, size_t cap) {
+    offers_starttls = 0;
     for (;;) {
         size_t n = 0;
         char c;
         for (;;) {
-            ssize_t k = recv(fd, &c, 1, 0);
-            if (k < 0 && errno == EINTR) continue;
+            ssize_t k = net_recv(fd, &c, 1);
             if (k <= 0) return -1;
             if (c == '\n') break;
             if (c != '\r' && n + 1 < cap) line[n++] = c;
         }
         line[n] = '\0';
         if (n < 3) return -1;
+        if (n == 12 && strncasecmp(line + 4, "STARTTLS", 8) == 0) offers_starttls = 1;
         if (n == 3 || line[3] == ' ') return atoi(line);
     }
 }
@@ -121,14 +126,32 @@ static void bare_address(const char *s, size_t n, char *out, size_t cap) {
     out[n] = '\0';
 }
 
-static int conversation(int fd, const char *user, const char *pass, const char *from, const char *to,
-                        const char *subject, const char *body) {
+/* the server is on this machine, so a password sent to it in plain text stays here */
+static int loopback(const char *host) {
+    return strcmp(host, "localhost") == 0 || strncmp(host, "127.", 4) == 0 || strcmp(host, "::1") == 0;
+}
+
+static int conversation(int fd, const char *server, int tls, const char *user, const char *pass,
+                        const char *from, const char *to, const char *subject, const char *body) {
     char cmd[1024], addr[512], host[256];
     if (step(fd, NULL, '2', "greeting") < 0) return -1;
     if (gethostname(host, sizeof host) != 0 || !host[0]) snprintf(host, sizeof host, "localhost");
     host[sizeof host - 1] = '\0';
     snprintf(cmd, sizeof cmd, "EHLO %s\r\n", host);
     if (step(fd, cmd, '2', "EHLO") < 0) return -1;
+    if (!tls && offers_starttls) {
+        if (step(fd, "STARTTLS\r\n", '2', "STARTTLS") < 0) return -1;
+        if (net_tls_connect(fd, server) < 0) {
+            snprintf(errbuf, sizeof errbuf, "STARTTLS: %s", net_err);
+            return -1;
+        }
+        tls = 1;
+        if (step(fd, cmd, '2', "EHLO") < 0) return -1;
+    }
+    if (*user && !tls && !loopback(server)) {
+        snprintf(errbuf, sizeof errbuf, "AUTH: the server offers no TLS, so the password is not sent");
+        return -1;
+    }
     if (*user) {
         Buf creds = {0}, b64 = {0};
         buf_add(&creds, "", 1);
@@ -193,7 +216,8 @@ static int conversation(int fd, const char *user, const char *pass, const char *
 }
 
 /* send a plain-text mail: 0, or −1. to is a comma-separated list of addresses; an empty
- * user skips authentication */
+ * user skips authentication. Port 465 speaks TLS from the start; on any other port the
+ * connection turns to TLS if the server offers STARTTLS */
 int64_t trith_smtp_send(const char *host, int64_t port, const char *user, const char *pass, const char *from,
                         const char *to, const char *subject, const char *body) {
     char portstr[16];
@@ -220,8 +244,14 @@ int64_t trith_smtp_send(const char *host, int64_t port, const char *user, const 
         return -1;
     }
     errbuf[0] = '\0';
-    int r = conversation(fd, user, pass, from, to, subject, body);
+    int tls = port == 465;
+    if (tls && net_tls_connect(fd, host) < 0) {
+        snprintf(errbuf, sizeof errbuf, "%s", net_err);
+        close(fd);
+        return -1;
+    }
+    int r = conversation(fd, host, tls, user, pass, from, to, subject, body);
     if (r < 0) send_all(fd, "QUIT\r\n", 6);
-    close(fd);
+    net_close(fd);
     return r;
 }

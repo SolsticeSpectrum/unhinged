@@ -329,6 +329,9 @@
 
 ƒ
   C "err" ⌈ ⌉ ∅ ≡ ⤴ ↵
+    ⍝ inside an instance of a generic function, say which one (§9.4)
+    C "inst" ⌈ ⌉ → where ¿
+    where ∅ ≢ ⤴ ↵ msg " (in " where ")" ⊞⊞ ⊞⊞ ⊞⊞ → msg ¿ ⌫ ¿
     tok ∅ ≡ ⤴ ↵
       C "path" ⌈ ⌉ ": error: " msg ⊞⊞ ⊞⊞ → e ¿
     ⌫ ⤵ ↵
@@ -984,6 +987,10 @@
     ⌫ ⤵ k "call" ≡ k "anti-call" ≡ ∨ k "inverse-call" ≡ ∨ k "shape-call" ≡ ∨ ⤴ ↵
       C op ⟪ ck_resolve ⟫ → f ¿
       C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      f "generic" ⌈ ⌉ ⊤ ≡ ⤴ ↵
+        C f S tok ⟪ ck_instance ⟫ → f ¿
+        C ⟪ ck_failed ⟫ ⤴ ↵ ⊗ ¿ ⌫ ¿
+      ⌫ ¿
       tok "marks" ⌈ ⌉ → ms ¿
       ms ∅ ≢ ⤴ ↵
         "future" ms ∈ f "outs" ⌈ ⌉ ⟪ len ⟫ 0 ≻ ∧ ⤴ ↵
@@ -1586,6 +1593,155 @@
   units ⇄ ¿
 ↦ C ↦ ops ↦ ck_reversible ¿
 
+⍝ ---- type variables (§9.4): a generic function is checked and emitted once per instance
+
+⍝ the type variables of a list of types, in order of first appearance
+ƒ
+  【】 → vs ¿
+  0 → i ¿
+  ts ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ts i ⌈ ⌉ → t ¿
+    0 → j ¿
+    t ⟪ len ⟫ → m ¿
+    j m ≺ ⟲ ↵
+      t j ⟪ char_at ⟫ → c ¿
+      c ⟪ tc_type_var ⟫ c vs ∈ ¬ ∧ ⤴ ↵ vs c ⟪ .append ⟫ ¿ ⌫ ¿
+      j 1 ⊞ → j ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  vs ⇄ ¿
+↦ ts ↦ ck_tvars ¿
+
+⍝ bind the type variables of the declared types ds to the classical types they meet in
+⍝ the actual types xs; a declared ◌ may meet a value that cannot fail
+ƒ
+  ❴❵ → b ¿
+  0 → i ¿
+  ds ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    ds i ⌈ ⌉ → d ¿
+    xs i ⌈ ⌉ → x ¿
+    0 → p ¿
+    0 → q ¿
+    d ⟪ len ⟫ → dn ¿
+    x ⟪ len ⟫ → xn ¿
+    p dn ≺ q xn ≺ ∧ ⟲ ↵
+      d p ⟪ char_at ⟫ → dc ¿
+      x q ⟪ char_at ⟫ → xc ¿
+      dc ⟪ tc_type_var ⟫ ⤴ ↵
+        xc ⟪ tc_base_type ⟫ xc "ʃ" ≢ ∧ dc b ∈ ¬ ∧ ⤴ ↵ b dc ← xc ¿ ⌫ ¿
+        p 1 ⊞ → p ¿
+        q 1 ⊞ → q ¿
+      ⌫ ⤵ dc xc ≡ ⤴ ↵
+        p 1 ⊞ → p ¿
+        q 1 ⊞ → q ¿
+      ⌫ ⤵ dc "◌" ≡ ⤴ ↵
+        p 1 ⊞ → p ¿
+      ⌫ ⤵ ↵
+        dn → p ¿
+      ⌫ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  b ⇄ ¿
+↦ ds ↦ xs ↦ ck_tbind ¿
+
+⍝ type t with its variables replaced by their bindings b
+ƒ
+  【】 → out ¿
+  0 → j ¿
+  t ⟪ len ⟫ → m ¿
+  j m ≺ ⟲ ↵
+    t j ⟪ char_at ⟫ → c ¿
+    c ⟪ tc_type_var ⟫ c b ∈ ∧ ⤴ ↵ b c ⌈ ⌉ → c ¿ ⌫ ¿
+    out c ⟪ .append ⟫ ¿
+    j 1 ⊞ → j ¿
+  ⌫ ¿
+  out "" ⟪ join ⟫ ⇄ ¿
+↦ t ↦ b ↦ ck_tsubst ¿
+
+ƒ
+  【】 → out ¿
+  0 → i ¿
+  ts ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵ out ts i ⌈ ⌉ b ⟪ ck_tsubst ⟫ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  out ⇄ ¿
+↦ ts ↦ b ↦ ck_tsubst_list ¿
+
+⍝ the types of the top k values of S
+ƒ
+  【】 → xs ¿
+  S ⟪ len ⟫ k ⊟ → i ¿
+  S ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵ xs S i ⌈ ⌉ "ty" ⌈ ⌉ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  xs ⇄ ¿
+↦ S ↦ k ↦ ck_top_types ¿
+
+⍝ the instance of a generic function: its record (with the name ᚠ[ℤ …]), which the
+⍝ caller registers the first time
+ƒ
+  【】 → bound ¿
+  0 → i ¿
+  vs ⟪ len ⟫ → nv ¿
+  i nv ≺ ⟲ ↵ bound b vs i ⌈ ⌉ ⌈ ⌉ ⟪ .append ⟫ ¿ i 1 ⊞ → i ¿ ⌫ ¿
+  f "name" ⌈ ⌉ → nm ¿
+  bound " " ⟪ join ⟫ → bs ¿
+  【nm "[" bs "]"】 ⟪ em_cat_ck ⟫ → key ¿
+  f "ins" ⌈ ⌉ b ⟪ ck_tsubst_list ⟫ → gi ¿
+  f "outs" ⌈ ⌉ b ⟪ ck_tsubst_list ⟫ → go ¿
+  ❴"ins": gi, "outs": go, "rev": ⊥, "name": key❵ → g ¿
+  f "insEv" ⌈ ⌉ → x0 ¿
+  f "insCh" ⌈ ⌉ → x1 ¿
+  f "outsEv" ⌈ ⌉ → x2 ¿
+  f "outsCh" ⌈ ⌉ → x3 ¿
+  g "insEv" ← x0 ¿
+  g "insCh" ← x1 ¿
+  g "outsEv" ← x2 ¿
+  g "outsCh" ← x3 ¿
+  g ⇄ ¿
+↦ f ↦ vs ↦ b ↦ ck_inst_record ¿
+
+⍝ a call of generic f on the values on top of S: the instance's record, made and queued
+⍝ for checking the first time; ∅ after an error
+ƒ
+  f "ins" ⌈ ⌉ → ins ¿
+  ins ⟪ len ⟫ → k ¿
+  ⍝ too few values: ck_apply reports it
+  S ⟪ len ⟫ k ≺ ⤴ ↵ f ⇄ ¿ ⌫ ¿
+  S k ⟪ ck_top_types ⟫ → xs ¿
+  ins xs ⟪ ck_tbind ⟫ → b ¿
+  f "tvars" ⌈ ⌉ → vs ¿
+  0 → i ¿
+  vs ⟪ len ⟫ → nv ¿
+  i nv ≺ ⟲ ↵
+    vs i ⌈ ⌉ → v ¿
+    v b ∈ ¬ ⤴ ↵
+      xs ⟪ ck_show ⟫ → shown ¿
+      f "name" ⌈ ⌉ → nm ¿
+      C tok 【"cannot infer " v " for " nm " from " shown ": a type variable stands for a classical type ℤ ℝ ŧ 𝔹 (§9.4)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿
+      ∅ ⇄ ¿
+    ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  f vs b ⟪ ck_inst_record ⟫ → g ¿
+  g "name" ⌈ ⌉ → key ¿
+  C "fns" ⌈ ⌉ → fns ¿
+  key fns ∈ ⤴ ↵ fns key ⌈ ⌉ ⇄ ¿ ⌫ ¿
+  fns key ← g ¿
+  f "item" ⌈ ⌉ → it ¿
+  f "shape" ⌈ ⌉ b ⟪ ck_tsubst ⟫ → shp ¿
+  it "tok" ⌈ ⌉ → itok ¿
+  it "ops" ⌈ ⌉ → iops ¿
+  tok "line" ⌈ ⌉ ⍕ → cl ¿
+  tok "col" ⌈ ⌉ ⍕ → cc ¿
+  【key ", first called at " cl ":" cc】 ⟪ em_cat_ck ⟫ → at ¿
+  ❴"kind": "fn", "name": key, "tok": itok, "ops": iops, "rev": ⊥, "shape": shp, "at": at❵ → git ¿
+  C "insts" ⌈ ⌉ 【git g】 ⟪ .append ⟫ ¿
+  g ⇄ ¿
+↦ C ↦ f ↦ S ↦ tok ↦ ck_instance ¿
+
 ⍝ ---- name resolution (§9, §9.1)
 
 ƒ
@@ -1630,6 +1786,30 @@
 
 ⍝ ---- signatures and functions
 
+⍝ mark f generic if its signature has type variables, and check where they may appear
+ƒ
+  f "ins" ⌈ ⌉ ⟪ ck_tvars ⟫ → tv ¿
+  f "outs" ⌈ ⌉ ⟪ ck_tvars ⟫ → tvo ¿
+  tv ⟪ len ⟫ 0 ≡ tvo ⟪ len ⟫ 0 ≡ ∧ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  it "tok" ⌈ ⌉ → tok ¿
+  it "name" ⌈ ⌉ → name ¿
+  it "kind" ⌈ ⌉ "ffi" ≡ ⤴ ↵ C tok "an FFI binding cannot be generic (§9.4)" ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  rev ⤴ ↵ C tok "a reversible function cannot be generic (§9.4)" ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+  0 → i ¿
+  tvo ⟪ len ⟫ → n ¿
+  i n ≺ ⟲ ↵
+    tvo i ⌈ ⌉ → v ¿
+    v tv ∈ ¬ ⤴ ↵ C tok 【v " appears only in the outputs of " name "; every type variable must be fixed by an input (§9.4)"】 ⟪ em_cat_ck ⟫ ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  f "generic" ← ⊤ ¿
+  f "tvars" ← tv ¿
+  f "item" ← it ¿
+  it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → shp ¿
+  f "shape" ← shp ¿
+  ∅ ⇄ ¿
+↦ C ↦ it ↦ f ↦ rev ↦ ck_generic ¿
+
 ƒ
   sig "ins" ⌈ ⌉ ⟪ ck_canon_list ⟫ → ins ¿
   sig "outs" ⌈ ⌉ ⟪ ck_canon_list ⟫ → outs ¿
@@ -1664,7 +1844,7 @@
       h "⟦" ≡ ⤴ ↵ b 1 b ⟪ len ⟫ 2 ⊟ ⟪ substr ⟫ → b ¿ ⊕ ¿ ⌫ ¿
       ⊥ → going ¿
     ⌫ ¿
-    b "" ≢ b ⟪ ck_head ⟫ ⟪ tc_base_type ⟫ ¬ ∧ ⤴ ↵
+    b "" ≢ b ⟪ ck_head ⟫ ⟪ tc_base_type ⟫ ¬ ∧ b ⟪ tc_type_var ⟫ ¬ ∧ ⤴ ↵
       b C "particles" ⌈ ⌉ ∈ ¬ ⤴ ↵ C tok "unknown type " b " (Ogham type names must be declared with ⚛, §8.6)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
     ⌫ ¿
     outputs t ⟪ ck_head ⟫ "⟗" ≡ t ⟪ ck_head ⟫ "⟖" ≡ ∨ ∧ ⤴ ↵ C tok "a function cannot return a shadow " t " (shadows never leave their block, §8.2)" ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿ ⌫ ¿
@@ -1712,7 +1892,8 @@
     S v ⟪ .append ⟫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
-  it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → sigs ¿
+  it "shape" ⌈ ⌉ → sigs ¿
+  sigs ∅ ≡ ⤴ ↵ it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → sigs ¿ ⌫ ¿
   C "" "fn " name " " sigs "  start " S ⟪ ck_vtypes ⟫ ⟪ ck_show ⟫ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_note ⟫ ¿
   it "rev" ⌈ ⌉ ⤴ ↵
     C it "ops" ⌈ ⌉ ⟪ ck_reversible ⟫ ¿
@@ -1770,6 +1951,7 @@
   ❴"err": ∅, "path": path, "next": 0, "trace": trace, "canFail": ⊥❵ → C ¿
   C "lines" ← 【】 ¿
   C "views" ← 【】 ¿
+  C "insts" ← 【】 ¿
   ❴❵ → fns ¿
   ❴❵ → shapes ¿
   ❴❵ → particles ¿
@@ -1795,6 +1977,7 @@
       it "sig" ⌈ ⌉ rev it "name" ⌈ ⌉ ⟪ ck_fn_info ⟫ → f ¿
       C f "ins" ⌈ ⌉ it "tok" ⌈ ⌉ ⊥ ⟪ ck_check_types ⟫ ¿
       C f "outs" ⌈ ⌉ it "tok" ⌈ ⌉ ⊤ ⟪ ck_check_types ⟫ ¿
+      C it f rev ⟪ ck_generic ⟫ ¿
       fns it "name" ⌈ ⌉ ← f ¿
       it "sig" ⌈ ⌉ ⟪ ck_shape ⟫ → key ¿
       key shapes ∈ ¬ ⤴ ↵ shapes key ← 【】 ¿ ⌫ ¿
@@ -1814,8 +1997,23 @@
   i n ≺ C ⟪ ck_failed ⟫ ¬ ∧ ⟲ ↵
     items i ⌈ ⌉ → it ¿
     it "kind" ⌈ ⌉ "fn" ≡ ⤴ ↵
-      C it fns it "name" ⌈ ⌉ ⌈ ⌉ ⟪ ck_function ⟫ ¿
+      fns it "name" ⌈ ⌉ ⌈ ⌉ → f ¿
+      f "generic" ⌈ ⌉ ⊤ ≡ ⤴ ↵
+        C "" "fn " it "name" ⌈ ⌉ " " f "shape" ⌈ ⌉ "  generic: checked for each instance (§9.4)" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_note ⟫ ¿
+      ⌫ ⤵ ↵
+        C it f ⟪ ck_function ⟫ ¿
+      ⌫ ¿
     ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⍝ the instances of generic functions, as calls made them (checking one may make more)
+  0 → i ¿
+  i C "insts" ⌈ ⌉ ⟪ len ⟫ ≺ C ⟪ ck_failed ⟫ ¬ ∧ ⟲ ↵
+    C "insts" ⌈ ⌉ i ⌈ ⌉ → pr ¿
+    pr 0 ⌈ ⌉ "at" ⌈ ⌉ → at ¿
+    C "inst" ← at ¿
+    C pr 0 ⌈ ⌉ pr 1 ⌈ ⌉ ⟪ ck_function ⟫ ¿
+    C "inst" ← ∅ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
   C "err" ⌈ ⌉ → err ¿

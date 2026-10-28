@@ -461,6 +461,23 @@ A function may be written as **fragments** spread anywhere in the module, in any
 
 **Cost:** resolver only. This is the "tangle" step of literate programming.
 
+### 9.4 Type variables
+
+A signature may use the type variables `α β γ δ ε ζ η θ`, each standing for one classical type: `ℤ`, `ℝ`, `ŧ` or `𝔹`.
+
+```
+⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ⦄ ⟨α β ⊸ β α⟩ ᚢ ⸫
+⦃ ⌖̱ ⦄ ⟨⟗⟦α⟧ ℤ ⊸ ◌α⟩ ᚣ ⸫
+```
+
+- A call fixes each variable from the types of its arguments: `△ ⊕ ᚢ` calls `ᚢ[ℤ ŧ]`, and an array of ℝ gives `ᚣ[ℝ]`. One variable stands for one type throughout the signature, and charges stay with it (`α⁽ᵘ⁾`).
+- Every variable must appear in an input, so a call can fix it. A variable that cannot be fixed (a string where `α` stands) is an error at the call.
+- A generic function is checked and compiled **once per instance**, as the calls make them, like a template. Its body is checked for each instance, so an error found there names the instance and where it was first called. A generic function that is never called is not checked at all.
+- Variables range over classical types only, so agreement marks (§6.1) mean the same in every instance.
+- FFI bindings and reversible functions cannot be generic.
+
+**Cost:** zero. Each instance is an ordinary function, named `ᚢ[ℤ ŧ]` in traces and in the IR.
+
 ---
 
 ## 10. Reversible Functions `⇋`
@@ -774,11 +791,12 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
 - **Decided after milestone 7.**
   - Agreement applies to `⧗ⁿ` reads too (§6.1). `trx.py` writes the mark after a name: `⧗:C̵` reads the heap `C` by moving it.
   - Call by shape matches evidentials and charges as well (§9.1).
+  - Generics: type variables `α … θ` over classical types, monomorphised per call (§9.4). Row-polymorphic effects follow with quotations (open question below).
   - Arrays inside `⥀`: borrowed moments are region-scoped (§5.1), so a loop body reads and writes an array through a `⟗`/`⟖` moment of an enclosing block instead of carrying it through the loop stack. Codegen is free: the shadow is a loop-invariant pointer. `trx.py` resolves `⧗:x̱` through the enclosing blocks.
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
 - Should the ψ cap be lower than 27 for quantum alternatives, to bound the drop logic?
-- Generics: monomorphised, stack-polymorphic signatures (Kitten-style row variables), or none in Trith 1.0?
+- Generics, step 2: quotations, i.e. blocks as values typed with row variables, `⟨ρ … ⊸ ρ …⟩`, with an apply glyph, specialised per call site. Row variables only mean something once blocks can be passed to functions; step 1, type variables, is §9.4.
 - Should scattered fragments be allowed across files within a module?
 
 ---
@@ -856,6 +874,7 @@ Benchmarks, each of which must run within 1.5× of `clang -O2`:
 | `⚛` | — | declare a particle type |
 | `⍤ⁿ` | — | prayer (assert or assume) |
 | `⎔` | — | FFI binding |
+| `α … θ` | — | type variable in a signature (§9.4) |
 | `⎙` | `⟨ʃ ⊸⟩` / `⟨ℤ ⊸⟩` | print |
 
 ---

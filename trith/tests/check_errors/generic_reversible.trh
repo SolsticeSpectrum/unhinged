@@ -1,0 +1,3 @@
+⍝ a reversible function cannot be generic (§9.4)
+⸫ ᚱ ⟨ α ⊸ α ⟩ ⦃ ⊝ ⦄ ⇋
+⦃ ⦄ ⟨ ⊸ ⟩ ᛟ ⸫

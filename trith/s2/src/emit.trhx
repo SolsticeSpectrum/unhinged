@@ -911,6 +911,34 @@
   ⦄
   ⧖:C,name,nd,found ⧗:C̵,found
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹efind› ⸫
+⍝ ‹einstS› C ef S: the emit record of generic ef's instance for the values on top of S (§9.4)
+⦃
+  ⧖:C,ef,S
+  ⧗:C̵,ef #3# ‹vf› △ ‹vf› ‹llen› ⧖:C,k
+  ⧗:C̵,S,k ‹toptys› ⧖:C,xs
+  ⧗:C̵,ef #3# ‹vf› ⧖:C,f
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins
+  ⧗:C̵,ins,xs ‹tbind› ⧖:C,b
+  ⧗:C̵,f,b #-1# ‹instrec› ⧖:C,g
+  ⧗:C̵,g ‹rd› ⧖:C,key
+  ⧗:C̵,key ‹efind› ⧖:C,old
+  ⧗:C̵,ef,g,key,old ⧗:old #-1# ᛖ ⋔ ⦃ ‹einstnew› ⦄ ⦃ ⧖:C,ef,g,key,old ⧗:C̵,old ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹einstS› ⸫
+⍝ a new instance is queued after the functions already there, so it is emitted in its turn
+⦃
+  ⧖:C,ef,g,key,old
+  ⧗:C̵ %%!@"trith.{key}"%% ⧖:C,sym
+  ⧗:C̵,ef #4# ‹vf› ⧖:C,node ⧗:C̵,ef #5# ‹vf› ⧖:C,from ⧗:C̵,ef #6# ‹vf› ⧖:C,to
+  ⧗:C̵,key,sym ○ ⧗:g,node,from,to ‹efnadd› ⧖:C
+  ⧗:C̵,key ‹efind›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹einstnew› ⸫
+⍝ ‹egencall› C ef S: ef itself, or its instance when it is generic
+⦃
+  ⧖:C,ef,S
+  ⧗:C̵,ef #3# ‹vf› ‹isgeneric› ⧖:C,gen
+  ⧗:C̵,ef,S ⧗:gen ⋔ ⦃ ‹einstS› ⦄ ⦃ ⧖:C,ff,SS ⧗:C̵,ff ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹egencall› ⸫
+
 ⍝ ‹eresolve› C op: the emit record of the function a call node names
 ⦃ ⧖:C,op ⧗:C̵,op ‹resolve› ‹rd› ‹efind› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eresolve› ⸫
 
@@ -1027,7 +1055,8 @@
 ⦃
   ⧖:C,op,S,strand,dead,prev,to
   ⧗:C̵,op ‹ndt› ⧖:C,tok
-  ⧗:C̵,op ‹eresolve› ⧖:C,f
+  ⧗:C̵,op ‹eresolve› ⧖:C,f0
+  ⧗:C̵,f0,S ‹egencall› ⧖:C,f
   ⧗:C̵,tok #2# ‹tmark› ⧖:C,fut ⧗:C̵,tok #4# ‹tmark› ⧖:C,past
   ⧗:C̵,S,f,tok,fut ⧗:past ⋔ ⦃ ⌁ ‹epast› ⦄ ⦃ ⧖:SS,ff,tk,fu ⧗:SS,ff,fu ‹ecall› ⦄ ⁼ ⧖:C,S2
   ⧗:C̵,S2,strand,dead ○
@@ -1812,7 +1841,9 @@
 ⦃
   ⧖:C,r
   ⧗:C̵,r #2# ‹vf› ⧖:C,ffi ⧗:C̵,r #5# ‹vf› ⧖:C,from
-  ○ ⧗:ffi ○ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:from #-1# ᛖ ⧗:ffi ○ ᛖ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:k
+  ⍝ a generic function is emitted only as its instances (§9.4)
+  ⧗:C̵,r #3# ‹vf› ‹isgeneric› ⧖:C,gen
+  ○ ⧗:ffi ○ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:from #-1# ᛖ ⧗:ffi ○ ᛖ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:gen ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:k
   ⧗:C̵,r,k ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹efunction› ⦄ ⦃ #2# ᛖ ⋔ ⦃ ‹einverse› ⦄ ⦃ ⌁ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹efun1› ⸫
 ⍝ ---- reversible functions (§10): the inverse is generated at compile time, as new tree nodes

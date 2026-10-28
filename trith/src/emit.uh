@@ -1089,6 +1089,30 @@
   fns nm ⌈ ⌉ ⇄ ¿
 ↦ E ↦ op ↦ em_resolve ¿
 
+⍝ a call of generic f on the entries on top of S: its instance (§9.4), made and queued
+⍝ for emission the first time
+ƒ
+  f "ins" ⌈ ⌉ → ins ¿
+  S ins ⟪ len ⟫ ⟪ ck_top_types ⟫ → xs ¿
+  ins xs ⟪ ck_tbind ⟫ → b ¿
+  f f "tvars" ⌈ ⌉ b ⟪ ck_inst_record ⟫ → g ¿
+  g "name" ⌈ ⌉ → key ¿
+  E "fns" ⌈ ⌉ → fns ¿
+  key fns ∈ ⤴ ↵ fns key ⌈ ⌉ ⇄ ¿ ⌫ ¿
+  【"@\"trith." key "\""】 ⟪ em_cat ⟫ → gsym ¿
+  g "sym" ← gsym ¿
+  fns key ← g ¿
+  ⍝ compile-time evaluation finds the body by name
+  E "items" ⌈ ⌉ → byn ¿
+  byn f "name" ⌈ ⌉ ⌈ ⌉ → it ¿
+  byn key ← it ¿
+  it "tok" ⌈ ⌉ → itok ¿
+  it "ops" ⌈ ⌉ → iops ¿
+  ❴"kind": "fn", "name": key, "tok": itok, "ops": iops, "rev": ⊥❵ → git ¿
+  E "insts" ⌈ ⌉ 【git g】 ⟪ .append ⟫ ¿
+  g ⇄ ¿
+↦ E ↦ f ↦ S ↦ em_instance ¿
+
 ⍝ Run ops on a copy of S inside its own future-call frame
 ƒ
   S ⟪ ck_copy ⟫ → S2 ¿
@@ -1199,6 +1223,7 @@
       S e ⟪ .append ⟫ ¿
     ⌫ ⤵ k "call" ≡ k "shape-call" ≡ ∨ ⤴ ↵
       E op ⟪ em_resolve ⟫ → f ¿
+      f "generic" ⌈ ⌉ ⊤ ≡ ⤴ ↵ E f S ⟪ em_instance ⟫ → f ¿ ⌫ ¿
       ⊥ → future ¿
       ⊥ → past ¿
       tok "marks" ⌈ ⌉ → ms ¿
@@ -1862,6 +1887,7 @@
   E "hoisted" ← 【】 ¿
   E "lines" ← 【】 ¿
   E "views" ← 【】 ¿
+  E "insts" ← 【】 ¿
   E "globals" ← 【】 ¿
   E "cur" ← "entry" ¿
   ❴❵ → fns ¿
@@ -1889,6 +1915,8 @@
     items i ⌈ ⌉ → it ¿
     it "kind" ⌈ ⌉ "particle" ≡ ⤴ ↵ i 1 ⊞ → i ¿ ⊕ ¿ ⌫ ¿
     it "sig" ⌈ ⌉ it "rev" ⌈ ⌉ it "name" ⌈ ⌉ ⟪ ck_fn_info ⟫ → f ¿
+    f "ins" ⌈ ⌉ ⟪ ck_tvars ⟫ → tv ¿
+    tv ⟪ len ⟫ 0 ≻ ⤴ ↵ f "generic" ← ⊤ ¿ f "tvars" ← tv ¿ ⌫ ¿
     it "name" ⌈ ⌉ → nm ¿
     【"@\"trith." nm "\""】 ⟪ em_cat ⟫ → fsym ¿
     f "sym" ← fsym ¿
@@ -1928,7 +1956,7 @@
   0 → i ¿
   i n ≺ E ⟪ em_failed ⟫ ¬ ∧ ⟲ ↵
     items i ⌈ ⌉ → it ¿
-    it "kind" ⌈ ⌉ "fn" ≡ ⤴ ↵
+    it "kind" ⌈ ⌉ "fn" ≡ fns it "name" ⌈ ⌉ ⌈ ⌉ "generic" ⌈ ⌉ ⊤ ≢ ∧ ⤴ ↵
       E it fns it "name" ⌈ ⌉ ⌈ ⌉ ⟪ em_function ⟫ ¿
       it "rev" ⌈ ⌉ E ⟪ em_failed ⟫ ¬ ∧ ⤴ ↵
         it "name" ⌈ ⌉ → nm ¿
@@ -1941,6 +1969,13 @@
         ⌫ ¿
       ⌫ ¿
     ⌫ ¿
+    i 1 ⊞ → i ¿
+  ⌫ ¿
+  ⍝ the instances of generic functions, in the order calls made them (§9.4)
+  0 → i ¿
+  i E "insts" ⌈ ⌉ ⟪ len ⟫ ≺ E ⟪ em_failed ⟫ ¬ ∧ ⟲ ↵
+    E "insts" ⌈ ⌉ i ⌈ ⌉ → pr ¿
+    E pr 0 ⌈ ⌉ pr 1 ⌈ ⌉ ⟪ em_function ⟫ ¿
     i 1 ⊞ → i ¿
   ⌫ ¿
   E "err" ⌈ ⌉ → err ¿

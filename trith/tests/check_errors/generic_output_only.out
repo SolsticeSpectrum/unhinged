@@ -1,0 +1,1 @@
+trith/tests/check_errors/generic_output_only.trh:2:17: error: α appears only in the outputs of ᚠ; every type variable must be fixed by an input (§9.4)

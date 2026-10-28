@@ -1,0 +1,1 @@
+trith/tests/check_errors/generic_reversible.trh:2:19: error: a reversible function cannot be generic (§9.4)

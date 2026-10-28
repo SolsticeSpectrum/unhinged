@@ -1,0 +1,29 @@
+⍝ type variables (§9.4): each call fixes α, β from its arguments, and the function is
+checked and compiled once per instance ⍝
+⦃ ⦄ ⟨ α ⊸ α ⟩ ᚡᚠ ⸫
+⸫ ᚡᚢ ⟨ α β ⊸ β α ⟩ ⦃ ⧗⁰ ⧗¹ ⧖ ⧖ ⦄
+⍝ ᚡᚤ a i: element i of an array of any classical type
+⸫ ᚡᚤ ⟨ ◌α ⊸ ℤ ⟦ α ⟧ ⟗ ⟩ ⦃ ⌖̱ ⦄
+⍝ ᚡᚥ a b: the larger of two values of the same type
+⸫ ᚡᚥ ⟨ α ⊸ α α ⟩ ⦃ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⁼ ⦃ ⌁ ⦄ ⋔ ≶ ⧗¹ ⧗⁰ ⧗¹ ⧗⁰ ⧖ ⧖ ⦄
+⍝ ᚡᚦ x: x and a copy, through ᚡᚠ: one generic calls another
+⸫ ᚡᚦ ⟨ α α ⊸ α ⟩ ⦃ ᚡᚠ ⧗⁰ ᚡᚠ ⧗⁰ ⧖ ⦄
+⍝ ᚡᚧ x n: x·x·…·x (n factors), recursively, for ℤ or ℝ
+⸫ ᚡᚧ ⟨ α ⊸ ℤ α ⟩ ⦃ ⦃ ⌁ ⦄ ⦃ ⊠ ᚡᚧ ⊟ △ ⧗¹ ⧗⁰ ⧗⁰ ⧖ ⧖ ⦄ ⦃ ⌁ ⦄ ⋔ ≶ △ ⧗¹ ⧗¹ ⧗⁰ ⧖ ⧖ ⦄
+⍝ ᚡᚨ a b: charges stay with the variable
+⸫ ᚡᚨ ⟨ α⁽ᵘ⁾ ⊸ α⁽ᵘ⁾ α⁽ᵘ⁾ ⟩ ⦃ ⊞ ⦄
+⦃
+  ⎙ ᚡᚠ ⊕ ⎙ ᚡᚠ △▽△
+  ○△ ⊖ ᚡᚢ ⎙ ⎙
+  ⌁̵ ⦃ ⦄ ⦃ ⎙ ⦄ ⁇ ᚡᚤ △ ⟗ ⟦ ○△○△ ▽△▽△ △○△ ⟧
+  △△ ○○△ ᚡᚥ ⎙ ⊖ ⊕ ᚡᚥ ⎙
+  ⎙ ⊠ ᚡᚦ ▽▽△
+  ○△ △△ ᚡᚧ ⎙
+  the same functions for ℝ: new instances ⍝
+  △⁝△ ▽△ ᚡᚧ ⎙ △⁝△ ▽△⁝○ ᚡᚥ ⎙
+  ⌁̵ ⦃ ⦄ ⦃ ⎙ ⦄ ⁇ ᚡᚤ ▽ ⟗ ⟦ △△⁝○ ▽⁝▽ △⁝△ ⟧
+  ⍝ a past-tense call is evaluated at compile time, through the same instance
+  ⎙ ⎙ ᚡᚢ̈ ⊕ ▽○△
+  ▽△ ○△ ᚡᚨ ⎙
+⸫ ᛟ ⟨ ⊸ ⟩ ⦃
+

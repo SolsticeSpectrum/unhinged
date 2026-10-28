@@ -1,0 +1,1 @@
+trith/tests/check_errors/generic_ffi.trh:2:23: error: an FFI binding cannot be generic (§9.4)

@@ -101,6 +101,11 @@
   c "ŧ" ≡ c "ℤ" ≡ ∨ c "ℝ" ≡ ∨ c "𝔹" ≡ ∨ c "ʃ" ≡ ∨ ⇄ ¿
 ↦ c ↦ tc_base_type ¿
 
+⍝ Type variables (§9.4): α … θ stand for a classical type in a signature
+ƒ
+  c "α" ≡ c "β" ≡ ∨ c "γ" ≡ ∨ c "δ" ≡ ∨ c "ε" ≡ ∨ c "ζ" ≡ ∨ c "η" ≡ ∨ c "θ" ≡ ∨ ⇄ ¿
+↦ c ↦ tc_type_var ¿
+
 ⍝ Type prefixes that attach to a type: ◌ ⟗ ⟖ ⸮ ⁖ (ψ is handled separately)
 ƒ
   c "◌" ≡ c "⟗" ≡ ∨ c "⟖" ≡ ∨ c "⸮" ≡ ∨ c "⁖" ≡ ∨ ⇄ ¿

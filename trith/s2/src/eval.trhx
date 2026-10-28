@@ -296,7 +296,8 @@
 
 ⦃
   ⧖:C,op,S,strand,tok,role
-  ⧗:C̵,op ‹eresolve› ⧖:C,f
+  ⧗:C̵,op ‹eresolve› ⧖:C,f0
+  ⧗:C̵,f0,S ‹egencall› ⧖:C,f
   ⧗:C̵,f #3# ‹vf› △ ‹vf› ⧖:C,ins
   ⧗:C̵,ins ‹llen› ⧖:C,ka
   ⧗:C̵,S,ka ‹epop› ⧖:C,S2,args

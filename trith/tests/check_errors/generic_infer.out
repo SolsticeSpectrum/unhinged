@@ -1,0 +1,4 @@
+fn ᚠ ⟨α ⊸ α⟩  generic: checked for each instance (§9.4)
+fn ᛟ ⟨ ⊸ ⟩  start []
+  »ih«  ⊢ [ʃ]
+trith/tests/check_errors/generic_infer.trh:3:8: error: cannot infer α for ᚠ from [ʃ]: a type variable stands for a classical type ℤ ℝ ŧ 𝔹 (§9.4)

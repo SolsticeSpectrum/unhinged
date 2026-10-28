@@ -468,7 +468,7 @@
   ⧖:b,k,end,copen
   ⧗:ḇ ᚴ ⧖:n
   ○
-  ⧗:end ⧗:k ⊟ △ ᛖ ⧗:ḇ,k ᚳ ⧖ @any(359,8484,8477,120121,643)@ ⋎ ⧗:ḇ,k,end #2# ‹allcls› ⋏ ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
+  ⧗:end ⧗:k ⊟ △ ᛖ ⧗:ḇ,k ᚳ ⧖ @any(359,8484,8477,120121,643,945,946,947,948,949,950,951,952)@ ⋎ ⧗:ḇ,k,end #2# ‹allcls› ⋏ ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
   ⧖:r0
   ⍝ not a type: malformed when there were prefixes or a charge
   ⧗:r0

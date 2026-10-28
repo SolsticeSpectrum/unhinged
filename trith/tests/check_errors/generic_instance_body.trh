@@ -1,0 +1,3 @@
+⍝ a generic body is checked per instance: ᚠ[ℤ] is fine, ᚠ[ŧ] is not (§9.4)
+⸫ ᚠ ⟨ α ⊸ α ⟩ ⦃ ⊞ △ ⦄
+⦃ △ ᚠ ⎙ ⊕ ᚠ ⎙ ⦄ ⟨ ⊸ ⟩ ᛟ ⸫

@@ -93,7 +93,13 @@
   $: error: $ ⎙̵
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cerr› ⸫
 ⍝ ‹die› C: end the message and stop
-⦃ $\n$ ⎙̵ △ ‹exit› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹die› ⸫
+⍝ inside an instance of a generic function (register 56), it says which one (§9.4)
+⦃
+  ⧖:C
+  ⧗:C̵ #56# ‹reg› ⧖:C,w
+  ⧗:C̵,w ⧗:w #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:C,ww $ (in $ ⎙̵ ⧗:C̵,ww ‹spr› $)$ ⎙̵ ⦄ ⁼
+  $\n$ ⎙̵ △ ‹exit›
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹die› ⸫
 
 ⍝ ‹pind› n: 2n spaces (from the parser)
 ⍝ ‹tron› C: tracing is on
@@ -385,13 +391,243 @@
   ⧗:C̵ ⧗:c ⧗:sz ⊞ ⧗:end ⧗:k △ ⊞ ⧗:nin,full,ins2,outs2,iev2,ich2,oev2,och2
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹sigtype1› ⸫
 
-⍝ ‹fninfo› C s rev name: a function record
+⍝ ‹fninfo› C s rev name: a function record [name ins outs rev iev ich oev och tvars item shape at];
+⍝ tvars are the type variables of the inputs (§9.4); a generic function's item and shape, and an
+⍝ instance's "ᚠ[ℤ], first called at …", are set later (−1 until then)
 ⦃
   ⧖:C,s,rev,name
   ⧗:C̵,s ○ ‹sigtypes› ⧖:C,ins,outs,iev,ich,oev,och
+  ⧗:C̵,ins ‹tvars› ⧖:C,tv
   ⧗:C̵ ‹len› ⧖:C,f
-  ⧗:C̵ ⧗:name ⍆̵ ⧗:ins ⍆̵ ⧗:outs ⍆̵ ⧗:rev ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:f
+  ⧗:C̵ ⧗:name ⍆̵ ⧗:ins ⍆̵ ⧗:outs ⍆̵ ⧗:rev ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:tv ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧗:f
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹fninfo› ⸫
+
+⍝ ---- type variables (§9.4): a generic function is checked and emitted once per instance
+
+⍝ ‹istvar› c: c is a type variable α … θ
+⦃ #945# #952# ᛦ ⦄ ⟨ℤ ⊸ ŧ⟩ ‹istvar› ⸫
+⍝ ‹tvars› C ts: the type variables of the types ts, in order of first appearance
+⦃
+  ⧖:C,ts
+  ⧗:C̵ ‹lnew0› ⧖:C,vs
+  ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵,ts,vs ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,ts,vs,j,n
+    ⧗:C̵,ts,vs,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ts,vs,j,n ⧗:C̵,ts,j ‹lget› ⧖:C,t ⧗:C̵,t,vs ‹tvars1› ⧖:C,vs2 ⧗:C̵,ts,vs2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,ts,vs,j,n ⧗:C̵,vs
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tvars› ⸫
+⦃
+  ⧖:C,t,vs
+  ⧗:C̵,t ‹slen› ⧖:C,n
+  ⧗:C̵,t,vs ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,t,vs,j,n
+    ⧗:C̵,t,vs,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,t,vs,j,n ⧗:C̵,t,j ‹sat› ⧖:C,c ⧗:C̵,vs,c ‹lhas› ⧖:C,has
+        ⧗:C̵,vs,c ⧗:c ‹istvar› ⧗:has ‹not› ⋎ ⋔ ⦃ ‹lpush› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,vs2
+        ⧗:C̵,t,vs2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,t,vs,j,n ⧗:C̵,vs
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tvars1› ⸫
+⍝ ‹tbind› C ds xs: the bindings of the variables of the declared types ds to the classical types
+⍝ they meet in the actual types xs (8 slots for α … θ, −1 while free); a declared ◌ may meet a
+⍝ value that cannot fail
+⦃
+  ⧖:C,ds,xs
+  ⧗:C̵ ‹lbeg› ⧖:C,b
+  ⧗:C̵,b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧗:b #-1# ‹ladd› ⧖:C
+  ⧗:C̵,ds ‹llen› ⧖:C,n
+  ⧗:C̵,ds,xs,b ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,ds,xs,b,j,n
+    ⧗:C̵,ds,xs,b,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ds,xs,b,j,n ⧗:C̵,ds,j ‹lget› ⧖:C,d ⧗:C̵,xs,j ‹lget› ⧖:C,x ⧗:C̵,d,x,b ‹tbind1› ⧗:ds,xs,b ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,ds,xs,b,j,n ⧗:C̵,b
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tbind› ⸫
+⦃
+  ⧖:C,d,x,b
+  ⧗:C̵,d ‹slen› ⧖:C,dn ⧗:C̵,x ‹slen› ⧖:C,xn
+  ⍝ the loop carries [C d x b p q dn xn]
+  ⧗:C̵,d,x,b ○ ○ ⧗:dn,xn
+  ⥀ ⦃
+    ⧖:C,d,x,b,p,q,dn,xn
+    ⧗:C̵,d,x,b,p,q,dn,xn ⧗:p ⧗:dn ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:q ⧗:xn ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⋎ ⋔ ⦃ ‹tbind2› ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹tbind1› ⸫
+⦃
+  ⧖:C,d,x,b,p,q,dn,xn
+  ⧗:C̵,d,p ‹sat› ⧖:C,dc ⧗:C̵,x,q ‹sat› ⧖:C,xc
+  ⍝ 1: a variable meets a type, 2: the same code point, 3: a declared ◌ alone, 4: a mismatch
+  #4# ⧗:dc #9676# ᛖ ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧗:dc ⧗:xc ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:dc ‹istvar› ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:k
+  ⧗:C̵,b,dc,xc ⧗:k △ ᛖ ⋔ ⦃ ‹tbind3› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,d,x,b
+  ⧗:p,q,dn,k ⍿⁰ #3# ᛖ ⋔ ⦃ ⌁ ⧖:pp,qq,nn ⧗:pp △ ⊞ ⧗:qq ⦄ ⦃ #4# ᛖ ⋔ ⦃ ⧖:pp,qq,nn ⧗:nn ⧗:qq ⦄ ⦃ ⧖:pp,qq,nn ⧗:pp △ ⊞ ⧗:qq △ ⊞ ⦄ ⁼ ⦄ ⁼
+  ⧗:dn,xn
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹tbind2› ⸫
+⍝ ‹tbind3› C b v t: bind variable v to the code point t, if t is a classical base type and v is free
+⦃
+  ⧖:C,b,v,t
+  ⧗:C̵,b ⧗:v #945# ⊟ ‹lget› ⧖:C,old
+  ⧗:t #8484# ᛖ ⧗:t #8477# ᛖ ⋏ ⧗:t #359# ᛖ ⋏ ⧗:t #120121# ᛖ ⋏ ⧗:old #-1# ᛖ ⋎ ⧖:ok
+  ⧗:C̵,b,v,t ⧗:ok ⋔ ⦃ ⧖:C,b,v,t ⧗:C̵,b ⧗:v #945# ⊟ ⧗:t ‹lset› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹tbind3› ⸫
+⍝ ‹tsubst› C t b: type t with its bound variables replaced (interned)
+⦃
+  ⧖:C,t,b
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:C̵,t ‹slen› ⧖:C,n
+  ⧗:C̵,e,t,b ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,e,t,b,j,n
+    ⧗:C̵,e,t,b,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,e,t,b,j,n ⧗:C̵,t,j ‹sat› ⧖:C,c
+        ⧗:C̵,b,c ⧗:c ‹istvar› ⋔ ⦃ ‹tsubc› ⦄ ⦃ ⧖:C,bb,cc ⧗:C̵,cc ⦄ ⁼ ⧖:C,c2
+        ⧗:C̵,e,c2 ‹scp› ⧗:e,t,b ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,e,t,b,j,n ⧗:C̵,e ‹send›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tsubst› ⸫
+⦃
+  ⧖:C,b,c
+  ⧗:C̵,b ⧗:c #945# ⊟ ‹lget› ⧖:C,w
+  ⧗:C̵ ⧗:c ⧗:w ⧗:w #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:ww ⌁ ⧗:ww ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tsubc› ⸫
+⍝ ‹tsubstl› C ts b: ‹tsubst› over a list
+⦃
+  ⧖:C,ts,b
+  ⧗:C̵ ‹lnew0› ⧖:C,out
+  ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵,ts,b,out ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,ts,b,out,j,n
+    ⧗:C̵,ts,b,out,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ts,b,out,j,n ⧗:C̵,ts,j ‹lget› ⧖:C,t ⧗:C̵,t,b ‹tsubst› ⧖:C,s ⧗:C̵,out,s ‹lpush› ⧖:C,out2 ⧗:C̵,ts,b,out2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,ts,b,out,j,n ⧗:C̵,out
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tsubstl› ⸫
+⍝ ‹toptys› C S k: the types of the top k values of S (values, emit entries and evaluated values
+⍝ all keep their type in field 0)
+⦃
+  ⧖:C,S,k
+  ⧗:C̵ ‹lnew0› ⧖:C,out
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S,out ⧗:n ⧗:k ⊟ ⧗:n
+  ⥀ ⦃
+    ⧖:C,S,out,j,n
+    ⧗:C̵,S,out,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,S,out,j,n ⧗:C̵,S,j ‹lget› ○ ‹vf› ⧖:C,t ⧗:C̵,out,t ‹lpush› ⧖:C,out2 ⧗:C̵,S,out2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,S,out,j,n ⧗:C̵,out
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹toptys› ⸫
+⍝ ‹instrec› C f b at: the record of generic f's instance for bindings b, named ᚠ[ℤ …]
+⦃
+  ⧖:C,f,b,at
+  ⧗:C̵,f ‹rd› ⧖:C,name
+  ⧗:C̵,f #8# ‹vf› ⧖:C,vs
+  ⧗:C̵,vs ‹llen› ⧖:C,nv
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:C̵,e,name ‹sapp› ⧗:e #91# ‹scp›
+  ⧗:e,vs,b ○ ⧗:nv
+  ⥀ ⦃
+    ⧖:C,e,vs,b,j,n
+    ⧗:C̵,e,vs,b,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,e,vs,b,j,n ⧗:C̵,e ⧗:j ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:ee ⧗:ee #32# ‹scp› ⦄ ⦃ ⌁ ⦄
+        ⧗:vs,j ‹lget› ⧖:C,v ⧗:C̵,b ⧗:v #945# ⊟ ‹lget› ⧖:C,t ⧗:C̵,e,t ‹scp›
+        ⧗:e,vs,b ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,e,vs,b,j,n ⧗:C̵,e #93# ‹scp› ⧗:e ‹send› ⧖:C,key
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,ins,b ‹tsubstl› ⧖:C,gi
+  ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs,b ‹tsubstl› ⧖:C,go
+  ⧗:C̵,f #10# ‹vf› ⧖:C,shp ⧗:C̵,shp,b ‹tsubst› ⧖:C,gshp
+  ⧗:C̵ ‹lnew0› ⧖:C,none
+  ⧗:C̵,f #4# ‹vf› ⧖:C,iev ⧗:C̵,f #5# ‹vf› ⧖:C,ich ⧗:C̵,f #6# ‹vf› ⧖:C,oev ⧗:C̵,f #7# ‹vf› ⧖:C,och
+  ⧗:C̵,f #9# ‹vf› ⧖:C,it
+  ⧗:C̵ ‹len› ⧖:C,g
+  ⧗:C̵ ⧗:key ⍆̵ ⧗:gi ⍆̵ ⧗:go ⍆̵ ○ ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:none ⍆̵ ⧗:it ⍆̵ ⧗:gshp ⍆̵ ⧗:at ⍆̵ ⧗:g
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹instrec› ⸫
+⍝ ‹isgeneric› C f: f has type variables
+⦃ ⧖:C,f ⧗:C̵,f #8# ‹vf› ⧖:C,tv ⧗:C̵,tv ‹llen› ⧖:C,n ⧗:C̵ ⧗:n ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isgeneric› ⸫
+⍝ ‹cinstance› C f S tok: a call of generic f on the values on top of S: the instance's record,
+⍝ made and queued for checking (register 57) the first time
+⦃
+  ⧖:C,f,S,tok
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins
+  ⧗:C̵,ins ‹llen› ⧖:C,k ⧗:C̵,S ‹llen› ⧖:C,n
+  ⍝ too few values: ‹apply› reports it
+  ⧗:C̵,f,S,tok,k ⧗:n ⧗:k ≶ ⋔ ⦃ ‹cinstance1› ⦄ ⁼ ⦃ ⌁ ⌁ ⌁ ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cinstance› ⸫
+⦃
+  ⧖:C,f,S,tok,k
+  ⧗:C̵,S,k ‹toptys› ⧖:C,xs
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins
+  ⧗:C̵,ins,xs ‹tbind› ⧖:C,b
+  ⧗:C̵,f #8# ‹vf› ⧖:C,vs
+  ⧗:C̵,vs ‹llen› ⧖:C,nv
+  ⧗:C̵,f,tok,xs,vs,b ○ ⧗:nv
+  ⥀ ⦃
+    ⧖:C,f,tok,xs,vs,b,j,n
+    ⧗:C̵,f,tok,xs,vs,b,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,f,tok,xs,vs,b,j,n ⧗:C̵,vs,j ‹lget› ⧖:C,v ⧗:C̵,b ⧗:v #945# ⊟ ‹lget› ⧖:C,w
+        ⧗:C̵,f,tok,xs,v ⧗:w #-1# ᛖ ⋔ ⦃ ‹noinfer› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+        ⧗:C̵,f,tok,xs,vs,b ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,f,tok,xs,vs,b,j,n
+  ⧗:C̵,tok △ ‹tf› ⧖:C,ln ⧗:C̵,tok #2# ‹tf› ⧖:C,cl
+  ⧗:C̵,f,b #-1# ‹instrec› ⧖:C,g
+  ⧗:C̵,g ‹rd› ⧖:C,key
+  ⧗:C̵,key ‹fnfind› ⧖:C,old
+  ⧗:C̵,g,key,ln,cl,old ⧗:old #-1# ᛖ ⋔ ⦃ ‹cinstnew› ⦄ ⦃ ⧖:C,g,key,ln,cl,old ⧗:C̵,old ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cinstance1› ⸫
+⦃
+  ⧖:C,g,key,ln,cl,old
+  ⧗:C̵ %%{key}, first called at {#ln}:{#cl}%% ⧖:C,at
+  ⧗:C̵,g #11# ⧗:at ‹vset› ⧖:C
+  ⧗:C̵ #7# ‹reg› ⧖:C,fns ⧗:C̵,fns,g ‹lpush› ⧖:C,fns2 ⧗:C̵ #7# ⧗:fns2 ‹wr› ⧖:C
+  ⧗:C̵ #57# ‹reg› ⧖:C,q ⧗:C̵,q,g ‹lpush› ⧖:C,q2 ⧗:C̵ #57# ⧗:q2 ‹wr› ⧖:C
+  ⧗:C̵,g
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cinstnew› ⸫
+⦃
+  ⧖:C,f,tok,xs,v
+  ⧗:C̵,f ‹rd› ⧖:C,name
+  ⧗:C̵,tok ‹cerr› $cannot infer $ ⎙̵ ⧗:v ᚢ $ for $ ⎙̵ ⧗:name ‹spr› $ from $ ⎙̵ ⧗:xs ○ ‹plist›
+  $: a type variable stands for a classical type ℤ ℝ ŧ 𝔹 (§9.4)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹noinfer› ⸫
+⍝ ‹cgeneric› C f i tok rev ffi sig: check where f's type variables may appear; keep a generic
+⍝ function's item and shape
+⦃
+  ⧖:C,f,i,tok,rev,ffi,sig
+  ⧗:C̵,f #8# ‹vf› ⧖:C,tv
+  ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs ‹tvars› ⧖:C,tvo
+  ⧗:C̵,tv ‹llen› ⧖:C,nv ⧗:C̵,tvo ‹llen› ⧖:C,nvo
+  ⧗:C̵,f,i,tok,rev,ffi,sig,tv,tvo ⧗:nv ○ ᛖ ⧗:nvo ○ ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹cgeneric1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cgeneric› ⸫
+⦃
+  ⧖:C,f,i,tok,rev,ffi,sig,tv,tvo
+  ⧗:C̵ ⧗:ffi ‹not› ⧗:tok #26# ‹cfailunless› ⧖:C
+  ⧗:C̵ ⧗:rev ‹not› ⧗:tok #27# ‹cfailunless› ⧖:C
+  ⍝ every variable of the outputs must be fixed by an input
+  ⧗:C̵,tvo ‹llen› ⧖:C,n
+  ⧗:C̵,f,tok,tv,tvo ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,f,tok,tv,tvo,j,n
+    ⧗:C̵,f,tok,tv,tvo,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,f,tok,tv,tvo,j,n ⧗:C̵,tvo,j ‹lget› ⧖:C,v ⧗:C̵,tv,v ‹lhas› ⧖:C,has
+        ⧗:C̵,f,tok,v ⧗:has ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹outvar› ⦄ ⁼ ⧖:C
+        ⧗:C̵,f,tok,tv,tvo ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,f,tok,tv,tvo,j,n
+  ⧗:C̵,sig ‹cshape› ⧖:C,shp
+  ⧗:C̵,f #9# ⧗:i ‹vset› ⧗:f #10# ⧗:shp ‹vset›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cgeneric1› ⸫
+⦃
+  ⧖:C,f,tok,v
+  ⧗:C̵,f ‹rd› ⧖:C,name
+  ⧗:C̵,tok ‹cerr› ⧗:v ᚢ $ appears only in the outputs of $ ⎙̵ ⧗:name ‹spr› $; every type variable must be fixed by an input (§9.4)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹outvar› ⸫
 
 ⍝ ‹pjoin› C L sep: print a list of strings joined by sep (0 a space, 1 ", ")
 ⦃
@@ -622,6 +858,8 @@
   ⍿⁰ #23# ᛖ ⋔ ⦃ $a particle is represented by a classical type$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #24# ᛖ ⋔ ⦃ $a reversible function has effect ⟨S ⊸ S⟩ (§10)$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #25# ᛖ ⋔ ⦃ $the entry point ᛟ has signature ⟨⊸⟩ or ⟨⊸ ◌⟩ (§9)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #26# ᛖ ⋔ ⦃ $an FFI binding cannot be generic (§9.4)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #27# ᛖ ⋔ ⦃ $a reversible function cannot be generic (§9.4)$ ⎙̵ ⦄ ∅ ⁼
   ⌁
 ⦄ ⟨ℤ ⊸⟩ ‹pmsg› ⸫
 
@@ -1769,7 +2007,9 @@
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
   ⧗:C̵,op ‹ndt› ⧖:C,tok
   ⧗:C̵,op ○ ‹nd› ⧖:C,k
-  ⧗:C̵,op ‹resolve› ⧖:C,f
+  ⧗:C̵,op ‹resolve› ⧖:C,f0
+  ⧗:C̵,f0 ‹isgeneric› ⧖:C,gen
+  ⧗:C̵,f0,S,tok ⧗:gen ⋔ ⦃ ‹cinstance› ⦄ ⦃ ⧖:C,ff,SS,tk ⧗:C̵,ff ⦄ ⁼ ⧖:C,f
   ⧗:C̵,tok #2# ‹tmark› ⧖:C,fut
   ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs ‹llen› ⧖:C,no
   ⧗:C̵ ⧗:fut ⧗:no ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ‹not› ⧗:tok #11# ‹cfailunless›
@@ -2229,7 +2469,7 @@
   ⧗:C̵,t ‹tbase› ⧖:C,b
   ⧗:C̵,b ‹slen› ⧖:C,bl ⧗:C̵,b ‹shead› ⧖:C,bh
   ⧗:C̵,b ‹ptfind› ⧖:C,rep
-  ⧗:C̵,tok,b ⧗:bl ○ ᛖ ‹not› ⧗:bh ‹isbasecp› ‹not› ⋎ ⧗:rep #-1# ᛖ ⋎ ⋔
+  ⧗:C̵,tok,b ⧗:bl ○ ᛖ ‹not› ⧗:bh ‹isbasecp› ‹not› ⋎ ⧗:rep #-1# ᛖ ⋎ ⧗:bh ‹istvar› ‹not› ⋎ ⋔
     ⦃ ⧖:tk,bb ⧗:tk ‹cerr› $unknown type $ ⎙̵ ⧗:bb ‹spr› $ (Ogham type names must be declared with ⚛, §8.6)$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
   ⧗:C̵,t ‹shead› ⧖:C,h
   ⧗:C̵,tok,t ⧗:outputs △ ᛖ ⧗:h #10199# ᛖ ⧗:h #10198# ᛖ ⋏ ⋎ ⋔
@@ -2281,7 +2521,7 @@
   ⧗:it #6# ⊞ ⧗:nfr ⊞ ⧖:sig
   ⍝ the header line
   ⧗:C̵ ‹tron› ⧖:C,on
-  ⧗:C̵,name,sig,S ⧗:on ⋔ ⦃ ⧖:C,name,sig,S ⧗:C̵,sig ‹cshape› ⧖:C,key $fn $ ⎙̵ ⧗:C̵,name ‹spr› $ $ ⎙̵ ⧗:key ‹spr› $  start $ ⎙̵ ⧗:S △ ‹plist› $\n$ ⎙̵ ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,name,sig,S,f ⧗:on ⋔ ⦃ ⧖:C,name,sig,S,f ⧗:C̵,f #10# ‹vf› ⧖:C,shp ⧗:C̵,sig,shp ⧗:shp #-1# ᛖ ⋔ ⦃ ⌁ ‹cshape› ⦄ ⦃ ⧖:C,sg,sh ⧗:C̵,sh ⦄ ⁼ ⧖:C,key $fn $ ⎙̵ ⧗:C̵,name ‹spr› $ $ ⎙̵ ⧗:key ‹spr› $  start $ ⎙̵ ⧗:S △ ‹plist› $\n$ ⎙̵ ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
   ⧗:C̵,sig #2# ‹nd› ⧖:C,ssz
   ⧗:C̵,it #2# ‹nd› ⧖:C,isz
   ⧗:sig ⧗:ssz ⊞ ⧖:from
@@ -2383,6 +2623,7 @@
   ⧗:C̵,sig ⧗:rev ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧗:name ‹fninfo› ⧖:C,f
   ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,f #2# ‹vf› ⧖:C,outs
   ⧗:C̵,ins,tok ○ ‹chktypes› ⧗:outs,tok △ ‹chktypes› ⧖:C
+  ⧗:C̵,f,i,tok,rev ⧗:k #32# ᛖ ⧗:sig ‹cgeneric› ⧖:C
   ⧗:C̵ #7# ‹reg› ⧖:C,fns ⧗:C̵,fns,f ‹lpush› ⧖:C,fns2 ⧗:C̵ #7# ⧗:fns2 ‹wr›
   ⧗:sig ‹cshape› ⧖:C,key
   ⧗:C̵ ‹len› ⧖:C,e ⧗:C̵ ⧗:key ⍆̵ ⧗:name ⍆̵ ⧖:C
@@ -2404,8 +2645,33 @@
   ⧖:C,i
   ⧗:C̵,i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C̵,nt ‹tname› ⧖:C,name
   ⧗:C̵,name ‹fnfind› ⧖:C,f
-  ⧗:C̵,i,f ‹cfunction›
+  ⧗:C̵,f ‹isgeneric› ⧖:C,g
+  ⧗:C̵,i,f ⧗:g ⋔ ⦃ ‹ctemplate› ⦄ ⦃ ‹cfunction› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹pass3f› ⸫
+⍝ ‹ctemplate› C i f: a generic function is checked for each instance instead; the trace says so
+⦃
+  ⧖:C,i,f
+  ⧗:C̵ ‹tron› ⧖:C,on
+  ⧗:C̵,f ⧗:on ⋔ ⦃ ⧖:C,f ⧗:C̵,f ‹rd› ⧖:C,name ⧗:C̵,f #10# ‹vf› ⧖:C,shp $fn $ ⎙̵ ⧗:C̵,name ‹spr› $ $ ⎙̵ ⧗:shp ‹spr› $  generic: checked for each instance (§9.4)\n$ ⎙̵ ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ctemplate› ⸫
+⍝ ‹cinsts› C: check the instances of generic functions as calls made them (register 57);
+⍝ checking one may make more
+⦃
+  ⧖:C
+  ⧗:C̵ ○
+  ⥀ ⦃
+    ⧖:C,i
+    ⧗:C̵ #57# ‹reg› ⧖:C,L ⧗:C̵,L ‹llen› ⧖:C,n
+    ⧗:C̵,L,i ⧗:i ⧗:n ≶ ⋔ ⦃ ⧖:C,L,i ⧗:C̵,i ⦶ ⦄ ⁼ ⦃ ⧖:C,L,i ⧗:C̵,L,i ‹lget› ‹cinst1› ⧗:i △ ⊞ ⊕ ⦄
+  ⦄
+  ⌁
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cinsts› ⸫
+⦃
+  ⧖:C,g
+  ⧗:C̵,g #11# ‹vf› ⧖:C,at ⧗:C̵ #56# ⧗:at ‹wr› ⧖:C
+  ⧗:C̵,g #9# ‹vf› ⧖:C,it ⧗:C̵,it,g ‹cfunction› ⧖:C
+  ⧗:C̵ #56# #-1# ‹wr›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cinst1› ⸫
 
 ⍝ ‹cinit› T F st trace: the heap for checking: registers, the common types, the token buffer and the tree
 ⦃
@@ -2429,7 +2695,7 @@
   #10199# #643# ‹str2› ⧖:C,s ⧗:C̵ #18# ⧗:s ‹wr›
   #10198# #643# ‹str2› ⧖:C,s ⧗:C̵ #19# ⧗:s ‹wr›
   #9676# #120121# ‹str2› ⧖:C,s ⧗:C̵ #20# ⧗:s ‹wr›
-  ‹lnew0› ⧖:C,e ⧗:C̵ #7# ⧗:e ‹wr› #8# ⧗:e ‹wr› #9# ⧗:e ‹wr›
+  ‹lnew0› ⧖:C,e ⧗:C̵ #7# ⧗:e ‹wr› #8# ⧗:e ‹wr› #9# ⧗:e ‹wr› #57# ⧗:e ‹wr› #56# #-1# ‹wr›
 ⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cinit› ⸫
 
 ⍝ ‹ccopyst› st C: copy the tree into the heap (register 5: its base; 24, 25: the tangled items)
@@ -2453,4 +2719,4 @@
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cpath› ⸫
 
 ⍝ ‹check› C: check every item (its trace goes to the output when register 1 is set)
-⦃ △ ‹citems› #2# ‹citems› #3# ‹citems› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹check› ⸫
+⦃ △ ‹citems› #2# ‹citems› #3# ‹citems› ‹cinsts› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹check› ⸫

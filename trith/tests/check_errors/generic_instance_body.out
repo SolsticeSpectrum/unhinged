@@ -1,0 +1,14 @@
+fn ᚠ ⟨α ⊸ α⟩  generic: checked for each instance (§9.4)
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  ᚠ  ⊢ [ℤ]
+  ⎙  ⊢ []
+  ⊕  ⊢ [ŧ]
+  ᚠ  ⊢ [ŧ]
+  ⎙  ⊢ []
+fn ᚠ[ℤ] ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+  △  ⊢ [ℤ ℤ]
+  ⊞  ⊢ [ℤ]
+fn ᚠ[ŧ] ⟨ŧ ⊸ ŧ⟩  start [ŧ]
+  △  ⊢ [ŧ ℤ]
+trith/tests/check_errors/generic_instance_body.trh:2:17: error: operand 1 of ⊞: expected ℤ, ℝ or 𝔹, found ŧ (in ᚠ[ŧ], first called at 3:11)

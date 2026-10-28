@@ -208,6 +208,7 @@
       S v ⟪ .append ⟫ ¿
     ⌫ ⤵ k "call" ≡ k "shape-call" ≡ ∨ ⤴ ↵
       E op ⟪ em_resolve ⟫ → f ¿
+      f "generic" ⌈ ⌉ ⊤ ≡ ⤴ ↵ E f S ⟪ em_instance ⟫ → f ¿ ⌫ ¿
       f "ins" ⌈ ⌉ ⟪ len ⟫ → ka ¿
       S ka ⟪ em_pop ⟫ → args ¿
       【】 → uargs ¿

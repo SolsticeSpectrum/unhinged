@@ -1,0 +1,5 @@
+fn ᚠ ⟨α α ⊸ α⟩  generic: checked for each instance (§9.4)
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  △⁝○  ⊢ [ℤ ℝ]
+trith/tests/check_errors/generic_mismatch.trh:3:9: error: argument 2 of ᚠ: expected ℤ, found ℝ

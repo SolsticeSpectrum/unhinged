@@ -4,7 +4,7 @@ UNHINGEDC := build/unhingedc
 TEST_BIN := build/tests
 TRITHC := build/trithc
 TRITH_TESTS := build/trith-tests
-.PHONY: build test clean trith trith-test trith-bench trith-memcheck s2 s2-regen s2-test s2-fuzz s3 s2-fixpoint lib-test lib-regen
+.PHONY: build test clean trith trith-test trith-bench trith-memcheck s2 s2-regen s2-test s2-fuzz s3 s2-fixpoint lib-test lib-regen bench-regen
 
 build:
 	@mkdir -p build
@@ -34,6 +34,12 @@ trith-memcheck: trith
 # benchmark gate (spec §17): each program within 1.5× of clang -O2 C
 trith-bench: trith
 	TRITHC=$(TRITHC) trith/bench/run.sh
+
+# sha256.trh is generated from sha256.trhx (written with the s2 shorthands)
+bench-regen: trith
+	@mkdir -p build
+	python3 trith/s2/tools/trx.py trith/bench/sha256.trhx > build/sha256.logical.trh
+	$(TRITHC) build/sha256.logical.trh --plough > trith/bench/sha256.trh
 
 clean:
 	rm -rf build output bootstrap/target

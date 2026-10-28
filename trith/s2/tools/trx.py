@@ -31,7 +31,7 @@ def bt(n):
 
 class Scope:
     def __init__(self, kind):
-        self.kind = kind      # 'fn', 'loop', 'face'
+        self.kind = kind      # 'fn', 'loop', 'face', 'prayer'
         self.names = []       # oldest first; None for anonymous moments
         self.group = None     # for faces: the group being filled
 
@@ -79,6 +79,8 @@ def process(src):
                     stack.append(Scope('fn'))
                 elif prev == '⥀':
                     stack.append(Scope('loop'))
+                elif prev and prev.startswith('⍤'):
+                    stack.append(Scope('prayer'))  # its moments stay inside
                 elif awaiting:
                     s = Scope('face'); s.group = pending[-1]; stack.append(s)
                 else:

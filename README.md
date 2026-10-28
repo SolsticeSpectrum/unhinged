@@ -77,7 +77,7 @@ Done so far:
 - Milestone 4: arrays and strings, borrows at run time, particles, FFI through generated C glue, and checked evidentials and charges.
 - Milestone 5: superposition with phase and interference, retrocausal post-selection, reversible functions with generated inverses, past-tense calls evaluated at compile time, and prayer verdicts.
 
-Generated code runs at C speed (within about 0.9–1.06× of `clang -O2`) on all four benchmarks: fib, Collatz, n-body and Game of Life.
+Generated code runs at C speed (within about 0.9–1.06× of `clang -O2`) on fib, Collatz, n-body and Game of Life, and at about 1.2× on SHA-256 of 100 MiB, where 32-bit words live in 64-bit integers with masks.
 
 - Milestone 6: the compiler rewritten in Trith itself (stage s2, in `trith/s2/`), passing the fixpoint. s1 compiles it into `build/s2c`, which prints exactly what `trithc` prints for `--tokens`, `--ast`, `--check` and `--emit-llvm` (traces and error messages included) for every Trith file in the repository, and compiles programs the same way. s2 compiled by itself (s3) emits the same IR and is the same executable. Unlike s1, s2 exits with status 1 after an error, and it is much faster: it compiles its own 8,000-line source to IR in 0.35 s, where s1 takes 11 s.
 

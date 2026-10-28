@@ -785,17 +785,17 @@ Milestones:
 1. Lexer and parser for Trith, written in UNHINGED. Golden tests cover the Boustrophedon Rule, the Balance Law, the mark registry, and fragments. **Done:** `trith/src/`, tests in `trith/tests/`, `make trith-test`.
 2. Check pass: effects, linearity, agreement. **Done:** `trith/src/check.uh`, `trithc --check`, tests in `trith/tests/check*/`.
 3. Stack-to-SSA and LLVM emission for ℤ, ŧ, `⋔`, `⥀`, functions and inside-out scope. **Benchmark gate here.** **Done:** `trith/src/emit.uh`, `trith/runtime/trith_rt.c`; also ℝ, 𝔹, string literals with `⎙`, `◌`/`⁇`/`↯`, `⊨`, prayers, future calls and call by shape. `make trith-bench` passes: fib(35) 0.97× and Collatz to 10⁶ 1.03× of `clang -O2`.
-4. ◌, arrays, strings, FFI, particles, evidentials, charges. **Done.** Benchmarks: n-body 1.06× and Game of Life 0.95× of `clang -O2`. Life's grid-size prayer (§12) lets the optimiser remove every bounds check. SHA-256 is not written yet.
+4. ◌, arrays, strings, FFI, particles, evidentials, charges. **Done.** Benchmarks: n-body 1.06× and Game of Life 0.95× of `clang -O2`. Life's grid-size prayer (§12) lets the optimiser remove every bounds check.
 5. ψ with phases, `⟜`, `⇋`, tense, prayers, call by shape. **Done** within the s1 limits recorded in §16.1.
 6. Rewrite the compiler in Trith (s2), then pass the fixpoint (s3). **Done:** `trith/s2/`, built as `build/s2c` by s1. s2 agrees with s1's `--tokens`, `--ast`, `--check` and `--emit-llvm` on every file in the repository, on random inputs and on mutated tests, and compiled programs behave identically (`make s2-test`, `make s2-fuzz`). s3, s2 compiled by s2, emits exactly the IR s2 emits for its own source and is the same executable (`make s2-fixpoint`). s2 is about 30× faster than s1: it checks its own 8,000-line source in 0.24 s and compiles it to IR in 0.35 s (s1: 7.5 s and 11 s).
-7. Port the standard library modules. **Done:** `trith/lib/`: crypto (SHA-256, HMAC-SHA-256, AES-256-CBC, random bytes), json, http (client and server), ws (WebSocket client and server) and smtp, in C with Trith-shaped signatures (−1 and NULL for failure, so results bind as `◌`). Network results are bound as hearsay `⸮`. `make lib-test` builds and runs a test of each module with s1 and with s2; the network tests fork into a server and a client, and the SMTP test talks to a fake server. There is no TLS. The SHA-256 benchmark is still open: it needs SHA-256 written in Trith rather than bound from C.
+7. Port the standard library modules. **Done:** `trith/lib/`: crypto (SHA-256, HMAC-SHA-256, AES-256-CBC, random bytes), json, http (client and server), ws (WebSocket client and server) and smtp, in C with Trith-shaped signatures (−1 and NULL for failure, so results bind as `◌`). Network results are bound as hearsay `⸮`. `make lib-test` builds and runs a test of each module with s1 and with s2; the network tests fork into a server and a client, and the SMTP test talks to a fake server. There is no TLS. SHA-256 is also written in Trith itself, as the last benchmark (`trith/bench/sha256.trhx`): it hashes 100 MiB at about 1.2× the time of `clang -O2`, and prayers on the table lengths remove every bounds check. The remaining gap is 32-bit arithmetic done in 64-bit ℤ with masks, since Trith has no 32-bit integer type.
 
 Benchmarks, each of which must run within 1.5× of `clang -O2`:
 
 - fib(35), recursive
 - n-body, 1M steps
 - Game of Life, 512² grid, 1000 generations
-- SHA-256 of 100 MB
+- SHA-256 of 100 MiB
 - the compile time of the compiler itself
 
 ---

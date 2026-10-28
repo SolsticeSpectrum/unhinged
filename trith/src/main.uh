@@ -100,7 +100,7 @@
     csrcs ci ⌈ ⌉ → src ¿
     ci ⍕ → cis ¿
     【output ".c" cis ".ll"】 "" ⟪ join ⟫ → cll ¿
-    【"clang -S -emit-llvm " opt " -w -o " cll " " src " 2>&1"】 "" ⟪ join ⟫ → ccmd ¿
+    【"clang -S -emit-llvm " opt " -w -I . -o " cll " " src " 2>&1"】 "" ⟪ join ⟫ → ccmd ¿
     ccmd ⟪ syscall ⟫ → cout ¿
     cout "" ≢ ⤴ ↵
       cout ⊢ ¿

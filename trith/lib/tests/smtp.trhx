@@ -1,0 +1,14 @@
+⍝ trith/lib/smtp.c: mail to a fake server (smtp_server.py, started by the test runner)
+⎔ $trith_smtp_send$ ⟨ʃ ℤ ʃ ʃ ʃ ʃ ʃ ʃ ⊸ ◌ℤ⟩ ‹smtp› ⸫
+⎔ $trith_smtp_error$ ⟨⊸ ʃ⟩ ‹serror› ⸫
+
+⍝ ‹report›: say how a send went
+⦃ ⁇ ⦃ ⌁ $sent\n$ ⎙̵ ⦄ ⦃ $not sent: $ ⎙̵ ‹serror› ⎙̵ $\n$ ⎙̵ ⦄ ⦄ ⟨◌ℤ ⊸⟩ ‹report› ⸫
+
+⦃
+  $127.0.0.1$ #8475# $mailer$ $hunter2$ $Trith <trith@example.com>$ $ada@example.com, Bob <bob@example.com>$
+    $Status report$ $All is well.\n.hidden line keeps its dot\nbye$ ‹smtp› ‹report›
+  $127.0.0.1$ #8475# $mailer$ $guess$ $trith@example.com$ $ada@example.com$ $Hello$ $Hi.$ ‹smtp› ‹report›
+  $127.0.0.1$ #8475# $$ $$ $trith@example.com$ $ghost@nowhere.invalid$ $Hello$ $Hi.$ ‹smtp› ‹report›
+  $127.0.0.1$ #1# $$ $$ $trith@example.com$ $ada@example.com$ $Hello$ $Hi.$ ‹smtp› ‹report›
+⦄ ⟨⊸⟩ ᛟ ⸫

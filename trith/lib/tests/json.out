@@ -1,0 +1,14 @@
+localhost
+5432
+café "ok"
+Bob
+(none)
+port
+users: 3
+type of the document: 6
+Alice
+Cara
+{"database":{"host":"localhost","port":5432},"features":{"newFeature":true},"users":[{"name":"Alice","active":true},{"name":"Bob","active":false},{"name":"Cara","active":true}],"motto":"café \"ok\""}
+"say \"hi\"\n"
+type of [1, 2: -1
+exit=0

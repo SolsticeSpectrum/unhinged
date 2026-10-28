@@ -1,0 +1,52 @@
+⍝ trith/lib/ws.c: an echo server and its client in one program, split by fork
+⸫ ᚡᚠ ⟨ ℤ ⊸ ⟩ «krof» ⎔
+⎔ »netsil_sw_htirt« ⟨ ℤ ⊸ ◌ℤ ⟩ ᚡᚢ ⸫
+⸫ ᚡᚤ ⟨ ◌ℤ ⊸ ℤ ⟩ «tpecca_sw_htirt» ⎔
+⎔ »tcennoc_sw_htirt« ⟨ ʃ ⊸ ◌ℤ ⟩ ᚡᚥ ⸫
+⸫ ᚡᚦ ⟨ ◌ℤ ⊸ ⸮ʃ ℤ ⟩ «dnes_sw_htirt» ⎔
+⎔ »eviecer_sw_htirt« ⟨ ℤ ⊸ ⸮◌ʃ ⟩ ᚡᚧ ⸫
+⸫ ᚡᚨ ⟨ ℤ ⊸ ℤ ⟩ «esolc_sw_htirt» ⎔
+⎔ »rorre_sw_htirt« ⟨ ⊸ ʃ ⟩ ᚡᚩ ⸫
+
+⍝ ᚡᚪ s: the text, or ? if there is none (what came over the network is hearsay, ⸮)
+⸫ ᚡᚪ ⟨ ⸮ʃ ⊸ ⸮◌ʃ ⟩ ⦃ ⦃ «?» ⦄ ⦃ ⦄ ⁇ ⦄
+
+ᚡᚫ conn: send every message back until the client closes ⍝
+⦃
+  ⦄ ⥀
+    ⧖
+    ⦃ ⦶ ⌁ ⦄ ⦃ ⊕ ⦃ ⦄ ⦃ ⌁ ⦄ ⁇ ᚡᚦ ⦄ ⁇ ᚡᚧ ⧗⁰ ⧗⁰ ⧗⁰
+  ⦄
+  ⌁ ᚡᚨ
+⦄ ⟨ ℤ ⊸ ⟩ ᚡᚫ ⸫
+
+⍝ ᚡᚬ server: serve one client, then stop
+⸫ ᚡᚬ ⟨ ⊸ ℤ ⟩ ⦃ ⌁ ᚡᚨ ⧗⁰ ⦃ ⦄ ⦃ ᚡᚫ ⦄ ⁇ ᚡᚤ ⧗⁰ ⧖ ⦄
+
+ᚡᚭ conn text: send text and print what comes back ⍝
+⦃ ⧖ ⧖ ⧗⁰ ⧗¹ ᚡᚦ ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⧗⁰ ᚡᚧ ᚡᚪ ⎙̵ »↵« ⎙̵ ⦄ ⟨ ℤ ʃ ⊸ ⟩ ᚡᚭ ⸫
+
+⍝ ᚡᚮ conn: the client's side of the conversation
+⦄
+  ⧖
+  ᚡᚭ «tekcos ,olleh» ⧗⁰
+  ⧗⁰ »✓ olléh« ᚡᚭ
+  ⦃ ⦄ ⦃ ⌁ ⦄ ⁇ ᚡᚦ «98765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210» ⧗⁰
+  » htgnel htiw kcab semoc egassem gnol a« ⎙̵ ⧗⁰ ᚡᚧ ᚡᚪ ⟗ ⍴̱ ⎙ ⌁̵
+  ⌁ ᚡᚨ ⧗⁰
+⦄ ⟨ ℤ ⊸ ⟩ ᚡᚮ ⸫
+
+⍝ ᚡᚯ server: the client, the only side that prints
+⦄
+  ᚡᚨ ⌁
+  ⦃ ⎙̵ «↵» ⎙̵ ᚡᚩ ⎙̵ « :tcennoc tonnac» ⦄ ⦃ ᚡᚮ ⦄ ⁇ ᚡᚥ «tahc/2748:1.0.0.721//:sw»
+  »/moc.elpmaxe//:ssw« ᚡᚥ ⁇ ⦃ ᚡᚨ ⌁ ⦄ ⦃ ᚡᚩ ⎙̵ »↵« ⎙̵ ⦄
+  ⦃ ⎙̵ «↵» ⎙̵ ᚡᚩ ⦄ ⦃ ⌁ ᚡᚨ ⦄ ⁇ ᚡᚥ «/1:1.0.0.721//:sw»
+⦄ ⟨ ℤ ⊸ ⟩ ᚡᚯ ⸫
+
+⦃
+  ⁇ ᚡᚢ ○△▽▽○▽○△△
+    ⦃ ⧖ ⧗⁰ ᚡᚠ ○ ≶ ⋔ ⦃ ᚡᚬ ⦄ ⦃ ᚡᚯ ⦄ ⦃ ᚡᚨ ⌁ »↵deliaf krof« ⎙̵ ⦄ ⦄
+    ⦃ ⎙̵ «↵» ⎙̵ ᚡᚩ ⎙̵ « :netsil tonnac» ⦄
+⦄ ⟨ ⊸ ⟩ ᛟ ⸫ ⸱ ⸱
+

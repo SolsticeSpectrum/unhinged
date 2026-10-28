@@ -113,6 +113,15 @@ make s2-regen       # regenerate trith/s2/s2c.trh from trith/s2/src (needs pytho
 ./build/s2c file.trh --tokens        # same output as trithc for --tokens, --ast, --check and --emit-llvm
 ```
 
+- Milestone 7: the v1 standard library ported as C modules bound with FFI (`trith/lib/`): SHA-256, HMAC and AES; JSON; an HTTP client and server; WebSocket; SMTP. See [`trith/lib/README.md`](trith/lib/README.md).
+
+```bash
+make lib-test       # build and run each module's test with s1 and s2 (also run by make test)
+make lib-regen      # regenerate trith/lib/tests/*.trh from the .trhx sources (needs python3)
+
+./build/trithc main.trh --include trith/lib/json.h --link trith/lib/json.c -o main
+```
+
 Golden tests: `trith/tests/<suite>/<name>.trh` is compared with `<name>.out`. To regenerate the `.out` files after an intended change, run `BLESS=1 TRITHC=build/trithc build/trith-tests` and review the diff.
 
 ## Layout

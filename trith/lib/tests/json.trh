@@ -1,0 +1,43 @@
+⍝ trith/lib/json.c: a document is text, read and changed by path
+⸫ ᚡᚠ ⟨ ◌ʃ ⊸ ʃ ⟗ʃ ⟩ «teg_nosj_htirt» ⎔
+⎔ »epyt_nosj_htirt« ⟨ ⟗ʃ ʃ ⊸ ℤ ⟩ ᚡᚢ ⸫
+⸫ ᚡᚤ ⟨ ℤ ⊸ ʃ ⟗ʃ ⟩ «nel_nosj_htirt» ⎔
+⎔ »ta_nosj_htirt« ⟨ ⟗ʃ ʃ ℤ ⊸ ◌ʃ ⟩ ᚡᚥ ⸫
+⸫ ᚡᚦ ⟨ ◌ʃ ⊸ ℤ ʃ ⟗ʃ ⟩ «yek_nosj_htirt» ⎔
+⎔ »loob_nosj_htirt« ⟨ ⟗ʃ ʃ ⊸ ℤ ⟩ ᚡᚧ ⸫
+⸫ ᚡᚨ ⟨ ◌ʃ ⊸ ʃ ʃ ʃ ⟩ «tes_nosj_htirt» ⎔
+⎔ »etouq_nosj_htirt« ⟨ ʃ ⊸ ʃ ⟩ ᚡᚩ ⸫
+
+⍝ ᚡᚪ doc path: print the value at path, or (none)
+⸫ ᚡᚪ ⟨ ⊸ ʃ ⟗ʃ ⟩ ⦃ ⎙̵ «↵» ⦃ ⎙̵ «)enon(» ⦄ ⦃ ⎙̵ ⦄ ⁇ ᚡᚠ ⦄
+
+ᚡᚫ doc i: print the name of user i if that user is active ⍝
+⦃
+  ⧖
+  »sresu« ⧗⁰ ᚡᚥ ⁇
+    ⦃ ⌁̵ ⁼ ∅ ⦃ ᚡᚪ «eman» ⟗ ⦄ ⋔ ≶ △ ᚡᚧ «evitca» ⟗ ⦄
+    ⦃ ⦄
+⸫ ᚡᚫ ⟨ ⊸ ℤ ⟗ʃ ⟩ ⦃
+
+⦄
+  »}""\ko"\ éfac" :"ottom" ,]}eurt :"evitca" ,"araC" :"eman"{ ,}eslaf :"evitca" ,"boB" :"eman"{ ,}eurt :"evitca" ,"ecilA" :"eman"{[ :"sresu" ,}eslaf :"erutaeFwen"{ :"serutaef" ,}2345 :"trop" ,"tsohlacol" :"tsoh"{ :"esabatad"{«
+  ᚡᚪ «tsoh.esabatad» ⟗
+  ⟗ »trop.esabatad« ᚡᚪ
+  ᚡᚪ «ottom» ⟗
+  ⟗ »eman.1.sresu« ᚡᚪ
+  ᚡᚪ «eman.7.sresu» ⟗
+  ⟗ »esabatad« △ ᚡᚦ ⁇ ⦃ ⎙̵ ⦄ ⦃ »)enon(« ⎙̵ ⦄ »↵« ⎙̵
+  ⎙ ᚡᚢ «» ⟗ ⎙̵ « :tnemucod eht fo epyt» ⎙ ᚡᚤ «sresu» ⟗ ⎙̵ « :sresu»
+  ⍝ the active users, by index
+  ○ ᚡᚤ «sresu» ⟗
+  ⥀ ⦃
+    ⧖ ⧖
+    ⟗ ⧗¹ ᚡᚫ
+    ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋔ ≶ ⍿¹ ⍿¹ ⊞ △ ⧗¹ ⧗⁰
+  ⦄
+  ⌁ ⌁
+  »erutaeFwen.serutaef« »eurt« ᚡᚨ ⁇ ⦃ ⎙̵ ⦄ ⦃ »)tnemucod on(« ⎙̵ ⦄ »↵« ⎙̵
+  ⎙̵ «↵» ⎙̵ ᚡᚩ «↵"ih" yas»
+  » :2 ,1[ fo epyt« ⎙̵ »2 ,1[« ⟗ »« ᚡᚢ ⎙ ⌁̵
+⸫ ᛟ ⟨ ⊸ ⟩ ⦃
+

@@ -1,0 +1,31 @@
+sent
+not sent: AUTH: 535 5.7.8 authentication failed
+not sent: RCPT TO: 550 5.1.1 no such user
+not sent: cannot connect
+exit=0
+--- connection 1
+EHLO (host)
+AUTH PLAIN AG1haWxlcgBodW50ZXIy
+MAIL FROM:<trith@example.com>
+RCPT TO:<ada@example.com>
+RCPT TO:<bob@example.com>
+DATA
+| From: Trith <trith@example.com>
+| To: ada@example.com, Bob <bob@example.com>
+| Subject: Status report
+| MIME-Version: 1.0
+| Content-Type: text/plain; charset=utf-8
+| 
+| All is well.
+| ..hidden line keeps its dot
+| bye
+QUIT
+--- connection 2
+EHLO (host)
+AUTH PLAIN AG1haWxlcgBndWVzcw==
+QUIT
+--- connection 3
+EHLO (host)
+MAIL FROM:<trith@example.com>
+RCPT TO:<ghost@nowhere.invalid>
+QUIT

@@ -1,4 +1,4 @@
-⍝ ==== s2 driver: s2c file.trh [-o out] [--tokens | --ast | --check | --emit-llvm] [--debug]
+⍝ ==== s2 driver: s2c main.trh [-o out] [--debug] [--include h] [--link f.c] [--tokens | --ast | --check | --emit-llvm]
 ⍝ The dumps print what trithc prints; without one, the program is compiled as trithc does.
 
 ⎔ $trith_write_file$ ⟨⟗ʃ ⟗ʃ ⊸ ℤ⟩ ‹wfile› ⸫
@@ -19,14 +19,6 @@
 ⦄ ⟨⟗ʃ ⟗ʃ ⊸ ŧ⟩ ‹streq2› ⸫
 
 ⦃ ⧖:a,b ⧗:b ⟗ ⧗:a ‹streq2› ⧖:r ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ŧ⟩ ‹streqo› ⸫
-
-⍝ ‹modeof› arg: 1 for --tokens, 2 for --ast, 3 for --check, 4 for --emit-llvm, 6 for -o,
-⍝ 15 for --debug (compile with -O0), else 0
-⦃
-  ⟗ $--tokens$ ‹streqo› ⧖:r1 ⟗ $--ast$ ‹streqo› ⧖:r2 ⟗ $--check$ ‹streqo› ⧖:r3 ⟗ $--emit-llvm$ ‹streqo› ⧖:r4
-  ⟗ $-o$ ‹streqo› ⧖:r6 ⟗ $--debug$ ‹streqo› ⧖:r15 ⌁̵
-  ○ ⧗:r15 ⋔ ⦃ ⌁ #15# ⦄ ∅ ⁼ ⧗:r6 ⋔ ⦃ ⌁ #6# ⦄ ∅ ⁼ ⧗:r4 ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼ ⧗:r3 ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧗:r2 ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:r1 ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
-⦄ ⟨ʃ ⊸ ℤ⟩ ‹modeof› ⸫
 
 ⦃
   ⧖:path,out,count,rem
@@ -74,16 +66,32 @@
   ⦄
   ⌁ ⌁ ⧖:e ⧖:C ⌁̱ ⧗:C,e
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eheapstr› ⸫
-⍝ ‹eoutname› C mode: the output path: argument 3 after -o, else the source without .trh (or .ŧ)
-⦃
-  ⧖:C,mode
-  ⧗:mode ⧗:mode #10# ≶ ⋔ ∅ ⦃ #10# ⊟ ⦄ ∅ ⧖:m
-  ⧗:C ⧗:m #6# ᛖ ⋔ ⦃ ‹eoutarg› ⦄ ⦃ ‹estripext› ⦄ ⁼
-⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eoutname› ⸫
+⍝ ‹bargs› C: what the arguments say for the build: the output path (−1: next to the source),
+⍝ the #include lines for --include, and the C files of --link
 ⦃
   ⧖:C
-  ⧗:C #3# ᚨ ⁇ ⦃ ⟗ ᛞ ⧖:oc ⌁̵ ⧖:CC ⧗:oc ⟗ ⧗:CC ‹eheapstr› ⧖:CC2,s ⌁̵ ⧗:CC2,s ⦄ ⦃ ‹usage› #-1# ⦄
-⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eoutarg› ⸫
+  ⧗:C ‹qnew› ⧖:C,inc ⧗:C ‹qnew› ⧖:C,lnk
+  ⧗:C,inc,lnk #-1# △
+  ⥀ ⦃
+    ⧖:C,inc,lnk,out,i
+    ⧗:i ‹argcode› ⧖:k
+    ⧗:C,inc,lnk,out,i,k ⧗:k #-1# ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ‹bargs1› ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⧖:C,inc,lnk,out ⧗:C,out,inc,lnk
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹bargs› ⸫
+⦃
+  ⧖:C,inc,lnk,out,i,k
+  ⧗:C ⧗:i △ ⊞ ‹eargheap› ⧖:C,v
+  ⧗:C,out,v ⧗:k #6# ᛖ ⋔ ⦃ ⧖:o,vv ⧗:vv ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C,out2
+  ⧗:C,inc,v ⧗:k #7# ᛖ ⋔ ⦃ ⧖:q,vv %%#include "{vv}"%% ⧖:l ⧗:q,l ‹qadd› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:lnk,v ⧗:k #8# ᛖ ⋔ ⦃ ‹qadd› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⧗:inc,lnk,out2 ⧗:i ⧗:k #6# #8# ᛦ ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ⊞
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹bargs1› ⸫
+⍝ ‹eargheap› C i: argument i as a heap string (−1 if there is none)
+⦃
+  ⧖:C,i
+  ⧗:C ⧗:i ᚨ ⁇ ⦃ ⟗ ᛞ ⧖:oc ⌁̵ ⧖:CC ⧗:oc ⟗ ⧗:CC ‹eheapstr› ⧖:CC2,s ⌁̵ ⧗:CC2,s ⦄ ⦃ #-1# ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eargheap› ⸫
 ⦃
   ⧖:C
   ⧗:C #6# ‹reg› ⧖:C,p
@@ -109,17 +117,26 @@
   ⧗:ct ⟗ ‹system› ⧖:r ⌁̵
   ⧗:C ⧗:r ○ ᛖ ⋔ ⦃ ⦄ ⦃ △ ‹exit› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹esys› ⸫
-⍝ ‹ebuild› C q mode dbg: write the IR (and the FFI glue), then let clang and llvm-link make the executable
+⍝ ‹ebuild› C q mode dbg: write the IR (and the FFI glue), then let clang and llvm-link make the
+⍝ executable: the runtime, the glue and every --link file become IR and are linked into one module
 ⦃
   ⧖:C,q,mode,dbg
-  ⧗:C,mode ‹eoutname› ⧖:C,out
+  ⧗:C ‹bargs› ⧖:C,out0,inc,lnk
+  ⧗:C,out0 ⧗:out0 #-1# ᛖ ⋔ ⦃ ⌁ ‹estripext› ⦄ ∅ ⁼ ⧖:C,out
   ⧗:C %%{out}.ll%% ⧖:C,ll
   ⧗:C,ll,q ‹ewrite› ⧖:C
-  ⧗:C ‹qnew› ‹eglue› ⧖:C,gq
+  ⧗:C,inc ‹eglue› ⧖:C,gq
   ⧗:C ⧗:gq #2# ⊞ ‹rd› ⧖:C,ng
   ⧗:C ⧗:dbg △ ᛖ ⋔ ⦃ %%-O0 -g%% ⦄ ⦃ %%-O2%% ⦄ ⁼ ⧖:C,opt
-  ⧗:C %%clang -S -emit-llvm {opt} -w -o {out}.c0.ll trith/runtime/trith_rt.c 2>&1%% ‹esys› ⧖:C
-  ⧗:C,out,gq,opt ⧗:ng ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ %%%% ⦄ ⦃ ‹eglueb› ⦄ ⁼ ⧖:C,more
+  ⧗:C %%clang -S -emit-llvm {opt} -w -I . -o {out}.c0.ll trith/runtime/trith_rt.c 2>&1%% ‹esys› ⧖:C
+  ⧗:C,out,gq,opt ⧗:ng ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ %%%% △ ⦄ ⦃ ‹eglueb› ⦄ ⁼ ⧖:C,more,ci
+  ⧗:C,lnk ‹rd› ⧖:C,nd
+  ⧗:C,out,opt,more,ci,nd
+  ⥀ ⦃
+    ⧖:C,out,opt,more,ci,nd
+    ⧗:C,out,opt,more,ci,nd ⧗:nd #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹elink1› ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⌁ ⧖:C,out,opt,more
   ⧗:C %%llvm-link -o {out}.bc {ll} {out}.c0.ll{more} 2>&1%% ‹esys› ⧖:C
   ⧗:C %%clang {opt} -w -o {out} {out}.bc -lm 2>&1%% ‹esys›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebuild› ⸫
@@ -128,9 +145,18 @@
   ⧖:C,out,gq,opt
   ⧗:C %%{out}.ffi.c%% ⧖:C,gp
   ⧗:C,gp,gq ‹ewrite› ⧖:C
-  ⧗:C %%clang -S -emit-llvm {opt} -w -o {out}.c1.ll {gp} 2>&1%% ‹esys› ⧖:C
-  ⧗:C %% {out}.c1.ll%%
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eglueb› ⸫
+  ⧗:C %%clang -S -emit-llvm {opt} -w -I . -o {out}.c1.ll {gp} 2>&1%% ‹esys› ⧖:C
+  ⧗:C %% {out}.c1.ll%% #2#
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹eglueb› ⸫
+⍝ one --link file: compiled to IR and named for the link
+⦃
+  ⧖:C,out,opt,more,ci,nd
+  ⧗:C ⧗:nd △ ⊞ ‹rd› ⧖:C,src
+  ⧗:C %%clang -S -emit-llvm {opt} -w -I . -o {out}.c{#ci}.ll {src} 2>&1%% ‹esys› ⧖:C
+  ⧗:C %%{more} {out}.c{#ci}.ll%% ⧖:C,more2
+  ⧗:C,nd ‹rd› ⧖:C,nx
+  ⧗:C,out,opt,more2 ⧗:ci △ ⊞ ⧗:nx
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ⟩ ‹elink1› ⸫
 
 ⦃
   ⧖:path,out,mode
@@ -163,19 +189,53 @@
     ⦃ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄
 ⦄ ⟨ʃ ℤ ⊸⟩ ‹main1› ⸫
 
-⦃ $usage: s2c <file.trh> [-o <output>] [--tokens | --ast | --check | --emit-llvm] [--debug]\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
+⦃ $usage: s2c <main.trh> [-o <output>] [--debug] [--include h] [--link f.c] [--tokens | --ast | --check | --emit-llvm]\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
 
-⍝ ‹isdebug› i: argument i is --debug
-⦃ ᚨ ⁇ ⦃ ⟗ $--debug$ ‹streqo› ⧖:r ⌁̵ ⧗:r ⦄ ⦃ ⊕ ⦄ ⦄ ⟨ℤ ⊸ ŧ⟩ ‹isdebug› ⸫
-⍝ ‹modefix› m: a --debug after the mode (or after -o's path) adds 10, where it matters
+⍝ ---- arguments, as trithc reads them: flags in any order, the first other argument is the source
+
+⍝ ‹argeq› s i: argument i is the literal s
+⦃ ⧖:s,i ⧗:s ⧗:i ᚨ ⁇ ⦃ ⟗ ⍿² ‹streqo› ⧖:r ⌁̵ ⧗:r ⦄ ⦃ ⌁̵ ⊕ ⦄ ⦄ ⟨ʃ ℤ ⊸ ŧ⟩ ‹argeq› ⸫
+⍝ ‹argcode› i: −1 none, 1 --tokens, 2 --ast, 3 --check, 4 --emit-llvm, 5 --debug, 6 -o, 7 --include,
+⍝ 8 --link, 9 --plough or --unplough (s1 only), 0 anything else
 ⦃
-  ⍿⁰ #6# ᛖ ⋔ ⦃ #4# ‹isdebug› ⋔ ⦃ #10# ⊞ ⦄ ∅ ⁼ ⦄ ⦃ ⍿⁰ #4# ᛖ ⋔ ⦃ #3# ‹isdebug› ⋔ ⦃ #10# ⊞ ⦄ ∅ ⁼ ⦄ ∅ ⁼ ⦄ ⁼
-⦄ ⟨ℤ ⊸ ℤ⟩ ‹modefix› ⸫
+  ⧖:i
+  ⧗:i ᚨ ⁇ ⦃ ⌁̵ ○ ⦄ ⦃ #-1# ⦄
+  $--tokens$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ $--ast$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼
+  $--check$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ $--emit-llvm$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼
+  $--debug$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #5# ⦄ ∅ ⁼ $-o$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #6# ⦄ ∅ ⁼
+  $--include$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #7# ⦄ ∅ ⁼ $--link$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #8# ⦄ ∅ ⁼
+  $--plough$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼ $--unplough$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
+⦄ ⟨ℤ ⊸ ℤ⟩ ‹argcode› ⸫
+⍝ ‹argscan›: the mode (0 compile), --debug, the source's index (−1: none), and whether the arguments are bad
+⦃
+  △ ○ ○ #-1# ○
+  ⥀ ⦃
+    ⧖:i,mode,dbg,in,bad
+    ⧗:i ‹argcode› ⧖:k
+    ⧗:i,mode,dbg,in,bad,k ⧗:k #-1# ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ‹argstep› ⊕ ⦄ ⁼
+  ⦄
+  ⧖:i,mode,dbg,in,bad ⧗:mode,dbg,in,bad
+⦄ ⟨⊸ ℤ ℤ ℤ ℤ⟩ ‹argscan› ⸫
+⦃
+  ⧖:i,mode,dbg,in,bad,k
+  ⧗:mode ⧗:k ⧗:k △ #4# ᛦ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:mode2
+  ⧗:dbg ⧗:k #5# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:dbg2
+  ⧗:i △ ⊞ ‹argcode› ⧖:knext
+  ⧗:k #6# #8# ᛦ ⧖:takes
+  ⧗:in ⧗:i ⧗:k ○ ᛖ ⧗:in #-1# ᛖ ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:in2
+  ⧗:bad ⧗:takes ⧗:knext #-1# ᛖ ⋎ ⧗:k #9# ᛖ ⋏ ⧗:k ○ ᛖ ⧗:in #-1# ᛖ ‹not› ⋎ ⋏ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:bad2
+  ⧗:i ⧗:takes ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ⊞ ⧖:i2
+  ⧗:i2,mode2,dbg2,in2,bad2
+⦄ ⟨ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ⟩ ‹argstep› ⸫
+⍝ ‹main0› mode dbg in: the run's mode (5 compile; +10 with --debug for --emit-llvm and compiling)
+⦃
+  ⧖:mode,dbg,in
+  ⧗:mode ⧗:mode ○ ᛖ ⋔ ⦃ ⌁ #5# ⦄ ∅ ⁼ ⧖:m
+  ⧗:m ⧗:m #4# ᛖ ⧗:m #5# ᛖ ⋏ ⧗:dbg △ ᛖ ⋎ ⋔ ⦃ #10# ⊞ ⦄ ∅ ⁼ ⧖:fm
+  ⧗:fm ⧗:in ᚨ ⁇ ⦃ ⧖:p ⧖:f ⧗:p,f ‹main1› ⦄ ⦃ ⌁ ‹usage› ⦄
+⦄ ⟨ℤ ℤ ℤ ⊸⟩ ‹main0› ⸫
 
 ⦃
-  △ ᚨ ⁇
-    ⦃ #2# ᚨ ⁇
-        ⦃ ‹modeof› ‹modefix› ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁̵ ‹usage› ⦄ ⦃ ‹main1› ⦄ ⁼ ⦄
-        ⦃ #5# ‹main1› ⦄ ⦄
-    ⦃ ‹usage› ⦄
+  ‹argscan› ⧖:mode,dbg,in,bad
+  ⧗:mode,dbg,in ⧗:in #-1# ᛖ ⧗:bad △ ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ ⌁ ‹usage› ⦄ ⦃ ‹main0› ⦄ ⁼
 ⦄ ⟨⊸⟩ ᛟ ⸫

@@ -1,0 +1,51 @@
+⍝ trith/lib/ws.c: an echo server and its client in one program, split by fork
+⎔ $fork$ ⟨⊸ ℤ⟩ ‹fork› ⸫
+⎔ $trith_ws_listen$ ⟨ℤ ⊸ ◌ℤ⟩ ‹listen› ⸫
+⎔ $trith_ws_accept$ ⟨ℤ ⊸ ◌ℤ⟩ ‹accept› ⸫
+⎔ $trith_ws_connect$ ⟨ʃ ⊸ ◌ℤ⟩ ‹connect› ⸫
+⎔ $trith_ws_send$ ⟨ℤ ⸮ʃ ⊸ ◌ℤ⟩ ‹send› ⸫
+⎔ $trith_ws_receive$ ⟨ℤ ⊸ ⸮◌ʃ⟩ ‹recv› ⸫
+⎔ $trith_ws_close$ ⟨ℤ ⊸ ℤ⟩ ‹wclose› ⸫
+⎔ $trith_ws_error$ ⟨⊸ ʃ⟩ ‹werror› ⸫
+
+⍝ ‹or› s: the text, or ? if there is none (what came over the network is hearsay, ⸮)
+⦃ ⁇ ⦃ ⦄ ⦃ $?$ ⦄ ⦄ ⟨⸮◌ʃ ⊸ ⸮ʃ⟩ ‹or› ⸫
+
+⍝ ‹echo› conn: send every message back until the client closes
+⦃
+  ⥀ ⦃
+    ⧖:c
+    ⧗:c ⧗:c ⧗:c ‹recv› ⁇ ⦃ ‹send› ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⊕ ⦄ ⦃ ⌁ ⦶ ⦄
+  ⦄
+  ‹wclose› ⌁
+⦄ ⟨ℤ ⊸⟩ ‹echo› ⸫
+
+⍝ ‹child› server: serve one client, then stop
+⦃ ⧖:s ⧗:s ‹accept› ⁇ ⦃ ‹echo› ⦄ ⦃ ⦄ ⧗:s ‹wclose› ⌁ ⦄ ⟨ℤ ⊸⟩ ‹child› ⸫
+
+⍝ ‹say› conn text: send text and print what comes back
+⦃ ⧖:c,t ⧗:c ⧗:t ‹send› ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⧗:c ‹recv› ‹or› ⎙̵ $\n$ ⎙̵ ⦄ ⟨ℤ ʃ ⊸⟩ ‹say› ⸫
+
+⍝ ‹talk› conn: the client's side of the conversation
+⦃
+  ⧖:c
+  ⧗:c $hello, socket$ ‹say›
+  ⧗:c $héllo ✓$ ‹say›
+  ⧗:c $01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789$ ‹send› ⁇ ⦃ ⌁ ⦄ ⦃ ⦄
+  $a long message comes back with length $ ⎙̵ ⧗:c ‹recv› ‹or› ⟗ ⍴̱ ⎙ ⌁̵
+  ⧗:c ‹wclose› ⌁
+⦄ ⟨ℤ ⊸⟩ ‹talk› ⸫
+
+⍝ ‹parent› server: the client, the only side that prints
+⦃
+  ‹wclose› ⌁
+  $ws://127.0.0.1:8472/chat$ ‹connect› ⁇ ⦃ ‹talk› ⦄ ⦃ $cannot connect: $ ⎙̵ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
+  $wss://example.com/$ ‹connect› ⁇ ⦃ ‹wclose› ⌁ ⦄ ⦃ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
+  $ws://127.0.0.1:1/$ ‹connect› ⁇ ⦃ ‹wclose› ⌁ ⦄ ⦃ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
+⦄ ⟨ℤ ⊸⟩ ‹parent› ⸫
+
+⦃
+  #8472# ‹listen› ⁇
+    ⦃ ⧖:s ⧗:s ‹fork› ○ ≶ ⋔ ⦃ ‹child› ⦄ ⦃ ‹parent› ⦄ ⦃ ‹wclose› ⌁ $fork failed\n$ ⎙̵ ⦄ ⦄
+    ⦃ $cannot listen: $ ⎙̵ ‹werror› ⎙̵ $\n$ ⎙̵ ⦄
+⦄ ⟨⊸⟩ ᛟ ⸫

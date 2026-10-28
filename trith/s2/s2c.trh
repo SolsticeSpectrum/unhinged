@@ -8167,7 +8167,7 @@ Registers: 49 the first error (a string, −1: none), 50 unwinding a ◌ ⍝
   ⧗⁰ ⧗¹³ ⧗¹ ᚥᛌ
 ⸫ ᚣᚣᚷ ⟨ ℤ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
 
-==== s2 driver: s2c file.trh [-o out] [--tokens | --ast | --check | --emit-llvm] [--debug] ⍝
+==== s2 driver: s2c main.trh [-o out] [--debug] [--include h] [--link f.c] [--tokens | --ast | --check | --emit-llvm] ⍝
 ⍝ The dumps print what trithc prints; without one, the program is compiled as trithc does.
 
 ⎔ »elif_etirw_htirt« ⟨ ⟗ʃ ⟗ʃ ⊸ ℤ ⟩ ᚣᚣᚸ ⸫
@@ -8189,49 +8189,41 @@ Registers: 49 the first error (a string, −1: none), 50 unwinding a ◌ ⍝
 
 ⸫ ᚣᚣᚻ ⟨ ŧ ⊸ ʃ ⟗ʃ ⟩ ⦃ ⧗⁰ ⌁̵ ⧖ ᚣᚣᚺ ⧗⁰ ⟗ ⧗¹ ⧖ ⧖ ⦄
 
-ᚣᚣᚼ arg: 1 for --tokens, 2 for --ast, 3 for --check, 4 for --emit-llvm, 6 for -o, ⍝
-⍝ 15 for --debug (compile with -O0), else 0
-⦄
-  ⟗ »snekot--« ᚣᚣᚻ ⧖ ⟗ »tsa--« ᚣᚣᚻ ⧖ ⟗ »kcehc--« ᚣᚣᚻ ⧖ ⟗ »mvll-time--« ᚣᚣᚻ ⧖
-  ⌁̵ ⧖ ᚣᚣᚻ «gubed--» ⟗ ⧖ ᚣᚣᚻ «o-» ⟗
-  ○ ⧗⁰ ⋔ ⦃ ⌁ ○▽▽△ ⦄ ∅ ⁼ ⧗¹ ⋔ ⦃ ⌁ ○▽△ ⦄ ∅ ⁼ ⧗² ⋔ ⦃ ⌁ △△ ⦄ ∅ ⁼ ⧗³ ⋔ ⦃ ⌁ ○△ ⦄ ∅ ⁼ ⧗⁴ ⋔ ⦃ ⌁ ▽△ ⦄ ∅ ⁼ ⧗⁵ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
-⸫ ᚣᚣᚼ ⟨ ℤ ⊸ ʃ ⟩ ⦃
-
 ⦄
   ⧖ ⧖ ⧖ ⧖
   ⎙̵ «↵waL ecnalaB yranreT eht rof ynam oot » ᛁ ⧗³ ⎙̵ « ,snekot » ᛁ ⧗² ⎙̵ « :ecnalabmi :rorre :» ⎙̵ ⧗⁰
   ⧗¹ ⌁̵ △ ᚡᚢ
-⸫ ᚣᚣᚽ ⟨ ⊸ ℤ ℤ ⟦ ℤ ⟧ ʃ ⟩ ⦃
+⸫ ᚣᚣᚼ ⟨ ⊸ ℤ ℤ ⟦ ℤ ⟧ ʃ ⟩ ⦃
 
-⸫ ᚣᚣᚾ ⟨ ⊸ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⟗ ⟩ ⦃ ⌁̵ ᚥᚪ ⧗⁰ ⟗ ⧗¹ ⧖ ⧖ ⦄
+⸫ ᚣᚣᚽ ⟨ ⊸ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⟗ ⟩ ⦃ ⌁̵ ᚥᚪ ⧗⁰ ⟗ ⧗¹ ⧖ ⧖ ⦄
 
-ᚣᚣᚿ path toks: parse, tangle and print the item tree ⍝
+ᚣᚣᚾ path toks: parse, tangle and print the item tree ⍝
 ⦃
   ⧖ ⧖
-  ⧗¹ ᚣᛌ ᚡᚤ ⟗ ⧗⁰ ᚤᛕ ⧖ ⟗ ⧗⁰ ᚣᚣᚾ ⌁̵
-⸫ ᚣᚣᚿ ⟨ ◌ ⊸ ⟦ ℤ ⟧ ⟗ʃ ⟩ ⦃
+  ⧗¹ ᚣᛌ ᚡᚤ ⟗ ⧗⁰ ᚤᛕ ⧖ ⟗ ⧗⁰ ᚣᚣᚽ ⌁̵
+⸫ ᚣᚣᚾ ⟨ ◌ ⊸ ⟦ ℤ ⟧ ⟗ʃ ⟩ ⦃
 
-ᚣᚣᛀ path toks: parse, tangle and check (printing the trace), then "ok" ⍝
+ᚣᚣᚿ path toks: parse, tangle and check (printing the trace), then "ok" ⍝
 ⦃
   ⧖ ⧖
   ⧗¹ ᚣᛌ ᚡᚤ ⟗ ⧗⁰ ᚤᛕ ⧖ ⟗ ⧗¹ ⧗⁰ △ ᚡᚤᚤ ᚡᚤᚧ ⌁̵ »↵ko« ⎙̵ ⌁̵
-⸫ ᚣᚣᛀ ⟨ ◌ ⊸ ⟦ ℤ ⟧ ⟗ʃ ⟩ ⦃
+⸫ ᚣᚣᚿ ⟨ ◌ ⊸ ⟦ ℤ ⟧ ⟗ʃ ⟩ ⦃
 
-ᚣᚣᛁ path toks debug: parse, tangle, check and print the LLVM IR ⍝
+ᚣᚣᛀ path toks debug: parse, tangle, check and print the LLVM IR ⍝
 ⦃
   ⧖ ⧖ ⧖
   ⧗¹ ᚣᛌ ᚡᚤ ⟗ ⧗⁰ ᚤᛕ ⧖ ⟗ ⧗¹ ⧗⁰ ○ ᚡᚤᚤ ᚡᚤᚧ ⧗³ ᚣᚡᚢ ⌁̵ ⌁̵
-⸫ ᚣᚣᛁ ⟨ ◌ ⊸ ℤ ⟦ ℤ ⟧ ⟗ʃ ⟩ ⦃
+⸫ ᚣᚣᛀ ⟨ ◌ ⊸ ℤ ⟦ ℤ ⟧ ⟗ʃ ⟩ ⦃
 
-ᚣᚣᛂ path toks mode: compile to an executable, as trithc does (5: next to the source, 6: -o) ⍝
+ᚣᚣᛁ path toks mode: compile to an executable, as trithc does (5: next to the source, 6: -o) ⍝
 ⦃
   ⧖ ⧖ ⧖
   ⧗² △○△ ≶ ⋔ ⦃ △ ⦄ ⦃ △ ⦄ ⦃ ○ ⦄ ⧖
   ⧖ ⧖ ᚣᚡᚠ ⧗¹ ᚡᚤᚧ ᚡᚤᚤ ○ ⧗⁰ ⧗² ⟗ ⧖ ᚤᛕ ⧗¹ ⟗ ᚡᚤ ᚣᛌ ⧗²
-  ⧗⁰ ⧗¹ ⧗⁶ ⧗³ ᚣᚣᛃ ⌁̵ ⌁̵
-⸫ ᚣᚣᛂ ⟨ ◌ ⊸ ℤ ⟦ ℤ ⟧ ⟗ʃ ⟩ ⦃
+  ⧗⁰ ⧗¹ ⧗⁶ ⧗³ ᚣᚣᛂ ⌁̵ ⌁̵
+⸫ ᚣᚣᛁ ⟨ ◌ ⊸ ℤ ⟦ ℤ ⟧ ⟗ʃ ⟩ ⦃
 
-ᚣᚣᛄ cps C: code points (after a sentinel) as a heap string ⍝
+ᚣᚣᛃ cps C: code points (after a sentinel) as a heap string ⍝
 ⦃
   ⧖ ⧖
   ⧗¹ ᚥᚯ ⧖ ⧖
@@ -8242,24 +8234,40 @@ Registers: 49 the first error (a string, −1: none), 50 unwinding a ◌ ⍝
       ⦃ ⊕ ⧗⁴ ⊞ △ ⧗³ ⧗² ᚥᚰ ᚳ ⧗³ ⧗⁰ ⧗² ⧗¹ ⧗⁰ ⧖ ⧖ ⧖ ⧖ ⧖ ⦄
   ⦄
   ⧗¹ ⧗⁰ ⌁̱ ⧖ ⧖ ⌁ ⌁
-⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ℤ ⟩ ᚣᚣᛄ ⸫
-ᚣᚣᛅ C mode: the output path: argument 3 after -o, else the source without .trh (or .ŧ) ⍝
-⦃
-  ⧖ ⧖
-  ⧗¹ ⧗¹ △○△ ≶ ⋔ ∅ ⦃ △○△ ⊟ ⦄ ∅ ⧖
-  ⁼ ⦃ ᚣᚣᛇ ⦄ ⦃ ᚣᚣᛆ ⦄ ⋔ ᛖ ○▽△ ⧗⁰ ⧗¹
-⦄ ⟨ ⟦ ℤ ⟧ ℤ ⊸ ⟦ ℤ ⟧ ℤ ⟩ ᚣᚣᛅ ⸫
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ℤ ⟩ ᚣᚣᛃ ⸫
+ᚣᚣᛄ C: what the arguments say for the build: the output path (−1: next to the source), ⍝
+⍝ the #include lines for --include, and the C files of --link
 ⦄
   ⧖
-  ⦃ ▽ ᚣᚣᛈ ⦄ ⦃ ⧗¹ ⧗⁰ ⌁̵ ⧖ ⧖ ᚣᚣᛄ ⧗⁰ ⟗ ⧗¹ ⧖ ⌁̵ ⧖ ᛞ ⟗ ⦄ ⁇ ᚨ ○△ ⧗⁰
-⦄ ⟨ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ℤ ⟩ ᚣᚣᛆ ⸫
+  ⧖ ⧖ ᚥᛓ ⧗⁰ ⧖ ⧖ ᚥᛓ ⧗⁰
+  ⧗⁰ ⧗³ ⧗¹ ▽ △
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧖ ᚣᚣᛅ ⧗⁴
+    ⧗¹ ⧗² ⧗³ ⧗⁴ ⧗⁵ ⧗⁰ ⧗⁰ ▽ ᛖ ⋔ ⦃ ⌁ ⦶ ⦄ ⦃ ᚣᚣᛆ ⊕ ⦄ ⁼
+  ⦃
+  ⌁ ⧖ ⧖ ⧖ ⧖ ⧗⁰ ⧗³ ⧗¹ ⧗²
+⸫ ᚣᚣᛄ ⟨ ℤ ℤ ℤ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ⟩ ⦃
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗⁴ △ ⊞ ᚣᚣᛇ ⧖ ⧖
+  ⧖ ⧖ ⁼ ⦃ ⌁ ⦄ ⦃ ⧗¹ ⧖ ⧖ ⦄ ⋔ ᛖ ○▽△ ⧗⁷ ⧗¹ ⧗⁵ ⧗⁰
+  ⧗⁰ ⧗⁵ ⧗³ ⧗⁹ △▽△ ᛖ ⋔ ⦃ ⧖ ⧖ ᚥᚯ ⧖ ⧗⁰ »" edulcni#« ᚥᚶ ⧗⁰ ⧗² ᚥᚱ ⧗⁰ »"« ᚥᚶ ⧗⁰ ⧖ ⧗² ⧗⁰ ᚥᛕ ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+  ⁼ ⦃ ⌁ ⌁ ⦄ ⦃ ᚥᛕ ⦄ ⋔ ᛖ ▽○△ ⧗⁹ ⧗³ ⧗⁶
+  ⧗⁵ ⧗⁶ ⧗¹ ⧗⁸ ⧗⁹ ○▽△ ▽○△ ᛦ ⋔ ⦃ ▽△ ⦄ ⦃ △ ⦄ ⁼ ⊞
+⸫ ᚣᚣᛆ ⟨ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
+⍝ ᚣᚣᛇ C i: argument i as a heap string (−1 if there is none)
+⦄
+  ⧖ ⧖
+  ⦃ ▽ ⦄ ⦃ ⧗¹ ⧗⁰ ⌁̵ ⧖ ⧖ ᚣᚣᛃ ⧗⁰ ⟗ ⧗¹ ⧖ ⌁̵ ⧖ ᛞ ⟗ ⦄ ⁇ ᚨ ⧗¹ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ℤ ⊸ ⟦ ℤ ⟧ ℤ ⟩ ᚣᚣᛇ ⸫
 ⦄
   ⧖
   ⧖ ⧖ ᚥᛙ ○▽△ ⧗⁰
   ⧗⁰ ⧗¹ ᚥᚿ ⧖ ⧖
   ⧖ ⧖ ᚥᛀ ⊟ △△ ⧗¹ ⧗³ ⧗⁰
   ⧗⁰ ⧗⁵ ○ ⧗³ ▽△ ⊟ ⧗³ △△ ⊟ ⧗¹ △○▽▽△ ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ᚥᛁ
-⸫ ᚣᚣᛇ ⟨ ℤ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ⟩ ⦃
+⸫ ᚣᚣᛈ ⟨ ℤ ⟦ ℤ ⟧ ⊸ ⟦ ℤ ⟧ ⟩ ⦃
 ⍝ ᚣᚣᛉ C s: a heap string as text
 ⸫ ᚣᚣᛉ ⟨ ʃ ⟦ ℤ ⟧ ⊸ ℤ ⟦ ℤ ⟧ ⟩ ⦃ ᚣᚡᚧ ⧗¹ «» ⧗⁰ ⧖ ⧖ ⦄
 ⍝ ᚣᚣᛊ C path q: write the lines of q to the file path (both heap strings)
@@ -8278,74 +8286,126 @@ Registers: 49 the first error (a string, −1: none), 50 unwinding a ◌ ⍝
   ⌁̵ ⧖ ᚣᚣᚹ ⟗ ⧗¹
   ⧗¹ ⧗⁰ ○ ᛖ ⋔ ⦃ ⦄ ⦃ △ ᚡᚢ ⦄ ⁼
 ⸫ ᚣᚣᛌ ⟨ ⟦ ℤ ⟧ ⊸ ℤ ⟦ ℤ ⟧ ⟩ ⦃
-⍝ ᚣᚣᛃ C q mode dbg: write the IR (and the FFI glue), then let clang and llvm-link make the executable
-⦄
+⍝ ᚣᚣᛂ C q mode dbg: write the IR (and the FFI glue), then let clang and llvm-link make the
+executable: the runtime, the glue and every --link file become IR and are linked into one module ⍝
+⦃
   ⧖ ⧖ ⧖ ⧖
-  ⧖ ⧖ ᚣᚣᛅ ⧗² ⧗⁰
+  ⧗⁰ ᚣᚣᛄ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⧖ ⁼ ∅ ⦃ ᚣᚣᛈ ⌁ ⦄ ⋔ ᛖ ▽ ⧗¹ ⧗¹ ⧗⁰
   ⧗⁰ ᚥᚯ ⧖ ⧗⁰ ⧗² ᚥᚱ ⧗⁰ »ll.« ᚥᚶ ⧗⁰ ⧖ ⧖
-  ⧖ ᚣᚣᛊ ⧗⁶ ⧗¹ ⧗⁰
-  ⧗⁰ ᚥᛓ ᚣᚡᚤ ⧖ ⧖
+  ⧖ ᚣᚣᛊ ⧗¹⁰ ⧗¹ ⧗⁰
+  ⧗⁰ ⧗⁸ ᚣᚡᚤ ⧖ ⧖
   ⧖ ⧖ ᚥᚫ ⊞ ▽△ ⧗¹ ⧗⁰
-  ⧗⁰ ⧗¹³ △ ᛖ ⋔ ⦃ ᚥᚯ ⧖ ⧗⁰ »g- 0O-« ᚥᚶ ⧗⁰ ⦄ ⦃ ᚥᚯ ⧖ ⧗⁰ »2O-« ᚥᚶ ⧗⁰ ⦄ ⁼ ⧖ ⧖
-  ⧖ ᚣᚣᛌ ⧗⁰ ᚥᚶ «1&>2 c.tr_htirt/emitnur/htirt ll.0c.» ⧗⁰ ᚥᚱ ⧗¹³ ⧗⁰ ᚥᚶ « o- w- » ⧗⁰ ᚥᚱ ⧗² ⧗⁰ ᚥᚶ « mvll-time- S- gnalc» ⧗⁰ ⧖ ᚥᚯ ⧗⁰
-  ⧗⁰ ⧗¹⁴ ⧗⁸ ⧗³ ⧗⁶ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ᚥᚯ ⧖ ⧗⁰ ⦄ ⦃ ᚣᚣᛍ ⦄ ⁼ ⧖ ⧖
-  ⧖ ᚣᚣᛌ ⧗⁰ ᚥᚶ «1&>2 » ⧗⁰ ᚥᚱ ⧗² ⧗⁰ ᚥᚶ «ll.0c.» ⧗⁰ ᚥᚱ ⧗¹⁷ ⧗⁰ ᚥᚶ « » ⧗⁰ ᚥᚱ ⧗¹⁴ ⧗⁰ ᚥᚶ « cb.» ⧗⁰ ᚥᚱ ⧗¹⁷ ⧗⁰ ᚥᚶ « o- knil-mvll» ⧗⁰ ⧖ ᚥᚯ ⧗⁰
-  ⧗⁰ ᚥᚯ ⧖ ⧗⁰ » gnalc« ᚥᚶ ⧗⁰ ⧗⁸ ᚥᚱ ⧗⁰ » o- w- « ᚥᚶ ⧗⁰ ⧗¹⁹ ᚥᚱ ⧗⁰ » « ᚥᚶ ⧗⁰ ⧗¹⁹ ᚥᚱ ⧗⁰ »1&>2 ml- cb.« ᚥᚶ ⧗⁰ ᚣᚣᛌ
-⸫ ᚣᚣᛃ ⟨ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
-⍝ the FFI glue as C: written, compiled, and named for the link
-⦄
+  ⧗⁰ ⧗¹⁷ △ ᛖ ⋔ ⦃ ᚥᚯ ⧖ ⧗⁰ »g- 0O-« ᚥᚶ ⧗⁰ ⦄ ⦃ ᚥᚯ ⧖ ⧗⁰ »2O-« ᚥᚶ ⧗⁰ ⦄ ⁼ ⧖ ⧖
+  ⧖ ᚣᚣᛌ ⧗⁰ ᚥᚶ «1&>2 c.tr_htirt/emitnur/htirt ll.0c.» ⧗⁰ ᚥᚱ ⧗¹³ ⧗⁰ ᚥᚶ « o- . I- w- » ⧗⁰ ᚥᚱ ⧗² ⧗⁰ ᚥᚶ « mvll-time- S- gnalc» ⧗⁰ ⧖ ᚥᚯ ⧗⁰
+  ⧗⁰ ⧗¹⁴ ⧗⁸ ⧗³ ⧗⁶ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ᚥᚯ ⧖ ⧗⁰ △ ⦄ ⦃ ᚣᚣᛍ ⦄ ⁼ ⧖ ⧖ ⧖
+  ⧖ ⧖ ᚥᚫ ⧗²¹ ⧗⁰
+  ⧗⁰ ⧗¹⁹ ⧗⁸ ⧗³ ⧗⁴ ⧗¹
+  ⦄ ⥀
+    ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+    ⁼ ⦃ ⊕ ᚣᚣᛎ ⦄ ⦃ ⦶ ⦄ ⋔ ᛖ ▽ ⧗⁵ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹ ⧗⁰
+  ⦄
+  ⧖ ⧖ ⧖ ⧖ ⌁ ⌁
+  ⧗⁰ ᚥᚯ ⧖ ⧗⁰ » o- knil-mvll« ᚥᚶ ⧗⁰ ⧗² ᚥᚱ ⧗⁰ » cb.« ᚥᚶ ⧗⁰ ⧗²⁷ ᚥᚱ ⧗⁰ » « ᚥᚶ ⧗⁰ ⧗² ᚥᚱ ⧗⁰ »ll.0c.« ᚥᚶ ⧗⁰ ⧗⁴ ᚥᚱ ⧗⁰ »1&>2 « ᚥᚶ ⧗⁰ ᚣᚣᛌ ⧖
+  ᚣᚣᛌ ⧗⁰ ᚥᚶ «1&>2 ml- cb.» ⧗⁰ ᚥᚱ ⧗⁴ ⧗⁰ ᚥᚶ « » ⧗⁰ ᚥᚱ ⧗⁴ ⧗⁰ ᚥᚶ « o- w- » ⧗⁰ ᚥᚱ ⧗⁵ ⧗⁰ ᚥᚶ « gnalc» ⧗⁰ ⧖ ᚥᚯ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ⟩ ᚣᚣᛂ ⸫
+the FFI glue as C: written, compiled, and named for the link ⍝
+⦃
   ⧖ ⧖ ⧖ ⧖
-  ⧖ ⧖ ⧗⁰ ᚥᚶ «c.iff.» ⧗⁰ ᚥᚱ ⧗² ⧗⁰ ⧖ ᚥᚯ ⧗⁰
-  ⧗⁰ ⧗¹ ⧗⁵ ᚣᚣᛊ ⧖
-  ⧖ ᚣᚣᛌ ⧗⁰ ᚥᚶ «1&>2 » ⧗⁰ ᚥᚱ ⧗³ ⧗⁰ ᚥᚶ « ll.1c.» ⧗⁰ ᚥᚱ ⧗⁶ ⧗⁰ ᚥᚶ « o- w- » ⧗⁰ ᚥᚱ ⧗⁸ ⧗⁰ ᚥᚶ « mvll-time- S- gnalc» ⧗⁰ ⧖ ᚥᚯ ⧗⁰
-  ⧗⁰ ᚥᚯ ⧖ ⧗⁰ » « ᚥᚶ ⧗⁰ ⧗⁸ ᚥᚱ ⧗⁰ »ll.1c.« ᚥᚶ ⧗⁰
-⸫ ᚣᚣᛍ ⟨ ℤ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
+  ⧗⁰ ᚥᚯ ⧖ ⧗⁰ ⧗² ᚥᚱ ⧗⁰ »c.iff.« ᚥᚶ ⧗⁰ ⧖ ⧖
+  ⧖ ᚣᚣᛊ ⧗⁵ ⧗¹ ⧗⁰
+  ⧗⁰ ᚥᚯ ⧖ ⧗⁰ » mvll-time- S- gnalc« ᚥᚶ ⧗⁰ ⧗⁸ ᚥᚱ ⧗⁰ » o- . I- w- « ᚥᚶ ⧗⁰ ⧗⁶ ᚥᚱ ⧗⁰ » ll.1c.« ᚥᚶ ⧗⁰ ⧗³ ᚥᚱ ⧗⁰ »1&>2 « ᚥᚶ ⧗⁰ ᚣᚣᛌ ⧖
+  ▽△ ⧗⁰ ᚥᚶ «ll.1c.» ⧗⁰ ᚥᚱ ⧗⁸ ⧗⁰ ᚥᚶ « » ⧗⁰ ⧖ ᚥᚯ ⧗⁰
+⦄ ⟨ ⟦ ℤ ⟧ ℤ ℤ ℤ ⊸ ⟦ ℤ ⟧ ℤ ℤ ⟩ ᚣᚣᛍ ⸫
+one --link file: compiled to IR and named for the link ⍝
+⦃
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧗⁰ ⧗⁵ △ ⊞ ᚥᚫ ⧖ ⧖
+  ⧖ ᚣᚣᛌ ⧗⁰ ᚥᚶ «1&>2 » ⧗⁰ ᚥᚱ ⧗² ⧗⁰ ᚥᚶ « ll.» ⧗⁰ ᚥᚸ ⧗⁷ ⧗⁰ ᚥᚶ «c.» ⧗⁰ ᚥᚱ ⧗⁴ ⧗⁰ ᚥᚶ « o- . I- w- » ⧗⁰ ᚥᚱ ⧗⁵ ⧗⁰ ᚥᚶ « mvll-time- S- gnalc» ⧗⁰ ⧖ ᚥᚯ ⧗⁰
+  ⧗⁰ ᚥᚯ ⧖ ⧗⁰ ⧗⁸ ᚥᚱ ⧗⁰ » « ᚥᚶ ⧗⁰ ⧗⁶ ᚥᚱ ⧗⁰ »c.« ᚥᚶ ⧗⁰ ⧗⁹ ᚥᚸ ⧗⁰ »ll.« ᚥᚶ ⧗⁰ ⧖ ⧖
+  ⧖ ⧖ ᚥᚫ ⧗¹² ⧗⁰
+  ⧗⁰ ⧗¹⁰ ⧗¹¹ ⧗³ ⧗¹³ △ ⊞ ⧗¹
+⸫ ᚣᚣᛎ ⟨ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ⟦ ℤ ⟧ ⟩ ⦃
 
 ⦄
   ⧖ ⧖ ⧖
   ᛖ △ ⍿⁰ ⧗² ⧗¹ ⧗⁰
   ⋔ ⦃ ⌁ ⧖ ⧗⁰ ⟗ ᚡᚹ ⌁̵ ⌁̵ ⦄
-    ⦃ ⦃ ᚡᚢ △ ⌁̵ ⦄ ⦃ ⌁̵ ⦄ ⁇ ᚣᚣᚿ ⧗⁰ ⟗ ⧖ ⌁ ⦄ ⋔ ᛖ ▽△ ⍿⁰ ⦄
-      ⦃ ⍿⁰ ○△ ᛖ ⋔ ⦃ ⌁ ⧖ ⟗ ⧗⁰ ᚣᚣᛀ ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ᚡᚢ ⦄ ⦄
-        ⦃ ⦃ ᚡᚢ △ ⌁̵ ⦄ ⦃ ⌁̵ ⦄ ⁇ ᚣᚣᛁ ⧗¹ ⧗⁰ ⟗ ⧖ ⧖ ⁼ ⦃ ○ ⦄ ⦃ △ ⦄ ⋔ ᛖ ▽▽▽△ ⦄ ⋔ ⋏ ᛖ ▽▽▽△ ⍿¹ ᛖ △△ ⍿⁰ ⦄
-          ⦃ ⧖ ⧖ ⟗ ⧗⁰ ⧗¹ ᚣᚣᛂ ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ᚡᚢ ⦄ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
-⸫ ᚣᚣᛎ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ʃ ⟩ ⦃
+    ⦃ ⦃ ᚡᚢ △ ⌁̵ ⦄ ⦃ ⌁̵ ⦄ ⁇ ᚣᚣᚾ ⧗⁰ ⟗ ⧖ ⌁ ⦄ ⋔ ᛖ ▽△ ⍿⁰ ⦄
+      ⦃ ⍿⁰ ○△ ᛖ ⋔ ⦃ ⌁ ⧖ ⟗ ⧗⁰ ᚣᚣᚿ ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ᚡᚢ ⦄ ⦄
+        ⦃ ⦃ ᚡᚢ △ ⌁̵ ⦄ ⦃ ⌁̵ ⦄ ⁇ ᚣᚣᛀ ⧗¹ ⧗⁰ ⟗ ⧖ ⧖ ⁼ ⦃ ○ ⦄ ⦃ △ ⦄ ⋔ ᛖ ▽▽▽△ ⦄ ⋔ ⋏ ᛖ ▽▽▽△ ⍿¹ ᛖ △△ ⍿⁰ ⦄
+          ⦃ ⧖ ⧖ ⟗ ⧗⁰ ⧗¹ ᚣᚣᛁ ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ᚡᚢ ⦄ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⸫ ᚣᚣᛏ ⟨ ⊸ ℤ ⟦ ℤ ⟧ ʃ ⟩ ⦃
 
 ⦄
   ⧖ ⧖ ⧖
   ⧖ ⧖ ᚳ ○ ⟗ ⧗²
   ⧗¹ ○△ ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ ○△ ⊞ ⦄ ⧖
   ⧗⁴ ⧗⁰ ⧗² ⧗¹ ⧗³
-  ⧗⁰ ○ ᛖ ⋔ ⦃ ⧖ ⌁ ⌁ ⧗⁰ ᚣᚣᛎ ⦄ ⦃ ⌁ ᚣᚣᚽ ⦄ ⁼
-⸫ ᚣᚣᛏ ⟨ ⊸ ⟦ ℤ ⟧ ℤ ʃ ⟩ ⦃
+  ⧗⁰ ○ ᛖ ⋔ ⦃ ⧖ ⌁ ⌁ ⧗⁰ ᚣᚣᛏ ⦄ ⦃ ⌁ ᚣᚣᚼ ⦄ ⁼
+⸫ ᚣᚣᛐ ⟨ ⊸ ⟦ ℤ ⟧ ℤ ʃ ⟩ ⦃
 
 ⦄
   ⧖ ⧖ ⧖
   ⌁̵ ⧖ ᛞ ⟗ ⧗²
-  ⧗¹ ⟗ ⧗⁰ ᚣᛋ ⧗² ⍿¹ ⁇ ⦃ ᚣᚣᛏ ⦄ ⦃ ⌁ ⌁̵ △ ᚡᚢ ⦄
-⸫ ᚣᚣᛐ ⟨ ⊸ ʃ ℤ ʃ ⟩ ⦃
+  ⧗¹ ⟗ ⧗⁰ ᚣᛋ ⧗² ⍿¹ ⁇ ⦃ ᚣᚣᛐ ⦄ ⦃ ⌁ ⌁̵ △ ᚡᚢ ⦄
+⸫ ᚣᚣᛑ ⟨ ⊸ ʃ ℤ ʃ ⟩ ⦃
 
 ⦄
   ⧖ ⧖
   ⁇ ⍿¹ ⧗¹ ᚠ ⟗ ⧗⁰
-    ⦃ ⟗ ⍴̱ ○ ᛖ ⋔ ⦃ ⌁̵ ⌁ ⎙̵ »↵)ytpme si elif ro( elif daer tonnac :rorre :« ⎙̵ △ ᚡᚢ ⦄ ⦃ ᚣᚣᛐ ⦄ ⁼ ⦄
+    ⦃ ⟗ ⍴̱ ○ ᛖ ⋔ ⦃ ⌁̵ ⌁ ⎙̵ »↵)ytpme si elif ro( elif daer tonnac :rorre :« ⎙̵ △ ᚡᚢ ⦄ ⦃ ᚣᚣᛑ ⦄ ⁼ ⦄
     ⦃ ᚡᚢ △ ⎙̵ «↵)ytpme si elif ro( elif daer tonnac :rorre :» ⎙̵ ⌁ ⦄
-⦄ ⟨ ʃ ℤ ⊸ ⟩ ᚣᚣᛑ ⸫
+⦄ ⟨ ʃ ℤ ⊸ ⟩ ᚣᚣᛒ ⸫
 
-⦃ »↵]gubed--[ ]mvll-time-- | kcehc-- | tsa-- | snekot--[ ]>tuptuo< o-[ >hrt.elif< c2s :egasu« ⎙̵ ▽△ ᚡᚢ ⦄ ⟨ ⊸ ⟩ ᚣᚣᛈ ⸫
+⦃ »↵]mvll-time-- | kcehc-- | tsa-- | snekot--[ ]c.f knil--[ ]h edulcni--[ ]gubed--[ ]>tuptuo< o-[ >hrt.niam< c2s :egasu« ⎙̵ ▽△ ᚡᚢ ⦄ ⟨ ⊸ ⟩ ᚣᚣᛓ ⸫
 
-⍝ ᚣᚣᛒ i: argument i is --debug
-⸫ ᚣᚣᛒ ⟨ ŧ ⊸ ℤ ⟩ ⦃ ⦃ ⊕ ⦄ ⦃ ⧗⁰ ⌁̵ ⧖ ᚣᚣᚻ «gubed--» ⟗ ⦄ ⁇ ᚨ ⦄
-⍝ ᚣᚣᛓ m: a --debug after the mode (or after -o's path) adds 10, where it matters
+⍝ ---- arguments, as trithc reads them: flags in any order, the first other argument is the source
+
+⍝ ᚣᚣᛔ s i: argument i is the literal s
+⸫ ᚣᚣᛔ ⟨ ŧ ⊸ ℤ ʃ ⟩ ⦃ ⦃ ⊕ ⌁̵ ⦄ ⦃ ⧗⁰ ⌁̵ ⧖ ᚣᚣᚻ ⍿² ⟗ ⦄ ⁇ ᚨ ⧗¹ ⧗⁰ ⧖ ⧖ ⦄
+⍝ ᚣᚣᛅ i: −1 none, 1 --tokens, 2 --ast, 3 --check, 4 --emit-llvm, 5 --debug, 6 -o, 7 --include,
+8 --link, 9 --plough or --unplough (s1 only), 0 anything else ⍝
+⦃
+  ⧖
+  ⧗⁰ ᚨ ⁇ ⦃ ⌁̵ ○ ⦄ ⦃ ▽ ⦄
+  ⁼ ∅ ⦃ ▽△ ⌁ ⦄ ⋔ ᚣᚣᛔ ⧗⁰ «tsa--» ⁼ ∅ ⦃ △ ⌁ ⦄ ⋔ ᚣᚣᛔ ⧗⁰ «snekot--»
+  »kcehc--« ⧗⁰ ᚣᚣᛔ ⋔ ⦃ ⌁ ○△ ⦄ ∅ ⁼ »mvll-time--« ⧗⁰ ᚣᚣᛔ ⋔ ⦃ ⌁ △△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ○▽△ ⌁ ⦄ ⋔ ᚣᚣᛔ ⧗⁰ «o-» ⁼ ∅ ⦃ ▽▽△ ⌁ ⦄ ⋔ ᚣᚣᛔ ⧗⁰ «gubed--»
+  »edulcni--« ⧗⁰ ᚣᚣᛔ ⋔ ⦃ ⌁ △▽△ ⦄ ∅ ⁼ »knil--« ⧗⁰ ᚣᚣᛔ ⋔ ⦃ ⌁ ▽○△ ⦄ ∅ ⁼
+  ⁼ ∅ ⦃ ○○△ ⌁ ⦄ ⋔ ᚣᚣᛔ ⧗⁰ «hguolpnu--» ⁼ ∅ ⦃ ○○△ ⌁ ⦄ ⋔ ᚣᚣᛔ ⧗⁰ «hguolp--»
+⦄ ⟨ ℤ ⊸ ℤ ⟩ ᚣᚣᛅ ⸫
+ᚣᚣᛕ: the mode (0 compile), --debug, the source's index (−1: none), and whether the arguments are bad ⍝
+⦃
+  ○ ▽ ○ ○ △
+  ⥀ ⦃
+    ⧖ ⧖ ⧖ ⧖ ⧖
+    ⧗⁰ ᚣᚣᛅ ⧖
+    ⁼ ⦃ ⊕ ᚣᚣᛖ ⦄ ⦃ ⦶ ⌁ ⦄ ⋔ ᛖ ▽ ⧗⁰ ⧗⁰ ⧗⁵ ⧗⁴ ⧗³ ⧗² ⧗¹
+  ⦄
+  ⧗⁴ ⧗³ ⧗² ⧗¹ ⧖ ⧖ ⧖ ⧖ ⧖
+⦄ ⟨ ⊸ ℤ ℤ ℤ ℤ ⟩ ᚣᚣᛕ ⸫
 ⦄
-  ⍿⁰ ○▽△ ᛖ ⋔ ⦃ △△ ᚣᚣᛒ ⋔ ⦃ △○△ ⊞ ⦄ ∅ ⁼ ⦄ ⦃ ⍿⁰ △△ ᛖ ⋔ ⦃ ○△ ᚣᚣᛒ ⋔ ⦃ △○△ ⊞ ⦄ ∅ ⁼ ⦄ ∅ ⁼ ⦄ ⁼
-⸫ ᚣᚣᛓ ⟨ ℤ ⊸ ℤ ⟩ ⦃
-
+  ⧖ ⧖ ⧖ ⧖ ⧖ ⧖
+  ⧖ ⁼ ⦃ ⌁ ⦄ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⋔ ᛦ △△ △ ⧗⁵ ⧗⁵ ⧗¹
+  ⧗³ ⧗⁶ ▽▽△ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖
+  ⧖ ᚣᚣᛅ ⊞ △ ⧗²
+  ⧗⁸ ○▽△ ▽○△ ᛦ ⧖
+  ⧖ ⁼ ⦃ ⌁ ⦄ ⦃ ⧗⁰ ⌁ ⧖ ⦄ ⋔ ⋎ ᛖ ▽ ⧗⁷ ᛖ ○ ⧗⁹ ⧗⁴ ⧗⁷
+  ⧗⁹ ⧗¹ ⧗² ▽ ᛖ ⋎ ⧗¹⁰ ○○△ ᛖ ⋏ ⧗¹⁰ ○ ᛖ ⧗⁸ ▽ ᛖ ᚡᚠ ⋎ ⋏ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖
+  ⧖ ⊞ ⁼ ⦃ △ ⦄ ⦃ ▽△ ⦄ ⋔ ⧗² ⧗⁶
+  ⧗⁰ ⧗⁶ ⧗⁵ ⧗² ⧗¹
+⸫ ᚣᚣᛖ ⟨ ℤ ℤ ℤ ℤ ℤ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ ⟩ ⦃
+⍝ ᚣᚣᛗ mode dbg in: the run's mode (5 compile; +10 with --debug for --emit-llvm and compiling)
 ⦄
-  △ ᚨ ⁇
-    ⁇ ᚨ ▽△ ⦄
-        ⦃ ᚣᚣᚼ ᚣᚣᛓ ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁̵ ᚣᚣᛈ ⦄ ⦃ ᚣᚣᛑ ⦄ ⁼ ⦄
-        ⦃ ⦃ ᚣᚣᛑ ▽▽△ ⦄
-    ⦃ ᚣᚣᛈ ⦄
+  ⧖ ⧖ ⧖
+  ⧖ ⁼ ∅ ⦃ ▽▽△ ⌁ ⦄ ⋔ ᛖ ○ ⧗⁰ ⧗⁰
+  ⧗⁰ ⧗⁰ △△ ᛖ ⧗⁰ ▽▽△ ᛖ ⋏ ⧗² △ ᛖ ⋎ ⋔ ⦃ △○△ ⊞ ⦄ ∅ ⁼ ⧖
+  ⦃ ᚣᚣᛓ ⌁ ⦄ ⦃ ᚣᚣᛒ ⧗⁰ ⧗¹ ⧖ ⧖ ⦄ ⁇ ᚨ ⧗⁴ ⧗⁰
+⦄ ⟨ ℤ ℤ ℤ ⊸ ⟩ ᚣᚣᛗ ⸫
+
+⦃
+  ⧖ ⧖ ⧖ ⧖ ᚣᚣᛕ
+  ⧗⁰ ⧗¹ ⧗² ⧗² ▽ ᛖ ⧗³ △ ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ ⌁ ᚣᚣᛓ ⦄ ⦃ ᚣᚣᛗ ⦄ ⁼
 ⸫ ᛟ ⟨ ⊸ ⟩ ⦃
 

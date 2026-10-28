@@ -1,0 +1,42 @@
+⍝ trith/lib/json.c: a document is text, read and changed by path
+⎔ $trith_json_get$ ⟨⟗ʃ ʃ ⊸ ◌ʃ⟩ ‹jget› ⸫
+⎔ $trith_json_type$ ⟨⟗ʃ ʃ ⊸ ℤ⟩ ‹jtype› ⸫
+⎔ $trith_json_len$ ⟨⟗ʃ ʃ ⊸ ℤ⟩ ‹jlen› ⸫
+⎔ $trith_json_at$ ⟨⟗ʃ ʃ ℤ ⊸ ◌ʃ⟩ ‹jat› ⸫
+⎔ $trith_json_key$ ⟨⟗ʃ ʃ ℤ ⊸ ◌ʃ⟩ ‹jkey› ⸫
+⎔ $trith_json_bool$ ⟨⟗ʃ ʃ ⊸ ℤ⟩ ‹jbool› ⸫
+⎔ $trith_json_set$ ⟨ʃ ʃ ʃ ⊸ ◌ʃ⟩ ‹jset› ⸫
+⎔ $trith_json_quote$ ⟨ʃ ⊸ ʃ⟩ ‹jquote› ⸫
+
+⍝ ‹show› doc path: print the value at path, or (none)
+⦃ ‹jget› ⁇ ⦃ ⎙̵ ⦄ ⦃ $(none)$ ⎙̵ ⦄ $\n$ ⎙̵ ⦄ ⟨⟗ʃ ʃ ⊸⟩ ‹show› ⸫
+
+⍝ ‹active› doc i: print the name of user i if that user is active
+⦃
+  ⧖:i
+  $users$ ⧗:i ‹jat› ⁇
+    ⦃ ⟗ $active$ ‹jbool› △ ≶ ⋔ ⦃ ⟗ $name$ ‹show› ⦄ ∅ ⁼ ⌁̵ ⦄
+    ⦃ ⦄
+⦄ ⟨⟗ʃ ℤ ⊸⟩ ‹active› ⸫
+
+⦃
+  ${"database": {"host": "localhost", "port": 5432}, "features": {"newFeature": false}, "users": [{"name": "Alice", "active": true}, {"name": "Bob", "active": false}, {"name": "Cara", "active": true}], "motto": "café \"ok\""}$
+  ⟗ $database.host$ ‹show›
+  ⟗ $database.port$ ‹show›
+  ⟗ $motto$ ‹show›
+  ⟗ $users.1.name$ ‹show›
+  ⟗ $users.7.name$ ‹show›
+  ⟗ $database$ △ ‹jkey› ⁇ ⦃ ⎙̵ ⦄ ⦃ $(none)$ ⎙̵ ⦄ $\n$ ⎙̵
+  $users: $ ⎙̵ ⟗ $users$ ‹jlen› ⎙ $type of the document: $ ⎙̵ ⟗ $$ ‹jtype› ⎙
+  ⍝ the active users, by index
+  ⟗ $users$ ‹jlen› ○
+  ⥀ ⦃
+    ⧖:n,i
+    ⟗ ⧗:i ‹active›
+    ⧗:n ⧗:i △ ⊞ ⍿¹ ⍿¹ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄
+  ⦄
+  ⌁ ⌁
+  $features.newFeature$ $true$ ‹jset› ⁇ ⦃ ⎙̵ ⦄ ⦃ $(no document)$ ⎙̵ ⦄ $\n$ ⎙̵
+  $say "hi"\n$ ‹jquote› ⎙̵ $\n$ ⎙̵
+  $type of [1, 2: $ ⎙̵ $[1, 2$ ⟗ $$ ‹jtype› ⎙ ⌁̵
+⦄ ⟨⊸⟩ ᛟ ⸫

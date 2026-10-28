@@ -1,0 +1,52 @@
+⍝ trith/lib/http.c: a server and its client in one program, split by fork
+⎔ $fork$ ⟨⊸ ℤ⟩ ‹fork› ⸫
+⎔ $trith_http_listen$ ⟨ℤ ⊸ ◌ℤ⟩ ‹listen› ⸫
+⎔ $trith_http_accept$ ⟨ℤ ⊸ ◌ℤ⟩ ‹accept› ⸫
+⎔ $trith_http_req_path$ ⟨ℤ ⊸ ⸮◌ʃ⟩ ‹rqpath› ⸫
+⎔ $trith_http_req_body$ ⟨ℤ ⊸ ⸮◌ʃ⟩ ‹rqbody› ⸫
+⎔ $trith_http_req_header$ ⟨ℤ ʃ ⊸ ⸮◌ʃ⟩ ‹rqheader› ⸫
+⎔ $trith_http_respond$ ⟨ℤ ℤ ⸮ʃ ⸮ʃ ⊸ ◌ℤ⟩ ‹respond› ⸫
+⎔ $trith_http_close$ ⟨ℤ ⊸ ℤ⟩ ‹hclose› ⸫
+⎔ $trith_http_get$ ⟨ʃ ⊸ ⸮◌ʃ⟩ ‹get› ⸫
+⎔ $trith_http_request$ ⟨ʃ ʃ ʃ ʃ ⊸ ⸮◌ℤ⟩ ‹request› ⸫
+⎔ $trith_http_response_body$ ⟨⊸ ⸮ʃ⟩ ‹rbody› ⸫
+⎔ $trith_http_response_header$ ⟨ʃ ⊸ ⸮◌ʃ⟩ ‹rheader› ⸫
+⎔ $trith_http_error$ ⟨⊸ ʃ⟩ ‹herror› ⸫
+
+⍝ ‹or› s: the text, or ? if there is none (what came over the network is hearsay, ⸮)
+⦃ ⁇ ⦃ ⦄ ⦃ $?$ ⦄ ⦄ ⟨⸮◌ʃ ⊸ ⸮ʃ⟩ ‹or› ⸫
+
+⍝ ‹srvpath› server: answer the next request with its path
+⦃
+  ‹accept› ⁇
+    ⦃ ⧖:h ⧗:h #200# $text/plain$ ⧗:h ‹rqpath› ‹or› ‹respond› ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⦄
+    ⦃ ⦄
+⦄ ⟨ℤ ⊸⟩ ‹srvpath› ⸫
+
+⍝ ‹srvecho› server: answer the next request with its body, typed as its X-Trith header says
+⦃
+  ‹accept› ⁇
+    ⦃ ⧖:h ⧗:h #201# ⧗:h $X-Trith$ ‹rqheader› ‹or› ⧗:h ‹rqbody› ‹or› ‹respond› ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⦄
+    ⦃ ⦄
+⦄ ⟨ℤ ⊸⟩ ‹srvecho› ⸫
+
+⍝ ‹child› server: serve the two requests the parent makes, then stop
+⦃ ⧖:s ⧗:s ‹srvpath› ⧗:s ‹srvecho› ⧗:s ‹hclose› ⌁ ⦄ ⟨ℤ ⊸⟩ ‹child› ⸫
+
+⍝ ‹parent› server: the client side, the only one that prints
+⦃
+  ‹hclose› ⌁
+  $http://127.0.0.1:8471/hello$ ‹get› ⁇ ⦃ ⎙̵ ⦄ ⦃ $GET failed: $ ⎙̵ ‹herror› ⎙̵ ⦄ $\n$ ⎙̵
+  $POST$ $http://127.0.0.1:8471/echo$ $X-Trith: text/x-trith$ $ping$ ‹request›
+    ⁇ ⦃ ⎙ ⦄ ⦃ $POST failed: $ ⎙̵ ‹herror› ⎙̵ $\n$ ⎙̵ ⦄
+  ‹rbody› ⎙̵ $\n$ ⎙̵
+  $content-type$ ‹rheader› ‹or› ⎙̵ $\n$ ⎙̵
+  $https://example.com/$ ‹get› ⁇ ⦃ ⎙̵ ⦄ ⦃ ‹herror› ⎙̵ ⦄ $\n$ ⎙̵
+  $http://127.0.0.1:1/$ ‹get› ⁇ ⦃ ⎙̵ ⦄ ⦃ ‹herror› ⎙̵ ⦄ $\n$ ⎙̵
+⦄ ⟨ℤ ⊸⟩ ‹parent› ⸫
+
+⦃
+  #8471# ‹listen› ⁇
+    ⦃ ⧖:s ⧗:s ‹fork› ○ ≶ ⋔ ⦃ ‹child› ⦄ ⦃ ‹parent› ⦄ ⦃ ‹hclose› ⌁ $fork failed\n$ ⎙̵ ⦄ ⦄
+    ⦃ $cannot listen: $ ⎙̵ ‹herror› ⎙̵ $\n$ ⎙̵ ⦄
+⦄ ⟨⊸⟩ ᛟ ⸫

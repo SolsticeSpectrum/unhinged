@@ -564,7 +564,7 @@ FFI binding:
 - The second binds `read` as ᛞ. Its result is declared hearsay and possibly failed.
 - FFI results that come from the outside world must be declared `⸮`.
 
-The v1 standard library (HTTP, SMTP, WebSocket, SHA-256, AES, JSON) is ported as FFI-bound modules.
+The v1 standard library (HTTP, SMTP, WebSocket, SHA-256, AES, JSON) is ported as FFI-bound modules: `trith/lib/X.c` with its prototypes in `X.h`, which a program binds with `⎔` and builds with `--include trith/lib/X.h --link trith/lib/X.c`. `trith/lib/README.md` lists the functions and their bindings.
 
 ---
 
@@ -729,6 +729,7 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
     - A `◌` result fails when it is negative (integers), NULL (strings) or NaN (reals).
   - The runtime offers `trith_argc`, `trith_arg(i)`, `trith_read_file(path)` and `trith_write_file(path, data)` to `⎔` bindings, for the self-hosted compiler (milestone 6). `trith_arg` and `trith_read_file` return NULL on failure, so they bind as `◌ʃ`; `trith_write_file` returns 0 or −1, so it binds as `◌ℤ`. `trith/tests/run/io_bytes.trh` uses them.
   - The runtime and FFI glue are compiled to LLVM IR and linked into one module before optimising, so calls into them can inline.
+  - The glue and every `--link` file are compiled with `-I .`, so a quoted `--include` path is found from the repository root. s2 takes the same `--include` and `--link` flags (milestone 7).
 - **Compile-time evaluation (milestone 5).**
   - The evaluator runs pure code over ℤ, ŧ and their `◌` forms. It refuses I/O, FFI, containers and future calls. Integers must stay within 2⁵³, and it gives up after 10⁷ steps or 200 nested calls.
   - A past-tense call needs a pure callee and arguments known at compile time; literals and operators on them are folded. §15.4 compiles to a single `print(21)`.
@@ -787,7 +788,7 @@ Milestones:
 4. ◌, arrays, strings, FFI, particles, evidentials, charges. **Done.** Benchmarks: n-body 1.06× and Game of Life 0.95× of `clang -O2`. Life's grid-size prayer (§12) lets the optimiser remove every bounds check. SHA-256 is not written yet.
 5. ψ with phases, `⟜`, `⇋`, tense, prayers, call by shape. **Done** within the s1 limits recorded in §16.1.
 6. Rewrite the compiler in Trith (s2), then pass the fixpoint (s3). **Done:** `trith/s2/`, built as `build/s2c` by s1. s2 agrees with s1's `--tokens`, `--ast`, `--check` and `--emit-llvm` on every file in the repository, on random inputs and on mutated tests, and compiled programs behave identically (`make s2-test`, `make s2-fuzz`). s3, s2 compiled by s2, emits exactly the IR s2 emits for its own source and is the same executable (`make s2-fixpoint`). s2 is about 30× faster than s1: it checks its own 8,000-line source in 0.24 s and compiles it to IR in 0.35 s (s1: 7.5 s and 11 s).
-7. Port the standard library modules.
+7. Port the standard library modules. **Done:** `trith/lib/`: crypto (SHA-256, HMAC-SHA-256, AES-256-CBC, random bytes), json, http (client and server), ws (WebSocket client and server) and smtp, in C with Trith-shaped signatures (−1 and NULL for failure, so results bind as `◌`). Network results are bound as hearsay `⸮`. `make lib-test` builds and runs a test of each module with s1 and with s2; the network tests fork into a server and a client, and the SMTP test talks to a fake server. There is no TLS. The SHA-256 benchmark is still open: it needs SHA-256 written in Trith rather than bound from C.
 
 Benchmarks, each of which must run within 1.5× of `clang -O2`:
 

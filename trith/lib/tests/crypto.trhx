@@ -1,0 +1,14 @@
+⍝ trith/lib/crypto.c: SHA-256, HMAC-SHA-256, AES-256-CBC, random bytes
+⎔ $trith_sha256$ ⟨ʃ ⊸ ʃ⟩ ‹sha› ⸫
+⎔ $trith_hmac_sha256$ ⟨ʃ ʃ ⊸ ʃ⟩ ‹hmac› ⸫
+⎔ $trith_random_hex$ ⟨ℤ ⊸ ⸮◌ʃ⟩ ‹rand› ⸫
+⎔ $trith_aes_encrypt$ ⟨ʃ ʃ ⊸ ʃ⟩ ‹enc› ⸫
+⎔ $trith_aes_decrypt$ ⟨ʃ ʃ ⊸ ◌ʃ⟩ ‹dec› ⸫
+⦃
+  $hello$ ‹sha› ⎙̵ $\n$ ⎙̵
+  $$ ‹sha› ⎙̵ $\n$ ⎙̵
+  $message$ $secret$ ‹hmac› ⎙̵ $\n$ ⎙̵
+  #32# ‹rand› ⁇ ⦃ ⟗ ⍴̱ ⎙ ⌁̵ ⦄ ⦃ $no random bytes\n$ ⎙̵ ⦄
+  $Hello, World!$ $my secret key$ ‹enc› ⟗ ⍴̱ ⎙ $my secret key$ ‹dec› ⁇ ⦃ ⎙̵ $\n$ ⎙̵ ⦄ ⦃ $decryption failed\n$ ⎙̵ ⦄
+  $00ff$ $my secret key$ ‹dec› ⁇ ⦃ ⎙̵ $\n$ ⎙̵ ⦄ ⦃ $not a ciphertext: no text\n$ ⎙̵ ⦄
+⦄ ⟨⊸⟩ ᛟ ⸫

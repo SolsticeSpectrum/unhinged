@@ -1,0 +1,53 @@
+⍝ trith/lib/http.c: a server and its client in one program, split by fork
+⸫ ᚡᚠ ⟨ ℤ ⊸ ⟩ «krof» ⎔
+⎔ »netsil_ptth_htirt« ⟨ ℤ ⊸ ◌ℤ ⟩ ᚡᚢ ⸫
+⸫ ᚡᚤ ⟨ ◌ℤ ⊸ ℤ ⟩ «tpecca_ptth_htirt» ⎔
+⎔ »htap_qer_ptth_htirt« ⟨ ℤ ⊸ ⸮◌ʃ ⟩ ᚡᚥ ⸫
+⸫ ᚡᚦ ⟨ ⸮◌ʃ ⊸ ℤ ⟩ «ydob_qer_ptth_htirt» ⎔
+⎔ »redaeh_qer_ptth_htirt« ⟨ ℤ ʃ ⊸ ⸮◌ʃ ⟩ ᚡᚧ ⸫
+⸫ ᚡᚨ ⟨ ◌ℤ ⊸ ⸮ʃ ⸮ʃ ℤ ℤ ⟩ «dnopser_ptth_htirt» ⎔
+⎔ »esolc_ptth_htirt« ⟨ ℤ ⊸ ℤ ⟩ ᚡᚩ ⸫
+⸫ ᚡᚪ ⟨ ⸮◌ʃ ⊸ ʃ ⟩ «teg_ptth_htirt» ⎔
+⎔ »tseuqer_ptth_htirt« ⟨ ʃ ʃ ʃ ʃ ⊸ ⸮◌ℤ ⟩ ᚡᚫ ⸫
+⸫ ᚡᚬ ⟨ ⸮ʃ ⊸ ⟩ «ydob_esnopser_ptth_htirt» ⎔
+⎔ »redaeh_esnopser_ptth_htirt« ⟨ ʃ ⊸ ⸮◌ʃ ⟩ ᚡᚭ ⸫
+⸫ ᚡᚮ ⟨ ʃ ⊸ ⟩ «rorre_ptth_htirt» ⎔
+
+ᚡᚯ s: the text, or ? if there is none (what came over the network is hearsay, ⸮) ⍝
+⦃ ⁇ ⦃ ⦄ ⦃ »?« ⦄ ⦄ ⟨ ⸮◌ʃ ⊸ ⸮ʃ ⟩ ᚡᚯ ⸫
+
+⍝ ᚡᚰ server: answer the next request with its path
+⦄
+  ᚡᚤ ⁇
+    ⦃ ⦃ ⦄ ⦃ ⌁ ⦄ ⁇ ᚡᚨ ᚡᚯ ᚡᚥ ⧗⁰ «nialp/txet» ▽△△△▽△ ⧗⁰ ⧖ ⦄
+    ⦃ ⦄
+⸫ ᚡᚰ ⟨ ⊸ ℤ ⟩ ⦃
+
+ᚡᚱ server: answer the next request with its body, typed as its X-Trith header says ⍝
+⦃
+  ⁇ ᚡᚤ
+    ⦃ ⧖ ⧗⁰ ○△△△▽△ ⧗⁰ »htirT-X« ᚡᚧ ᚡᚯ ⧗⁰ ᚡᚦ ᚡᚯ ᚡᚨ ⁇ ⦃ ⌁ ⦄ ⦃ ⦄ ⦄
+    ⦃ ⦄
+⦄ ⟨ ℤ ⊸ ⟩ ᚡᚱ ⸫
+
+⍝ ᚡᚲ server: serve the two requests the parent makes, then stop
+⸫ ᚡᚲ ⟨ ⊸ ℤ ⟩ ⦃ ⌁ ᚡᚩ ⧗⁰ ᚡᚱ ⧗⁰ ᚡᚰ ⧗⁰ ⧖ ⦄
+
+ᚡᚳ server: the client side, the only one that prints ⍝
+⦃
+  ⌁ ᚡᚩ
+  »olleh/1748:1.0.0.721//:ptth« ᚡᚪ ⁇ ⦃ ⎙̵ ⦄ ⦃ » :deliaf TEG« ⎙̵ ᚡᚮ ⎙̵ ⦄ »↵« ⎙̵
+  ᚡᚫ «gnip» «htirt-x/txet :htirT-X» «ohce/1748:1.0.0.721//:ptth» «TSOP»
+    ⁇ ⦃ ⎙ ⦄ ⦃ » :deliaf TSOP« ⎙̵ ᚡᚮ ⎙̵ »↵« ⎙̵ ⦄
+  ⎙̵ «↵» ⎙̵ ᚡᚬ
+  »epyt-tnetnoc« ᚡᚭ ᚡᚯ ⎙̵ »↵« ⎙̵
+  ⎙̵ «↵» ⦃ ⎙̵ ᚡᚮ ⦄ ⦃ ⎙̵ ⦄ ⁇ ᚡᚪ «/moc.elpmaxe//:sptth»
+  »/1:1.0.0.721//:ptth« ᚡᚪ ⁇ ⦃ ⎙̵ ⦄ ⦃ ᚡᚮ ⎙̵ ⦄ »↵« ⎙̵
+⸫ ᚡᚳ ⟨ ⊸ ℤ ⟩ ⦃
+
+⦄
+  ▽△▽▽○▽○△△ ᚡᚢ ⁇
+    ⦃ ⦃ ⎙̵ «↵deliaf krof» ⌁ ᚡᚩ ⦄ ⦃ ᚡᚳ ⦄ ⦃ ᚡᚲ ⦄ ⋔ ≶ ○ ᚡᚠ ⧗⁰ ⧖ ⦄
+    ⦃ » :netsil tonnac« ⎙̵ ᚡᚮ ⎙̵ »↵« ⎙̵ ⦄
+⸫ ᛟ ⟨ ⊸ ⟩ ⦃
+

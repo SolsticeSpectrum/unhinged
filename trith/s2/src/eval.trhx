@@ -336,10 +336,15 @@
 ⦃
   ⧖:C,S,strand,x,idx,role
   ⧗:C̵,strand ‹llen› ⧖:C,n
+  ⧗:C̵,S,strand,idx,role ⧗:idx ⧗:n ≶ ⋔ ⦃ ⧖:C,S,strand,idx,role ⧗:C̵ %%compile-time evaluation of borrowed moments is not supported in s1%% ‹everr› ⧗:S,strand ⦄ ⁼ ⦃ ‹evo_read1› ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹evo_read› ⸫
+⦃
+  ⧖:C,S,strand,idx,role
+  ⧗:C̵,strand ‹llen› ⧖:C,n
   ⧗:C̵,strand ⧗:n △ ⊟ ⧗:idx ⊟ ‹lget› ⧖:C,v
   ⧗:C̵,v,role ‹evrole› ⧖:C,w
   ⧗:C̵,S,w ‹lpush› ⧗:strand
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹evo_read› ⸫
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹evo_read1› ⸫
 ⦃
   ⧖:C,S,strand,x,idx,role
   ⧗:C̵,S ‹llen› ⧖:C,n

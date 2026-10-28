@@ -114,6 +114,7 @@ make s2-regen       # regenerate trith/s2/s2c.trh from trith/s2/src (needs pytho
 ```
 
 - Milestone 7: the v1 standard library ported as C modules bound with FFI (`trith/lib/`): SHA-256, HMAC and AES; JSON; an HTTP client and server; WebSocket; SMTP. See [`trith/lib/README.md`](trith/lib/README.md).
+- Since then, decided open questions (§16): agreement marks on moment reads (`⧗̵ⁿ` moves a string, `⧗̱ⁿ` reads a shadow), and region-scoped borrows, so a loop or face reads and writes an array through a `⟗`/`⟖` moment of an enclosing block.
 
 ```bash
 make lib-test       # build and run each module's test with s1 and s2 (also run by make test)

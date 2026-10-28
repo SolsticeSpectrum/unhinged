@@ -903,12 +903,15 @@
   ⧗:C̵,S2,strand2
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_bind› ⸫
 
-⍝ ⧗ⁿ: read a moment
+⍝ ⧗ⁿ: read a moment, of this block or (past its strand) of an enclosing one
 ⦃
   ⧖:C,tok,S,strand,depth,locks
   ⧗:C̵,tok #4# ‹tf› ⧖:C,idx
   ⧗:C̵,strand ‹llen› ⧖:C,n
-  ⧗:C̵,tok,idx,n ⧗:idx ⧗:n ≶ ⋔ ⦃ ‹readerr› ⦄ ⁼ ⦃ ⌁ ⌁ ⌁ ⦄ ⧖:C
+  ⧗:C̵,tok,S,strand,depth,locks,idx,n ⧗:idx ⧗:n ≶ ⋔ ⦃ ‹g_rdouter› ⦄ ⁼ ⦃ ‹g_rdlocal› ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_read› ⸫
+⦃
+  ⧖:C,tok,S,strand,depth,locks,idx,n
   ⧗:n △ ⊟ ⧗:idx ⊟ ⧖:mi
   ⧗:C̵,strand,mi ‹lget› ⧖:C,m
   ⧗:C̵,m ‹vall› ⧖:C,ty,id,mtok,rg,of,void,ev,ch
@@ -921,7 +924,85 @@
   ⧗:C̵,v,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹vrole› ⦄ ⁼ ⧖:C,v2
   ⧗:C̵,S,v2 ‹lpush› ⧖:C,S2
   ⧗:C̵,S2,strand2
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_read› ⸫
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_rdlocal› ⸫
+
+⍝ ⧗ⁿ past this block's strand reads a moment of an enclosing block (§5.1). Only
+⍝ borrowed moments are visible there: a ⟗ is copied, and a ⟖ is lent as a fresh ⟖
+⍝ that cannot leave this block, while the moment itself stays bound (s1's
+⍝ ck_read_outer). The views of the enclosing blocks are a chain from register 60.
+⦃
+  ⧖:C,tok,S,strand,depth,locks,idx,n
+  ⧗:C̵ #60# ‹reg› ⧖:C,vw
+  ⧗:C̵,vw △ ‹lget› ⧖:C,pv
+  ⍝ the loop carries [C view j total m]
+  ⧗:C̵,pv ⧗:idx ⧗:n ⊟ ⧗:n #-1#
+  ⥀ ⦃
+    ⧖:C,v,j,total,m
+    ⧗:C̵,v,j,total,m ⧗:v ○ ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹rdo_step› ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,v,j,total,m
+  ⧗:C̵,tok,idx,total ⧗:m #-1# ᛖ ⋔ ⦃ ‹readerr› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,m ‹vall› ⧖:C,ty,id,mtok,rg,of,void,ev,ch
+  ⧗:C̵,ty ‹tclass› ⧖:C,cl
+  ⧗:C̵,tok,ty ⧗:cl △ ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹outerr› ⦄ ⁼ ⧖:C
+  ⧗:C̵,tok,ty,mtok ⧗:void △ ᛖ ⋔ ⦃ ‹voiderr› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,m ‹l1› ⧖:C,vs ⧗:C̵,tok,vs ‹agree› ⧖:C
+  ⧗:C̵,ty ‹shead› ⧖:C,h
+  ⧗:C̵,tok,S,strand,pv,of,ty,depth,rg ⧗:h #10198# ᛖ ⋔ ⦃ ‹rdo_lend› ⦄ ⦃ ⧖:C,tok,S,strand,pv,of,ty,depth,rg ⧗:C̵,ty,tok,rg ‹vnew› ⦄ ⁼ ⧖:C,v
+  ⧗:C̵,v #4# ⧗:of ‹vset› ⧗:m,v ‹vannot› ⧖:C
+  ⧗:C̵,tok ‹trole› ⧖:C,role
+  ⧗:C̵,v,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹vrole› ⦄ ⁼ ⧖:C,v2
+  ⧗:C̵,S,v2 ‹lpush› ⧗:strand
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹g_rdouter› ⸫
+⍝ ‹rdo_step› C view j total m: look in one enclosing view; a found moment ends the walk
+⦃
+  ⧖:C,v,j,total,m
+  ⧗:C̵,v ○ ‹lget› ⧖:C,st
+  ⧗:C̵,st ‹llen› ⧖:C,sl
+  ⧗:C̵,v △ ‹lget› ⧖:C,pv
+  ⧗:C̵,st,sl,j,total,pv ⧗:j ⧗:sl ≶ ⋔ ⦃ ‹rdo_skip› ⦄ ⁼ ⦃ ‹rdo_take› ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹rdo_step› ⸫
+⦃ ⧖:C,st,sl,j,total,pv ⧗:C̵,pv ⧗:j ⧗:sl ⊟ ⧗:total ⧗:sl ⊞ #-1# ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹rdo_skip› ⸫
+⦃
+  ⧖:C,st,sl,j,total,pv
+  ⧗:C̵,st ⧗:sl △ ⊟ ⧗:j ⊟ ‹lget› ⧖:C,m
+  ⧗:C̵ ○ ⧗:j ⧗:total ⧗:sl ⊞ ⧗:m
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹rdo_take› ⸫
+⍝ ‹rdo_lend› C tok S strand view of ty depth rg: a fresh ⟖, if it would be the only live one
+⍝ besides the moment (on the stack, in this strand, or in any enclosing one)
+⦃
+  ⧖:C,tok,S,strand,pv,of,ty,depth,rg
+  ⧗:C̵,S,of ○ ‹cntex› ⧖:C,a
+  ⧗:C̵,strand,of △ ‹cntex› ⧖:C,b
+  ⧗:C̵,pv,of ○
+  ⥀ ⦃
+    ⧖:C,v,of,k
+    ⧗:C̵,v,of,k ⧗:v ○ ᛖ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,v,of,k ⧗:C̵,v ○ ‹lget› ⧖:C,st ⧗:C̵,st,of △ ‹cntex› ⧖:C,c ⧗:C̵,v △ ‹lget› ⧖:C,nv ⧗:C̵,nv,of ⧗:k ⧗:c ⊞ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,v,of,k
+  ⧗:C̵ ⧗:a ⧗:b ⊞ ⧗:k ⊞ △ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⧗:tok #9# ‹cfailunless› ⧖:C
+  ⧗:C̵,ty,tok,depth ‹vnew›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹rdo_lend› ⸫
+⍝ ‹cntex› C L of moments: how many live ⟖ of "of" L holds (skipping void moments)
+⦃
+  ⧖:C,L,of,moments
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,L,of,moments ○ ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,L,of,moments,k,j,n
+    ⧗:C̵,L,of,moments,k,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,of,moments,k,j,n ⧗:C̵,L,j ‹lget› ⧖:C,w ⧗:C̵,w #4# ‹vf› ⧖:C,wof ⧗:C̵,w #5# ‹vf› ⧖:C,x ⧗:C̵,w ‹vty› ‹shead› ⧖:C,h
+        ⧗:C̵,L,of,moments ⧗:k ⧗:wof ⧗:of ᛖ ⧗:h #10198# ᛖ ⋎ ⧗:moments △ ᛖ ⧗:x △ ᛖ ⋎ ‹not› ⋎ ⋔ ⦃ △ ⊞ ⦄ ∅ ⁼
+        ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,L,of,moments,k,j,n ⧗:C̵,k
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cntex› ⸫
+⦃
+  ⧖:C,tok,ty
+  ⧗:C̵,tok ‹cerr› ⧗:tok ‹plab› $ reads a $ ⎙̵ ⧗:ty ‹spr›
+  $ of an enclosing block; only borrowed moments (⟗, ⟖) are visible inside a block, other values enter it through the stack (§5.1)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹outerr› ⸫
 
 ⦃
   ⧖:C,tok,idx,n
@@ -1982,6 +2063,9 @@
 ⦃
   ⧖:C,from,to,S,depth,locks,ind
   ⧗:C̵ ‹lnew0› ⧖:C,strand
+  ⍝ this block's view [strand, enclosing view] heads the chain in register 60 while it runs
+  ⧗:C̵ #60# ‹reg› ⧖:C,pv
+  ⧗:C̵ ‹lbeg› ⧖:C,vw ⧗:C̵,vw,strand ‹ladd› ⧗:vw,pv ‹ladd› #60# ⧗:vw ‹wr› ⧖:C
   ⍝ the loop carries [C oi to S strand dead depth locks ind prev]
   ⧗:C̵,from,to,S,strand ○ ⧗:depth,locks,ind #-1#
   ⥀ ⦃
@@ -1989,12 +2073,14 @@
     ⧗:C̵,oi,to,S,strand,dead,depth,locks,ind,prev ⧗:oi ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹bstep› ⊕ ⦄
   ⦄
   ⧖:C,oi,to,S,strand,dead,depth,locks,ind,prev
+  ⧗:C̵ #60# ⧗:pv ‹wr› ⧖:C
   ⧗:C̵,S,strand,dead
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹cblock› ⸫
 
 ⍝ ‹bstep› C oi to S strand dead depth locks ind prev: one op of a block
 ⦃
   ⧖:C,oi,to,S,strand,dead,depth,locks,ind,prev
+  ⧗:C̵ #60# ‹reg› ⧖:C,vw ⧗:C̵,vw ○ ⧗:strand ‹lset› ⧖:C
   ⧗:C̵,oi ‹ndt› ⧖:C,tok
   ⧗:C̵ ⧗:dead ○ ᛖ ⧗:tok #10# ‹cfailunless›
   ⧗:oi,S,strand,dead,depth,locks,ind,prev,to ‹case› ⧖:C,S2,strand2,dead2,skip,lab,larg

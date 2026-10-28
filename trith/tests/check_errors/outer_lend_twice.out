@@ -1,0 +1,10 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+    elements
+      ○  ⊢ [ℤ]
+  ⟦…⟧  ⊢ [⟦ℤ⟧]
+  ⟖  ⊢ [⟦ℤ⟧ ⟖⟦ℤ⟧]
+  ⧖  ⊢ [⟦ℤ⟧]
+  ⊕  ⊢ [⟦ℤ⟧ ŧ]
+    face ⦶
+      ⧗̱⁰  ⊢ [⟦ℤ⟧ ⟖⟦ℤ⟧]
+trith/tests/check_errors/outer_lend_twice.trh:2:39: error: this value already has a live ⟖ shadow

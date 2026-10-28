@@ -202,6 +202,15 @@ There are no variables. Instead, each block has a **strand**, an append-only tim
 Scope is inverted compared with ordinary languages:
 
 1. An inner block **cannot see** the moments of the blocks that enclose it. Data enters a block **only through the stack**.
+   - The exception is **borrowed moments** (region-scoped borrows). A `⧗ⁿ` whose n runs past the block's own moments counts on through the strands of the enclosing blocks, innermost first. If it lands on a `⟗` or `⟖` moment, it reads it, marked `⧗̱ⁿ` (§6.1). Any other value is an error.
+   - A `⟗` read this way is copied. A `⟖` is **lent**: the read gives a fresh `⟖` that must be used up inside the reading block, and the moment stays bound. Only one `⟖` of a value may be live at a time.
+   - So a loop can write into an array without carrying the array through its stack:
+
+     ```
+     ⟖ ⧖  ○ ⥀ ⦃ ⧖ ⧗̱¹ ⧗⁰ ⧗⁰ ⍈̱ ⁇ ⦃ ⦄ ⦃ ⦄  ⧗⁰ △ ⊞ ○△ ⍿¹ ≶ ⦄
+     ```
+
+     Here `⧗̱¹` inside the body reaches past the body's one moment to the `⟖` bound before the loop.
 2. Moments bound inside a block **remain visible after** the block, to the code that follows it in the enclosing block. They are appended to the enclosing strand in the order they were bound.
 3. For a `⋔`, only the moments bound by **every live face** are exported. Specifically, the export is the longest common prefix of the faces' moment-type sequences, and those moments become `phi` nodes. Everything after that prefix **evaporates**.
 4. For a `⥀`, the moments of the **final iteration** are exported after the loop exits. Each iteration starts with an empty view of the previous iterations.
@@ -325,6 +334,8 @@ This is linear typing. Memory is freed at the point of annihilation, with no gar
 - `⟖` (exclusive entangle) pushes a `⟖T`, which is read-write and linear.
 - While a shadow is alive, the original value cannot be moved, observed or mutated.
 - A shadow cannot escape the block that created it. Regions are **lexical blocks**, so no non-lexical lifetime analysis is needed.
+- A shadow bound as a moment is visible to the blocks nested inside its region (§5.1). An inner block borrows a `⟖` moment for itself, and that borrow cannot leave the inner block.
+- Annihilating a `⟖` (`⌁̱`) ends the borrow; the value it shadows stays alive.
 
 **Cost:** a pointer.
 
@@ -763,9 +774,9 @@ These were ambiguous in draft 1. The s1 compiler implements them as follows; cha
 - **Decided after milestone 7.**
   - Agreement applies to `⧗ⁿ` reads too (§6.1). `trx.py` writes the mark after a name: `⧗:C̵` reads the heap `C` by moving it.
   - Call by shape matches evidentials and charges as well (§9.1).
+  - Arrays inside `⥀`: borrowed moments are region-scoped (§5.1), so a loop body reads and writes an array through a `⟗`/`⟖` moment of an enclosing block instead of carrying it through the loop stack. Codegen is free: the shadow is a loop-invariant pointer. `trx.py` resolves `⧗:x̱` through the enclosing blocks.
 - **Tooling.** `trithc --plough` turns a file written in logical order (every line left to right) into on-disk order and pads it with breaths. `trithc --unplough` does the reverse, for reading.
 
-- Mutable arrays inside `⥀`: keep threading a `⟖` through the loop stack, or allow region-scoped exclusive moments?
 - Should the ψ cap be lower than 27 for quantum alternatives, to bound the drop logic?
 - Generics: monomorphised, stack-polymorphic signatures (Kitten-style row variables), or none in Trith 1.0?
 - Should scattered fragments be allowed across files within a module?

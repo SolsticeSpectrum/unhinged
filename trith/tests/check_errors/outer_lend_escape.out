@@ -1,0 +1,15 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+    elements
+      ○  ⊢ [ℤ]
+  ⟦…⟧  ⊢ [⟦ℤ⟧]
+  ⟖  ⊢ [⟦ℤ⟧ ⟖⟦ℤ⟧]
+  ⧖  ⊢ [⟦ℤ⟧]
+  ⊕  ⊢ [⟦ℤ⟧ ŧ]
+    face ⦶
+      ⧗̱⁰  ⊢ [⟦ℤ⟧ ⟖⟦ℤ⟧]
+      ⧖  ⊢ [⟦ℤ⟧]
+    face ⊕
+      ⧗̱⁰  ⊢ [⟦ℤ⟧ ⟖⟦ℤ⟧]
+      ⧖  ⊢ [⟦ℤ⟧]
+    face ⊖
+trith/tests/check_errors/outer_lend_escape.trh:2:48: error: the shadow ⟖⟦ℤ⟧ created here escapes its block (§8.2)

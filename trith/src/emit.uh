@@ -654,6 +654,8 @@
     ty → base ¿
     ty ⟪ em_is_fail ⟫ ty "◌" ≢ ∧ ⤴ ↵ ty ⟪ ck_tail ⟫ → base ¿ ⌫ ¿
     base ⟪ ck_copyable ⟫ ⤴ ↵ 【】 ⇄ ¿ ⌫ ¿
+    ⍝ annihilating a ⟖ ends the borrow; the value it shadows stays alive
+    base ⟪ ck_head ⟫ "⟖" ≡ ⤴ ↵ 【】 ⇄ ¿ ⌫ ¿
     base EM_PARTICLES ∈ ⤴ ↵
       ty base ≢ ⤴ ↵ E tok "code generation for ⌁ on a possibly-failed particle arrives later" ⟪ em_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
       【"⌁" base】 ⟪ em_cat ⟫ → anti ¿
@@ -1122,12 +1124,40 @@
   r "stack" ⌈ ⌉ 0 ⌈ ⌉ "v" ⌈ ⌉ ⇄ ¿
 ↦ E ↦ ops ↦ vals ↦ em_predicate ¿
 
+⍝ E "views" holds the strand of every block being emitted, outermost first: an
+⍝ inner block reads the borrowed moments of the blocks around it (§5.1)
+ƒ
+  E "views" ⌈ ⌉ → vw ¿
+  vw 【】 ⟪ .append ⟫ ¿
+  E ops S ⟪ em_block_inner ⟫ → r ¿
+  vw ⟪ .pop ⟫ ¿
+  r ⇄ ¿
+↦ E ↦ ops ↦ S ↦ em_block ¿
+
+⍝ the entry of a moment of an enclosing block, idx counted past this block's n moments
+ƒ
+  E "views" ⌈ ⌉ → vw ¿
+  idx n ⊟ → j ¿
+  vw ⟪ len ⟫ 2 ⊟ → lv ¿
+  ∅ → e ¿
+  lv 0 ≽ e ∅ ≡ ∧ ⟲ ↵
+    vw lv ⌈ ⌉ → st ¿
+    st ⟪ len ⟫ → sl ¿
+    j sl ≺ ⤴ ↵ st sl 1 ⊟ j ⊟ ⌈ ⌉ → e ¿ ⌫ ⤵ ↵ j sl ⊟ → j ¿ ⌫ ¿
+    lv 1 ⊟ → lv ¿
+  ⌫ ¿
+  e ⇄ ¿
+↦ E ↦ idx ↦ n ↦ em_outer ¿
+
 ƒ
   【】 → strand ¿
   ⊥ → dead ¿
   0 → oi ¿
   ops ⟪ len ⟫ → nops ¿
+  E "views" ⌈ ⌉ → vw ¿
+  vw ⟪ len ⟫ 1 ⊟ → vi ¿
   oi nops ≺ ⟲ ↵
+    vw vi ← strand ¿
     ops oi ⌈ ⌉ → op ¿
     op "kind" ⌈ ⌉ → k ¿
     op "tok" ⌈ ⌉ → tok ¿
@@ -1186,7 +1216,11 @@
         be "slots" ⌈ ⌉ ∅ ≢ ⤴ ↵ E be ops oi ⟪ em_retro ⟫ → be ¿ ⌫ ¿
         strand be ⟪ .append ⟫ ¿
       ⌫ ⤵ x "⧗" ≡ ⤴ ↵
-        strand strand ⟪ len ⟫ 1 ⊟ idx ⊟ ⌈ ⌉ → e ¿
+        idx strand ⟪ len ⟫ ≽ ⤴ ↵
+          E idx strand ⟪ len ⟫ ⟪ em_outer ⟫ → e ¿
+        ⌫ ⤵ ↵
+          strand strand ⟪ len ⟫ 1 ⊟ idx ⊟ ⌈ ⌉ → e ¿
+        ⌫ ¿
         S e role ⟪ em_with_role ⟫ ⟪ .append ⟫ ¿
       ⌫ ⤵ x "⍿" ≡ ⤴ ↵
         S ⟪ len ⟫ 1 ⊟ idx ⊟ → si ¿
@@ -1560,7 +1594,7 @@
     oi 1 ⊞ → oi ¿
   ⌫ ¿
   S strand dead ⟪ ck_result ⟫ ⇄ ¿
-↦ E ↦ ops ↦ S ↦ em_block ¿
+↦ E ↦ ops ↦ S ↦ em_block_inner ¿
 
 ƒ
   0 → i ¿
@@ -1827,6 +1861,7 @@
   ❴"err": ∅, "path": path, "sn": 0, "debug": debug❵ → E ¿
   E "hoisted" ← 【】 ¿
   E "lines" ← 【】 ¿
+  E "views" ← 【】 ¿
   E "globals" ← 【】 ¿
   E "cur" ← "entry" ¿
   ❴❵ → fns ¿

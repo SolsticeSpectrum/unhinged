@@ -3,4 +3,4 @@ fn ᛟ ⟨ ⊸ ⟩  start []
   ⧖  ⊢ []
   ⊕  ⊢ [ŧ]
     face ⦶
-trith/tests/check_errors/inside_out_scope.trh:1:13: error: ⧗⁰ reads 1 moment(s) back, but only 0 are visible here (data enters a block only through the stack, §5.1)
+trith/tests/check_errors/inside_out_scope.trh:1:13: error: ⧗⁰ reads a ℤ of an enclosing block; only borrowed moments (⟗, ⟖) are visible inside a block, other values enter it through the stack (§5.1)

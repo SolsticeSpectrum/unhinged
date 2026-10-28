@@ -1,0 +1,6 @@
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  ⧖  ⊢ []
+  ⊕  ⊢ [ŧ]
+    face ⦶
+trith/tests/check_errors/moment_out_of_range.trh:2:23: error: ⧗² reads 3 moment(s) back, but only 1 are visible here (data enters a block only through the stack, §5.1)

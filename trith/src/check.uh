@@ -602,6 +602,65 @@
   C tok "internal: no rule for " x ⊞⊞ ⟪ ck_err ⟫ ⇄ ¿
 ↦ C ↦ tok ↦ ts ↦ ck_glyph_types ¿
 
+⍝ ⧗ⁿ past the block's own strand reads a moment of an enclosing block (§5.1). Only
+⍝ borrowed moments are visible there: a ⟗ is copied, and a ⟖ is lent as a fresh ⟖
+⍝ that cannot leave this block, while the moment itself stays bound. Returns the
+⍝ value, or ∅ after an error.
+ƒ
+  C "views" ⌈ ⌉ → vw ¿
+  idx n ⊟ → j ¿
+  vw ⟪ len ⟫ 2 ⊟ → lv ¿
+  ∅ → m ¿
+  n → total ¿
+  lv 0 ≽ ⟲ ↵
+    vw lv ⌈ ⌉ → st ¿
+    st ⟪ len ⟫ → sl ¿
+    m ∅ ≡ j sl ≺ ∧ ⤴ ↵ st sl 1 ⊟ j ⊟ ⌈ ⌉ → m ¿ ⌫ ⤵ m ∅ ≡ ⤴ ↵ j sl ⊟ → j ¿ ⌫ ¿
+    total sl ⊞ → total ¿
+    lv 1 ⊟ → lv ¿
+  ⌫ ¿
+  tok ⟪ ck_label ⟫ → lbl ¿
+  m ∅ ≡ ⤴ ↵
+    C tok lbl " reads " idx 1 ⊞ ⍕ " moment(s) back, but only " total ⍕ " are visible here (data enters a block only through the stack, §5.1)" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  m "ty" ⌈ ⌉ → t ¿
+  t ⟪ ck_class ⟫ "borrowed" ≢ ⤴ ↵
+    C tok lbl " reads a " t " of an enclosing block; only borrowed moments (⟗, ⟖) are visible inside a block, other values enter it through the stack (§5.1)" ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  m "void" ⌈ ⌉ ⤴ ↵
+    m "tok" ⌈ ⌉ → mt ¿
+    C tok lbl " reads a void moment: its " t " was already moved out (bound at " mt "line" ⌈ ⌉ ⍕ ":" mt "col" ⌈ ⌉ ⍕ ")" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+    ∅ ⇄ ¿
+  ⌫ ¿
+  C tok 【❴"ty": t❵】 ⟪ ck_agree ⟫ ¿
+  C ⟪ ck_failed ⟫ ⤴ ↵ ∅ ⇄ ¿ ⌫ ¿
+  m "of" ⌈ ⌉ → of ¿
+  t ⟪ ck_head ⟫ "⟖" ≡ ⤴ ↵
+    ⍝ only one ⟖ of a value may be live: the moment itself, on the stack or in any strand
+    0 → live ¿
+    【】 S ⊞⊞ strand ⊞⊞ → pool ¿
+    0 → q ¿
+    vw ⟪ len ⟫ 1 ⊟ → nv ¿
+    q nv ≺ ⟲ ↵ pool vw q ⌈ ⌉ ⊞⊞ → pool ¿ q 1 ⊞ → q ¿ ⌫ ¿
+    0 → q ¿
+    pool ⟪ len ⟫ → np ¿
+    q np ≺ ⟲ ↵
+      pool q ⌈ ⌉ → w ¿
+      w "void" ⌈ ⌉ ⊤ ≢ w "of" ⌈ ⌉ of ≡ ∧ w "ty" ⌈ ⌉ ⟪ ck_head ⟫ "⟖" ≡ ∧ ⤴ ↵ live 1 ⊞ → live ¿ ⌫ ¿
+      q 1 ⊞ → q ¿
+    ⌫ ¿
+    live 1 ≻ ⤴ ↵ C tok "this value already has a live ⟖ shadow" ⟪ ck_err ⟫ ¿ ∅ ⇄ ¿ ⌫ ¿
+    C t tok depth ⟪ ck_val ⟫ → v ¿
+  ⌫ ⤵ ↵
+    C t tok m "region" ⌈ ⌉ ⟪ ck_val ⟫ → v ¿
+  ⌫ ¿
+  v "of" ← of ¿
+  m v ⟪ ck_copy_annot ⟫ ¿
+  v ⇄ ¿
+↦ C ↦ tok ↦ idx ↦ n ↦ S ↦ strand ↦ depth ↦ ck_read_outer ¿
+
 ⍝ ---- blocks
 ⍝ ck_block walks ops over stack S (mutated) with its own strand.
 ⍝ Returns ❴stack, strand, dead❵. depth is the lexical region of this block.
@@ -885,8 +944,14 @@
   ∅ ⇄ ¿
 ↦ C ↦ S ↦ strand ↦ locks ↦ f ↦ tok ↦ label ↦ depth ↦ ck_apply ¿
 
+⍝ C "views" holds the strand of every block being checked, outermost first, so that
+⍝ an inner block can read the borrowed moments of the blocks around it (§5.1)
 ƒ
-  C ops S depth locks ind ⟪ ck_block_inner ⟫ ⇄ ¿
+  C "views" ⌈ ⌉ → vw ¿
+  vw 【】 ⟪ .append ⟫ ¿
+  C ops S depth locks ind ⟪ ck_block_inner ⟫ → r ¿
+  vw ⟪ .pop ⟫ ¿
+  r ⇄ ¿
 ↦ C ↦ ops ↦ S ↦ depth ↦ locks ↦ ind ↦ ck_block ¿
 
 ƒ
@@ -894,7 +959,10 @@
   ⊥ → dead ¿
   0 → oi ¿
   ops ⟪ len ⟫ → nops ¿
+  C "views" ⌈ ⌉ → vw ¿
+  vw ⟪ len ⟫ 1 ⊟ → vi ¿
   oi nops ≺ ⟲ ↵
+    vw vi ← strand ¿
     ops oi ⌈ ⌉ → op ¿
     op "kind" ⌈ ⌉ → k ¿
     op "tok" ⌈ ⌉ → tok ¿
@@ -1188,8 +1256,10 @@
   x "⧗" ≡ ⤴ ↵
     strand ⟪ len ⟫ → n ¿
     idx n ≽ ⤴ ↵
-      tok ⟪ ck_label ⟫ → lbl ¿
-      C tok lbl " reads " idx 1 ⊞ ⍕ " moment(s) back, but only " n ⍕ " are visible here (data enters a block only through the stack, §5.1)" ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⊞⊞ ⟪ ck_err ⟫ ¿
+      C tok idx n S strand depth ⟪ ck_read_outer ⟫ → v ¿
+      v ∅ ≡ ⤴ ↵ ⊥ ⇄ ¿ ⌫ ¿
+      role ∅ ≢ ⤴ ↵ v role ⟪ ck_with_role ⟫ → v ¿ ⌫ ¿
+      S v ⟪ .append ⟫ ¿
       ⊥ ⇄ ¿
     ⌫ ¿
     n 1 ⊟ idx ⊟ → mi ¿
@@ -1699,6 +1769,7 @@
 ƒ
   ❴"err": ∅, "path": path, "next": 0, "trace": trace, "canFail": ⊥❵ → C ¿
   C "lines" ← 【】 ¿
+  C "views" ← 【】 ¿
   ❴❵ → fns ¿
   ❴❵ → shapes ¿
   ❴❵ → particles ¿

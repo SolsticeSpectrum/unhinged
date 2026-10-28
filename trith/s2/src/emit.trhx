@@ -705,7 +705,9 @@
   ⧗:C̵,ty ⧗:f ⧗:bare ‹not› ⋎ ⋔ ⦃ ‹stail› ⦄ ∅ ⁼ ⧖:C,base
   ⧗:C̵,base ‹tcopy› ⧖:C,cp
   ⧗:C̵,base ‹ptfind› ⧖:C,rep
-  #2# ⧗:rep #-1# ᛖ ‹not› ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:cp ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:k
+  ⍝ annihilating a ⟖ ends the borrow; the value it shadows stays alive
+  ⧗:C̵,base ‹shead› ⧖:C,bh
+  #2# ⧗:rep #-1# ᛖ ‹not› ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:cp ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧗:bh #10198# ᛖ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:k
   ⧗:C̵,a,ty,base,tok,k ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ △ ᛖ ⋔ ⦃ ‹eg_anti› ⦄ ⦃ ‹eg_free› ⦄ ⁼ ⦄ ⁼
   ‹lnew0›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_drop› ⸫
@@ -927,6 +929,10 @@
 ⦃
   ⧖:C,from,to,S
   ⧗:C̵ ‹lnew0› ⧖:C,strand
+  ⍝ this block's view [strand, enclosing view] heads the chain in register 61 while it
+  ⍝ is emitted, so an inner block can read its borrowed moments (§5.1)
+  ⧗:C̵ #61# ‹reg› ⧖:C,pv
+  ⧗:C̵ ‹lbeg› ⧖:C,vw ⧗:C̵,vw,strand ‹ladd› ⧗:vw,pv ‹ladd› #61# ⧗:vw ‹wr› ⧖:C
   ⍝ the loop carries [C oi to S strand dead prev]
   ⧗:C̵,from,to,S,strand ○ #-1#
   ⥀ ⦃
@@ -934,12 +940,14 @@
     ⧗:C̵,oi,to,S,strand,dead,prev ⧗:oi ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹estep› ⊕ ⦄
   ⦄
   ⧖:C,oi,to,S,strand,dead,prev
+  ⧗:C̵ #61# ⧗:pv ‹wr› ⧖:C
   ⧗:C̵,S,strand,dead
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eblock› ⸫
 
 ⍝ ‹estep› C oi to S strand dead prev: one op
 ⦃
   ⧖:C,oi,to,S,strand,dead,prev
+  ⧗:C̵ #61# ‹reg› ⧖:C,vw ⧗:C̵,vw ○ ⧗:strand ‹lset› ⧖:C
   ⧗:C̵,oi,S,strand,dead,prev,to ‹ecase› ⧖:C,S2,strand2,dead2,skip
   ⧗:C̵,oi ‹nextn› ⧖:C,nx
   ⧗:C̵,nx ‹nextn› ⧖:C,nx2
@@ -1068,10 +1076,22 @@
 ⦃
   ⧖:C,S,strand,dead,tok,x,idx,role,op,to
   ⧗:C̵,strand ‹llen› ⧖:C,n
-  ⧗:C̵,strand ⧗:n △ ⊟ ⧗:idx ⊟ ‹lget› ⧖:C,e
+  ⧗:C̵,strand,idx,n ⧗:idx ⧗:n ≶ ⋔ ⦃ ‹eo_outer› ⦄ ⁼ ⦃ ⧖:C,strand,idx,n ⧗:C̵,strand ⧗:n △ ⊟ ⧗:idx ⊟ ‹lget› ⦄ ⧖:C,e
   ⧗:C̵,e,role ‹ewrole› ⧖:C,e2
   ⧗:C̵,S,e2 ‹lpush› ⧗:strand,dead
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eo_read› ⸫
+⍝ ‹eo_outer› C strand idx n: the entry of a borrowed moment of an enclosing block
+⦃
+  ⧖:C,strand,idx,n
+  ⧗:C̵ #61# ‹reg› ⧖:C,vw
+  ⧗:C̵,vw △ ‹lget› ⧖:C,pv
+  ⧗:C̵,pv ⧗:idx ⧗:n ⊟ ⧗:n #-1#
+  ⥀ ⦃
+    ⧖:C,v,j,total,m
+    ⧗:C̵,v,j,total,m ⧗:v ○ ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹rdo_step› ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,v,j,total,m ⧗:C̵,m
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eo_outer› ⸫
 ⦃
   ⧖:C,S,strand,dead,tok,x,idx,role,op,to
   ⧗:C̵,S ‹llen› ⧖:C,n

@@ -14,9 +14,10 @@
 
 Names follow Trith's own scope rules: each ⦃ starts an empty strand, a ⥀
 exports every moment of its body, and the faces of ⋔ (3) and ⁇ (2) export
-their common prefix.  A name that is not visible is an error.
+their common prefix.  A borrowed moment of an enclosing block is visible
+when its read is marked ⧗:x̱.  A name that is not visible is an error.
 """
-import re, sys
+import re, sys, unicodedata
 
 LINEAR = {'C'}  # names that hold owned arrays: reading one moves it out
 SUP = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
@@ -114,6 +115,7 @@ def process(src):
                 for nm in t[2:].split(','):
                     # an agreement mark written after a name goes onto its read (§6.1): ⧗:C̵
                     mk = ''
+                    nm = unicodedata.normalize('NFD', nm)  # ẖ is h with its mark
                     while nm and '\u0300' <= nm[-1] <= '\u036f':
                         mk = nm[-1] + mk; nm = nm[:-1]
                     ns = stack[-1].names
@@ -126,7 +128,19 @@ def process(src):
                         if ns[i] == '(moved ' + nm + ')':
                             fail(lineno, f'moment {nm} was already moved out (it holds an owned array)')
                     else:
-                        fail(lineno, f'moment {nm} is not visible here')
+                        # a borrowed moment of an enclosing block (§5.1): ⧗ⁿ counts on
+                        # through the enclosing strands, innermost first
+                        k = len(ns)
+                        for sc in reversed(stack[:-1]):
+                            if nm in sc.names and '\u0331' in mk:
+                                i = len(sc.names) - 1 - sc.names[::-1].index(nm)
+                                rs.append('⧗' + mk + str(k + len(sc.names) - 1 - i).translate(SUP))
+                                break
+                            k += len(sc.names)
+                        else:
+                            fail(lineno, f'moment {nm} is not visible here' +
+                                 (' (only a borrowed moment, read ⧗:x̱, is visible from an enclosing block)'
+                                  if any(nm in sc.names for sc in stack[:-1]) else ''))
                 r = ' '.join(rs)
             elif t in ('⸫',) and stack:
                 fail(lineno, 'unclosed block')

@@ -228,6 +228,7 @@
       x "⧖" ≡ ⤴ ↵
         strand S ⟪ .pop ⟫ ⟪ .append ⟫ ¿
       ⌫ ⤵ x "⧗" ≡ ⤴ ↵
+        idx strand ⟪ len ⟫ ≽ ⤴ ↵ X "compile-time evaluation of borrowed moments is not supported in s1" ⟪ ev_err ⟫ ¿ ⊗ ¿ ⌫ ¿
         strand strand ⟪ len ⟫ 1 ⊟ idx ⊟ ⌈ ⌉ → v ¿
         v "ty" ⌈ ⌉ v "n" ⌈ ⌉ v "ok" ⌈ ⌉ ⟪ ev_val ⟫ → w ¿
         w "role" ← role ¿

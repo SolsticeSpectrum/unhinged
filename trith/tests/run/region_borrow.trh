@@ -1,0 +1,48 @@
+⍝ region-scoped borrows (§5.1): loops and faces read ⟗/⟖ moments of the blocks around them
+ᚡᚠ w n: w[i] = i·i for i in 0…n−1, through a ⟖ parameter bound as a moment ⍝
+⦃
+  ⧖ ⧖
+  ⧗¹ ○ ⥀ ⦃
+    ⧖ ⧖
+    ⧗̱² ⧗¹ ⧗¹ ⧗¹ ⊠ ⍈̱ ⁇ ⦃ ⦄ ⦃ ⦄
+    ≶ ⍿¹ ⧗⁰ ⊞ △ ⧗¹ ⧗⁰
+  ⦄
+  ⌁̱ ⧗̱² ⌁ ⌁
+⦄ ⟨ ⟖ ⟦ ℤ ⟧ ℤ ⊸ ⟩ ᚡᚠ ⸫
+ᚡᚢ a n: the sum of a[−n…n] (indices are centre-based), reading a ⟗ moment inside the loop ⍝
+⦃
+  ⧖ ⧖
+  ⧗¹ △ ⊞ ○ ⧗¹ ⊝ ⥀ ⦃
+    ⧖ ⧖ ⧖
+    ⧗⁰ ⧗̱³ ⧗² ⌖̱ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧗¹ ⊞
+    ≶ ⍿¹ ⧗⁰ ⊞ △ ⧗²
+  ⦄
+  ⧗⁰ ⌁ ⧖ ⌁
+⦄ ⟨ ⟗ ⟦ ℤ ⟧ ℤ ⊸ ℤ ⟩ ᚡᚢ ⸫
+ᚡᚤ a: a face reads a ⟗ moment of its block ⍝
+⦃
+  ⧖
+  ⊕ ⋔ ⦃ ⦄ ⦃ ⧗̱⁰ ▽▽ ⌖̱ ⁇ ⦃ ⎙ ⦄ ⦃ ⦄ ⦄ ∅
+⸫ ᚡᚤ ⟨ ⊸ ⟦ ℤ ⟧ ⟗ ⟩ ⦃
+⦃
+  nine cells written by two nested loops, through one ⟖ moment two blocks up ⍝
+  ⟦ ○ ○ ○ ○ ○ ○ ○ ○ ○ ⟧ ⟖ ⧖
+  ⦄ ⥀ ○
+    ⧖
+    ⦄ ⥀ ○ ⧗⁰
+      ⧖ ⧖
+      ⦃ ⦄ ⦃ ⦄ ⁇ ⍈̱ ⊞ ⧗¹ ⊠ △○△ ⧗⁰ ⊟ △△ ⊞ ⊠ ⧗⁰ ○△ ⧗¹ ⧗̱³
+      ⧗⁰ ⧗¹ △ ⊞ ○△ ⍿¹ ≶
+    ⦃
+    ⌁ ⌁
+    ≶ ⍿¹ ○△ ⊞ △ ⧗⁰
+  ⦄
+  ⌁̱ ⧗̱³ ⌁
+  ⟗ △△ ᚡᚢ ⎙
+  a function lends its ⟖ parameter to a loop ⍝
+  ⟖ △△ ᚡᚠ
+  ⎙ ᚡᚢ △△ ⟗
+  ⟗ ᚡᚤ
+  ⌁̵
+⦄ ⟨ ⊸ ⟩ ᛟ ⸫ ⸱
+

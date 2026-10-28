@@ -43,6 +43,12 @@
   ⧗:toks̵ ‹tindex› ‹ok› ⟗ ⧗:patẖ ‹parse› ⧖:st ⟗ ⧗:patẖ,st̵ △ ‹cinit› ‹check› ⌁̵ $ok\n$ ⎙̵ ⌁̵
 ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹checkw› ⸫
 
+⍝ ‹reportw› path toks mode: parse, tangle and check, then report the curses (8) or the confessions (9)
+⦃
+  ⧖:path,toks,mode
+  ⧗:toks̵ ‹tindex› ‹ok› ⟗ ⧗:patẖ ‹parse› ⧖:st ⟗ ⧗:patẖ,st̵ ○ ‹cinit› ‹check› ⧗:mode ‹creport› ⌁̵ ⌁̵
+⦄ ⟨⟗ʃ ⟦ℤ⟧ ℤ ⊸ ◌⟩ ‹reportw› ⸫
+
 ⍝ ‹emitw› path toks debug: parse, tangle, check and print the LLVM IR
 ⦃
   ⧖:path,toks,dbg
@@ -166,7 +172,7 @@
 
 ⦃
   ⧖:path,out,mode
-  ⧗:path̵,out̵,mode ⍿⁰ #7# ᛖ ⋔ ⦃ ⌁ ⧖:o ⧗:o̵ ⟗ ‹foldpr› ⌁̵ ⌁̵ ⦄ ⦃ ‹run1› ⦄ ⁼
+  ⧗:path̵,out̵,mode ⍿⁰ #7# ᛖ ⋔ ⦃ ⌁ ⧖:o ⧗:o̵ ⟗ ‹foldpr› ⌁̵ ⌁̵ ⦄ ⦃ ⍿⁰ #8# #9# ᛦ ⋔ ⦃ ⧖:o,m ⟗ ⧗:o̵,m ‹reportw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⦃ ‹run1› ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹run› ⸫
 ⦃
   ⧖:path,out,mode
@@ -298,7 +304,8 @@
 ⍝ ‹argeq› s i: argument i is the literal s
 ⦃ ⧖:s,i ⧗:s̵ ⧗:i ᚨ ⁇ ⦃ ⟗ ⍿² ‹streqo› ⧖:r ⌁̵ ⧗:r ⦄ ⦃ ⌁̵ ⊕ ⦄ ⦄ ⟨ʃ ℤ ⊸ ŧ⟩ ‹argeq› ⸫
 ⍝ ‹argcode› i: −1 none, 1 --tokens, 2 --ast, 3 --check, 4 --emit-llvm, 5 --debug, 6 -o, 7 --include,
-⍝ 8 --link, 9 --plough or --unplough (s1 only), 10 --fold, 11 --unfold, 0 anything else
+⍝ 8 --link, 9 --plough or --unplough (s1 only), 10 --fold, 11 --unfold, 12 --curses, 13 --confessions,
+⍝ 14 --confess (read again where it matters, by ‹confessing›), 0 anything else
 ⦃
   ⧖:i
   ⧗:i ᚨ ⁇ ⦃ ⌁̵ ○ ⦄ ⦃ #-1# ⦄
@@ -308,6 +315,7 @@
   $--include$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #7# ⦄ ∅ ⁼ $--link$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #8# ⦄ ∅ ⁼
   $--plough$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼ $--unplough$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
   $--fold$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #10# ⦄ ∅ ⁼ $--unfold$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #11# ⦄ ∅ ⁼
+  $--curses$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #12# ⦄ ∅ ⁼ $--confessions$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #13# ⦄ ∅ ⁼ $--confess$ ⧗:i ‹argeq› ⋔ ⦃ ⌁ #14# ⦄ ∅ ⁼
 ⦄ ⟨ℤ ⊸ ℤ⟩ ‹argcode› ⸫
 ⍝ ‹argscan›: the mode (0 compile, 7 --fold, 1000 + n --unfold n), --debug, the first source's
 ⍝ index (−1: none), whether the arguments are bad, and how many source files there are
@@ -324,7 +332,8 @@
   ⧖:i,mode,dbg,in,bad,ns,k
   ⧗:i △ ⊞ ‹argnum› ⧖:num
   ⧗:mode ⧗:k ⧗:k △ #4# ᛦ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
-  ⧗:k #10# ᛖ ⋔ ⦃ ⌁ #7# ⦄ ∅ ⁼ ⧗:num ⧗:k #11# ᛖ ⋔ ⦃ ⧖:a ⌁ ⧗:a #1000# ⊞ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:mode2
+  ⧗:k #10# ᛖ ⋔ ⦃ ⌁ #7# ⦄ ∅ ⁼ ⧗:k #12# ᛖ ⋔ ⦃ ⌁ #8# ⦄ ∅ ⁼ ⧗:k #13# ᛖ ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
+  ⧗:num ⧗:k #11# ᛖ ⋔ ⦃ ⧖:a ⌁ ⧗:a #1000# ⊞ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:mode2
   ⧗:dbg ⧗:k #5# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:dbg2
   ⧗:i △ ⊞ ‹argcode› ⧖:knext
   ⧗:k #6# #8# ᛦ ⧗:k #11# ᛖ ⋏ ⧖:takes

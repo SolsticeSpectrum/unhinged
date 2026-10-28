@@ -7,3 +7,407 @@
   ⧗:m △ ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ᶠ$ ⎙̵ ⦄ ∅ ⁼ ⧗:m #2# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ⁱ$ ⎙̵ ⦄ ∅ ⁼ ⧗:m #4# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ᵘ$ ⎙̵ ⦄ ∅ ⁼
   ⧗:m #8# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ᵈ$ ⎙̵ ⦄ ∅ ⁼ ⧗:m #16# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ᵃ$ ⎙̵ ⦄ ∅ ⁼
 ⦄ ⟨ℤ ⊸⟩ ‹pcurses› ⸫
+
+⍝ ---- the addenda's state: register 62 holds a block [lift fn vow depths flags confessions proven]
+⍝ lift: the curses the enclosing ⛨ blocks lift; fn: the record of the function being checked
+⍝ (−1 outside one); vow: a ⍤⥀ waiting for its ⥀ (−1); depths: the stack depth after each op of
+⍝ the tree, by node (for the vow prover); confessions: the ⛨ tokens met, as a chain [next tok];
+⍝ proven: the vows the prover proved, as a chain [next node]
+
+⦃ ⧖:C,k ⧗:C̵ #62# ‹rd› ⧖:C,b ⧗:C̵ ⧗:b ⧗:k ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹a2› ⸫
+⦃ ⧖:C,k,v ⧗:C̵ #62# ‹rd› ⧖:C,b ⧗:C̵ ⧗:b ⧗:k ⊞ ⧗:v ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹a2w› ⸫
+
+⍝ ‹a2init› C: the block, and a depth slot for every node of the tree
+⦃
+  ⧖:C
+  ⧗:C̵ ‹len› ⧖:C,b ⧗:C̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧖:C ⧗:C̵ #62# ⧗:b ‹wr› ⧖:C
+  ⧗:C̵ #25# ‹rd› ⧖:C,n
+  ⧗:C̵ ‹len› ⧖:C,d ⧗:C̵ #3# ⧗:d ‹a2w› ⧖:C
+  ⧗:C̵,n ⥀ ⦃ ⧖:C,k ⧗:C̵,k ⧗:k ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:C,k ⧗:C̵ ○ ⍆̵ ⧗:k △ ⊟ ⊕ ⦄ ⦃ ⦶ ⦄ ⦄ ⌁
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹a2init› ⸫
+
+⍝ ‹setdepth› C op S: the depth after op
+⦃ ⧖:C,op,S ⧗:C̵ #3# ‹a2› ⧖:C,d ⧗:C̵,S ‹llen› ⧖:C,n ⧗:C̵ ⧗:d ⧗:op ⊞ ⧗:n ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹setdepth› ⸫
+⍝ ‹getdepth› C op
+⦃ ⧖:C,op ⧗:C̵ #3# ‹a2› ⧖:C,d ⧗:C̵ ⧗:d ⧗:op ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹getdepth› ⸫
+
+⍝ ---- recording: a function's own curses (slot 17) and its calls (slot 18, a chain [next callee lift])
+
+⍝ ‹curse› C bits: the function being checked performs these curses (less what is lifted)
+⦃
+  ⧖:C,bits
+  ⧗:C̵ △ ‹a2› ⧖:C,f ⧗:C̵ ○ ‹a2› ⧖:C,lift
+  ⧗:C̵,f ⧗:bits ⧗:lift #31# ⩡ ⋒ ⧗:f #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹curse1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹curse› ⸫
+⦃ ⧖:C,f,m ⧗:C̵,f #17# ‹vf› ⧖:C,own ⧗:C̵ ⧗:f #17# ⊞ ⧗:own ⧗:m ⋓ ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹curse1› ⸫
+
+⍝ ‹cedge› C g: the function being checked calls g
+⦃
+  ⧖:C,g
+  ⧗:C̵ △ ‹a2› ⧖:C,f ⧗:C̵ ○ ‹a2› ⧖:C,lift
+  ⧗:C̵,f,g,lift ⧗:f #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹cedge1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cedge› ⸫
+⦃
+  ⧖:C,f,g,lift
+  ⧗:C̵,f #18# ‹vf› ⧖:C,head
+  ⧗:C̵ ‹len› ⧖:C,e ⧗:C̵ ⧗:head ⍆̵ ⧗:g ⍆̵ ⧗:lift ⍆̵ ⧖:C
+  ⧗:C̵ ⧗:f #18# ⊞ ⧗:e ‹wr›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cedge1› ⸫
+
+⍝ ‹cursedeco› C f i k deco tok: a function's decorations and token; an FFI binding is worldly
+⍝ (forbidden too if declared ⎔⸸ᵘ, and hungry if it returns a string or an array) (A.4)
+⦃
+  ⧖:C,f,i,k,deco,tok
+  ⧗:C̵ ⧗:f #23# ⊞ ⧗:tok ‹wr› ⧖:C
+  ⧗:C̵,i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C̵,nt ‹tname› ⧖:C,nm ⧗:C̵ ⧗:f #24# ⊞ ⧗:nm ‹wr› ⧖:C
+  ⧗:C̵ ⧗:f #21# ⊞ ⧗:deco #-1# ⧗:k #40# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ‹wr› ⧖:C
+  ⧗:C̵,f,tok ⧗:k #32# ᛖ ⋔ ⦃ ‹ffcurse› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cursedeco› ⸫
+⦃
+  ⧖:C,f,tok
+  ⧗:C̵,tok ‹tkd› ⧖:C,tk
+  ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs ○ ‹lget› ⧖:C,o ⧗:C̵,outs ‹llen› ⧖:C,no
+  ⧗:C̵,o ‹stail› ⧖:C,o2 ⧗:C̵,o ‹shead› ⧖:C,oh
+  ⧗:C̵ ⧗:o2 ⧗:o ⧗:oh #9676# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ‹tclass› ⧖:C,cl
+  #2# ⧗:tk #17# ᛖ ⋔ ⦃ #4# ⋓ ⦄ ∅ ⁼ ⧗:cl #3# ᛖ ⧗:no ○ ᛖ ‹not› ⋎ ⋔ ⦃ #16# ⋓ ⦄ ∅ ⁼ ⧖:m
+  ⧗:C̵ ⧗:f #17# ⊞ ⧗:m ‹wr›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ffcurse› ⸫
+
+⍝ ‹opcurse› C op S: what a glyph op does: ⎙ is worldly, ⍆ hungry, ⊙⁻ ⊙⁺ may stop the program
+⍝ (worldly), and ⌁ on a particle runs its antiparticle (a call)
+⦃
+  ⧖:C,op,S
+  ⧗:C̵,op ‹ndt› ⧖:C,tok ⧗:C̵,tok ‹tc0› ⧖:C,x ⧗:C̵,tok #4# ‹tf› ⧖:C,idx
+  ○ ⧗:x #9113# ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:x #9030# ᛖ ⋔ ⦃ ⌁ #16# ⦄ ∅ ⁼
+  ⧗:x #8857# ᛖ ⧗:idx #-1# ᛖ ⧗:idx #-2# ᛖ ⋏ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:m
+  ⧗:C̵,m ‹curse› ⧖:C
+  ⧗:C̵,S ⧗:x #8961# ᛖ ⋔ ⦃ ‹anticurse› ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹opcurse› ⸫
+⦃
+  ⧖:C,S
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,v
+  ⧗:C̵,v ‹vty› ⧖:C,t ⧗:C̵,t ‹tbase› ⧖:C,b
+  ⧗:C̵ ‹sbeg› ⧖:C,e ⧗:C̵,e #8961# ‹scp› ⧗:e,b ‹sapp› ⧗:e ‹send› ⧖:C,an
+  ⧗:C̵,an ‹fnfind› ⧖:C,g
+  ⧗:C̵,g ⧗:n ○ ≶ ⋔ ⦃ ⌁ ⦄ ⦃ ⍿⁰ #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹cedge› ⦄ ⁼ ⦄ ⦃ ⌁ ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹anticurse› ⸫
+
+⍝ ---- ⛨ˣ ⦃ … ⦄: an exorcism lifts the curses x from what its block does (A.4.2)
+⦃
+  ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok #5# ‹tf› ⧖:C,mask
+  ⧗:C̵,tok ⧗:mask ○ ᛖ ⋔ ⦃ ⧖:tk ⧗:tk ‹cerr› $a bare ⛨ prefixes a rite, which ends a cursed particle; an exorcism names its curses, ⛨ⁱ ⦃ … ⦄ (A.4.2, A.6)$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵ ⧗:mask △ ⋒ ○ ᛖ ⧗:mask #8# ⋒ ○ ᛖ ⋎ ⧗:tok #32# ‹cfailunless› ⧖:C
+  ⧗:C̵,tok ‹confess› ⧖:C
+  ⧗:C̵ ○ ‹a2› ⧖:C,lift0
+  ⧗:C̵ ○ ⧗:lift0 ⧗:mask ⋓ ‹a2w› ⧖:C
+  ⧗:C̵,S,strand,locks ‹locks› ⧖:C,inner
+  ⧗:C̵ ⧗:ind △ ⊞ #12# ‹note›
+  ⧗:op #3# ⊞ ⧗:S,depth,inner ⧗:ind #2# ⊞ ‹subb› ‹rnew› ⧖:C,r1
+  ⧗:C̵ ○ ⧗:lift0 ‹a2w› ⧖:C
+  ⧗:C̵,r1 ‹l1› ⧖:C,rs
+  ⧗:C̵,rs,tok ○ ⧗:depth ‹join› ⧖:C,S3,strand2,dead2
+  ⧗:C̵,strand,strand2 ‹lcat› ⧖:C,strand3
+  ⧗:C̵,S3,strand3,dead2 ○ #12# ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_exorcise› ⸫
+⍝ ‹confess› C tok: list the exorcism for --confessions (once, however often its block is checked)
+⦃
+  ⧖:C,tok
+  ⧗:C̵ #5# ‹a2› ⧖:C,head
+  ⧗:C̵,head,tok ‹confhas› ⧖:C,seen
+  ⧗:C̵,head,tok ⧗:seen ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:C,hd,tk ⧗:C̵ ‹len› ⧖:C,e ⧗:C̵ ⧗:hd ⍆̵ ⧗:tk ⍆̵ ⧖:C ⧗:C̵ #5# ⧗:e ‹a2w› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹confess› ⸫
+⦃
+  ⧖:C,e,tok
+  ⧗:C̵,e,tok ⊕
+  ⥀ ⦃
+    ⧖:C,e,tok,found
+    ⧗:C̵,e,tok,found ⧗:e #-1# ᛖ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,e,tok,found ⧗:C̵,e ‹rd› ⧖:C,nx ⧗:C̵ ⧗:e △ ⊞ ‹rd› ⧖:C,t ⧗:C̵,nx,tok ⧗:found ⧗:t ⧗:tok ᛖ ⋏ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,e,tok,found ⧗:C̵,found
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹confhas› ⸫
+
+⍝ ---- vows (A.5.1): ⍤⥀ ⦃ measure ⦄ before a ⥀, ⍤ᚠ ⦃ measure ⦄ first in ᚠ's body; the measure
+⍝ gets copies (or shadows) of the stack and leaves one ℤ
+⦃
+  ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok #5# ‹tf› ⧖:C,isfn
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ○ ⧗:n ‹lslice› ⧖:C,vals
+  ⧗:C̵ ⧗:ind △ ⊞ #13# ‹note›
+  ⧗:S,strand,locks ‹locks› ⧖:C,live
+  ⧗:C̵ ⧗:op #3# ⊞ ⧗:vals,tok ⧗:depth,live ⧗:ind #2# ⊞ ‹measure› ⧖:C
+  ⧗:C̵,op,tok,prev,to,depth ⧗:isfn ○ ᛖ ⋔ ⦃ ⌁ ‹vowloop› ⦄ ⦃ ‹vowfn› ⦄ ⁼
+  ⧗:S,strand,dead ○ ○ ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_vow› ⸫
+⍝ a loop's vow waits for its ⥀, which must come next
+⦃
+  ⧖:C,op,tok,prev,to
+  ⧗:C̵,op #2# ‹nd› ⧖:C,sz
+  ⧗:op ⧗:sz ⊞ ⧖:nx
+  ⧗:C̵,nx ○ ‹nd› ⧖:C,nk
+  ⧗:C̵ ⧗:nx ⧗:to ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧗:nk #14# ᛖ ⋎ ⧗:tok #33# ‹cfailunless› ⧖:C
+  ⧗:C̵ #2# ⧗:op ‹a2w›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹vowloop› ⸫
+⍝ a function's vow is the first op of its body, and names it
+⦃
+  ⧖:C,op,tok,prev,to,depth
+  ⧗:C̵ △ ‹a2› ⧖:C,f
+  ⧗:C̵ ‹sbeg› ⧖:C,e
+  ⧗:C̵,tok #7# ‹tf› ⧖:C,n
+  ⧗:C̵,e ⧗:tok #9# ⊞ ⧗:tok #8# ⊞ ⧗:n ⊞
+  ⥀ ⦃
+    ⧖:C,e,j,end
+    ⧗:C̵,e,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:C,e,j,end ⧗:C̵,j ‹rd› ⧖:C,c ⧗:C̵,e,c ‹scp› ⧗:e ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ‹send› ⧖:C,nm
+  ⧗:C̵ ⧗:f #-1# ᛖ ‹not› ⧗:tok #34# ‹cfailunless› ⧖:C
+  ⍝ an instance's name is its key, so compare with the function's own name (slot 24)
+  ⧗:C̵,f #24# ‹vf› ⧖:C,cur
+  ⧗:C̵ ⧗:prev #-1# ᛖ ⧗:depth △ ᛖ ⋎ ⧗:nm ⧗:cur ᛖ ⋎ ⧗:tok #34# ‹cfailunless› ⧖:C
+  ⧗:C̵ ⧗:f #19# ⊞ ⧗:op ‹wr›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹vowfn› ⸫
+
+⍝ ‹measure› C b vals tok depth locks ind: a measure block sees copies or shadows of vals and must
+⍝ leave exactly one ℤ (like ‹predicate›, which wants a ŧ)
+⦃
+  ⧖:C,b,vals,tok,depth,locks,ind
+  ⧗:C̵,vals ‹llen› ⧖:C,n
+  ⧗:C̵ ‹lnew0› ⧖:C,PS
+  ⧗:C̵,vals,tok,depth,PS ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,vals,tok,depth,PS,j,n
+    ⧗:C̵,vals,tok,depth,PS,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,tok,depth,PS,j,n ⧗:C̵,vals,j ‹lget› ⧖:C,v
+        ⧗:C̵,v ‹vty› ⧖:C,t ⧗:C̵,t ‹tcopy› ⧖:C,cp
+        ⧗:C̵,v,t,tok,depth ⧗:cp ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹pshadow› ⦄ ⁼ ⧖:C,w
+        ⧗:C̵,PS,w ‹lpush› ⧖:C,PS2
+        ⧗:C̵,vals,tok,depth,PS2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,vals,tok,depth,PS,j,n
+  ⧗:C̵,b ‹brange› ⧖:C,from,to
+  ⧗:C̵,from,to,PS ⧗:depth △ ⊞ ⧗:locks,ind ‹cblock› ⧖:C,S2,strand,dead
+  ⧗:C̵,S2,strand,tok ⧗:dead ○ ᛖ ⋔ ⦃ ‹meascheck› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹measure› ⸫
+⦃
+  ⧖:C,S2,strand,tok
+  ⧗:C̵,S2 ‹ltypes› ⧖:C,ts
+  ⧗:C̵ #11# ‹reg› ‹l1› ⧖:C,want
+  ⧗:C̵,ts,want ‹leq› ⧖:C,ok
+  ⧗:C̵,tok,ts ⧗:ok ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:tk,ts2 ⧗:tk ‹cerr› $a vow's measure must leave exactly [ℤ], but leaves $ ⎙̵ ⧗:ts2 ○ ‹plist› $ (A.5.1)$ ⎙̵ ‹die› ⦄ ⁼
+  ⧗:strand ○ ‹noleak›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹meascheck› ⸫
+
+⍝ ‹loopcurse› C op pv: a ⥀ without a vow is restless; one with a vow is restless no longer, and
+⍝ if its vow is not proven the function's attributes wait (A.5.3). In a function that cannot
+⍝ fail, a ⥀ that may exit with ⊖ stops the program, which is worldly.
+⦃
+  ⧖:C,op,pv
+  ⧗:C̵,pv,op ⧗:pv #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ○ ⦄ ⦃ ‹vprove› ⦄ ⁼ ⧖:C,r
+  ⧗:C̵ #2# ‹reg› ⧖:C,cf
+  ⧗:pv #-1# ᛖ ⧖:none
+  ⧗:C̵ #8# ⧗:none ⋔ ⦃ ⦄ ⦃ ⌁ ○ ⦄ ⁼ ‹curse› ⧖:C
+  ⧗:C̵ #2# ⧗:r #2# ⋒ ○ ᛖ ⧗:cf △ ᛖ ‹not› ⋎ ⋔ ⦃ ⦄ ⦃ ⌁ ○ ⦄ ⁼ ‹curse› ⧖:C
+  ⧗:C̵ ⧗:none ‹not› ⧗:r △ ⋒ ○ ᛖ ⋎ ⋔ ⦃ ‹hopeful› ⦄ ∅ ⁼
+  ⧖:C ⧗:C̵,pv ⧗:r △ ⋒ △ ᛖ ⋔ ⦃ ‹vowok› ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹loopcurse› ⸫
+⍝ ‹hopeful› C: the function being checked has an unproven vow
+⦃
+  ⧖:C
+  ⧗:C̵ △ ‹a2› ⧖:C,f
+  ⧗:C̵,f ⧗:f #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:C,f ⧗:C̵,f #22# ‹vf› ⧖:C,h ⧗:C̵ ⧗:f #22# ⊞ ⧗:h △ ⊞ ‹wr› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹hopeful› ⸫
+
+⍝ ‹fnvowend› C f from to: once the body is checked, prove the function's vow (if it has one)
+⦃
+  ⧖:C,f,from,to
+  ⧗:C̵,f #19# ‹vf› ⧖:C,vw
+  ⧗:C̵,f,vw,from,to ⧗:vw ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ⍿² ⧖:vv ‹vprovefn› ⧖:C,r ⧗:C̵ ⧗:r △ ⋒ ○ ᛖ ⋔ ⦃ ‹hopeful› ⦄ ∅ ⁼ ⧖:C ⧗:C̵,vv ⧗:r △ ⋒ △ ᛖ ⋔ ⦃ ‹vowok› ⦄ ⦃ ⌁ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹fnvowend› ⸫
+
+⍝ ---- the prover (A.5.1), deliberately weak: see vows.trhx. Results: bit 1 proven, bit 2 the ⥀
+⍝ never exits with ⊖.
+
+⍝ ‹vowok› C node: the prover proved vow node; ‹isproven› C node asks
+⦃ ⧖:C,node ⧗:C̵ #6# ‹a2› ⧖:C,hd ⧗:C̵ ‹len› ⧖:C,e ⧗:C̵ ⧗:hd ⍆̵ ⧗:node ⍆̵ ⧖:C ⧗:C̵ #6# ⧗:e ‹a2w› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹vowok› ⸫
+⦃ ⧖:C,node ⧗:C̵ #6# ‹a2› ⧖:C,hd ⧗:C̵,hd,node ‹confhas› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isproven› ⸫
+
+⍝ stubs until the prover lands: every vow is hopeful
+⦃ ⧖:C,pv,op ⧗:C̵ ○ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vprove› ⸫
+⦃ ⧖:C,f,vw,from,to ⧗:C̵ ○ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vprovefn› ⸫
+
+⍝ ---- the curse sets (A.4): recursion, then a fixpoint over the calls, then the declarations
+
+⍝ ‹cursefix› C
+⦃ ‹currec› ‹curfix› ‹curcheck› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cursefix› ⸫
+
+⍝ ‹fnsdo› C code: run ‹fn1› with code on every function record, in definition order
+⦃
+  ⧖:C,code
+  ⧗:C̵ #7# ‹reg› ⧖:C,fns ⧗:C̵,fns ‹llen› ⧖:C,n
+  ⧗:C̵,fns,code ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,fns,code,j,n
+    ⧗:C̵,fns,code,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,fns,code,j,n ⧗:C̵,fns,j ‹lget› ⧖:C,f ⧗:C̵,f,code ‹fn1› ⧗:fns,code ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹fnsdo› ⸫
+⦃
+  ⧖:C,f,code
+  ⧗:C̵,f,code ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹currec1› ⦄ ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ‹curcheck1› ⦄ ⦃ #3# ᛖ ⋔ ⦃ ‹curpr1› ⦄ ⦃ ⌁ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹fn1› ⸫
+
+⍝ ‹ischecked› C f: a function whose body was checked (not an FFI binding, not a generic template)
+⦃
+  ⧖:C,f
+  ⧗:C̵,f #21# ‹vf› ⧖:C,deco ⧗:C̵,f ‹isgeneric› ⧖:C,g
+  ⧗:C̵ ⧗:deco #-1# ᛖ ‹not› ⧗:g ‹not› ⋎
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹ischecked› ⸫
+
+⍝ ‹sigfail› C f: f may fail: its output is ◌ (its ᶠ comes from its signature)
+⦃
+  ⧖:C,f
+  ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs ‹llen› ⧖:C,no
+  ⧗:C̵,outs ○ ‹lget› ‹shead› ⧖:C,oh
+  ⧗:C̵ ⧗:no △ ᛖ ⧗:oh #9676# ᛖ ⋎
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹sigfail› ⸫
+
+⍝ recursion: a function that calls itself is restless, unless it vows (⍤ᚠ); one in a cycle with
+⍝ others is restless whatever it vows (s2's prover looks at direct recursion only)
+⦃ △ ‹fnsdo› ‹cscc› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹currec› ⸫
+⦃
+  ⧖:C,f
+  ⧗:C̵,f #18# ‹vf› ⧖:C,e ⧗:C̵,e,f ‹edgeto› ⧖:C,self
+  ⧗:C̵,f #19# ‹vf› ⧖:C,vw
+  ⧗:C̵,f ⧗:self ⧗:vw ○ ᛖ ⋎ ⋔ ⦃ #8# ‹curse1› ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹currec1› ⸫
+⍝ ‹edgeto› C e g: the chain of calls from e has a call of g
+⦃
+  ⧖:C,e,g
+  ⧗:C̵,e,g ⊕
+  ⥀ ⦃
+    ⧖:C,e,g,found
+    ⧗:C̵,e,g,found ⧗:e #-1# ᛖ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,e,g,found ⧗:C̵,e ‹rd› ⧖:C,nx ⧗:C̵ ⧗:e △ ⊞ ‹rd› ⧖:C,h ⧗:C̵,nx,g ⧗:found ⧗:h ⧗:g ᛖ ⋏ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,e,g,found ⧗:C̵,found
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹edgeto› ⸫
+⍝ ‹cscc› C: stub until the cycle finder lands
+⦃ ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cscc› ⸫
+
+⍝ ‹curfix› C: final = own ∪ ᶠ (from the signature) ∪ the curses of every callee, less ᶠ and what
+⍝ the call site lifted; repeated until nothing changes
+⦃
+  ⥀ ⦃ ⧖:C ⧗:C̵ ‹curpass› ⧖:C,ch ⧗:C̵ ⧗:ch ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼ ⦄
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹curfix› ⸫
+⦃
+  ⧖:C
+  ⧗:C̵ #7# ‹reg› ⧖:C,fns ⧗:C̵,fns ‹llen› ⧖:C,n
+  ⧗:C̵,fns ○ ⧗:n ⊕
+  ⥀ ⦃
+    ⧖:C,fns,j,n,ch
+    ⧗:C̵,fns,j,n,ch ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,fns,j,n,ch ⧗:C̵,fns,j ‹lget› ⧖:C,f ⧗:C̵,f ‹curpass1› ⧖:C,c1 ⧗:C̵,fns ⧗:j △ ⊞ ⧗:n ⧗:ch ⧗:c1 ⋏ ⊕ ⦄
+  ⦄
+  ⧖:C,fns,j,n,ch ⧗:C̵,ch
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ŧ⟩ ‹curpass› ⸫
+⦃
+  ⧖:C,f
+  ⧗:C̵,f #17# ‹vf› ⧖:C,own ⧗:C̵,f ‹sigfail› ⧖:C,sf
+  ⧗:own ⧗:sf ⋔ ⦃ △ ⋓ ⦄ ∅ ⁼ ⧖:m0
+  ⧗:C̵,f #18# ‹vf› ⧖:C,e
+  ⧗:C̵,e,m0 ‹edgesor› ⧖:C,m
+  ⧗:C̵,f #20# ‹vf› ⧖:C,old
+  ⧗:C̵ ⧗:f #20# ⊞ ⧗:m ‹wr› ⧖:C
+  ⧗:C̵ ⧗:m ⧗:old ᛖ ‹not›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹curpass1› ⸫
+⦃
+  ⧖:C,e,m
+  ⧗:C̵,e,m
+  ⥀ ⦃
+    ⧖:C,e,m
+    ⧗:C̵,e,m ⧗:e #-1# ᛖ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,e,m ⧗:C̵,e ‹rd› ⧖:C,nx ⧗:C̵ ⧗:e △ ⊞ ‹rd› ⧖:C,g ⧗:C̵ ⧗:e #2# ⊞ ‹rd› ⧖:C,l
+        ⧗:C̵,g #20# ‹vf› ⧖:C,fg
+        ⧗:fg ⧗:fg #-1# ᛖ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:fg2
+        ⧗:C̵,nx ⧗:m ⧗:fg2 ⧗:l △ ⋓ #31# ⩡ ⋒ ⋓ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,e,m ⧗:C̵,m
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹edgesor› ⸫
+
+⍝ ‹curcheck› C: declared curses must be the inferred ones (A.4.1), --confess wants them declared,
+⍝ and ✧ ✧✧ must hold (A.5.2)
+⦃ #2# ‹fnsdo› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹curcheck› ⸫
+⦃
+  ⧖:C,f
+  ⧗:C̵,f ‹ischecked› ⧖:C,chk
+  ⧗:C̵,f ⧗:chk ⋔ ⦃ ‹curcheck2› ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹curcheck1› ⸫
+⦃
+  ⧖:C,f
+  ⧗:C̵,f #21# ‹vf› ⧖:C,deco ⧗:C̵,f #20# ‹vf› ⧖:C,fin ⧗:C̵,f #23# ‹vf› ⧖:C,tok ⧗:C̵,f ‹rd› ⧖:C,name
+  ⧗:deco #4# ≫ #31# ⋒ ⧖:dm
+  ⧗:deco #8# ⋒ ○ ᛖ ‹not› ⧖:decl
+  ⍝ declared: the same set
+  ⧗:C̵,tok,name,fin,dm ⧗:decl ⧗:fin ⧗:dm ᛖ ‹not› ⋎ ⋔ ⦃ ‹unspoken› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⍝ --confess: every function but ᛟ declares its curses
+  #5855# ‹str1› ⧖:C,entry
+  ⧗:C̵,tok,name,fin ⧗:decl ‹not› ⧗:name ⧗:entry ᛖ ‹not› ⋎ ‹confessing› ⋎ ⋔ ⦃ ‹unconfessed› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⍝ ✧: none of ⁱ ᵘ ᵈ; ✧✧: no curse at all
+  ⧗:C̵,tok,name,fin ⧗:deco #2# ⋒ ○ ᛖ ‹not› ⧗:fin #14# ⋒ ○ ᛖ ‹not› ⋎ ⧗:deco #4# ⋒ ○ ᛖ ‹not› ⧗:fin ○ ᛖ ‹not› ⋎ ⋏
+    ⋔ ⦃ ‹fallen› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹curcheck2› ⸫
+⦃
+  ⧖:C,tok,name,fin,dm
+  ⧗:C̵,tok ‹cerr› ⧗:fin ⧗:dm #31# ⩡ ⋒ ○ ᛖ ‹not› ⋔ ⦃ $unspoken curse: $ ⎙̵ ⦄ ⦃ $false accusation: $ ⎙̵ ⦄ ⁼
+  ⧗:name ‹spr› $ is $ ⎙̵ ⧗:fin ‹pcurses› $, but its signature declares $ ⎙̵ ⧗:dm ‹pcurses› $ (A.4.1)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹unspoken› ⸫
+⦃
+  ⧖:C,tok,name,fin
+  ⧗:C̵,tok ‹cerr› $unconfessed: --confess wants every function to declare its curses, and $ ⎙̵ ⧗:name ‹spr›
+  $ is $ ⎙̵ ⧗:fin ‹pcurses› $ (A.4.1)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹unconfessed› ⸫
+⦃
+  ⧖:C,tok,name,fin
+  ⧗:C̵,tok ‹cerr› $fallen: $ ⎙̵ ⧗:name ‹spr› $ is declared blessed but is $ ⎙̵ ⧗:fin ‹pcurses› $ (A.5.2)$ ⎙̵ ‹die›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹fallen› ⸫
+
+⍝ ‹confessing›: the command has --confess
+⦃
+  △ ⊕
+  ⥀ ⦃
+    ⧖:i,found
+    ⧗:i,found ⧗:i ‹argcode› #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:i,found ⧗:i △ ⊞ ⧗:found $--confess$ ⧗:i ‹argeq› ⋏ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:i,found ⧗:found
+⦄ ⟨⊸ ŧ⟩ ‹confessing› ⸫
+
+⍝ ---- reports: --curses lists every checked function's curses and blessing; --confessions every
+⍝ exorcism (A.4.1)
+⦃
+  ⧖:C,mode
+  ⧗:C̵ ⧗:mode #8# ᛖ ⋔ ⦃ #3# ‹fnsdo› ⦄ ⦃ #5# ‹a2› ‹confpr› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹creport› ⸫
+⦃
+  ⧖:C,f
+  ⧗:C̵,f ‹ischecked› ⧖:C,chk
+  ⧗:C̵,f ⧗:chk ⋔ ⦃ ‹curpr2› ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹curpr1› ⸫
+⦃
+  ⧖:C,f
+  ⧗:C̵,f #20# ‹vf› ⧖:C,fin ⧗:C̵,f #22# ‹vf› ⧖:C,hop
+  ⧗:C̵,f ‹rd› ‹spr› $ $ ⎙̵ ⧗:fin ‹pcurses›
+  ⧗:fin ⧗:fin ○ ᛖ ⋔ ⦃ ⌁ $ ✧✧$ ⎙̵ ⦄ ⦃ #14# ⋒ ○ ᛖ ⋔ ⦃ $ ✧$ ⎙̵ ⦄ ∅ ⁼ ⦄ ⁼
+  ⧗:hop ⧗:hop ○ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ $ (hopeful vows: $ ⎙̵ ᛁ $)$ ⎙̵ ⦄ ⁼
+  $\n$ ⎙̵
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹curpr2› ⸫
+⍝ ‹confpr› C e: the exorcisms from the chain e on, in the order they were met
+⦃
+  ⧖:C,e
+  ⧗:C̵,e ⧗:e #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:C,e ⧗:C̵,e ‹rd› ‹confpr› ⧖:C ⧗:C̵ ⧗:e △ ⊞ ‹rd› ⧖:C,t ⧗:C̵,t ‹cpos› $ $ ⎙̵ ⧗:t ‹ptx› $\n$ ⎙̵ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹confpr› ⸫

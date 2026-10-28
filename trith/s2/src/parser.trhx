@@ -11,7 +11,7 @@
 ⍝   20 sig [nin saw]: types    21 type [np prefix tokens…]: element type (⟦…⟧)
 ⍝   30 fragment [name rev ordinal hasSig]: body, sig
 ⍝   31 particle [name]: type   32 ffi [name cname]: sig
-⍝   18 exorcism ⛨ˣ: block        19 vow ⍤⥀ or ⍤ᚠ: block (Addendum A.4, A.5)
+⍝   24 exorcism ⛨ˣ: block        25 vow ⍤⥀ or ⍤ᚠ: block (Addendum A.4, A.5)
 ⍝   40 fn [name rev nfr ordinals…]: sig, ops (after tangling)
 ⍝ A fragment's rev is a set of bits, which tangling ORs together: 1 reversible ⇋, 2 blessed ✧,
 ⍝ 4 doubly blessed ✧✧, 8 curses declared, and the declared curse mask from bit 4 on (A.4.1).
@@ -404,8 +404,8 @@
   ⧗:k #11# ᛖ ⧗:c #10216# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #14# #6# ⦄ ∅ ⁼
   ⧗:k #11# ᛖ ⧗:c #10627# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #15# #7# ⦄ ∅ ⁼
   ⍝ the addenda: ⛨ˣ ⦃…⦄ and ⍤⥀ ⦃…⦄ hold a block; ⸸…, ✧ and ⎔⸸ᵘ belong to items
-  ⧗:k #14# ᛖ ⋔ ⦃ ⌁ ⌁ #8# #18# ⦄ ∅ ⁼
-  ⧗:k #16# ᛖ ⋔ ⦃ ⌁ ⌁ #8# #19# ⦄ ∅ ⁼
+  ⧗:k #14# ᛖ ⋔ ⦃ ⌁ ⌁ #8# #24# ⦄ ∅ ⁼
+  ⧗:k #16# ᛖ ⋔ ⦃ ⌁ ⌁ #8# #25# ⦄ ∅ ⁼
   ⧗:k #13# ᛖ ⧗:k #15# ᛖ ⋏ ⧗:k #17# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ #4# #4# ⦄ ∅ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ ℤ⟩ ‹opclass› ⸫
 
@@ -1041,9 +1041,9 @@
   ⧗:k #14# ᛖ ⋔ ⦃ $loop$ ⎙̵ ⦄ ∅ ⁼
   ⧗:k #15# ᛖ ⋔ ⦃ $postselect$ ⎙̵ ⦄ ∅ ⁼
   ⧗:k #16# ᛖ ⋔ ⦃ $prayer$ ⎙̵ ⦄ ∅ ⁼
-  ⧗:k #18# ᛖ ⋔ ⦃ $exorcism $ ⎙̵ ⦄ ∅ ⁼
-  ⧗:k #19# ᛖ ⋔ ⦃ $vow $ ⎙̵ ⦄ ∅ ⁼
-  ⧗:Ṯ,t ⧗:k #18# ᛖ ⧗:k #19# ᛖ ⋏ ⋔ ⦃ ‹ptok› ⦄ ⦃ ⌁ ⌁̱ ⦄ ⁼
+  ⧗:k #24# ᛖ ⋔ ⦃ $exorcism $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:k #25# ᛖ ⋔ ⦃ $vow $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:Ṯ,t ⧗:k #24# ᛖ ⧗:k #25# ᛖ ⋏ ⋔ ⦃ ‹ptok› ⦄ ⦃ ⌁ ⌁̱ ⦄ ⁼
   ⧗:Ṯ ⧗:t #4# ⊞ ᚳ ⧖:n
   ⧗:n #-9# ᛖ ‹not› ⋔ ⦃ $ n=$ ⎙̵ ⦄ ∅ ⁼
   ⧗:n ⧗:n #-9# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ᛁ ⦄ ⁼

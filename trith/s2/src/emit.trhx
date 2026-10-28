@@ -3,6 +3,7 @@
 ⍝ 28 the IR lines (a queue of strings), 29 the globals, 30 the current label,
 ⍝ 31 the future-call frames (a stack of [below calls]), 32 the failure return
 ⍝ (−1: none), 33 next string constant, 34 debug, 35 hoisted post-selections,
+⍝ 63 the vows' block [loop fn m0 k] (see ‹el_vow›),
 ⍝ 36 functions (a queue of [name sym ffi f node ops0 ops1]), 41 … 48 the texts
 ⍝ "i8" "i64" "double" "ptr" "i1" "true" "false" "0".
 ⍝ An entry of the virtual stack is [ty v ok role hasc c lit slots live neg cmp]:
@@ -1014,7 +1015,9 @@
   ⍿⁰ #16# ᛖ ⋔ ⦃ ⌁ ‹el_prayer› ⦄ ⦃
   ⍿⁰ #15# ᛖ ⋔ ⦃ ⌁ ‹el_post› ⦄ ⦃
   ⍿⁰ #4# ᛖ ⋔ ⦃ ⌁ ‹el_inv› ⦄ ⦃
-  #3# ᛖ ⋔ ⦃ ‹el_inv› ⦄ ⦃ ‹el_err› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ⍿⁰ #24# ᛖ ⋔ ⦃ ⌁ ‹el_exorcise› ⦄ ⦃
+  ⍿⁰ #25# ᛖ ⋔ ⦃ ⌁ ‹el_vow› ⦄ ⦃
+  #3# ᛖ ⋔ ⦃ ‹el_inv› ⦄ ⦃ ‹el_err› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹ecase› ⸫
 
 ⦃
@@ -1071,6 +1074,7 @@
   ⧗:C̵,op ‹eresolve› ⧖:C,f0
   ⧗:C̵,f0,S,op ‹egencall› ⧖:C,f
   ⧗:C̵,tok #2# ‹tmark› ⧖:C,fut ⧗:C̵,tok #4# ‹tmark› ⧖:C,past
+  ⧗:C̵,f #3# ‹vf› ⧖:C,cf ⧗:C̵,cf,S ⧗:past ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹evowcall› ⦄ ⁼ ⧖:C
   ⧗:C̵,S,f,tok,fut ⧗:past ⋔ ⦃ ⌁ ‹epast› ⦄ ⦃ ⧖:SS,ff,tk,fu ⧗:SS,ff,fu ‹ecall› ⦄ ⁼ ⧖:C,S2
   ⧗:C̵,S2,strand,dead ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_call› ⸫
@@ -1435,6 +1439,7 @@
 ⦃
   ⧖:C,op,S,strand,dead,prev,to
   ⧗:C̵ ‹ecur› ⧖:C,pre
+  ⧗:C̵ #63# ‹reg› ⧖:C,vb ⧗:C̵,vb ‹rd› ⧖:C,vw ⧗:C̵ ⧗:vb #-1# ‹wr› ⧖:C
   ⧗:C̵ ‹elabel› ⧖:C,head ⧗:C̵ ‹elabel› ⧖:C,exit ⧗:C̵ ‹elabel› ⧖:C,lfail
   ⧗:C̵,head ‹ebr› ⧗:head ‹estart›
   ‹qnew› ⧖:C,hq ⧗:C̵ ‹qnew› ⧖:C,patches
@@ -1446,10 +1451,12 @@
   ⦄
   ⌁ ⌁ ⌁ ⌁ ⌁ ⧖:C
   ⧗:C̵,hq ‹qlist› ⧖:C,HS
+  ⧗:C̵,vw,HS ‹evowhead› ⧖:C,vr
   ⧗:C̵ ⧗:op #3# ⊞ ⧗:HS ‹esubb› ⧖:C,BS,rst,rdead
   ⧗:C̵ ‹ecur› ⧖:C,latch0
   ⧗:C̵,BS,exit,head,lfail,latch0 ⧗:rdead ○ ᛖ ⋔ ⦃ ‹elatch› ⦄ ⦃ ⧖:b,e,h,f,l ⧗:b,l ⦄ ⁼ ⧖:C,BS2,latch
   ⧗:C̵,patches,S,BS2,pre,latch,rdead ‹epatch› ⧖:C
+  ⧗:C̵,vr,pre,latch,rdead ‹evowpatch› ⧖:C
   ⧗:C̵,lfail,exit,BS2,strand,rst,S ⧗:rdead ○ ᛖ ⋔ ⦃ ‹eloopend› ⦄ ⦃ ⧖:lf,ex,b,st,rs,SS ⧗:SS,st △ ⦄ ⁼
   ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_loop› ⸫
@@ -1564,6 +1571,7 @@
   ⧗:C̵,node ‹ndt› ⧖:C,tok
   ⧗:C̵,ins,tok ‹eneedall› ⧗:outs,tok ‹eneedall›
   #26# ○ ‹wr› #27# ○ ‹wr› #31# #-1# ‹wr› ⧖:C
+  ⧗:C̵ #63# ‹reg› ⧖:C,vb ⧗:C̵ ⧗:vb △ ⊞ ⧗:f ‹wr› ⧗:vb #2# ⊞ #-1# ‹wr› ⧖:C
   ⍝ how a failure leaves this function
   ⧗:C̵,outs ‹llen› ⧖:C,no
   ⧗:C̵,outs ○ ‹lget› ⧖:C,o0
@@ -1678,6 +1686,7 @@
   %%!ptr%% ⧖:C,s ⧗:C̵ #44# ⧗:s ‹wr› %%!i1%% ⧖:C,s ⧗:C̵ #45# ⧗:s ‹wr› %%!true%% ⧖:C,s ⧗:C̵ #46# ⧗:s ‹wr›
   %%!false%% ⧖:C,s ⧗:C̵ #47# ⧗:s ‹wr› %%!0%% ⧖:C,s ⧗:C̵ #48# ⧗:s ‹wr›
   %%!entry%% ⧖:C,s ⧗:C̵ #30# ⧗:s ‹wr›
+  ‹len› ⧖:C,vb ⧗:C̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ #63# ⧗:vb ‹wr›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹eregs› ⸫
 
 ⍝ ‹efns› C: the emit record of every function, binding and generated inverse
@@ -2158,6 +2167,95 @@
   %%call void @trith_reversal_failed()%% ‹eemit› %%unreachable%% ‹eemit›
   ⧗:lgood ‹estart›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ersel1› ⸫
+
+⍝ ---- the addenda (A.4, A.5): an exorcism lifts curses only for the checker, so its block is
+⍝ emitted in place. A vow is erased, unless it is hopeful and this is a --debug build: then
+⍝ its measure runs and traps unless it is at least 0 and below the last one. Register 63's
+⍝ block holds the ⍤⥀ waiting for its ⥀ (−1: none), the function being emitted (its checker
+⍝ record), the measure on entry to it (−1: no hopeful ⍤ᚠ) and how many inputs it measures.
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C̵ ⧗:op #3# ⊞ ⧗:S ‹esubb› ⧖:C,R,st,d
+  ⧗:C̵,strand,st ‹lcat› ⧖:C,strand2
+  ⧗:C̵,R,strand2,d ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_exorcise› ⸫
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C̵ #34# ‹reg› ⧖:C,debug
+  ⧗:C̵,op ‹isproven› ⧖:C,pr
+  ⧗:C̵,op ‹ndt› ⧖:C,tok ⧗:C̵,tok #5# ‹tf› ⧖:C,isfn
+  ⧗:C̵,op,S,isfn ⧗:debug △ ᛖ ⧗:pr ‹not› ⋎ ⋔ ⦃ ⧖:C,o,s,i ⧗:C̵,o,s ⧗:i ○ ᛖ ⋔ ⦃ ‹evowloop› ⦄ ⦃ ‹evowfn› ⦄ ⁼ ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:S,strand,dead ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_vow› ⸫
+⍝ a ⍤⥀ waits for its ⥀ (‹el_loop›, ‹evowhead›)
+⦃ ⧖:C,op,S ⧗:C̵ #63# ‹reg› ⧖:C,vb ⧗:C̵ ⧗:vb ⧗:op ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹evowloop› ⸫
+⍝ a ⍤ᚠ measures the inputs on entry; each call of ᚠ in its body measures the call's inputs
+⦃
+  ⧖:C,op,S
+  ⧗:C̵,op,S ‹emeasure› ⧖:C,m
+  ⧗:C̵,m ⧗:m #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:C,mm ⧗:C̵ %%icmp sge i64 {mm}, 0%% ‹edef› ⧖:C,ok ⧗:C̵,ok ‹etrapunless› ⦄ ⁼ ⧖:C
+  ⧗:C̵,S ‹llen› ⧖:C,k
+  ⧗:C̵ #63# ‹reg› ⧖:C,vb ⧗:C̵ ⧗:vb #2# ⊞ ⧗:m ‹wr› ⧗:vb #3# ⊞ ⧗:k ‹wr›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹evowfn› ⸫
+⍝ ‹emeasure› C vow vals: run vow node's measure on shadows of vals, giving its ℤ (−1: it never finishes)
+⦃
+  ⧖:C,vow,vals
+  ⧗:C̵,vals ‹eshadows› ⧖:C,pv
+  ⧗:C̵ ⧗:vow #3# ⊞ ⧗:pv ‹esubb› ⧖:C,R,st,dead
+  ⧗:C̵,R ⧗:dead ○ ᛖ ⋔ ⦃ ○ ‹lget› ‹ev› ⦄ ⦃ ⌁ #-1# ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹emeasure› ⸫
+⍝ ‹evowhead› C vw HS: at the head of a ⥀ with a hopeful vow, a placeholder phi for the last
+⍝ measure, then the measure of HS and the trap; gives [at prev m] for ‹evowpatch› (−1: none)
+⦃
+  ⧖:C,vw,HS
+  ⧗:C̵,vw,HS ⧗:vw #-1# ᛖ ⋔ ⦃ ⌁ ⌁ #-1# ⦄ ⦃ ‹evowhead1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evowhead› ⸫
+⦃
+  ⧖:C,vw,HS
+  ⧗:C̵ ‹etmp› ⧖:C,prev
+  ⧗:C̵ %%  PHI%% ⧖:C,l
+  ⧗:C̵ #28# ‹reg› ⧖:C,q ⧗:C̵,q,l ‹qadd1› ⧖:C,at
+  ⧗:C̵,vw,HS ‹emeasure› ⧖:C,m
+  ⧗:C̵,at,prev,m ⧗:m #-1# ᛖ ⋔ ⦃ ⧖:C,a,p,mm ⧗:C̵ %%%% ⧖:C,s ⧗:C̵ ⧗:a △ ⊞ ⧗:s ‹wr› #-1# ⦄ ⦃ ‹evowtrap› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evowhead1› ⸫
+⦃
+  ⧖:C,at,prev,m
+  ⧗:C̵ %%icmp sge i64 {m}, 0%% ‹edef› ⧖:C,ok1
+  ⧗:C̵ %%icmp slt i64 {m}, {prev}%% ‹edef› ⧖:C,ok2
+  ⧗:C̵ %%and i1 {ok1}, {ok2}%% ‹edef› ⧖:C,ok ⧗:C̵,ok ‹etrapunless›
+  ‹len› ⧖:C,r ⧗:C̵ ⧗:at ⍆̵ ⧗:prev ⍆̵ ⧗:m ⍆̵ ⧖:C ⧗:C̵,r
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evowtrap› ⸫
+⍝ ‹evowpatch› C r pre latch dead: the last measure is "none yet" (the largest ℤ) from before the
+⍝ ⥀, and this iteration's measure from the latch
+⦃
+  ⧖:C,r,pre,latch,dead
+  ⧗:C̵,r,pre,latch,dead ⧗:r #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ‹evowpatch1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹evowpatch› ⸫
+⦃
+  ⧖:C,r,pre,latch,dead
+  ⧗:C̵,r ‹rd› ⧖:C,at ⧗:C̵,r △ ‹vf› ⧖:C,prev ⧗:C̵,r #2# ‹vf› ⧖:C,m
+  ⧗:C̵,prev,pre,m,latch ⧗:dead ○ ᛖ ⋔
+    ⦃ ⧖:nm,p,b,l %%  {nm} = phi i64 [ 9223372036854775807, %{p} ], [ {b}, %{l} ]%% ⦄
+    ⦃ ⧖:nm,p,b,l %%  {nm} = phi i64 [ 9223372036854775807, %{p} ]%% ⦄ ⁼ ⧖:C,line
+  ⧗:C̵ ⧗:at △ ⊞ ⧗:line ‹wr›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹evowpatch1› ⸫
+⍝ ‹evowcall› C f S: before a call of f, the function being emitted, whose hopeful ⍤ᚠ measured m0
+⍝ on entry: the call's inputs must measure at least 0 and below m0
+⦃
+  ⧖:C,f,S
+  ⧗:C̵ #63# ‹reg› ⧖:C,vb
+  ⧗:C̵,vb △ ‹vf› ⧖:C,cur ⧗:C̵,vb #2# ‹vf› ⧖:C,m0
+  ⧗:C̵,f,S,m0 ⧗:cur ⧗:f ᛖ ⧗:m0 #-1# ᛖ ‹not› ⋎ ⋔ ⦃ ‹evowcall1› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹evowcall› ⸫
+⦃
+  ⧖:C,f,S,m0
+  ⧗:C̵ #63# ‹reg› #3# ‹vf› ⧖:C,k
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n ⧗:k ⊟ ⧗:n ‹lslice› ⧖:C,args
+  ⧗:C̵,f #19# ‹vf› ⧖:C,vow
+  ⧗:C̵,vow,args ‹emeasure› ⧖:C,m
+  ⧗:C̵,m0,m ⧗:m #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:C,a,b ⧗:C̵ ○ ⧗:a,b ‹evowtrap› ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹evowcall1› ⸫
 
 ⍝ ⍤ⁿ: proved and erased when its values are known, else assumed (or trapped with --debug, §12)
 ⦃

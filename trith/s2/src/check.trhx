@@ -87,14 +87,16 @@
 ⍝ ---- errors and traces
 
 ⍝ ‹cerr› C t: "path:line:col: error: " for token t (the file and coordinates of a plane cell, A.1.2)
+⦃ ‹cpos› $: error: $ ⎙̵ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cerr› ⸫
+⍝ ‹cpos› C t: "path:line:col" for token t
 ⦃
   ⧖:C,t
   ⧗:C̵ #6# ‹rd› ⧖:C,path
   ⧗:C̵ ⧗:t ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ ○ ○ ⦄ ⦃ ⧖:t2 ⧗:t2 △ ‹tf› ⧖:a ⧗:t2 #2# ‹tf› ⧖:b ⧗:a,b ⦄ ⁼ ⧖:C,ln,cl
   ⧗:C̵,path ⧗:ln ⧗:ln ‹isplane› ⋔ ⦃ ‹plf› ⦄ ⦃ ⌁ ○ ⦄ ⁼ ‹sprseg› ⧖:C
   ⧗:ln,cl ⧗:t #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ $:$ ⎙̵ ‹plpos› ⦄ ⁼
-  $: error: $ ⎙̵ ⧗:C̵
-⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cerr› ⸫
+  ⧗:C̵
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cpos› ⸫
 ⍝ ‹die› C: end the message and stop
 ⍝ inside an instance of a generic function (register 56), it says which one (§9.4)
 ⦃
@@ -160,7 +162,8 @@
   ⍿⁰ #5# ᛖ ⋔ ⦃ $⊨$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #6# ᛖ ⋔ ⦃ $⟦…⟧$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #7# ᛖ ⋔ ⦃ $⟜$ ⎙̵ ⦄ ∅ ⁼
-  #8# ᛖ ⋔ ⦃ $⟜ (retrocausal: filters the moment)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #8# ᛖ ⋔ ⦃ $⟜ (retrocausal: filters the moment)$ ⎙̵ ⦄ ∅ ⁼
+  #12# ᛖ ⋔ ⦃ $⛨ (end)$ ⎙̵ ⦄ ∅ ⁼
 ⦄ ⟨ℤ ⊸⟩ ‹pcodelab› ⸫
 
 ⍝ ‹note› C ind code: a note line: 1 attest, 2 face ⦶, 3 face ⊕, 4 face ⊖,
@@ -182,7 +185,9 @@
   ⍿⁰ #8# ᛖ ⋔ ⦃ $fail$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #9# ᛖ ⋔ ⦃ $prayer$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #10# ᛖ ⋔ ⦃ $elements$ ⎙̵ ⦄ ∅ ⁼
-  #11# ᛖ ⋔ ⦃ $post-select$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #11# ᛖ ⋔ ⦃ $post-select$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #12# ᛖ ⋔ ⦃ $exorcised$ ⎙̵ ⦄ ∅ ⁼
+  #13# ᛖ ⋔ ⦃ $measure$ ⎙̵ ⦄ ∅ ⁼
 ⦄ ⟨ℤ ⊸⟩ ‹pnote› ⸫
 
 ⍝ ---- types written in the tree
@@ -400,7 +405,8 @@
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹sigtype1› ⸫
 
 ⍝ ‹fninfo› C s rev name: a function record [name ins outs rev iev ich oev och tvars item shape at
-⍝ quotey qsigs rows rowin rowout];
+⍝ quotey qsigs rows rowin rowout own calls vow final deco hopeful tok plain] (the last eight are the
+⍝ curses of Addendum A.4: see curses.trhx);
 ⍝ tvars are the type variables of the inputs (§9.4); a generic function's item and shape, and an
 ⍝ instance's "ᚠ[ℤ], first called at …", are set later (−1 until then)
 ⦃
@@ -408,7 +414,8 @@
   ⧗:C̵,s ○ ‹sigtypes› ⧖:C,ins,outs,iev,ich,oev,och
   ⧗:C̵,ins ‹tvars› ⧖:C,tv
   ⧗:C̵ ‹len› ⧖:C,f
-  ⧗:C̵ ⧗:name ⍆̵ ⧗:ins ⍆̵ ⧗:outs ⍆̵ ⧗:rev ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:tv ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧗:f
+  ⧗:C̵ ⧗:name ⍆̵ ⧗:ins ⍆̵ ⧗:outs ⍆̵ ⧗:rev ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:tv ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵
+    ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ ○ ⍆̵ #-1# ⍆̵ ⧗:name ⍆̵ ⧗:f
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹fninfo› ⸫
 
 ⍝ ---- type variables (§9.4): a generic function is checked and emitted once per instance
@@ -555,7 +562,10 @@
   ⧗:C̵,f #4# ‹vf› ⧖:C,iev ⧗:C̵,f #5# ‹vf› ⧖:C,ich ⧗:C̵,f #6# ‹vf› ⧖:C,oev ⧗:C̵,f #7# ‹vf› ⧖:C,och
   ⧗:C̵,f #9# ‹vf› ⧖:C,it
   ⧗:C̵ ‹len› ⧖:C,g
-  ⧗:C̵ ⧗:key ⍆̵ ⧗:gi ⍆̵ ⧗:go ⍆̵ ○ ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:none ⍆̵ ⧗:it ⍆̵ ⧗:gshp ⍆̵ ⧗:at ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧗:g
+  ⧗:C̵,f #21# ‹vf› ⧖:C,deco ⧗:C̵,f #23# ‹vf› ⧖:C,ftok ⧗:C̵,f #24# ‹vf› ⧖:C,fnm
+  ⧗:C̵ ‹len› ⧖:C,g
+  ⧗:C̵ ⧗:key ⍆̵ ⧗:gi ⍆̵ ⧗:go ⍆̵ ○ ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:none ⍆̵ ⧗:it ⍆̵ ⧗:gshp ⍆̵ ⧗:at ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵
+    ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ⧗:deco ⍆̵ ○ ⍆̵ ⧗:ftok ⍆̵ ⧗:fnm ⍆̵ ⧗:g
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹instrec› ⸫
 ⍝ ‹isgeneric› C f: f has type variables, quotation parameters or rows
 ⦃ ⧖:C,f ⧗:C̵,f #8# ‹vf› ⧖:C,tv ⧗:C̵,tv ‹llen› ⧖:C,n ⧗:C̵,f #12# ‹vf› ⧖:C,qy ⧗:C̵ ⧗:n ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:qy △ ᛖ ⋏ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isgeneric› ⸫
@@ -1111,8 +1121,10 @@
   ⧗:C̵ ‹lnew0› ⧖:C,none
   ⧗:C̵,f #9# ‹vf› ⧖:C,it
   ⧗:C̵ ‹len› ⧖:C,g
+  ⧗:C̵,f #21# ‹vf› ⧖:C,deco ⧗:C̵,f #23# ‹vf› ⧖:C,ftok ⧗:C̵,f #24# ‹vf› ⧖:C,fnm
+  ⧗:C̵ ‹len› ⧖:C,g
   ⧗:C̵ ⧗:key ⍆̵ ⧗:gi ⍆̵ ⧗:go ⍆̵ ○ ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:none ⍆̵ ⧗:it ⍆̵ ⧗:shp ⍆̵ ⧗:at ⍆̵
-  ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧗:g
+  ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ⧗:deco ⍆̵ ○ ⍆̵ ⧗:ftok ⍆̵ ⧗:fnm ⍆̵ ⧗:g
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qinstrec› ⸫
 ⦃ ⧖:C,g0,rb,r ⧗:C̵,rb ⧗:r ‹rowslot› ‹lget› ⧖:C,rl ⧗:C̵,g0,rl ‹lcat› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qrowcat› ⸫
 ⍝ ‹crecord› C op f: call op makes instance f, seen from the function being checked
@@ -1373,6 +1385,9 @@
   ⍿⁰ #28# ᛖ ⋔ ⦃ $a quotation type has the same row variable on both sides, or none: ⟨ρ … ⊸ ρ …⟩ (§9.5)$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #29# ᛖ ⋔ ⦃ $a row variable stands for the bottom of an effect, so it comes first: ⟨ρ … ⊸ ρ …⟩ (§9.5)$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #30# ᛖ ⋔ ⦃ $decoherence cap: a superposition of quantum values holds at most 9 alternatives (§8.3)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #32# ᛖ ⋔ ⦃ $an exorcism lifts only ⁱ, ᵘ and ᵃ: failure is lifted by handling it with ⁇, restlessness by a vow (A.4.2)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #33# ᛖ ⋔ ⦃ $a vow ⍤⥀ ⦃ measure ⦄ goes directly before its ⥀ (A.5.1)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #34# ᛖ ⋔ ⦃ $a vow ⍤ᚠ ⦃ measure ⦄ is the first op of the body of the function ᚠ it names (A.5.1)$ ⎙̵ ⦄ ∅ ⁼
   ⌁
 ⦄ ⟨ℤ ⊸⟩ ‹pmsg› ⸫
 
@@ -2513,6 +2528,7 @@
   ⧗:C̵,v #7# ⧗:glu ⧗:lk #5# ᛖ ⧗:lk #6# ᛖ ⋏ ⋔ ⦃ ‹vset› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:tok ‹trole› ⧖:C,role
   ⧗:C̵,v,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹vrole› ⦄ ⁼ ⧖:C,v2
+  ⧗:C̵ ⧗:lk #12# ᛖ ⋔ ⦃ #16# ‹curse› ⦄ ∅ ⁼ ⧖:C
   ⧗:C̵,S,v2 ‹lpush› ⧗:strand,dead ○ ○ ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_lit› ⸫
 
@@ -2530,6 +2546,9 @@
   ⧗:C̵,f #2# ‹vf› ⧖:C,outs ⧗:C̵,outs ‹llen› ⧖:C,no
   ⧗:C̵ ⧗:fut ⧗:no ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ‹not› ⧗:tok #11# ‹cfailunless›
   ⧗:S,strand,locks,f,tok,depth ‹apply› ⧖:C,S2
+  ⍝ a past-tense call happens at compile time, so it is not a call of this function's
+  ⧗:C̵,tok #4# ‹tmark› ⧖:C,past
+  ⧗:C̵,f ⧗:past ⋔ ⦃ ⌁ ⦄ ⦃ ‹cedge› ⦄ ⁼ ⧖:C
   ⧗:C̵,f ‹rd› ⧖:C,fname
   ⧗:C̵,S2,strand,dead ○ ⧗:k #6# ᛖ ⋔ ⦃ #9# ⦄ ⦃ ○ ⦄ ⁼ ⧗:fname
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_call› ⸫
@@ -2541,6 +2560,7 @@
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_op› ⸫
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
+  ⧗:C̵,op,S ‹opcurse› ⧖:C
   ⧗:C̵,op,S,strand,depth,locks ‹glyph› ⧖:C,S2,strand2
   ⧗:C̵,op ‹ndt› ⧖:C,tok ⧗:C̵,tok ‹tc0› ⧖:C,x
   ⧗:C̵,S2,strand2 ⧗:dead ⧗:x #8623# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ○ ○ ○
@@ -2590,6 +2610,8 @@
   ⧖:C,op,c,S3,depth,inner,ind,rs,fi,prevr
   ⧗:C̵,rs,tok ○ ⧗:depth ‹join› ⧖:C,S4,strand2,dead2
   ⧗:C̵,op,c,S4,tok,depth,inner,ind ⧗:k #11# ᛖ ⋔ ⦃ ‹rsassert› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⍝ a failed exit assertion stops the program: worldly (A.4)
+  ⧗:C̵ ⧗:k #11# ᛖ ⋔ ⦃ #2# ‹curse› ⦄ ∅ ⁼ ⧖:C
   ⧗:C̵,strand,strand2 ‹lcat› ⧖:C,strand3
   ⧗:C̵,S4,strand3,dead2 ○ ⧗:k #11# ᛖ ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ○
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_select› ⸫
@@ -2620,6 +2642,14 @@
   ⧗:c,vals,tok #3# ⧗:depth,inner ⧗:ind #2# ⊞ ‹predicate›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹rsassert› ⸫
 
+⍝ ⥀: its vow, if any, waits in the addenda's state; see ‹loopcurse›
+⦃
+  ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
+  ⧗:C̵ #2# ‹a2› ⧖:C,pv ⧗:C̵ #2# #-1# ‹a2w› ⧖:C
+  ⧗:C̵,op,S,strand,dead,depth,locks,ind,prev,to ‹c_loop0› ⧖:C,S2,st2,d2,sk,lb,la
+  ⧗:C̵,op,pv ‹loopcurse› ⧖:C
+  ⧗:C̵,S2,st2,d2,sk,lb,la
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_loop› ⸫
 ⍝ ⥀: the body must have effect ⟨S ⊸ S ŧ⟩; evidentials and charges carried round must reach a fixpoint
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
@@ -2642,7 +2672,7 @@
   ⧗:C̵ ⧗:ind △ ⊞ #6# ‹note›
   ⧗:b,S,depth,inner ⧗:ind #2# ⊞ ‹subb› ⧖:C,R,rst,rdead
   ⧗:C̵,S,strand,dead,before,R,rst,tok,depth ⧗:rdead △ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ △ ○ #3# ○ ⦄ ⦃ ‹loopend› ⦄ ⁼
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_loop› ⸫
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_loop0› ⸫
 
 ⍝ ‹lstab› C S R dead: S with the evidentials and charges the body leaves on it, and whether that changed anything
 ⦃
@@ -2739,6 +2769,7 @@
 ⦃
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
   ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵ #16# ‹curse› ⧖:C
   ⧗:C̵,op #2# ‹nd› ⧖:C,sz
   ⧗:C̵ ⧗:ind △ ⊞ #10# ‹note›
   ‹lnew0› ⧖:C,AS
@@ -2806,7 +2837,9 @@
   ⍿⁰ #17# ᛖ ⋔ ⦃ ⌁ ‹c_handle› ⦄ ⦃
   ⍿⁰ #16# ᛖ ⋔ ⦃ ⌁ ‹c_prayer› ⦄ ⦃
   ⍿⁰ #8# ᛖ ⋔ ⦃ ⌁ ‹c_array› ⦄ ⦃
-  ⌁ ‹c_post› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ⍿⁰ #24# ᛖ ⋔ ⦃ ⌁ ‹c_exorcise› ⦄ ⦃
+  ⍿⁰ #25# ᛖ ⋔ ⦃ ⌁ ‹c_vow› ⦄ ⦃
+  ⌁ ‹c_post› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹case› ⸫
 
 ⍝ ‹btrace› C ind tok lab larg S: the trace line after an op
@@ -2845,6 +2878,7 @@
   ⧗:C̵,oi ‹ndt› ⧖:C,tok
   ⧗:C̵ ⧗:dead ○ ᛖ ⧗:tok #10# ‹cfailunless›
   ⧗:oi,S,strand,dead,depth,locks,ind,prev,to ‹case› ⧖:C,S2,strand2,dead2,skip,lab,larg
+  ⧗:C̵,oi,S2 ‹setdepth› ⧖:C
   ⧗:C̵,ind,tok,lab,larg,S2 ‹btrace› ⧖:C
   ⧗:C̵,oi #2# ‹nd› ⧖:C,sz
   ⧗:oi ⧗:sz ⊞ ⧖:nx
@@ -3060,6 +3094,7 @@
   ⧗:C̵,it ‹ndt› ⧖:C,tok
   ⧗:C̵,f ‹rd› ⧖:C,name
   ⧗:C̵ #55# ⧗:name ‹wr› ⧖:C
+  ⧗:C̵ △ ⧗:f ‹a2w› ⧖:C
   ⧗:C̵,f #2# ‹vf› ⧖:C,outs
   ⧗:C̵,outs ‹llen› ⧖:C,no
   ⧗:C̵,outs ○ ‹lget› ‹shead› ⧖:C,oh
@@ -3080,6 +3115,8 @@
   ⧗:C̵,from,to,S △ ⧗:e △ ‹cblock› ⧖:C,R,rst,rdead
   ⧗:C̵,f,tok,name,R ⧗:rdead ○ ᛖ ⋔ ⦃ ‹fnend› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
   ⧗:rst ○ ‹noleak›
+  ⧗:f,from,to ‹fnvowend› ⧖:C
+  ⧗:C̵ △ #-1# ‹a2w›
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹cfunction› ⸫
 
 ⍝ ‹fnend› C f tok name R: the final stack must be what the signature promises
@@ -3169,6 +3206,7 @@
   ⧗:i #6# ⊞ ⧗:nfr ⊞ ⧗:i #5# ⊞ ⧗:k #40# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:sig
   ⧗:C̵,i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C̵,nt ‹tname› ⧖:C,name
   ⧗:C̵,sig ⧗:rev ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧗:name ‹fninfo› ⧖:C,f
+  ⧗:C̵,f,i,k,r4,tok ‹cursedeco› ⧖:C
   ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,f #2# ‹vf› ⧖:C,outs
   ⧗:C̵,ins,tok ○ ‹chktypes› ⧗:outs,tok △ ‹chktypes› ⧖:C
   ⧗:C̵,f,i,tok,rev ⧗:k #32# ᛖ ⧗:sig ‹cgeneric› ⧖:C
@@ -3244,6 +3282,7 @@
   #10198# #643# ‹str2› ⧖:C,s ⧗:C̵ #19# ⧗:s ‹wr›
   #9676# #120121# ‹str2› ⧖:C,s ⧗:C̵ #20# ⧗:s ‹wr›
   ‹lnew0› ⧖:C,e ⧗:C̵ #7# ⧗:e ‹wr› #8# ⧗:e ‹wr› #9# ⧗:e ‹wr› #57# ⧗:e ‹wr› #58# ⧗:e ‹wr› #59# ⧗:e ‹wr› #56# #-1# ‹wr›
+  ‹a2init›
 ⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cinit› ⸫
 
 ⍝ ‹ccopyst› st C: copy the tree into the heap (register 5: its base; 24, 25: the tangled items)
@@ -3267,4 +3306,4 @@
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cpath› ⸫
 
 ⍝ ‹check› C: check every item (its trace goes to the output when register 1 is set)
-⦃ △ ‹citems› #2# ‹citems› #3# ‹citems› ‹cinsts› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹check› ⸫
+⦃ △ ‹citems› #2# ‹citems› #3# ‹citems› ‹cinsts› ‹cursefix› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹check› ⸫

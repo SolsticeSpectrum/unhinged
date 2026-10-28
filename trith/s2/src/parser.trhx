@@ -11,7 +11,10 @@
 ⍝   20 sig [nin saw]: types    21 type [np prefix tokens…]: element type (⟦…⟧)
 ⍝   30 fragment [name rev ordinal hasSig]: body, sig
 ⍝   31 particle [name]: type   32 ffi [name cname]: sig
+⍝   18 exorcism ⛨ˣ: block        19 vow ⍤⥀ or ⍤ᚠ: block (Addendum A.4, A.5)
 ⍝   40 fn [name rev nfr ordinals…]: sig, ops (after tangling)
+⍝ A fragment's rev is a set of bits, which tangling ORs together: 1 reversible ⇋, 2 blessed ✧,
+⍝ 4 doubly blessed ✧✧, 8 curses declared, and the declared curse mask from bit 4 on (A.4.1).
 ⍝ Token slots point into the token buffer; −1 is the end of the file.
 
 ⍝ ---- the token buffer's index (slot 3: where it starts, slot 4: count)
@@ -400,6 +403,10 @@
   ⧗:k #11# ᛖ ⧗:c #10214# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #13# #8# ⦄ ∅ ⁼
   ⧗:k #11# ᛖ ⧗:c #10216# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #14# #6# ⦄ ∅ ⁼
   ⧗:k #11# ᛖ ⧗:c #10627# ᛖ ⋎ ⋔ ⦃ ⌁ ⌁ #15# #7# ⦄ ∅ ⁼
+  ⍝ the addenda: ⛨ˣ ⦃…⦄ and ⍤⥀ ⦃…⦄ hold a block; ⸸…, ✧ and ⎔⸸ᵘ belong to items
+  ⧗:k #14# ᛖ ⋔ ⦃ ⌁ ⌁ #8# #18# ⦄ ∅ ⁼
+  ⧗:k #16# ᛖ ⋔ ⦃ ⌁ ⌁ #8# #19# ⦄ ∅ ⁼
+  ⧗:k #13# ᛖ ⧗:k #15# ᛖ ⋏ ⧗:k #17# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ #4# #4# ⦄ ∅ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ ℤ⟩ ‹opclass› ⸫
 
 ⍝ ‹op› st T F: one operation; handlers: 1 leaf, 3 unexpected, 4 unexpected
@@ -458,10 +465,31 @@
   ⧗:st̵,Ṯ,F̱ #10627# #10628# #9# ‹block› ‹ok› ⟗ ⧗:Ṯ ‹peek› ⧖:t ⧖:st
   ⧗:st̵,Ṯ,F̱,node ⧗:Ṯ,t #11# #10216# ‹is1›
   ⋔ ⦃ ⧖:st,T,F,node ⧗:st̵,Ṯ,F̱ ‹sig› ⧗:node #6# ⊞ △ ‹set› ‹ok› ⦄ ⦃ ⌁ ⌁̱ ⌁̱ ⦄ ⁼
+  ⧗:Ṯ,node ‹fcurse› ‹ok›
   ⟗ ⧗:Ṯ ‹peek› ⧖:nt ⧖:st
   ⧗:st̵,F̱,Ṯ,nt,node
   ⧗:Ṯ,nt ‹tkind› △ ᛖ ⧗:Ṯ,nt ‹tkind› #3# ᛖ ⋏ ⋔ ⦃ ‹fname› ⦄ ⦃ ⌁ #3# ‹fail2› ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹function› ⸫
+
+⍝ ‹fcurse› st T node: after a signature, the curses it declares ⸸… go into the rev bits (A.4.1)
+⦃
+  ⧖:st,T,node
+  ⧗:st̵ ⟗ ⧗:Ṯ ‹peek› ⧖:ct ⟗ ⧗:node #6# ⊞ ᚳ ⧖:has ⟗ ⧗:node #4# ⊞ ᚳ ⧖:rev ⧖:st
+  ⧗:Ṯ,ct ‹tkind› #13# ᛖ ⧗:has △ ᛖ ⋎ ⧖:yes
+  ⧗:Ṯ ⧗:ct #5# ⊞ ᚳ ⧖:m
+  ⧗:st̵ ⧗:node #4# ⊞ ⧗:rev #8# ⋓ ⧗:m #4# ≪ ⋓ ⧗:yes ⋔ ⦃ ⧖:a,b,c ⧗:a̵ ‹adv› ‹ok› ⧗:b,c ‹set› ‹ok› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹fcurse› ⸫
+
+⍝ ‹blessed› st T F: ✧ or ✧✧ before a function (A.5.2)
+⦃
+  ⧖:st,T,F
+  ⧗:st̵ ⟗ ⧗:Ṯ ‹peek› ⧖:t ⧖:st
+  ⧗:Ṯ ⧗:t #5# ⊞ ᚳ ⧖:lvl
+  ⧗:st̵ ‹adv› ‹ok› ⟗ ⧗:Ṯ ‹peek› ⧖:t2 ⧖:st
+  ⧗:Ṯ,t2 #8# #8651# ‹is1› ⧖:isrev
+  ⧗:st̵ ⧗:isrev ⋔ ⦃ ‹adv› ‹ok› ⦄ ∅ ⁼ ⧖:st
+  ⧗:st̵,Ṯ,F̱ #4# #2# ⧗:lvl #2# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ △ ○ ⧗:isrev ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⋓ ‹function›
+⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹blessed› ⸫
 
 ⍝ ‹iname› st T F nt node: the item's name and ⸫
 ⦃
@@ -504,11 +532,13 @@
   ⧖:st,T,F
   ⧗:st̵ ⟗ ⧗:Ṯ ‹peek› ⧖:t ⧖:st
   ⧗:st̵,Ṯ,F̱,t
+  ⧗:Ṯ,t ‹tkind› #15# ᛖ ⋔ ⦃ ⌁ ‹blessed› ⦄ ⦃ ⧖:st,T,F,t ⧗:st̵,Ṯ,F̱,t
+  ⧗:Ṯ,t ‹tkind› #17# ᛖ ⋔ ⦃ ⌁ ‹ffi› ⦄ ⦃ ⧖:st,T,F,t ⧗:st̵,Ṯ,F̱,t
   ⧗:Ṯ,t #8# #9883# ‹is1› ⋔ ⦃ ⌁ ‹particle› ⦄
     ⦃ ⧖:st,T,F,t ⧗:st̵,Ṯ,F̱,t ⧗:Ṯ,t #8# #9108# ‹is1› ⋔ ⦃ ⌁ ‹ffi› ⦄
       ⦃ ⧖:st,T,F,t ⧗:st̵,Ṯ,F̱,t ⧗:Ṯ,t #8# #8651# ‹is1› ⋔ ⦃ ⌁ ⧖:T2,F2 ‹adv› ⧗:T2̱,F2̱ △ ‹function› ⦄
         ⦃ ⧖:st,T,F,t ⧗:st̵,Ṯ,F̱,t ⧗:Ṯ,t #11# #10627# ‹is1› ⋔ ⦃ ⌁ ○ ‹function› ⦄
-          ⦃ ⧖:st,T,F,t ⧗:st̵,F̱,Ṯ,t #7# ‹fail2› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+          ⦃ ⧖:st,T,F,t ⧗:st̵,F̱,Ṯ,t #7# ‹fail2› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ⊸ ◌⟦ℤ⟧⟩ ‹item› ⸫
 
 ⦃
@@ -1011,6 +1041,9 @@
   ⧗:k #14# ᛖ ⋔ ⦃ $loop$ ⎙̵ ⦄ ∅ ⁼
   ⧗:k #15# ᛖ ⋔ ⦃ $postselect$ ⎙̵ ⦄ ∅ ⁼
   ⧗:k #16# ᛖ ⋔ ⦃ $prayer$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:k #18# ᛖ ⋔ ⦃ $exorcism $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:k #19# ᛖ ⋔ ⦃ $vow $ ⎙̵ ⦄ ∅ ⁼
+  ⧗:Ṯ,t ⧗:k #18# ᛖ ⧗:k #19# ᛖ ⋏ ⋔ ⦃ ‹ptok› ⦄ ⦃ ⌁ ⌁̱ ⦄ ⁼
   ⧗:Ṯ ⧗:t #4# ⊞ ᚳ ⧖:n
   ⧗:n #-9# ᛖ ‹not› ⋔ ⦃ $ n=$ ⎙̵ ⦄ ∅ ⁼
   ⧗:n ⧗:n #-9# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ᛁ ⦄ ⁼
@@ -1079,7 +1112,10 @@
   ⧗:sṯ ⧗:s #2# ⊞ ᚳ ⧗:s ⊞ ⧖:body
   ⧗:sṯ ⧗:i #2# ⊞ ᚳ ⧗:i ⊞ ⧖:end
   $fn $ ⎙̵ ⧗:Ṯ,name ‹pname› $ $ ⎙̵ ⧗:sṯ,Ṯ,s ‹psig›
-  ⧗:rev ○ ᛖ ‹not› ⋔ ⦃ $ reversible$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:rev △ ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ reversible$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:rev #2# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ ✧$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:rev #4# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ ✧✧$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:rev #4# ≫ ⧗:rev #8# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ $ ⎙̵ ‹pcurses› ⦄ ⦃ ⌁ ⦄ ⁼
   ⧗:sṯ,Ṯ,i,nfr ‹pfrags› $\n$ ⎙̵
   ⧗:sṯ,Ṯ,body,end △ ‹dops›
 ⦄ ⟨⟗⟦ℤ⟧ ⟗⟦ℤ⟧ ℤ ℤ ⊸⟩ ‹dfn› ⸫

@@ -1714,7 +1714,7 @@
   ⧗:C̵ %%!@"trith.{name}"%% ⧖:C,sym
   ⧗:C̵,name,sym ○ ⧗:f,i,from,to ‹efnadd› ⧖:C
   ⧗:C̵,i #4# ‹nd› ⧖:C,rev
-  ⧗:C̵,name,f,i ⧗:rev △ ᛖ ⋔ ⦃ ‹efninv› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:C̵,name,f,i ⧗:rev △ ⋒ △ ᛖ ⋔ ⦃ ‹efninv› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹efn40› ⸫
 ⍝ every ⇋ function gets a generated inverse ⇜name (its ops are made when it is emitted)
 ⦃

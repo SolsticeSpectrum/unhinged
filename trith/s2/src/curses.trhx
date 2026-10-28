@@ -1,0 +1,9 @@
+⍝ ==== s2 curses, vows and blessings (Addendum A.4, A.5)
+
+⍝ ‹pcurses› m: a curse mask as written, ⸸ and its letters (ᶠ ⁱ ᵘ ᵈ ᵃ)
+⦃
+  ⧖:m
+  $⸸$ ⎙̵
+  ⧗:m △ ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ᶠ$ ⎙̵ ⦄ ∅ ⁼ ⧗:m #2# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ⁱ$ ⎙̵ ⦄ ∅ ⁼ ⧗:m #4# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ᵘ$ ⎙̵ ⦄ ∅ ⁼
+  ⧗:m #8# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ᵈ$ ⎙̵ ⦄ ∅ ⁼ ⧗:m #16# ⋒ ○ ᛖ ‹not› ⋔ ⦃ $ᵃ$ ⎙̵ ⦄ ∅ ⁼
+⦄ ⟨ℤ ⊸⟩ ‹pcurses› ⸫

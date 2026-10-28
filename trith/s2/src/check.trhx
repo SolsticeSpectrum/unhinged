@@ -3075,7 +3075,7 @@
   ⧗:sig ⧗:ssz ⊞ ⧖:from
   ⧗:it ⧗:isz ⊞ ⧖:to
   ⧗:C̵,it #4# ‹nd› ⧖:C,rev
-  ⧗:C̵,from,to ⧗:rev △ ᛖ ⋔ ⦃ ‹reversible› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,from,to ⧗:rev △ ⋒ △ ᛖ ⋔ ⦃ ‹reversible› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
   ⧗:C̵ ‹lnew0› ⧖:C,e
   ⧗:C̵,from,to,S △ ⧗:e △ ‹cblock› ⧖:C,R,rst,rdead
   ⧗:C̵,f,tok,name,R ⧗:rdead ○ ᛖ ⋔ ⦃ ‹fnend› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
@@ -3165,7 +3165,7 @@
   ⧗:C̵,i ‹ndt› ⧖:C,tok
   ⧗:C̵,i #4# ‹nd› ⧖:C,r4
   ⧗:C̵,i #5# ‹nd› ⧖:C,nfr
-  ⧗:k #40# ᛖ ⧗:r4 △ ᛖ ⋎ ⧖:rev
+  ⧗:k #40# ᛖ ⧗:r4 △ ⋒ △ ᛖ ⋎ ⧖:rev
   ⧗:i #6# ⊞ ⧗:nfr ⊞ ⧗:i #5# ⊞ ⧗:k #40# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:sig
   ⧗:C̵,i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C̵,nt ‹tname› ⧖:C,name
   ⧗:C̵,sig ⧗:rev ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⧗:name ‹fninfo› ⧖:C,f

@@ -183,7 +183,7 @@
 ⦄ ⟨⟗⟦ℤ⟧ ℤ ℤ ⊸ ŧ ℤ ℤ⟩ ‹hdrparse› ⸫
 
 ⍝ ‹header› out cps path line ls le: a header line becomes a marker record
-⍝ [14 line 1 0 −9 z n 0 0], whose line is the plane's origin with y = 0
+⍝ [99 line 1 0 −9 z n 0 0], whose line is the plane's origin with y = 0
 ⦃
   ⧖:out,cps,path,line,ls,le
   ⧗:cps̱,ls,le ‹hdrparse› ⧖:ok,z,n
@@ -192,7 +192,7 @@
 ⦄ ⟨⟦ℤ⟧ ⟗⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹header› ⸫
 ⦃
   ⧖:out,path,line,fl,z,n
-  ⧗:out̵ #14# ⍆̵ ○ ⧗:fl △ ⊞ ⧗:line ‹plf› ⧗:z ○ ‹plpack› ⍆̵ △ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ⧗:z ⍆̵ ⧗:n ⍆̵ ○ ⍆̵ ○ ⍆̵
+  ⧗:out̵ #99# ⍆̵ ○ ⧗:fl △ ⊞ ⧗:line ‹plf› ⧗:z ○ ‹plpack› ⍆̵ △ ⍆̵ ○ ⍆̵ #-9# ⍆̵ ⧗:z ⍆̵ ⧗:n ⍆̵ ○ ⍆̵ ○ ⍆̵
 ⦄ ⟨⟦ℤ⟧ ⟗ʃ ℤ ℤ ℤ ℤ ⊸ ◌⟦ℤ⟧⟩ ‹hdrrec› ⸫
 ⦃
   ⧖:out,path,line,fl,z,n
@@ -260,7 +260,7 @@
 ⦃
   ⧖:toks,path,P,X,j,cur
   ⧗:toks̱,j ᚳ ⧖:kind
-  ⧗:toks̱,patẖ,P̵,X̵,j,cur ⧗:kind #14# ᛖ ⋔ ⦃ ‹ptmark› ⦄ ⦃ ‹ptrec› ⦄ ⁼ ⧖:P,X,cur
+  ⧗:toks̱,patẖ,P̵,X̵,j,cur ⧗:kind #99# ᛖ ⋔ ⦃ ‹ptmark› ⦄ ⦃ ‹ptrec› ⦄ ⁼ ⧖:P,X,cur
   ⧗:P̵,X̵ ⧗:j ⧗:toks̱,j ‹reclen› ⊞ ⧗:cur
 ⦄ ⟨⟗⟦ℤ⟧ ⟗ʃ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ⟦ℤ⟧ ℤ ℤ⟩ ‹ptscan1› ⸫
 ⍝ a header: a new plane, unless tokens of the same file came before it

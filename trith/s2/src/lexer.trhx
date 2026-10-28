@@ -6,7 +6,9 @@
 ⍝ After the text come rn and the token's raw text as written (marks included,
 ⍝ in physical order), which the check pass shows in its traces.
 ⍝ Kinds: 1 name 2 tname 3 anti 4 inverse 5 int 6 real 7 trit 8 glyph
-⍝ 9 type 10 tprefix 11 bracket 12 string. idx −9 is none, −1 is ⁻, −2 is ⁺.
+⍝ 9 type 10 tprefix 11 bracket 12 string, and the addenda's 13 curse ⸸…, 14 exorcism ⛨…
+⍝ (or the rite prefix ⛨), 15 blessing ✧ ✧✧, 16 vow ⍤⥀ ⍤ᚠ, 17 forbidden binding ⎔⸸ᵘ (v1: the curse
+⍝ mask, the blessing's level, or 0 for a loop vow and 1 for a function's). idx −9 is none, −1 is ⁻, −2 is ⁺.
 ⍝ int: v1 value; real: v1/v2; type and tprefix: v1 prefix length, v2 slot of ⁽ or −1.
 
 ⎔ »tixe« ⟨ℤ ⊸⟩ ‹exit› ⸫
@@ -81,6 +83,11 @@
   ⍿⁰ #10# ᛖ ⋔ ⦃ $tprefix$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #11# ᛖ ⋔ ⦃ $bracket$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #12# ᛖ ⋔ ⦃ $string$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #13# ᛖ ⋔ ⦃ $curse$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #14# ᛖ ⋔ ⦃ $exorcism$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #15# ᛖ ⋔ ⦃ $blessing$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #16# ᛖ ⋔ ⦃ $vow$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #17# ᛖ ⋔ ⦃ $forbidden$ ⎙̵ ⦄ ∅ ⁼
   ⌁
 ⦄ ⟨ℤ ⊸⟩ ‹pkind› ⸫
 
@@ -632,8 +639,52 @@
 ⦃
   ⧖:b
   ⧗:ḇ ‹ascii› ⧖:code
-  ⧗:ḇ ⧗:code ⧗:code ○ ᛖ ⋔ ⦃ ⌁ ‹cl1› ⦄ ⦃ ⧖:code ⌁̱ ○ ⧗:code ○ ○ ○ ○ ⦄ ⁼
+  ⧗:ḇ ⧗:code ⧗:code ○ ᛖ ⋔ ⦃ ⌁ ‹cladd› ⦄ ⦃ ⧖:code ⌁̱ ○ ⧗:code ○ ○ ○ ○ ⦄ ⁼
 ⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹classify› ⸫
+
+⍝ ---- the addenda's tokens (A.4, A.5): ⸸… curses, ⛨… exorcisms and the rite prefix ⛨,
+⍝ ✧ ✧✧ blessings, ⍤⥀ ⍤ᚠ vows and ⎔⸸ᵘ forbidden bindings
+
+⍝ ‹cursebit› cp: the bit of a curse letter (ᶠ 1, ⁱ 2, ᵘ 4, ᵈ 8, ᵃ 16), or 0
+⦃
+  ⧖:c ○
+  ⧗:c #7584# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:c #8305# ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:c #7512# ᛖ ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼
+  ⧗:c #7496# ᛖ ⋔ ⦃ ⌁ #8# ⦄ ∅ ⁼ ⧗:c #7491# ᛖ ⋔ ⦃ ⌁ #16# ⦄ ∅ ⁼
+⦄ ⟨ℤ ⊸ ℤ⟩ ‹cursebit› ⸫
+
+⍝ ‹cursemask› b from: the mask of the curse letters from slot from on (−1 if one is not a
+⍝ curse letter, repeats, or there are none)
+⦃
+  ⧖:b,from
+  ⧗:ḇ,from ⧗:from ⧗:ḇ ᚴ ≶ ⋔ ⦃ #-1# ⦄ ⁼ ⦃ ○ ⦄
+  ⥀ ⦃
+    ⧖:b,i,m
+    ⧗:ḇ,i ᚳ ‹cursebit› ⧖:bit
+    ⧗:ḇ ⧗:i △ ⊞ ⧗:m ⧗:bit ⧗:bit ○ ᛖ ⧗:m ⧗:bit ⋒ ○ ᛖ ‹not› ⋏ ⧗:m #-1# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ #-1# ⦄ ⦃ ⋓ ⦄ ⁼
+    ⧗:i △ ⊞ ⧗:ḇ ᚴ ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⊕ ⦄
+  ⦄
+  ⧖:b,i,m ⧗:m
+⦄ ⟨⟗⟦ℤ⟧ ℤ ⊸ ℤ⟩ ‹cursemask› ⸫
+
+⍝ ‹cladd› b: one of the addenda's tokens, or the ordinary classification
+⦃
+  ⧖:b
+  ⧗:ḇ ᚴ ⧖:n ⧗:ḇ ○ ᚳ ⧖:c0 ⧗:ḇ △ ᚳ ⧖:c1
+  ⧗:ḇ △ ‹cursemask› ⧖:m1
+  ○
+  ⧗:c0 #11832# ᛖ ⧗:m1 #-1# ᛖ ‹not› ⧗:n △ ᛖ ⋏ ⋎ ⋔ ⦃ ⌁ #13# ⦄ ∅ ⁼
+  ⧗:c0 #9960# ᛖ ⧗:n △ ᛖ ⧗:m1 #-1# ᛖ ‹not› ⋏ ⋎ ⋔ ⦃ ⌁ #14# ⦄ ∅ ⁼
+  ⧗:c0 #10023# ᛖ ⧗:n △ ᛖ ⧗:n #2# ᛖ ⧗:c1 #10023# ᛖ ⋎ ⋏ ⋎ ⋔ ⦃ ⌁ #15# ⦄ ∅ ⁼
+  ⧗:c0 #9060# ᛖ ⧗:n #2# ᛖ ⧗:c1 #10560# ᛖ ⋎ ⧗:ḇ △ ⧗:n △ ‹allcls› ⋏ ⋎ ⋔ ⦃ ⌁ #16# ⦄ ∅ ⁼
+  ⧗:c0 #9108# ᛖ ⧗:n #3# ᛖ ⋎ ⧗:c1 #11832# ᛖ ⋎ ⧗:ḇ #2# ᚳ #7512# ᛖ ⋎ ⋔ ⦃ ⌁ #17# ⦄ ∅ ⁼
+  ⧖:kind
+  ⍝ v1: the curse mask (13, 14; 0 for a bare ⛨), the blessing's level, 0 for ⍤⥀ and 1 for ⍤ᚠ, 4 for ⎔⸸ᵘ
+  ○ ⧗:m1 ⧗:n △ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:t1
+  ⧗:n ⧗:t1 ⧗:kind #15# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:t2
+  ○ △ ⧗:c1 #10560# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧗:t2 ⧗:kind #16# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:t3
+  #4# ⧗:t3 ⧗:kind #17# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:v1
+  ⧗:ḇ,kind,v1,n ⧗:kind ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ‹cl1› ⦄ ⦃ ⧖:k,v,nn ⌁̱ ⧗:k #-9# ⧗:v ○ ○ ⧗:nn ⦄ ⁼
+⦄ ⟨⟗⟦ℤ⟧ ⊸ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹cladd› ⸫
 
 ⍝ ---- combining marks (§2.1)
 

@@ -1,5 +1,5 @@
 /* Trith standard library: crypto (SHA-256, HMAC-SHA-256, AES-256-CBC, random bytes).
- * Ported from the UNHINGED v1 runtime (runtime/rt.c), with the same algorithms and
+ * Ported from the UNHINGED v1 runtime (unhinged/runtime/rt.c), with the same algorithms and
  * formats. Bind it with ⎔ and build with --link trith/lib/crypto.c (trith/lib/README.md).
  * Strings come back in a buffer the next call reuses (the FFI glue copies them at
  * once); NULL is a failure, which a ◌ʃ binding sees as ◌. */

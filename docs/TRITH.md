@@ -1,6 +1,6 @@
 # Trith — Language Specification (draft 1)
 
-> Successor to UNHINGED (v1). Compiler: `trithc`. Source files: `.trh` (alias: `.ŧ`).
+> The language of this repository. It succeeds UNHINGED (v1), which survives only to bootstrap the first compiler (`unhinged/`). Compilers: `trithc` (s1, in UNHINGED) and `s2c` (s2, in Trith). Source files: `.trh` (alias: `.ŧ`).
 
 > A language from a species that thinks in data flow, time, evidence and possibility — not in names, sequence and truth.
 > Alien on the surface, boring underneath: everything strange is resolved by the compiler.

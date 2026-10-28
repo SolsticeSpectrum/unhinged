@@ -1,154 +1,109 @@
-# UNHINGED
+# Trith
 
-UNHINGED is a postfix, symbol-driven language with a self-hosted compiler.
+Trith is a postfix language with no variable names. Values flow on a stack, and time is a strand of moments you read by how long ago they were bound. Truth has three values. Values carry evidence and units, and quantum values are linear. Function bodies can be scattered across a file, and every other line of a source file runs right to left. Underneath, it is boring: everything strange is resolved at compile time, and the generated code runs at the speed of C (§0, the Zero-Cost Law).
 
-## Build Pipeline
-
-Three-stage build:
-
-1) Build the Rust bootstrap compiler.
-2) Use the bootstrap to compile the UNHINGED compiler (stage1).
-3) Use stage1 to compile the final compiler (stage2).
-
-The final binary is `build/unhingedc`.
-Stage1 is `build/stage1`.
-
-Why stage2:
-
-- Stage1 is already self-hosted.
-- Stage2 is a sanity check that the compiler can rebuild itself without relying on the bootstrap and that the output stabilizes.
-
-## Build
-
-```bash
-make build
+```
+⦃ »↵dlrow ,olleh« ⎙̵ ⦄ ⟨⊸⟩ ᛟ ⸫
 ```
 
-## Test
+- The language: [`docs/TRITH.md`](docs/TRITH.md). Two proposed extensions, not implemented yet: [Addendum A](docs/TRITH-ADDENDUM-A.md) (planes, the tesseract, dreams, curses and blessings) and [Addendum B](docs/TRITH-ADDENDUM-B.md) (heat and voltage).
+- The standard library: [`trith/lib/README.md`](trith/lib/README.md). It covers SHA-256, HMAC and AES; JSON; an HTTP client and server; WebSocket; and SMTP, with TLS for all three network modules.
+- Trith replaced UNHINGED, the language this repository started with. UNHINGED now exists only to bootstrap the first Trith compiler; see [`unhinged/README.md`](unhinged/README.md).
+
+## Build and test
+
+You need clang and LLVM (`llvm-link`), Rust (cargo), Python 3, and OpenSSL's headers (libssl-dev) for the network library. Run everything from the repository root.
 
 ```bash
-make test
+make            # builds build/s2c, the Trith compiler written in Trith (and everything it needs)
+make test       # every test below; must pass before a commit
 ```
 
-Optional service tests:
-
-- `RUN_NET=1` enables HTTP + WebSocket tests.
-- `RUN_SMTP=1` enables SMTP (MailHog setup below).
-
-Notes:
-
-- `tests/tests.uh` embeds all test sources and compiles/runs them using `UNHINGEDC`.
-- Net and SMTP tests are skipped unless enabled via env flags.
-
-### SMTP (MailHog)
-
-Start MailHog:
-
 ```bash
-python tests/servers/mailhog_start.py
-```
+./build/s2c main.trh -o main         # compile to a native binary
+./build/s2c main.trh --emit-llvm     # print the generated LLVM IR
+./build/s2c file.trh --tokens        # token stream after the Boustrophedon Rule
+./build/s2c file.trh --ast           # parsed and tangled item tree
+./build/s2c file.trh --check         # type-check, printing the virtual stack after every operation
+./build/s2c main.trh --include trith/lib/json.h --link trith/lib/json.c -o main   # with a library module
 
-Run SMTP tests:
-
-```bash
-RUN_SMTP=1 SMTP_HOST=127.0.0.1 SMTP_PORT=1025 SMTP_TLS=0 SMTP_STARTTLS=0 make test
-```
-
-View captured email:
-
-- http://127.0.0.1:8025
-
-Stop MailHog:
-
-```bash
-python tests/servers/mailhog_stop.py
-```
-
-## Trith (v2, in progress)
-
-Trith is the successor language; the spec is [`docs/TRITH.md`](docs/TRITH.md).
-Its first compiler, `trithc` (stage s1), is written in UNHINGED and built by `build/unhingedc`.
-
-Done so far:
-
-- Milestone 1: lexer and parser.
-- Milestone 2: the check pass (stack effects, linearity, borrows, failure, case roles, agreement).
-- Milestone 3: native code through LLVM for integers, trits, reals, bytes, string literals, `⋔`, `⥀`, failure handling, prayers and future calls.
-- Milestone 4: arrays and strings, borrows at run time, particles, FFI through generated C glue, and checked evidentials and charges.
-- Milestone 5: superposition with phase and interference, retrocausal post-selection, reversible functions with generated inverses, past-tense calls evaluated at compile time, and prayer verdicts.
-
-Generated code runs at C speed (within about 0.9–1.06× of `clang -O2`) on fib, Collatz, n-body and Game of Life, and at about 1.2× on SHA-256 of 100 MiB, where 32-bit words live in 64-bit integers with masks.
-
-- Milestone 6: the compiler rewritten in Trith itself (stage s2, in `trith/s2/`), passing the fixpoint. s1 compiles it into `build/s2c`, which prints exactly what `trithc` prints for `--tokens`, `--ast`, `--check` and `--emit-llvm` (traces and error messages included) for every Trith file in the repository, and compiles programs the same way. s2 compiled by itself (s3) emits the same IR and is the same executable. Unlike s1, s2 exits with status 1 after an error, and it is much faster: it compiles its own 8,000-line source to IR in 0.35 s, where s1 takes 11 s.
-
-```bash
-make trith          # builds build/trithc
-make trith-test     # golden tests in trith/tests/ (also run by make test)
-make trith-bench    # benchmark gate: each program within 1.5× of clang -O2 C
-make trith-memcheck # valgrind over every test program: no invalid accesses, no leaks
-
-./build/trithc main.trh -o main      # compile (run from the repo root; needs clang)
-./build/trithc main.trh --emit-llvm  # print the generated LLVM IR
-
-./build/trithc file.trh --tokens     # token stream after the Boustrophedon Rule
-./build/trithc file.trh --ast        # parsed and tangled item tree
-./build/trithc file.trh --check      # type-check, printing the virtual stack after every operation
-./build/trithc draft.trh --plough    # logical order (all lines left to right) → on-disk order, padded with breaths
+./build/trithc draft.trh --plough    # logical order (every line left to right) → on-disk order, padded with breaths
 ./build/trithc file.trh --unplough   # on-disk order → logical order, for reading
 ```
 
-Writing on-disk Trith by hand is error-prone (even lines run right to left, and the token count must divide by 3). Write the logical order and run `--plough`.
+Writing on-disk Trith by hand is error-prone: even lines run right to left, and the token count must be divisible by 3. Write in logical order and run `--plough`.
 
-The s2 sources (`trith/s2/src/*.trhx`) are logical-order Trith with a few authoring shorthands, expanded by `trith/s2/tools/trx.py`. Named moments `⧖:x` / `⧗:x` become `⧖` / `⧗ⁿ` with the index counted for you, following Trith's own scope rules. A read carries the agreement mark written after its name (`⧗:C̵` moves the heap `C`, `⧗:m̱` reads a shadow). `‹name›` gets a unique Runic function name, `#42#` becomes a balanced-ternary literal, and `$text$` becomes a string literal. The generated, ploughed `trith/s2/s2c.trh` is committed, so building s2 needs no Python.
+## The compilers
+
+The compiler exists twice, and the two must agree byte for byte.
+
+| Stage | Source | Binary | Written in |
+|---|---|---|---|
+| s1 | `trith/src/*.uh` | `build/trithc` | UNHINGED, compiled by `build/unhingedc` |
+| s2 | `trith/s2/src/*.trhx` → `trith/s2/s2c.trh` | `build/s2c` | Trith, compiled by s1 |
+| s3 | `trith/s2/s2c.trh` | `build/s3c` | Trith, compiled by s2 |
+
+For every Trith file in the repository, s2 prints exactly what s1 prints for `--tokens`, `--ast`, `--check` and `--emit-llvm`, traces and error messages included, and compiles programs the same way. s3 emits the same IR as s2 and is the same executable: that is the fixpoint (§17). s2 is the faster of the two. It compiles its own 8,000-line source in about 0.35 s, where s1 takes 11 s, and it exits with status 1 after an error. --plough and --unplough exist only in s1.
+
+The s2 sources are Trith in logical order with a few authoring shorthands, which `trith/s2/tools/trx.py` expands:
+
+- Named moments `⧖:x` / `⧗:x` become `⧖` / `⧗ⁿ`, with the index counted by Trith's own scope rules. A read carries the agreement mark written after its name: `⧗:C̵` moves the heap `C`, and `⧗:m̱` reads a shadow.
+- `‹name›` gets a unique Runic function name.
+- `#42#` becomes a balanced-ternary literal, and `$text$` a string literal.
+
+The generated, ploughed `trith/s2/s2c.trh` is committed, so building s2 needs no Python.
 
 ```bash
-make s2             # builds build/s2c from trith/s2/s2c.trh with s1
-make s2-test        # s2 and s1 agree on every dump of every .trh file, and on every compiled test program
-make s3             # builds build/s3c: s2 compiled by s2
-make s2-fixpoint    # s3 must emit exactly what s2 emits, be the same executable, and pass s2-test (also run by make test)
-make s2-fuzz        # random lexer inputs, random programs and mutated tests, s2 against s1
-make s2-regen       # regenerate trith/s2/s2c.trh from trith/s2/src (needs python3)
-
-./build/s2c main.trh -o main         # compile, as trithc does (run from the repo root; needs clang)
-./build/s2c file.trh --tokens        # same output as trithc for --tokens, --ast, --check and --emit-llvm
+make trith          # s1: build/trithc
+make s2             # s2: build/s2c, from the committed trith/s2/s2c.trh
+make s2-regen       # regenerate trith/s2/s2c.trh from trith/s2/src (after editing s2)
+make s3             # s3: build/s3c
 ```
 
-- Milestone 7: the v1 standard library ported as C modules bound with FFI (`trith/lib/`): SHA-256, HMAC and AES; JSON; an HTTP client and server; WebSocket; SMTP. See [`trith/lib/README.md`](trith/lib/README.md).
-- Since then, decided open questions (§16): agreement marks on moment reads (`⧗̵ⁿ` moves a string, `⧗̱ⁿ` reads a shadow), and region-scoped borrows, so a loop or face reads and writes an array through a `⟗`/`⟖` moment of an enclosing block; and generics: type variables `α … θ` in signatures, compiled once per instance (`⟨⟗⟦α⟧ ℤ ⊸ ◌α⟩` reads any classical array), then quotations: blocks as values, applied with `⍎` and passed to functions typed with row variables (`⟨ρ ⟨ρ ⊸ ρ⟩ ⊸ ρ⟩`), inlined per call site so they cost nothing at run time. The network modules speak TLS through OpenSSL (`https://`, `wss://`, SMTP with STARTTLS or on port 465), linked with `--link -lssl --link -lcrypto`. The runtime raises the stack limit at start, so deep compile-time recursion reports an error instead of overflowing.
+## Tests
 
-```bash
-make lib-test       # build and run each module's test with s1 and s2 (also run by make test)
-make lib-regen      # regenerate trith/lib/tests/*.trh from the .trhx sources (needs python3)
+| Target | What it checks |
+|---|---|
+| `make trith-test` | golden tests: each `trith/tests/<suite>/<name>.trh` against `<name>.out` |
+| `make s2-test` | s2 and s1 agree on every dump of every `.trh` file, and on every compiled test program |
+| `make s2-fixpoint` | s3 emits exactly what s2 emits, is the same executable, and passes s2-test |
+| `make lib-test` | each library module's test, built with s1 and with s2, run against its `.out` |
+| `make unhinged-test` | the UNHINGED bootstrap compiler's own tests |
+| `make s2-fuzz` | random lexer inputs, random programs, and mutated tests: s2 against s1 (not part of `make test`) |
+| `make trith-bench` | each benchmark within 1.5× of the same program in C at `clang -O2` |
+| `make trith-memcheck` | valgrind over every test program: no invalid accesses, no leaks |
 
-./build/trithc main.trh --include trith/lib/json.h --link trith/lib/json.c -o main
-```
+To regenerate the golden `.out` files after an intended change, run `BLESS=1 TRITHC=build/trithc build/trith-tests` and review the diff. `make lib-regen` and `make bench-regen` regenerate the `.trh` files that are written as `.trhx`.
 
-Golden tests: `trith/tests/<suite>/<name>.trh` is compared with `<name>.out`. To regenerate the `.out` files after an intended change, run `BLESS=1 TRITHC=build/trithc build/trith-tests` and review the diff.
+Generated code runs within about 0.9–1.06× of `clang -O2` on fib, Collatz, n-body and Game of Life. SHA-256 of 100 MiB runs at about 1.2×, because its 32-bit words live in 64-bit integers with masks.
+
+## What is implemented
+
+The whole of `docs/TRITH.md`, in both compilers:
+
+- the Boustrophedon Rule and the Ternary Balance Law;
+- the strand of moments, with region-scoped borrows;
+- case marks and agreement;
+- three-valued truth with `⋔` and `⥀`;
+- failure;
+- the quantum layer: ownership, borrows, superposition with phase and interference, retrocausal post-selection, particles and antiparticles;
+- functions: call by shape, the past and future tenses, scattered bodies;
+- generics, with type variables and quotations over row-polymorphic effects;
+- reversible functions with generated inverses;
+- centre-indexed arrays and strings;
+- prayers;
+- FFI through generated C glue.
+
+The order in which this was built, and the decisions taken on the spec's open questions, are in §16 and §17 of the spec.
 
 ## Layout
 
-- `bootstrap/` Rust bootstrap compiler.
-- `compiler/` UNHINGED compiler source.
-- `runtime/` LLVM IR runtime.
-- `tests/` Embedded test runner and helpers.
-- `examples/` Example programs (compile outputs into `output/`).
-- `docs/TRITH.md` Trith (v2) language spec.
-- `trith/` Trith compiler (s1 in `trith/src/`, written in UNHINGED), its golden tests and benchmarks, and the self-hosted compiler (`trith/s2/`, written in Trith).
-
-## Examples
-
-Keep generated binaries and artifacts in `output/` to avoid cluttering the repo.
-
-Game of Life:
-
-```bash
-./build/unhingedc examples/life.uh output/life
-./output/life
-```
-
-HTTP demo site:
-
-```bash
-./build/unhingedc examples/website.uh output/website
-./output/website
-```
+- `docs/` holds the language specification and the proposed addenda.
+- `trith/src/` is s1, the first compiler, written in UNHINGED.
+- `trith/s2/` is s2, the compiler written in Trith: sources, the generated `s2c.trh`, the authoring tools, and the agreement test.
+- `trith/runtime/` is the C runtime linked into every Trith program.
+- `trith/lib/` is the standard library: C modules bound with `⎔`.
+- `trith/tests/` holds the golden tests: lexer, parser, checker, check errors, programs that run, and emitted IR.
+- `trith/bench/` holds the benchmarks, each next to the same program in C.
+- `unhinged/` is the UNHINGED compiler (Rust bootstrap and self-hosted compiler), its runtime, tests and examples. It is kept to build s1.
+- `build/` and `output/` hold build products and test output; neither is committed.

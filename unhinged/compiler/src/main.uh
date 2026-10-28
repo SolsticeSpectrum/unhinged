@@ -33,7 +33,7 @@
   outputFile ".rt.o" ⊞⊞ → rtobj ¿
   "llc -O0 -filetype=obj -o " objpath ⊞⊞ " " ⊞⊞ llpath ⊞⊞ → cmd1 ¿
   cmd1 ⟪ syscall ⟫ → _ ¿
-  "clang -S -emit-llvm -O2 -o " rtll ⊞⊞ " runtime/rt.c" ⊞⊞ → cmd2 ¿
+  "clang -S -emit-llvm -O2 -o " rtll ⊞⊞ " unhinged/runtime/rt.c" ⊞⊞ → cmd2 ¿
   cmd2 ⟪ syscall ⟫ → _ ¿
   "llc -O2 -filetype=obj -o " rtobj ⊞⊞ " " ⊞⊞ rtll ⊞⊞ → cmd3 ¿
   cmd3 ⟪ syscall ⟫ → _ ¿
@@ -162,5 +162,6 @@ argc 2 ≺ ⤴ ↵
     ⌫ ¿
   ⌫ ¿
 
-  emitPath emitOnly outputFile inputFile ⟪ main ⟫ ⊢ ¿
+  emitPath emitOnly outputFile inputFile ⟪ main ⟫ → rc ¿
+  rc 0 ≢ ⤴ ↵ rc ⊢ ¿ ⌫ ¿
 ⌫ ¿

@@ -1,24 +1,35 @@
+# Trith (docs/TRITH.md). The compiler exists twice: s1, trith/src (build/trithc), is
+# written in UNHINGED, the language Trith replaced; s2, trith/s2 (build/s2c), is written
+# in Trith and compiled by s1. UNHINGED survives only to bootstrap s1: a Rust compiler
+# (unhinged/bootstrap) builds the self-hosted UNHINGED compiler (unhinged/compiler).
 UNHINGEDC_BOOT := build/bootstrap
 UNHINGEDC_STAGE1 := build/stage1
 UNHINGEDC := build/unhingedc
-TEST_BIN := build/tests
+UNHINGED_TESTS := build/unhinged-tests
 TRITHC := build/trithc
 TRITH_TESTS := build/trith-tests
-.PHONY: build test clean trith trith-test trith-bench trith-memcheck s2 s2-regen s2-test s2-fuzz s3 s2-fixpoint lib-test lib-regen bench-regen
+.PHONY: all unhinged unhinged-test test clean trith trith-test trith-bench trith-memcheck s2 s2-regen s2-test s2-fuzz s3 s2-fixpoint lib-test lib-regen bench-regen
 
-build:
+all: s2
+
+test: trith-test s2-test s2-fixpoint lib-test unhinged-test
+
+# the bootstrap: Rust → UNHINGED stage1 → UNHINGED stage2 (build/unhingedc), which must
+# rebuild itself
+unhinged:
 	@mkdir -p build
-	cargo build --release --manifest-path bootstrap/Cargo.toml
-	cp bootstrap/target/release/unhingedc $(UNHINGEDC_BOOT)
-	$(UNHINGEDC_BOOT) compiler/src/main.uh -o $(UNHINGEDC_STAGE1)
-	$(UNHINGEDC_STAGE1) compiler/src/main.uh $(UNHINGEDC)
+	cargo build --release --manifest-path unhinged/bootstrap/Cargo.toml
+	cp unhinged/bootstrap/target/release/unhingedc $(UNHINGEDC_BOOT)
+	$(UNHINGEDC_BOOT) unhinged/compiler/src/main.uh -o $(UNHINGEDC_STAGE1)
+	$(UNHINGEDC_STAGE1) unhinged/compiler/src/main.uh $(UNHINGEDC)
 
-test: build trith-test s2-test s2-fixpoint lib-test
-	UNHINGEDC=$(UNHINGEDC) $(UNHINGEDC) tests/tests.uh $(TEST_BIN)
-	$(TEST_BIN)
+# the UNHINGED compiler's own tests (RUN_NET=1 and RUN_SMTP=1 add the network ones)
+unhinged-test: unhinged
+	UNHINGEDC=$(UNHINGEDC) $(UNHINGEDC) unhinged/tests/tests.uh $(UNHINGED_TESTS)
+	$(UNHINGED_TESTS)
 
-# Trith (v2): trithc is written in UNHINGED and compiled by the v1 compiler (spec §17, stage s1)
-trith: build
+# s1: trithc, compiled by the UNHINGED compiler (spec §17)
+trith: unhinged
 	$(UNHINGEDC) trith/src/main.uh $(TRITHC)
 
 trith-test: trith
@@ -42,7 +53,7 @@ bench-regen: trith
 	$(TRITHC) build/sha256.logical.trh --plough > trith/bench/sha256.trh
 
 clean:
-	rm -rf build output bootstrap/target
+	rm -rf build output unhinged/bootstrap/target
 
 # s2: the compiler rewritten in Trith (spec §17), compiled by s1. The sources
 # in trith/s2/src are authored in logical order with named moments; the

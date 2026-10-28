@@ -41,7 +41,7 @@ clean:
 # s2: the compiler rewritten in Trith (spec §17), compiled by s1. The sources
 # in trith/s2/src are authored in logical order with named moments; the
 # committed trith/s2/s2c.trh is generated from them by `make s2-regen`.
-S2_SRC := trith/s2/src/util.trhx trith/s2/src/chars.trhx trith/s2/src/lexer.trhx trith/s2/src/parser.trhx trith/s2/src/heap.trhx trith/s2/src/types.trhx trith/s2/src/check.trhx trith/s2/src/main.trhx
+S2_SRC := trith/s2/src/util.trhx trith/s2/src/chars.trhx trith/s2/src/lexer.trhx trith/s2/src/parser.trhx trith/s2/src/heap.trhx trith/s2/src/types.trhx trith/s2/src/check.trhx trith/s2/src/emit.trhx trith/s2/src/main.trhx
 s2: trith
 	$(TRITHC) trith/s2/s2c.trh -o build/s2c
 

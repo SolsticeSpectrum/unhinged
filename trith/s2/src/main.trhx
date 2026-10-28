@@ -16,10 +16,10 @@
 
 ⦃ ⧖:a,b ⧗:b ⟗ ⧗:a ‹streq2› ⧖:r ⌁̵ ⧗:r ⦄ ⟨⟗ʃ ʃ ⊸ ŧ⟩ ‹streqo› ⸫
 
-⍝ ‹modeof› arg: 1 for --tokens, 2 for --ast, 3 for --check, else 0
+⍝ ‹modeof› arg: 1 for --tokens, 2 for --ast, 3 for --check, 4 for --emit-llvm, else 0
 ⦃
-  ⟗ $--tokens$ ‹streqo› ⧖:r1 ⟗ $--ast$ ‹streqo› ⧖:r2 ⟗ $--check$ ‹streqo› ⧖:r3 ⌁̵
-  ○ ⧗:r3 ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧗:r2 ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:r1 ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
+  ⟗ $--tokens$ ‹streqo› ⧖:r1 ⟗ $--ast$ ‹streqo› ⧖:r2 ⟗ $--check$ ‹streqo› ⧖:r3 ⟗ $--emit-llvm$ ‹streqo› ⧖:r4 ⌁̵
+  ○ ⧗:r4 ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼ ⧗:r3 ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧗:r2 ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:r1 ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
 ⦄ ⟨ʃ ⊸ ℤ⟩ ‹modeof› ⸫
 
 ⦃
@@ -42,12 +42,18 @@
   ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st △ ‹cinit› ‹check› ⌁̵ $ok\n$ ⎙̵ ⌁̵
 ⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹checkw› ⸫
 
+⍝ ‹emitw› path toks: parse, tangle, check and print the LLVM IR
+⦃
+  ⧖:path,toks
+  ⧗:toks ‹tindex› ‹ok› ⟗ ⧗:path ‹parse› ⧖:st ⟗ ⧗:path,st ○ ‹cinit› ‹check› ○ ‹egen› ⌁̵ ⌁̵
+⦄ ⟨⟗ʃ ⟦ℤ⟧ ⊸ ◌⟩ ‹emitw› ⸫
+
 ⦃
   ⧖:path,out,mode
   ⧗:path,out,mode ⍿⁰ △ ᛖ
   ⋔ ⦃ ⌁ ⧖:o ⧗:o ⟗ ‹dump› ⌁̵ ⌁̵ ⦄
-    ⦃ #2# ᛖ ⋔ ⦃ ⧖:o ⟗ ⧗:o ‹astw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
-      ⦃ ⧖:o ⟗ ⧗:o ‹checkw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼ ⦄ ⁼
+    ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⧖:o ⟗ ⧗:o ‹astw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄
+      ⦃ #3# ᛖ ⋔ ⦃ ⧖:o ⟗ ⧗:o ‹checkw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⦃ ⧖:o ⟗ ⧗:o ‹emitw› ⁇ ⦃ ⌁̵ ⦄ ⦃ ⌁̵ △ ‹exit› ⦄ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨ʃ ⟦ℤ⟧ ℤ ⊸⟩ ‹run› ⸫
 
 ⦃
@@ -71,7 +77,7 @@
     ⦃ ⌁ ⎙̵ $: error: cannot read file (or file is empty)\n$ ⎙̵ △ ‹exit› ⦄
 ⦄ ⟨ʃ ℤ ⊸⟩ ‹main1› ⸫
 
-⦃ $usage: s2c <file.trh> --tokens | --ast | --check\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
+⦃ $usage: s2c <file.trh> --tokens | --ast | --check | --emit-llvm\n$ ⎙̵ #2# ‹exit› ⦄ ⟨⊸⟩ ‹usage› ⸫
 
 ⦃
   △ ᚨ ⁇

@@ -1,0 +1,1710 @@
+⍝ ==== s2 code generation (spec §13): stack-to-SSA and LLVM IR, line for line as s1's emit.uh
+⍝ Runs on the heap the check pass leaves. Registers: 26 next %t, 27 next L,
+⍝ 28 the IR lines (a queue of strings), 29 the globals, 30 the current label,
+⍝ 31 the future-call frames (a stack of [below calls]), 32 the failure return
+⍝ (−1: none), 33 next string constant, 34 debug, 35 hoisted post-selections,
+⍝ 36 functions (a queue of [name sym ffi f node ops0 ops1]), 41 … 48 the texts
+⍝ "i8" "i64" "double" "ptr" "i1" "true" "false" "0".
+⍝ An entry of the virtual stack is [ty v ok role hasc c lit slots live neg cmp]:
+⍝ v and ok are SSA texts (−1: none), c a known value when hasc is 1, slots,
+⍝ live and neg the lists of a superposition, cmp the [eq gt lt a b] of a fresh ≶.
+
+⍝ ---- IR text
+
+⍝ ‹eraw› C s: a line as it is
+⦃ ⧖:C,s ⧗:C #28# ‹reg› ⧖:C,q ⧗:C,q,s ‹qadd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹eraw› ⸫
+⍝ ‹eemit› C s: an indented line
+⦃ ⧖:C,s ⧗:C %%  {s}%% ⧖:C,l ⧗:C,l ‹eraw› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹eemit› ⸫
+⦃ ⧖:C,s ⧗:C,s ‹eemit› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹eem› ⸫
+⍝ ‹estart› C lbl: start the block lbl
+⦃ ⧖:C,lbl ⧗:C %%{lbl}:%% ⧖:C,l ⧗:C,l ‹eraw› #30# ⧗:lbl ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹estart› ⸫
+⦃ ⧖:C ⧗:C #26# ‹inc› △ ⊞ ⧖:C,n ⧗:C %%!%t{#n}%% ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹etmp› ⸫
+⦃ ⧖:C ⧗:C #27# ‹inc› △ ⊞ ⧖:C,n ⧗:C %%!L{#n}%% ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹elabel› ⸫
+⍝ ‹edef› C rhs: %t = rhs, giving %t
+⦃ ⧖:C,rhs ⧗:C ‹etmp› ⧖:C,t ⧗:C %%{t} = {rhs}%% ⧖:C,l ⧗:C,l ‹eemit› ⧗:t ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹edef› ⸫
+⍝ ‹ebr› C l: br label %l
+⦃ ⧖:C,l ⧗:C %%br label %{l}%% ‹eemit› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebr› ⸫
+⍝ ‹ebr2› C c a b: br i1 c, label %a, label %b
+⦃ ⧖:C,c,a,b ⧗:C %%br i1 {c}, label %{a}, label %{b}%% ‹eemit› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebr2› ⸫
+⍝ ‹ecur› C: the current label
+⦃ #30# ‹reg› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ecur› ⸫
+⍝ ‹etx› C r: the text in register r (41 i8 … 48 0)
+⦃ ‹reg› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹etx› ⸫
+
+⍝ ‹eerr› C tok: start an error message at tok (−1: the file)
+⦃ ‹cerr› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹eerr› ⸫
+
+⍝ ---- types
+
+⍝ ‹tcode› C t: 0 ŧ, 1 ℤ, 2 ℝ, 3 𝔹, 4 ʃ, 5 ◌, 6 "", 7 ◌T, 8 ⟦T⟧, 9 ⟗T or ⟖T, 10 a particle, 11 other
+⦃
+  ⧖:C,t
+  ⧗:C,t #10# ‹tis› ⧖:C,a ⧗:C,t #11# ‹tis› ⧖:C,b ⧗:C,t #12# ‹tis› ⧖:C,c ⧗:C,t #13# ‹tis› ⧖:C,d
+  ⧗:C,t #14# ‹tis› ⧖:C,e ⧗:C,t #15# ‹tis› ⧖:C,f ⧗:C,t #16# ‹tis› ⧖:C,g
+  ⧗:C,t ‹shead› ⧖:C,h
+  ⧗:C,t ‹ptfind› ⧖:C,p
+  ⧗:C #11# ⧗:p #-1# ᛖ ‹not› ⋔ ⦃ ⌁ #10# ⦄ ∅ ⁼
+  ⧗:h #10199# ᛖ ⧗:h #10198# ᛖ ⋏ ⋔ ⦃ ⌁ #9# ⦄ ∅ ⁼
+  ⧗:h #10214# ᛖ ⋔ ⦃ ⌁ #8# ⦄ ∅ ⁼
+  ⧗:h #9676# ᛖ ⋔ ⦃ ⌁ #7# ⦄ ∅ ⁼
+  ⧗:g ⋔ ⦃ ⌁ #6# ⦄ ∅ ⁼ ⧗:f ⋔ ⦃ ⌁ #5# ⦄ ∅ ⁼ ⧗:e ⋔ ⦃ ⌁ #4# ⦄ ∅ ⁼ ⧗:d ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼
+  ⧗:c ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:b ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:a ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹tcode› ⸫
+
+⍝ ‹ellty› C t: the LLVM type of t, or −1
+⦃
+  ⧖:C,t
+  ⧗:C,t ‹tcode› ⧖:C,k
+  ⧗:C,t,k
+  ⍿⁰ ○ ᛖ ⍿¹ #3# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ #41# ‹etx› ⦄ ⦃
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ⌁ #42# ‹etx› ⦄ ⦃
+  ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⌁ #43# ‹etx› ⦄ ⦃
+  ⍿⁰ #4# ᛖ ⍿¹ #8# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ #44# ‹etx› ⦄ ⦃
+  ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ⌁ #45# ‹etx› ⦄ ⦃
+  ⍿⁰ #7# ᛖ ⋔ ⦃ ⌁ ‹ellfail› ⦄ ⦃
+  ⍿⁰ #9# ᛖ ⋔ ⦃ ⌁ ‹ellref› ⦄ ⦃
+  #10# ᛖ ⋔ ⦃ ‹ptfind› ‹ellty› ⦄ ⦃ ⌁ #-1# ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ellty› ⸫
+⍝ ◌T: {T, i1}
+⦃
+  ⧖:C,t
+  ⧗:C,t ‹stail› ‹ellty› ⧖:C,inner
+  ⧗:C,inner ⧗:inner #-1# ᛖ ⋔ ⦃ ⦄ ⦃ ⧖:i %%!{{{i}, i1}}%% ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ellfail› ⸫
+⍝ ⟗T, ⟖T: T itself when T is classical, else a pointer
+⦃
+  ⧖:C,t
+  ⧗:C,t ‹stail› ⧖:C,inner
+  ⧗:C,inner ‹tcopy› ⧖:C,cp
+  ⧗:C,inner ⧗:cp ⋔ ⦃ ‹ellty› ⦄ ⦃ ⌁ #44# ‹etx› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ellref› ⸫
+
+⍝ ‹estrip› C t: t without a leading ⟗ or ⟖
+⦃
+  ⧖:C,t
+  ⧗:C,t ‹shead› ⧖:C,h
+  ⧗:C,t ⧗:h #10199# ᛖ ⧗:h #10198# ᛖ ⋏ ⋔ ⦃ ‹stail› ⦄ ∅ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹estrip› ⸫
+
+⍝ ‹eelem› C t: the element type of a string or array type (shadows allowed)
+⦃
+  ⧖:C,t
+  ⧗:C,t ‹estrip› ⧖:C,b
+  ⧗:C,b #14# ‹tis› ⧖:C,s
+  ⧗:C,b ⧗:s ⋔ ⦃ ⌁ #13# ‹reg› ⦄ ⦃ △ ‹elemof› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eelem› ⸫
+
+⍝ ‹esize› C lt: the byte size of an element of LLVM type lt, as text
+⦃
+  ⧖:C,lt
+  ⧗:C #41# ‹etx› ⧖:C,i8 ⧗:C #45# ‹etx› ⧖:C,i1
+  ⧗:C ⧗:lt ⧗:i8 ᛖ ⧗:lt ⧗:i1 ᛖ ⋏ ⋔ ⦃ #49# ⦄ ⦃ #56# ⦄ ⁼ ‹str1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹esize› ⸫
+
+⍝ ‹ezero› C lt: the zero of LLVM type lt
+⦃
+  ⧖:C,lt
+  ⧗:C #43# ‹etx› ⧖:C,dbl ⧗:C #44# ‹etx› ⧖:C,ptr
+  ⧗:C,lt ‹shead› ⧖:C,h
+  #3# ⧗:h #123# ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:lt ⧗:ptr ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:lt ⧗:dbl ᛖ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:k
+  ⧗:C,k ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ %%!0.0%% ⦄ ⦃ ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ %%!null%% ⦄ ⦃ #2# ᛖ ⋔ ⦃ %%!zeroinitializer%% ⦄ ⦃ #48# ‹etx› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ezero› ⸫
+
+⍝ ‹eneed› C t tok: t must have an LLVM type (§13)
+⦃
+  ⧖:C,t,tok
+  ⧗:C,t ‹ellty› ⧖:C,lt
+  ⧗:C,t ‹shead› ⧖:C,h
+  ⧗:C,tok,t,h ⧗:lt #-1# ᛖ ‹not› ⋔ ⦃ ⌁ ⌁ ⌁ ⦄
+    ⦃ ⧖:tk,ty,hh ⧗:tk ‹eerr› ⧗:ty ⧗:hh #968# ᛖ ⋔ ⦃ $s1 keeps superpositions inside one block: $ ⎙̵ ‹spr› $ cannot be a parameter or a result$ ⎙̵ ⦄
+        ⦃ $code generation for $ ⎙̵ ‹spr› $ is not supported in s1$ ⎙̵ ⦄ ⁼ ‹die› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eneed› ⸫
+
+⍝ ---- entries
+
+⦃
+  ⧖:C,ty,v,ok,role,hasc,c,lit,sl,lv,ng,cmp
+  ⧗:C ‹len› ⧖:C,e
+  ⧗:C ⧗:ty ⍆̵ ⧗:v ⍆̵ ⧗:ok ⍆̵ ⧗:role ⍆̵ ⧗:hasc ⍆̵ ⧗:c ⍆̵ ⧗:lit ⍆̵ ⧗:sl ⍆̵ ⧗:lv ⍆̵ ⧗:ng ⍆̵ ⧗:cmp ⍆̵ ⧗:e
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹entx› ⸫
+⍝ ‹ent› C ty v ok
+⦃ ⧖:C,ty,v,ok ⧗:C,ty,v,ok #-1# ○ ○ ○ #-1# #-1# #-1# #-1# ‹entx› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ent› ⸫
+⍝ ‹entc› C ty v c lit: an entry with a known value
+⦃ ⧖:C,ty,v,c,lit ⧗:C,ty,v #-1# #-1# △ ⧗:c,lit #-1# #-1# #-1# #-1# ‹entx› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹entc› ⸫
+⍝ ‹ewrole› C e role: e with that role (s1's em_with_role: no literal mark, no comparison)
+⦃
+  ⧖:C,e,role
+  ⧗:C,e ○ ‹vf› ⧖:C,ty ⧗:C,e △ ‹vf› ⧖:C,v ⧗:C,e #2# ‹vf› ⧖:C,ok
+  ⧗:C,e #4# ‹vf› ⧖:C,hc ⧗:C,e #5# ‹vf› ⧖:C,c
+  ⧗:C,e #7# ‹vf› ⧖:C,sl ⧗:C,e #8# ‹vf› ⧖:C,lv ⧗:C,e #9# ‹vf› ⧖:C,ng
+  ⧗:C,ty,v,ok,role,hc,c ○ ⧗:sl,lv,ng #-1# ‹entx›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ewrole› ⸫
+⦃ ○ ‹vf› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ety› ⸫
+⦃ △ ‹vf› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev› ⸫
+⦃ #2# ‹vf› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eok› ⸫
+
+⍝ ‹efailty› C t: t is ◌T (or ◌)
+⦃ ‹shead› #9676# ᛖ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹efailty› ⸫
+⍝ ‹evty› C t: the LLVM type of the v part (◌T → T), −1 for a bare ◌
+⦃
+  ⧖:C,t
+  ⧗:C,t #15# ‹tis› ⧖:C,bare ⧗:C,t ‹efailty› ⧖:C,f
+  ⧗:C,t,f ⧗:bare ⋔ ⦃ ⌁ ⌁ #-1# ⦄ ⦃ ⋔ ⦃ ‹stail› ‹ellty› ⦄ ⦃ ‹ellty› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evty› ⸫
+
+⍝ ---- future (deferred) calls and failure exits
+
+⍝ ‹epushf› C: a new frame
+⦃
+  ⧖:C
+  ⧗:C ‹qnew› ⧖:C,q ⧗:C #31# ‹reg› ⧖:C,below
+  ⧗:C ‹len› ⧖:C,fr ⧗:C ⧗:below ⍆̵ ⧗:q ⍆̵ #31# ⧗:fr ‹wr›
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹epushf› ⸫
+⍝ ‹epopf› C: remove the top frame, giving its calls
+⦃
+  ⧖:C
+  ⧗:C #31# ‹reg› ⧖:C,fr
+  ⧗:C,fr ‹rd› ⧖:C,below ⧗:C ⧗:fr △ ⊞ ‹rd› ⧖:C,q
+  ⧗:C #31# ⧗:below ‹wr› ⧗:q
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹epopf› ⸫
+⍝ ‹erunf› C q: emit a frame's calls, last in first out
+⦃
+  ⧖:C,q
+  ⧗:C,q ‹qlist› ⧖:C,L
+  ⧗:C,L ‹llen› ⧖:C,n
+  ⧗:C,L ⧗:n △ ⊟
+  ⥀ ⦃
+    ⧖:C,L,i
+    ⧗:C,L,i ⧗:i ○ ≶ ⋔ ⦃ ⧖:LL,ii ⧗:LL,ii ‹lget› ‹eemit› ⧗:LL ⧗:ii △ ⊟ ⊕ ⦄ ⦃ ⧖:LL,ii ⧗:LL,ii ‹lget› ‹eemit› ⧗:LL ⧗:ii △ ⊟ ⊕ ⦄ ⦃ ⦶ ⦄
+  ⦄
+  ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹erunf› ⸫
+⍝ ‹efailexit› C: leave the function by failure, running every pending future call, innermost first
+⦃
+  ⧖:C
+  ⧗:C #31# ‹reg› ⧖:C,fr
+  ⧗:C,fr
+  ⥀ ⦃
+    ⧖:C,fr
+    ⧗:C,fr ⧗:fr #-1# ᛖ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,fr ⧗:C ⧗:fr △ ⊞ ‹rd› ‹erunf› ⧗:fr ‹rd› ⊕ ⦄ ⁼
+  ⦄
+  ⌁
+  #32# ‹reg› ⧖:C,fret
+  ⧗:C,fret ⧗:fret #-1# ᛖ ⋔ ⦃ ⌁ %%call void @trith_loop_failed()%% ‹eemit› %%unreachable%% ‹eemit› ⦄ ⦃ ‹eemit› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹efailexit› ⸫
+
+⍝ ‹eunwrap› C e: ◌T used as T: branch out by failure, continue with the value (§7.3)
+⦃
+  ⧖:C,e
+  ⧗:C,e ‹ety› ⧖:C,t
+  ⧗:C,t ‹efailty› ⧖:C,f ⧗:C,t #15# ‹tis› ⧖:C,bare
+  ⧗:C,e,t ⧗:f ‹not› ⧗:bare ⋏ ⋔ ⦃ ⌁ ⦄ ⦃ ‹eunwrap1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eunwrap› ⸫
+⦃
+  ⧖:C,e,t
+  ⧗:C ‹elabel› ⧖:C,lc ⧗:C ‹elabel› ⧖:C,lf
+  ⧗:C,e ‹eok› ⧖:C,ok
+  ⧗:C,ok,lc,lf ‹ebr2›
+  ⧗:lf ‹estart› ‹efailexit› ⧗:lc ‹estart›
+  ⧗:t ‹stail› ⧖:C,bt ⧗:C,e ‹ev› ⧖:C,v
+  ⧗:C,bt,v #-1# ‹ent›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eunwrap1› ⸫
+
+⍝ ‹epop› C S k: S without its top k, and those k ordered by case role (§6)
+⦃
+  ⧖:C,S,k
+  ⧗:C,S ‹llen› ⧖:C,n
+  ⧗:C,S ○ ⧗:n ⧗:k ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C,S ⧗:n ⧗:k ⊟ ⧗:n ‹lslice› ⧖:C,vals
+  ⍝ k free slots
+  ⧗:C ‹lbeg› ⧖:C,sl
+  ⧗:C,sl ⧗:k ⥀ ⦃ ⧖:C,sl,j ⧗:C,sl,j ○ ⧗:j ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:C,sl,j ⧗:C,sl #-1# ‹ladd› ⧗:sl ⧗:j △ ⊟ ⊕ ⦄ ⦄ ⌁ ⧖:C,sl
+  ⍝ first the values with a role, then the others in the free slots
+  ⧗:C,vals,sl ○ ⧗:k
+  ⥀ ⦃
+    ⧖:C,vals,sl,i,k
+    ⧗:C,vals,sl,i,k ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,sl,i,k ⧗:C,vals,i ‹lget› ⧖:C,v ⧗:C,v #3# ‹vf› ⧖:C,r
+        ⧗:C,sl,r,v ⧗:r #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹lset› ⦄ ⁼
+        ⧗:vals,sl ⧗:i △ ⊞ ⧗:k ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⧖:C
+  ⧗:C,vals,sl ○ ⧗:k
+  ⥀ ⦃
+    ⧖:C,vals,sl,i,k
+    ⧗:C,vals,sl,i,k ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,sl,i,k ⧗:C,vals,i ‹lget› ⧖:C,v ⧗:C,v #3# ‹vf› ⧖:C,r
+        ⧗:C,sl,v ⧗:r #-1# ᛖ ⋔ ⦃ ‹epfree› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼
+        ⧗:vals,sl ⧗:i △ ⊞ ⧗:k ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⧖:C
+  ⧗:C,S2,sl
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹epop› ⸫
+⍝ ‹epfree› C sl v: put v in the first free slot
+⦃
+  ⧖:C,sl,v
+  ⧗:C,sl ○
+  ⥀ ⦃ ⧖:C,sl,j ⧗:C,sl,j ‹lget› ⧖:C,x ⧗:C,sl,j ⧗:x #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ △ ⊞ ⊕ ⦄ ⁼ ⦄
+  ⧖:C,sl,j ⧗:C,sl,j,v ‹lset›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹epfree› ⸫
+
+⍝ ---- packing values for calls and returns
+
+⍝ ‹epack› C e o: entry e (−1: none) as a value of declared type o
+⦃
+  ⧖:C,e,o
+  ⧗:C,o #15# ‹tis› ⧖:C,bare ⧗:C,o ‹efailty› ⧖:C,f
+  ⧗:C,e,o,f ⧗:bare ⋔ ⦃ ⌁ ⌁ ⍿⁰ #-1# ᛖ ⋔ ⦃ ⌁ #46# ‹etx› ⦄ ⦃ ‹eok› ⦄ ⁼ ⦄ ⦃ ⋔ ⦃ ‹epack1› ⦄ ⦃ ⌁ ‹ev› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹epack› ⸫
+⦃
+  ⧖:C,e,o
+  ⧗:C,o ‹ellty› ⧖:C,st ⧗:C,o ‹stail› ‹ellty› ⧖:C,it
+  ⧗:C,e ‹ev› ⧖:C,v
+  ⧗:C,e ‹ety› ‹efailty› ⧖:C,ef
+  ⧗:C,e ⧗:ef ⋔ ⦃ ‹eok› ⦄ ⦃ ⌁ #46# ‹etx› ⦄ ⁼ ⧖:C,ok
+  ⧗:C %%insertvalue {st} undef, {it} {v}, 0%% ‹edef› ⧖:C,s1
+  ⧗:C %%insertvalue {st} {s1}, i1 {ok}, 1%% ‹edef›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹epack1› ⸫
+
+⍝ ‹eunpack› C o r: value r of declared type o as an entry
+⦃
+  ⧖:C,o,r
+  ⧗:C,o #15# ‹tis› ⧖:C,bare ⧗:C,o ‹efailty› ⧖:C,f
+  ⧗:C,o,r,f ⧗:bare ⋔ ⦃ ⌁ ⧖:oo,rr ⧗:oo #-1# ⧗:rr ‹ent› ⦄ ⦃ ⋔ ⦃ ‹eunpack1› ⦄ ⦃ #-1# ‹ent› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eunpack› ⸫
+⦃
+  ⧖:C,o,r
+  ⧗:C,o ‹ellty› ⧖:C,st
+  ⧗:C %%extractvalue {st} {r}, 0%% ‹edef› ⧖:C,v
+  ⧗:C %%extractvalue {st} {r}, 1%% ‹edef› ⧖:C,ok
+  ⧗:C,o,v,ok ‹ent›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eunpack1› ⸫
+
+⍝ ‹eretty› C outs: the return type of a function with outputs outs
+⦃
+  ⧖:C,outs
+  ⧗:C,outs ‹llen› ⧖:C,n
+  ⧗:C,outs,n ⧗:n ○ ᛖ ⋔ ⦃ ⌁ ⌁ %%!void%% ⦄ ⦃ △ ᛖ ⋔ ⦃ ○ ‹lget› ‹ellty› ⦄ ⦃ ‹eretty1› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eretty› ⸫
+⦃
+  ⧖:C,outs
+  ⧗:C,outs ‹etypes› ⧖:C,q
+  ⧗:C,q ○ ‹qjoin› ⧖:C,body
+  ⧗:C %%!{{{body}}}%%
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eretty1› ⸫
+⍝ ‹etypes› C L: a queue of the LLVM types of the types in L
+⦃
+  ⧖:C,L
+  ⧗:C ‹qnew› ⧖:C,q
+  ⧗:C,L ‹llen› ⧖:C,n
+  ⧗:C,L,q ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,L,q,i,n
+    ⧗:C,L,q,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,q,i,n ⧗:C,L,i ‹lget› ‹ellty› ⧖:C,lt ⧗:C,q,lt ‹qadd› ⧗:L,q ⧗:i △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⧖:q ⌁ ⧗:q
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹etypes› ⸫
+
+⍝ ---- calls
+
+⍝ ‹ecall› C S f fut: call the function with emit record f (fut: a future call)
+⦃
+  ⧖:C,S,f,fut
+  ⧗:C,f #3# ‹vf› ⧖:C,fr
+  ⧗:C,fr △ ‹vf› ⧖:C,ins ⧗:C,fr #2# ‹vf› ⧖:C,outs
+  ⧗:C,f △ ‹vf› ⧖:C,sym ⧗:C,f #2# ‹vf› ⧖:C,ffi
+  ⧗:C,ins ‹llen› ⧖:C,k
+  ⧗:C,S,k ‹epop› ⧖:C,S2,vals
+  ⧗:C ‹qnew› ⧖:C,args
+  ⧗:C,vals,ins,args ○ ⧗:k
+  ⥀ ⦃
+    ⧖:C,vals,ins,args,i,k
+    ⧗:C,vals,ins,args,i,k ⧗:i ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹ecarg› ⊕ ⦄
+  ⦄
+  ⧖:C,vals,ins,args,i,k
+  ⧗:C,args ○ ‹qjoin› ⧖:C,at
+  ⧗:C,outs ‹eretty› ⧖:C,rt
+  ⧗:C,outs ‹llen› ⧖:C,no
+  ⧗:C,outs ○ ‹lget› ⧖:C,o0
+  ⧗:C,o0 ‹efailty› ⧖:C,of
+  ⧗:ffi △ ᛖ ⧗:no △ ᛖ ⋎ ⧗:of ⋎ ⧖:isffi
+  ⧗:C,S2,o0,sym,at,rt,outs,no,fut ⧗:isffi ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ‹ecffi› ⦄ ⦃ ‹ecall2› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ecall› ⸫
+⦃
+  ⧖:C,vals,ins,args,i,k
+  ⧗:C,vals,i ‹lget› ⧖:C,e ⧗:C,ins,i ‹lget› ⧖:C,want
+  ⧗:C,want ‹efailty› ⧖:C,wf
+  ⧗:C,e ⧗:wf ⋔ ⦃ ⦄ ⦃ ‹eunwrap› ⦄ ⁼ ⧖:C,e2
+  ⧗:C,want ‹ellty› ⧖:C,lt
+  ⧗:C,e2,want ‹epack› ⧖:C,pv
+  ⧗:C %%{lt} {pv}%% ⧖:C,a ⧗:C,args,a ‹qadd›
+  ⧗:vals,ins,args ⧗:i △ ⊞ ⧗:k
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ⟩ ‹ecarg› ⸫
+⍝ ‹effibase› C o: the C-side type of an FFI result
+⦃
+  ⧖:C,o
+  ⧗:C,o #15# ‹tis› ⧖:C,bare ⧗:C,o ‹efailty› ⧖:C,f
+  ⧗:C,o,f ⧗:bare ⋔ ⦃ ⌁ ⌁ #11# ‹reg› ⦄ ⦃ ⋔ ⦃ ‹stail› ⦄ ∅ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹effibase› ⸫
+⍝ an FFI call returning ◌T: the C result says whether it failed
+⦃
+  ⧖:C,S,o,sym,at
+  ⧗:C,o ‹effibase› ⧖:C,base ⧗:C,base ‹ellty› ⧖:C,blt
+  ⧗:C %%call {blt} {sym}({at})%% ‹edef› ⧖:C,raw
+  ⧗:C #44# ‹etx› ⧖:C,ptr ⧗:C #43# ‹etx› ⧖:C,dbl
+  #2# ⧗:blt ⧗:dbl ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:blt ⧗:ptr ᛖ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:kk
+  ⧗:C,blt,raw,kk ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⧖:b,r %%icmp ne ptr {r}, null%% ⦄
+    ⦃ △ ᛖ ⋔ ⦃ ⧖:b,r %%fcmp ord double {r}, 0.0%% ⦄ ⦃ ⧖:b,r %%icmp sge {b} {r}, 0%% ⦄ ⁼ ⦄ ⁼ ‹edef› ⧖:C,ok
+  ⧗:C,o #15# ‹tis› ⧖:C,bare
+  ⧗:raw ⧗:bare ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼ ⧖:v
+  ⧗:C,o,v,ok ‹ent› ⧖:C,e ⧗:C,S,e ‹lpush›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ecffi› ⸫
+⦃
+  ⧖:C,S,o0,sym,at,rt,outs,no,fut
+  ⧗:C %%call {rt} {sym}({at})%% ⧖:C,ct
+  ⧗:C,S,ct,o0,rt,outs,no ⧗:fut ⋔ ⦃ ‹ecfut› ⦄ ⦃ ‹ecall3› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ecall2› ⸫
+⍝ a future call joins the innermost frame
+⦃
+  ⧖:C,S,ct,o0,rt,outs,no
+  ⧗:C #31# ‹reg› ⧖:C,fr ⧗:C ⧗:fr △ ⊞ ‹rd› ⧖:C,q ⧗:C,q,ct ‹qadd› ⧗:S
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ecfut› ⸫
+⦃
+  ⧖:C,S,ct,o0,rt,outs,no
+  ⧗:C,S,ct,o0,rt,outs,no ⧗:no ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⧖:s,c ⧗:c ‹eemit› ⧗:s ⦄ ⦃ ‹ecall4› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ecall3› ⸫
+⦃
+  ⧖:C,S,ct,o0,rt,outs,no
+  ⧗:C,ct ‹edef› ⧖:C,r
+  ⧗:C,S,o0,r,rt,outs,no ⧗:no △ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⧖:SS,oo,rr ⧗:oo,rr ‹eunpack› ⧖:C,e ⧗:C,SS,e ‹lpush› ⦄ ⦃ ‹ecallm› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ecall4› ⸫
+⦃
+  ⧖:C,S,o0,r,rt,outs,no
+  ⧗:C,S,r,rt,outs ○ ⧗:no
+  ⥀ ⦃
+    ⧖:C,S,r,rt,outs,i,n
+    ⧗:C,S,r,rt,outs,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,S,r,rt,outs,i,n
+        ⧗:C %%extractvalue {rt} {r}, {#i}%% ‹edef› ⧖:C,part
+        ⧗:C,outs,i ‹lget› ⧖:C,o ⧗:C,o,part ‹eunpack› ⧖:C,e ⧗:C,S,e ‹lpush› ⧖:C,S2
+        ⧗:C,S2,r,rt,outs ⧗:i △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,S,r,rt,outs,i,n ⧗:C,S
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ecallm› ⸫
+
+⍝ ---- string literals
+
+⍝ ‹ehexd› d: the code point of hex digit d
+⦃ ⧖:d ⧗:d #48# ⊞ ⧗:d #9# ≶ ⋔ ∅ ⦃ #7# ⊞ ⦄ ∅ ⦄ ⟨ℤ ⊸ ℤ⟩ ‹ehexd› ⸫
+⍝ ‹ebyte› C e b c: one byte b of the code point c, as written in an LLVM c"…" string
+⦃
+  ⧖:C,e,b,c
+  ⧗:b #32# #126# ᛦ ⧗:c #34# ᛖ ‹not› ⋎ ⧗:c #92# ᛖ ‹not› ⋎ ⧖:plain
+  ⧗:C,e,b,c ⧗:plain ⋔ ⦃ ⧖:ee,bb,cc ⧗:ee,cc ‹scp› ⦄
+    ⦃ ⧖:ee,bb,cc ⧗:ee #92# ‹scp› ⧗:ee ⧗:bb #4# ≫ ‹ehexd› ‹scp› ⧗:ee ⧗:bb #15# ⋒ ‹ehexd› ‹scp› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebyte› ⸫
+⍝ ‹eutf8› C e c: the UTF-8 bytes of c; their number
+⦃
+  ⧖:C,e,c
+  #4# ⧗:c #65536# ≶ ⋔ ∅ ∅ ⦃ ⌁ #3# ⦄ ⧗:c #2048# ≶ ⋔ ∅ ∅ ⦃ ⌁ #2# ⦄ ⧗:c #128# ≶ ⋔ ∅ ∅ ⦃ ⌁ △ ⦄ ⧖:m
+  ⍝ lead byte, then continuation bytes from the highest
+  ⧗:c,m ⧗:m △ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:cc,mm #255# #8# ⧗:mm ⊟ ≪ #255# ⋒ ⧗:cc #6# ⧗:mm △ ⊟ ⊠ ≫ ⋓ ⦄ ⁼ ⧖:lead
+  ⧗:C,e,lead,c ‹ebyte›
+  ⧗:e,c ⧗:m #2# ⊟
+  ⥀ ⦃
+    ⧖:e,c,j
+    ⧗:e,c,j ○ ⧗:j △ ⊞ ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:ee,cc,jj ⧗:ee #128# ⧗:cc #6# ⧗:jj ⊠ ≫ #63# ⋒ ⋓ ⧗:cc ‹ebyte› ⧗:ee,cc ⧗:jj △ ⊟ ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⧗:m
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eutf8› ⸫
+⍝ ‹estring› C t: a global constant for the text of string token t: its name and length
+⦃
+  ⧖:C,t
+  ⧗:C,t #7# ‹tf› ⧖:C,n
+  ⧗:C #33# ‹inc› △ ⊞ ⧖:C,sn
+  ⧗:C %%!@.s{#sn}%% ⧖:C,name
+  ⧗:C ‹sbeg› ⧖:C,e
+  ⧗:C,e ○ ⧗:t #8# ⊞ ⧗:t #8# ⊞ ⧗:n ⊞
+  ⥀ ⦃
+    ⧖:C,e,nb,j,end
+    ⧗:C,e,nb,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,e,nb,j,end ⧗:C,j ‹rd› ⧖:C,c ⧗:C,e,c ‹eutf8› ⧖:C,m ⧗:C,e ⧗:nb ⧗:m ⊞ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+  ⦄
+  ⧖:C,e,nb,j,end
+  ⧗:C %%{name} = private unnamed_addr constant [{#nb} x i8] c"{e}"%% ⧖:C,g
+  ⧗:C #29# ‹reg› ⧖:C,q ⧗:C,q,g ‹qadd› ⧖:C
+  ⧗:C %%!{#nb}%% ⧖:C,len
+  ⧗:C,name,len
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹estring› ⸫
+
+⍝ ---- containers: ʃ and ⟦T⟧ share the layout { ptr data, i64 len, i64 cap }
+
+⍝ ‹efield› C a k: load field k (0 data, 1 len)
+⦃
+  ⧖:C,a,k
+  ⧗:C,a,k ⧗:k ○ ᛖ ⋔ ⦃ ⌁ ⧖:aa %%load ptr, ptr {aa}, !tbaa !5%% ‹edef› ⦄
+    ⦃ ⧖:aa,kk %%getelementptr inbounds %trith.arr, ptr {aa}, i32 0, i32 {#kk}%% ‹edef› ⧖:p %%load i64, ptr {p}, !tbaa !4%% ‹edef› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹efield› ⸫
+⍝ ‹epos› C a i: the centre-based position i + len/2 (§11) and whether it is inside
+⦃
+  ⧖:C,a,i
+  ⧗:C,a △ ‹efield› ⧖:C,ln
+  ⧗:C %%lshr i64 {ln}, 1%% ‹edef› ⧖:C,half
+  ⧗:C %%add i64 {i}, {half}%% ‹edef› ⧖:C,pos
+  ⧗:C %%icmp ult i64 {pos}, {ln}%% ‹edef› ⧖:C,ok
+  ⧗:C,pos,ok
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹epos› ⸫
+⍝ ‹elevels› C t: how deep quantum elements nest inside container type t; −1 if unsupported
+⦃
+  ⧖:C,t
+  ⧗:C,t #14# ‹tis› ⧖:C,s
+  ⧗:C,t ⧗:s ⋔ ⦃ ⌁ ○ ⦄ ⦃ ‹elevels1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹elevels› ⸫
+⦃
+  ⧖:C,t
+  ⧗:C,t ‹eelem› ⧖:C,el
+  ⧗:C,el ‹tcopy› ⧖:C,cp
+  ⧗:C,el #14# ‹tis› ⧖:C,s ⧗:C,el ‹shead› ⧖:C,h
+  ⧗:s ⧗:h #10214# ᛖ ⋏ ⧖:nest
+  ⧗:C,el,nest ⧗:cp ⋔ ⦃ ⌁ ⌁ ○ ⦄ ⦃ ⋔ ⦃ ‹elevels› ⍿⁰ #-1# ᛖ ⋔ ∅ ⦃ △ ⊞ ⦄ ⁼ ⦄ ⦃ ⌁ #-1# ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹elevels1› ⸫
+
+⍝ ---- operators (§18): ‹eglyph› C tok vals → C L, the entries to push
+
+⦃ ⋔ ⦃ △ ⦄ ⦃ ○ ⦄ ⁼ ⦄ ⟨ŧ ⊸ ℤ⟩ ‹yn› ⸫
+⍝ ‹gf› C g k: field k of the operand record [tok vals ty a b lt real byte x ea]
+⦃ ‹vf› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹gf› ⸫
+⦃ ‹vf› △ ᛖ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹gflag› ⸫
+
+⦃
+  ⧖:C,tok,vals
+  ⧗:C,tok ‹tc0› ⧖:C,x
+  ⧗:C,vals ○ ‹lget› ⧖:C,ea
+  ⧗:C,ea ‹ety› ⧖:C,ty ⧗:C,ea ‹ev› ⧖:C,a
+  ⧗:C,vals ‹llen› ⧖:C,nv
+  ⧗:C,vals ⧗:nv △ ≶ ⋔ ⦃ ⌁ #-1# ⦄ ⦃ △ ‹lget› ‹ev› ⦄ ⦃ ⌁ #-1# ⦄ ⧖:C,b
+  ⧗:C,ty ‹evty› ⧖:C,lt
+  ⧗:C,ty #12# ‹tis› ⧖:C,real ⧗:C,ty #13# ‹tis› ⧖:C,byte
+  ⧗:C ‹len› ⧖:C,g
+  ⧗:C ⧗:tok ⍆̵ ⧗:vals ⍆̵ ⧗:ty ⍆̵ ⧗:a ⍆̵ ⧗:b ⍆̵ ⧗:lt ⍆̵ ⧗:real ‹yn› ⍆̵ ⧗:byte ‹yn› ⍆̵ ⧗:x ⍆̵ ⧗:ea ⍆̵
+  ⧗:g,x
+  ⍿⁰ ⧖ @any(8862,8863,8864)@ ⋔ ⦃ ⌁ ‹eg_arith› ⦄ ⦃
+  ⍿⁰ ⧖ @any(8856,8860)@ ⋔ ⦃ ⌁ ‹eg_div› ⦄ ⦃
+  ⍿⁰ #8861# ᛖ ⋔ ⦃ ⌁ ‹eg_neg› ⦄ ⦃
+  ⍿⁰ #8822# ᛖ ⋔ ⦃ ⌁ ‹eg_cmp› ⦄ ⦃
+  ⍿⁰ ⧖ @any(8911,8910)@ ⋔ ⦃ ⌁ ‹eg_tmin› ⦄ ⦃
+  ⍿⁰ ⧖ @any(8914,8915,10849,8810,8811)@ ⋔ ⦃ ⌁ ‹eg_bits› ⦄ ⦃
+  ⍿⁰ #9863# ᛖ ⋔ ⦃ ⌁ ‹eg_neut› ⦄ ⦃
+  ⍿⁰ #8961# ᛖ ⋔ ⦃ ⌁ ‹eg_drop› ⦄ ⦃
+  ⍿⁰ #9113# ᛖ ⋔ ⦃ ⌁ ‹eg_print› ⦄ ⦃
+  ⍿⁰ #9076# ᛖ ⋔ ⦃ ⌁ ‹eg_len› ⦄ ⦃
+  ⍿⁰ #8982# ᛖ ⋔ ⦃ ⌁ ‹eg_get› ⦄ ⦃
+  ⍿⁰ #9032# ᛖ ⋔ ⦃ ⌁ ‹eg_store› ⦄ ⦃
+  #9030# ᛖ ⋔ ⦃ ‹eg_push› ⦄ ⦃ ‹eg_none› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eglyph› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g ○ ‹gf› ⧖:C,tok
+  ⧗:C,tok ‹eerr› $code generation for $ ⎙̵ ⧗:tok ‹ptx› $ arrives in milestone 5$ ⎙̵ ‹die› ‹lnew0›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_none› ⸫
+
+⍝ ‹eopname› C oi kd: add sub mul (oi 0 1 2) plain, with nsw (kd 1), or on doubles (kd 2)
+⦃
+  ⧖:C,oi,kd
+  ⧗:C ‹sbeg› ⧖:C,e
+  ⧗:C,e ⧗:kd #2# ᛖ ⋔ ⦃ #102# ‹scp› ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:e ⧗:oi ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ $add$ ‹sapl› ⦄ ⦃ △ ᛖ ⋔ ⦃ $sub$ ‹sapl› ⦄ ⦃ $mul$ ‹sapl› ⦄ ⁼ ⦄ ⁼
+  ⧗:e ⧗:kd △ ᛖ ⋔ ⦃ $ nsw$ ‹sapl› ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:e
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eopname› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #8# ‹gf› ⧖:C,x ⧗:C,g #6# ‹gflag› ⧖:C,real ⧗:C,g #7# ‹gflag› ⧖:C,byte
+  ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #4# ‹gf› ⧖:C,b ⧗:C,g #5# ‹gf› ⧖:C,lt ⧗:C,g #2# ‹gf› ⧖:C,ty
+  △ ⧗:byte ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧗:real ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:kd
+  ⧗:C ⧗:x #8862# ⊟ ⧗:kd ‹eopname› ⧖:C,op
+  ⧗:C %%{op} {lt} {a}, {b}%% ‹edef› ⧖:C,r
+  ⧗:C,ty,r #-1# ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_arith› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #6# ‹gflag› ⧖:C,real
+  ⧗:C,g ⧗:real ⋔ ⦃ ‹eg_fdiv› ⦄ ⦃ ‹eg_idiv› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_div› ⸫
+⦃
+  ⧖:C,g
+  ⧗:C,g #8# ‹gf› ⧖:C,x ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #4# ‹gf› ⧖:C,b
+  ⧗:C,a,b ⧗:x #8860# ᛖ ⋔ ⦃ ⧖:aa,bb %%frem double {aa}, {bb}%% ⦄ ⦃ ⧖:aa,bb %%fdiv double {aa}, {bb}%% ⦄ ⁼ ‹edef› ⧖:C,r
+  ⧗:C %%fcmp one double {b}, 0.0%% ‹edef› ⧖:C,ok
+  ⧗:C #9676# #8477# ‹str2› ⧖:C,rt
+  ⧗:C,rt,r,ok ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_fdiv› ⸫
+⍝ integer division rounding to nearest (§3): sdiv plus a correction
+⦃
+  ⧖:C,g
+  ⧗:C,g #8# ‹gf› ⧖:C,x ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #4# ‹gf› ⧖:C,b ⧗:C,g #2# ‹gf› ⧖:C,ty
+  ⧗:C,ty ‹ellty› ⧖:C,lt
+  ⧗:C %%icmp eq {lt} {b}, 0%% ‹edef› ⧖:C,z
+  ⧗:C %%select i1 {z}, {lt} 1, {lt} {b}%% ‹edef› ⧖:C,d
+  ⧗:C %%sdiv {lt} {a}, {d}%% ‹edef› ⧖:C,q
+  ⧗:C %%srem {lt} {a}, {d}%% ‹edef› ⧖:C,r
+  ⧗:C %%shl {lt} {r}, 1%% ‹edef› ⧖:C,r2
+  ⧗:C %%sub {lt} 0, {r2}%% ‹edef› ⧖:C,nr2
+  ⧗:C %%icmp slt {lt} {r2}, 0%% ‹edef› ⧖:C,rn
+  ⧗:C %%select i1 {rn}, {lt} {nr2}, {lt} {r2}%% ‹edef› ⧖:C,ar2
+  ⧗:C %%sub {lt} 0, {d}%% ‹edef› ⧖:C,nd
+  ⧗:C %%icmp slt {lt} {d}, 0%% ‹edef› ⧖:C,dn
+  ⧗:C %%select i1 {dn}, {lt} {nd}, {lt} {d}%% ‹edef› ⧖:C,ad
+  ⧗:C %%icmp sgt {lt} {ar2}, {ad}%% ‹edef› ⧖:C,gt
+  ⧗:C %%xor {lt} {a}, {d}%% ‹edef› ⧖:C,sx
+  ⧗:C %%icmp slt {lt} {sx}, 0%% ‹edef› ⧖:C,sn
+  ⧗:C %%select i1 {sn}, {lt} -1, {lt} 1%% ‹edef› ⧖:C,adj
+  ⧗:C %%select i1 {gt}, {lt} {adj}, {lt} 0%% ‹edef› ⧖:C,adj2
+  ⧗:C %%add {lt} {q}, {adj2}%% ‹edef› ⧖:C,q2
+  ⧗:C %%xor i1 {z}, true%% ‹edef› ⧖:C,ok
+  ⧗:C #9676# ⧗:ty ‹spre› ⧖:C,rt
+  ⧗:C,lt,q2,d,a ⧗:x #8860# ᛖ ⋔ ⦃ ⧖:l,qq,dd,aa %%mul {l} {qq}, {dd}%% ‹edef› ⧖:qd ⧗:l,aa,qd ⧖:l2,a2,qd2 %%sub {l2} {a2}, {qd2}%% ‹edef› ⦄ ⦃ ⌁ ⌁ ⧖:l,qq ⧗:qq ⦄ ⁼ ⧖:C,m
+  ⧗:C,rt,m,ok ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_idiv› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #6# ‹gflag› ⧖:C,real ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #5# ‹gf› ⧖:C,lt ⧗:C,g #2# ‹gf› ⧖:C,ty
+  ⧗:C,a,lt ⧗:real ⋔ ⦃ ⧖:aa,l %%fneg double {aa}%% ⦄ ⦃ ⧖:aa,l %%sub {l} 0, {aa}%% ⦄ ⁼ ‹edef› ⧖:C,r
+  ⧗:C,ty,r #-1# ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_neg› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #6# ‹gflag› ⧖:C,real ⧗:C,g #7# ‹gflag› ⧖:C,byte
+  ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #4# ‹gf› ⧖:C,b ⧗:C,g #5# ‹gf› ⧖:C,lt
+  ⧗:C ⧗:byte ⋔ ⦃ %%ugt%% ⦄ ⦃ %%sgt%% ⦄ ⁼ ⧖:C,gp
+  ⧗:C ⧗:byte ⋔ ⦃ %%ult%% ⦄ ⦃ %%slt%% ⦄ ⁼ ⧖:C,lp
+  ⧗:C,a,b,lt,gp,lp ⧗:real ⋔ ⦃ ⧖:aa,bb,l,g,p %%fcmp ogt double {aa}, {bb}%% ‹edef› ⦄ ⦃ ⧖:aa,bb,l,g,p %%icmp {g} {l} {aa}, {bb}%% ‹edef› ⦄ ⁼ ⧖:C,gv
+  ⧗:C,a,b,lt,gp,lp ⧗:real ⋔ ⦃ ⧖:aa,bb,l,g,p %%fcmp olt double {aa}, {bb}%% ‹edef› ⦄ ⦃ ⧖:aa,bb,l,g,p %%icmp {p} {l} {aa}, {bb}%% ‹edef› ⦄ ⁼ ⧖:C,lv
+  ⧗:C %%zext i1 {gv} to i8%% ‹edef› ⧖:C,g8
+  ⧗:C %%zext i1 {lv} to i8%% ‹edef› ⧖:C,l8
+  ⧗:C %%sub i8 {g8}, {l8}%% ‹edef› ⧖:C,r
+  ⧗:C,gp ⧗:real ⋔ ⦃ ⌁ %%fcmp oeq%% ⦄ ⦃ ⌁ %%icmp eq%% ⦄ ⁼ ⧖:C,eqop
+  ⧗:C,gp ⧗:real ⋔ ⦃ ⌁ %%fcmp ogt%% ⦄ ⦃ ⧖:g %%icmp {g}%% ⦄ ⁼ ⧖:C,gtop
+  ⧗:C ‹len› ⧖:C,cmp ⧗:C ⧗:eqop ⍆̵ ⧗:gtop ⍆̵ ⧗:lt ⍆̵ ⧗:a ⍆̵ ⧗:b ⍆̵ ⧖:C
+  ⧗:C #10# ‹reg› ⧖:C,tt
+  ⧗:C,tt,r #-1# #-1# ○ ○ ○ #-1# #-1# #-1# ⧗:cmp ‹entx› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_cmp› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #8# ‹gf› ⧖:C,x ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #4# ‹gf› ⧖:C,b
+  ⧗:C ⧗:x #8910# ᛖ ⋔ ⦃ %%sgt%% ⦄ ⦃ %%slt%% ⦄ ⁼ ⧖:C,p
+  ⧗:C %%icmp {p} i8 {a}, {b}%% ‹edef› ⧖:C,c
+  ⧗:C %%select i1 {c}, i8 {a}, i8 {b}%% ‹edef› ⧖:C,r
+  ⧗:C #10# ‹reg› ⧖:C,tt
+  ⧗:C,tt,r #-1# ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_tmin› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #8# ‹gf› ⧖:C,x ⧗:C,g #7# ‹gflag› ⧖:C,byte
+  ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #4# ‹gf› ⧖:C,b ⧗:C,g #5# ‹gf› ⧖:C,lt ⧗:C,g #2# ‹gf› ⧖:C,ty
+  ⧗:C,byte,x
+  ⍿⁰ #8914# ᛖ ⋔ ⦃ ⌁ ⌁ %%and%% ⦄ ⦃
+  ⍿⁰ #8915# ᛖ ⋔ ⦃ ⌁ ⌁ %%or%% ⦄ ⦃
+  ⍿⁰ #10849# ᛖ ⋔ ⦃ ⌁ ⌁ %%xor%% ⦄ ⦃
+  #8810# ᛖ ⋔ ⦃ ⌁ %%shl%% ⦄ ⦃ ⋔ ⦃ %%lshr%% ⦄ ⦃ %%ashr%% ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⧖:C,op
+  ⧗:C %%{op} {lt} {a}, {b}%% ‹edef› ⧖:C,r
+  ⧗:C,ty,r #-1# ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_bits› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #7# ‹gflag› ⧖:C,byte ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #9# ‹gf› ⧖:C,ea
+  ⧗:C,a,ea ⧗:byte ⋔ ⦃ ⌁ ⧖:aa %%zext i8 {aa} to i64%% ‹edef› ⧖:r #11# ‹reg› ⧖:t ⧗:t,r #-1# ‹ent› ⦄ ⦃ ⧖:aa,e ⧗:e #-1# ‹ewrole› ⦄ ⁼ ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_neut› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g △ ‹gf› ⧖:C,vals ⧗:C,g ○ ‹gf› ⧖:C,tok
+  ⧗:C,vals ○ ‹lget› ‹ev› ⧖:C,a ⧗:C,vals △ ‹lget› ‹ev› ⧖:C,i
+  ⧗:C,g #2# ‹gf› ‹eelem› ⧖:C,et ⧗:C,et ‹ellty› ⧖:C,elt
+  ⧗:C,a,i ‹epos› ⧖:C,pos,ok
+  ⍝ no array is ever empty (and strings keep a spare byte), so position 0 is always loadable: clamp instead of branching
+  ⧗:C %%select i1 {ok}, i64 {pos}, i64 0%% ‹edef› ⧖:C,safe
+  ⧗:C,a ○ ‹efield› ⧖:C,data
+  ⧗:C %%getelementptr inbounds {elt}, ptr {data}, i64 {safe}%% ‹edef› ⧖:C,slot
+  ⧗:C %%load {elt}, ptr {slot}, !tbaa !6%% ‹edef› ⧖:C,got
+  ⧗:C,elt ‹ezero› ⧖:C,z
+  ⧗:C %%select i1 {ok}, {elt} {got}, {elt} {z}%% ‹edef› ⧖:C,r
+  ⧗:C #9676# ⧗:et ‹spre› ⧖:C,rt
+  ⧗:C,rt,r,ok ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_get› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g △ ‹gf› ⧖:C,vals
+  ⧗:C,vals ○ ‹lget› ‹ev› ⧖:C,a ⧗:C,vals △ ‹lget› ‹ev› ⧖:C,i ⧗:C,vals #2# ‹lget› ‹ev› ⧖:C,sv
+  ⧗:C,g #2# ‹gf› ‹eelem› ⧖:C,et ⧗:C,et ‹ellty› ⧖:C,elt
+  ⧗:C,a,i ‹epos› ⧖:C,pos,ok
+  ⧗:C ‹elabel› ⧖:C,lin ⧗:C ‹elabel› ⧖:C,lj
+  ⧗:C,ok,lin,lj ‹ebr2› ⧗:lin ‹estart›
+  ⧗:a ○ ‹efield› ⧖:C,data
+  ⧗:C %%getelementptr inbounds {elt}, ptr {data}, i64 {pos}%% ‹edef› ⧖:C,slot
+  ⧗:C %%store {elt} {sv}, ptr {slot}, !tbaa !6%% ‹eemit›
+  ⧗:lj ‹ebr› ⧗:lj ‹estart›
+  #15# ‹reg› ⧖:C,bare
+  ⧗:C,bare #-1# ⧗:ok ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_store› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g △ ‹gf› ⧖:C,vals ⧗:C,g #2# ‹gf› ⧖:C,ty ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #4# ‹gf› ⧖:C,b
+  ⧗:C,ty ‹eelem› ⧖:C,et ⧗:C,et ‹ellty› ⧖:C,elt ⧗:C,elt ‹esize› ⧖:C,sz
+  ⧗:C %%call ptr @trith_arr_push(ptr {a}, i64 {sz})%% ‹edef› ⧖:C,slot
+  ⧗:C,vals △ ‹lget› ‹ety› #11# ‹tis› ⧖:C,isz ⧗:C #41# ‹etx› ⧖:C,i8
+  ⧗:C,b ⧗:isz ⧗:elt ⧗:i8 ᛖ ⋎ ⋔ ⦃ ⧖:bb %%trunc i64 {bb} to i8%% ‹edef› ⦄ ∅ ⁼ ⧖:C,b2
+  ⧗:C %%store {elt} {b2}, ptr {slot}, !tbaa !6%% ‹eemit›
+  ⧗:ty,a #-1# ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_push› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #2# ‹gf› ⧖:C,ty
+  ⧗:C,a △ ‹efield› ⧖:C,r
+  ⧗:C #11# ‹reg› ⧖:C,t
+  ⧗:C,t,r #-1# ‹ent› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_len› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #2# ‹gf› ⧖:C,ty ⧗:C,g #5# ‹gf› ⧖:C,lt ⧗:C,g #6# ‹gflag› ⧖:C,real
+  ⧗:C,ty #14# ‹tis› ⧖:C,s ⧗:C,ty #18# ‹tis› ⧖:C,sr ⧗:C #42# ‹etx› ⧖:C,i64 ⧗:C,ty #13# ‹tis› ⧖:C,byte
+  #3# ⧗:real ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:sr ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:s ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:k
+  ⧗:C,a,lt,k ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⧖:aa %%call void @trith_print_str(ptr {aa})%% ‹eemit› ⦄ ⦃
+    ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ⌁ ⧖:aa %%call void @trith_print_str_ref(ptr {aa})%% ‹eemit› ⦄ ⦃
+    #2# ᛖ ⋔ ⦃ ⌁ ⧖:aa %%call void @trith_print_f64(double {aa})%% ‹eemit› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⧖:C
+  ○ ⧗:k #3# ᛖ ⧗:lt ⧗:i64 ᛖ ‹not› ⋎ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:k #3# ᛖ ⧗:lt ⧗:i64 ᛖ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:k2
+  ⧗:C,a,lt,ty,k2 ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹eg_print1› ⦄ ⦃ #2# ᛖ ⋔ ⦃ ⌁ ⌁ ⧖:aa %%call void @trith_print_i64(i64 {aa})%% ‹eemit› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⦄ ⁼
+  ‹lnew0›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_print› ⸫
+⦃
+  ⧖:C,a,lt,ty
+  ⧗:C,ty #13# ‹tis› ⧖:C,byte
+  ⧗:C ⧗:byte ⋔ ⦃ %%zext%% ⦄ ⦃ %%sext%% ⦄ ⁼ ⧖:C,ext
+  ⧗:C %%{ext} {lt} {a} to i64%% ‹edef› ⧖:C,w
+  ⧗:C %%call void @trith_print_i64(i64 {w})%% ‹eemit›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eg_print1› ⸫
+
+⦃
+  ⧖:C,g
+  ⧗:C,g #3# ‹gf› ⧖:C,a ⧗:C,g #2# ‹gf› ⧖:C,ty ⧗:C,g ○ ‹gf› ⧖:C,tok
+  ⧗:C,ty ‹efailty› ⧖:C,f ⧗:C,ty #15# ‹tis› ⧖:C,bare
+  ⧗:C,ty ⧗:f ⧗:bare ‹not› ⋎ ⋔ ⦃ ‹stail› ⦄ ∅ ⁼ ⧖:C,base
+  ⧗:C,base ‹tcopy› ⧖:C,cp
+  ⧗:C,base ‹ptfind› ⧖:C,rep
+  #2# ⧗:rep #-1# ᛖ ‹not› ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:cp ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:k
+  ⧗:C,a,ty,base,tok,k ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ △ ᛖ ⋔ ⦃ ‹eg_anti› ⦄ ⦃ ‹eg_free› ⦄ ⁼ ⦄ ⁼
+  ‹lnew0›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eg_drop› ⸫
+⍝ ⌁ on a particle: its antiparticle function
+⦃
+  ⧖:C,a,ty,base,tok
+  ⧗:C,tok ⧗:ty ⧗:base ᛖ ‹not› ⋔ ⦃ ‹eerr› $code generation for ⌁ on a possibly-failed particle arrives later$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⦄ ⁼
+  #8961# ⧗:base ‹spre› ⧖:C,anti
+  ⧗:C,anti ‹efind› △ ‹vf› ⧖:C,asym
+  ⧗:C,base ‹ellty› ⧖:C,plt
+  ⧗:C %%call void {asym}({plt} {a})%% ‹eemit›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eg_anti› ⸫
+⍝ ⌁ on a container
+⦃
+  ⧖:C,a,ty,base,tok
+  ⧗:C,base ‹elevels› ⧖:C,lv
+  ⧗:C,tok,base ⧗:lv #-1# ᛖ ⋔ ⦃ ⧖:tk,b ⧗:tk ‹eerr› $code generation for ⌁ on $ ⎙̵ ⧗:b ‹spr› $ (elements with antiparticles) is not supported yet$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C %%call void @trith_arr_free(ptr {a}, i64 {#lv})%% ‹eemit›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eg_free› ⸫
+
+⍝ ---- joins: phi nodes for every slot whose name differs between predecessors
+⍝ An incoming edge is [label stack strand]; ins is a queue of them.
+
+⦃ ⧖:C,lb,S,st ⧗:C ‹len› ⧖:C,r ⧗:C ⧗:lb ⍆̵ ⧗:S ⍆̵ ⧗:st ⍆̵ ⧗:r ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹einc› ⸫
+⍝ ‹eincadd› C ins lb S st
+⦃ ⧖:C,ins,lb,S,st ⧗:C,lb,S,st ‹einc› ⧖:C,r ⧗:C,ins,r ‹qadd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eincadd› ⸫
+
+⍝ ‹ephi› C ins key j f lt: a phi over field f (1 v, 2 ok) of entry j of each edge's key (1 stack, 2 strand)
+⦃
+  ⧖:C,ins,key,j,f,lt
+  ⧗:C,ins ‹qlist› ⧖:C,L
+  ⧗:C,L ○ ‹lget› ⧖:C,i0
+  ⧗:C,i0,key ‹vf› ⧖:C,l0 ⧗:C,l0,j ‹lget› ⧖:C,e0 ⧗:C,e0,f ‹vf› ⧖:C,v0
+  ⧗:C ‹qnew› ⧖:C,arms ⧗:C ‹qnew› ⧖:C,seen
+  ⧗:C,L ‹llen› ⧖:C,n
+  ⧗:C,L,key,j,f,v0,arms,seen ○ ⧗:n ⦶
+  ⥀ ⦃
+    ⧖:C,L,key,j,f,v0,arms,seen,i,n,same
+    ⧗:C,L,key,j,f,v0,arms,seen,i,n,same ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹ephi1› ⊕ ⦄
+  ⦄
+  ⧖:C,L,key,j,f,v0,arms,seen,i,n,same
+  ⧗:C,v0,arms,lt ⧗:same ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:vv,a,l ⧗:a ○ ‹qjoin› ⧖:at %%phi {l} {at}%% ‹edef› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ephi› ⸫
+⦃
+  ⧖:C,L,key,j,f,v0,arms,seen,i,n,same
+  ⧗:C,L,i ‹lget› ⧖:C,inc
+  ⧗:C,inc,key ‹vf› ⧖:C,li ⧗:C,li,j ‹lget› ⧖:C,ei ⧗:C,ei,f ‹vf› ⧖:C,vi
+  ⧗:C,inc ‹rd› ⧖:C,lb
+  ⧗:C,seen,lb ‹qhas› ⧖:C,had
+  ⧗:C,arms,seen,lb,vi ⧗:had ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⦃ ⧖:a,s,l,v ⧗:s,l ‹qadd› %%[ {v}, %{l} ]%% ⧖:arm ⧗:a,arm ‹qadd› ⦄ ⁼
+  ⧗:L,key,j,f,v0,arms,seen ⧗:i △ ⊞ ⧗:n ⧗:same ⧗:vi ⧗:v0 ᛖ ⋎
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ŧ⟩ ‹ephi1› ⸫
+
+⍝ ‹emerge› C ins key m: a phi (where needed) for every entry of the list m
+⦃
+  ⧖:C,ins,key,m
+  ⧗:C ‹qnew› ⧖:C,out
+  ⧗:C,m ‹llen› ⧖:C,n
+  ⧗:C,ins,key,m,out ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,ins,key,m,out,j,n
+    ⧗:C,ins,key,m,out,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹emerge1› ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⧖:out ⌁ ⌁ ⌁ ⧗:out ‹qlist›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹emerge› ⸫
+⦃
+  ⧖:C,ins,key,m,out,j,n
+  ⧗:C,m,j ‹lget› ‹ety› ⧖:C,ty
+  ⧗:C,ty ‹shead› ⧖:C,h
+  ⧗:C ⧗:h #968# ᛖ ⋔ ⦃ #-1# ‹eerr› $s1 keeps superpositions inside one block: a ψ cannot flow through ⋔, ⁇ or ⥀ (collapse it first)$ ⎙̵ ‹die› ⦄ ∅ ⁼ ⧖:C
+  ⧗:C,ty ‹evty› ⧖:C,vt
+  ⧗:C,ins,key,j,vt ⧗:vt #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ #-1# ⦄ ⦃ ⧖:i,k,jj,t ⧗:i,k,jj △ ⧗:t ‹ephi› ⦄ ⁼ ⧖:C,v
+  ⧗:C,ty ‹efailty› ⧖:C,f
+  ⧗:C #45# ‹etx› ⧖:C,i1
+  ⧗:C,ins,key,j,i1 ⧗:f ⋔ ⦃ ⧖:i,k,jj,t ⧗:i,k,jj #2# ⧗:t ‹ephi› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ #-1# ⦄ ⁼ ⧖:C,ok
+  ⧗:C,ty,v,ok ‹ent› ⧖:C,e ⧗:C,out,e ‹qadd›
+  ⧗:ins,key,m,out ⧗:j △ ⊞ ⧗:n
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹emerge1› ⸫
+
+⍝ ‹ejoin› C ins join: the join label and its phis, giving S strand dead
+⦃
+  ⧖:C,ins,join
+  ⧗:C,join ‹estart›
+  ⧗:ins #2# ⊞ ‹rd› ⧖:C,n
+  ⧗:C,ins ⧗:n ○ ᛖ ⋔ ⦃ ⌁ %%unreachable%% ‹eemit› ‹lnew0› ⧖:e ⧗:e,e △ ⦄ ⦃ ‹ejoin1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ejoin› ⸫
+⦃
+  ⧖:C,ins
+  ⧗:C,ins ‹qlist› ⧖:C,L
+  ⧗:C,L ○ ‹lget› ⧖:C,i0
+  ⧗:C,i0 △ ‹vf› ⧖:C,s0
+  ⧗:C,ins △ ⧗:s0 ‹emerge› ⧖:C,S
+  ⍝ exported moments: the longest common prefix of the moment types
+  ⧗:C,i0 #2# ‹vf› ⧖:C,t0
+  ⧗:C,t0 ‹llen› ⧖:C,p
+  ⧗:C,L ‹llen› ⧖:C,n
+  ⧗:C,L,t0 △ ⧗:n,p
+  ⥀ ⦃
+    ⧖:C,L,t0,i,n,p
+    ⧗:C,L,t0,i,n,p ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,t0,i,n,p ⧗:C,L,i ‹lget› #2# ‹vf› ⧖:C,si ⧗:C,t0,si,p ‹eprefix› ⧖:C,p2 ⧗:C,L,t0 ⧗:i △ ⊞ ⧗:n,p2 ⊕ ⦄
+  ⦄
+  ⧖:C,L,t0,i,n,p
+  ⧗:C,t0 ○ ⧗:p ‹lslice› ⧖:C,proto
+  ⧗:C,ins #2# ⧗:proto ‹emerge› ⧖:C,strand
+  ⧗:C,S,strand ○
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹ejoin1› ⸫
+⍝ ‹eprefix› C a b p: how many of the first p entries of a and b have the same types
+⦃
+  ⧖:C,a,b,p
+  ⧗:C,b ‹llen› ⧖:C,nb
+  ⧗:p ⧗:nb ‹min› ⧖:lim
+  ⧗:C,a,b,lim ○
+  ⥀ ⦃
+    ⧖:C,a,b,lim,q
+    ⧗:C,a,b,lim,q ⧗:q ⧗:lim ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹eprefix1› ⦄
+  ⦄
+  ⧖:C,a,b,lim,q ⧗:C,q
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eprefix› ⸫
+⦃
+  ⧖:C,a,b,lim,q
+  ⧗:C,a,q ‹lget› ‹ety› ⧖:C,ta ⧗:C,b,q ‹lget› ‹ety› ⧖:C,tb
+  ⧗:C,a,b,lim,q ⧗:ta ⧗:tb ᛖ ⋔ ⦃ △ ⊞ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ŧ⟩ ‹eprefix1› ⸫
+
+⍝ ---- three-way branches
+⍝ ‹ebranch3› C c t0 t1 t2: branch on trit entry c to t0 (⦶), t1 (⊕), t2 (⊖); the edges [from to] as a
+⍝ queue. A trit fresh from ≶ branches on the comparison itself, so LLVM sees the compares C would use.
+
+⦃ ⧖:C,ed,from,to ⧗:C ‹len› ⧖:C,r ⧗:C ⧗:from ⍆̵ ⧗:to ⍆̵ ⧖:C ⧗:C,ed,r ‹qadd› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eedge› ⸫
+
+⦃
+  ⧖:C,c,t0,t1,t2
+  ⧗:C ‹ecur› ⧖:C,from
+  ⧗:C ‹qnew› ⧖:C,ed
+  ⧗:C,c #10# ‹vf› ⧖:C,cmp
+  ⧗:C,c,t0,t1,t2,from,ed ⧗:cmp #-1# ᛖ ⋔ ⦃ ‹ebr3s› ⦄ ⦃ ‹ebr3c› ⦄ ⁼
+  ⧗:ed
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ebranch3› ⸫
+⍝ a switch on the trit; one case per distinct target, since a phi lists each predecessor once
+⦃
+  ⧖:C,c,t0,t1,t2,from,ed
+  ⧗:C,c ‹ev› ⧖:C,cv
+  ⧗:t0 ⧗:t1 ᛖ ⧖:e01 ⧗:t0 ⧗:t2 ᛖ ⧖:e02 ⧗:t1 ⧗:t2 ᛖ ⧖:e12
+  #4# ⧗:e02 ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧗:e01 ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:e01 ⧗:e12 ⋎ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
+  ⧗:e02 ‹not› ⧗:e12 ‹not› ⋎ ⧗:e01 ‹not› ⋎ ⋔ ⦃ ⌁ ○ ⦄ ∅ ⁼ ⧖:k
+  ⧗:C,cv,t0,t1,t2,k
+  ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⧖:v,a,b,d %%switch i8 {v}, label %{d} [ i8 0, label %{a}  i8 1, label %{b} ]%% ⦄ ⦃
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ⧖:v,a,b,d %%br label %{a}%% ⦄ ⦃
+  ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ⧖:v,a,b,d %%switch i8 {v}, label %{a} [ i8 -1, label %{d} ]%% ⦄ ⦃
+  #3# ᛖ ⋔ ⦃ ⧖:v,a,b,d %%switch i8 {v}, label %{d} [ i8 1, label %{b} ]%% ⦄ ⦃ ⧖:v,a,b,d %%switch i8 {v}, label %{d} [ i8 0, label %{a} ]%% ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ‹eemit› ⧖:C
+  ⧗:C,ed,from,t0 ‹eedge› ⧖:C
+  ⧗:C,ed,from,t1 ⧗:e01 ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹eedge› ⦄ ⁼ ⧖:C
+  ⧗:C,ed,from,t2 ⧗:e02 ⧗:e12 ⋏ ⋔ ⦃ ⌁ ⌁ ⌁ ⦄ ⦃ ‹eedge› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebr3s› ⸫
+⍝ branches on the comparison that made the trit
+⦃
+  ⧖:C,c,t0,t1,t2,from,ed
+  ⧗:C,c #10# ‹vf› ⧖:C,cmp
+  ⧗:C,cmp ○ ‹vf› ⧖:C,eq ⧗:C,cmp △ ‹vf› ⧖:C,gt ⧗:C,cmp #2# ‹vf› ⧖:C,lt ⧗:C,cmp #3# ‹vf› ⧖:C,a ⧗:C,cmp #4# ‹vf› ⧖:C,b
+  #4# ⧗:t0 ⧗:t2 ᛖ ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧗:t1 ⧗:t2 ᛖ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧗:t0 ⧗:t1 ᛖ ⧗:t1 ⧗:t2 ᛖ ⋎ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:k
+  ⧗:C,t0,t1,t2,from,ed,eq,gt,lt,a,b,k
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹ebc1› ⦄ ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ‹ebc2› ⦄ ⦃ #3# ᛖ ⋔ ⦃ ‹ebc3› ⦄ ⦃ ‹ebc4› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebr3c› ⸫
+⦃
+  ⧖:C,t0,t1,t2,from,ed,eq,gt,lt,a,b
+  ⧗:C,t0 ‹ebr› ⧗:ed,from,t0 ‹eedge›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebc1› ⸫
+⦃
+  ⧖:C,t0,t1,t2,from,ed,eq,gt,lt,a,b
+  ⧗:C %%{eq} {lt} {a}, {b}%% ‹edef› ⧖:C,ce
+  ⧗:C,ce,t0,t1 ‹ebr2› ⧗:ed,from,t0 ‹eedge› ⧗:ed,from,t1 ‹eedge›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebc2› ⸫
+⦃
+  ⧖:C,t0,t1,t2,from,ed,eq,gt,lt,a,b
+  ⧗:C %%{gt} {lt} {a}, {b}%% ‹edef› ⧖:C,cg
+  ⧗:C,cg,t1,t0 ‹ebr2› ⧗:ed,from,t1 ‹eedge› ⧗:ed,from,t0 ‹eedge›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebc3› ⸫
+⦃
+  ⧖:C,t0,t1,t2,from,ed,eq,gt,lt,a,b
+  ⧗:C ‹elabel› ⧖:C,lne
+  ⧗:C %%{eq} {lt} {a}, {b}%% ‹edef› ⧖:C,ce
+  ⧗:C,ce,t0,lne ‹ebr2› ⧗:lne ‹estart› ⧖:C
+  ⧗:C %%{gt} {lt} {a}, {b}%% ‹edef› ⧖:C,cg
+  ⧗:C,cg,t1,t2 ‹ebr2› ⧗:ed,from,t0 ‹eedge› ⧗:ed,lne,t1 ‹eedge› ⧗:ed,lne,t2 ‹eedge›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebc4› ⸫
+
+⍝ ---- blocks: ‹eblock› C from to S → C S strand dead (dead: 1 when the block left by failure)
+
+⍝ ‹efind› C name: the emit record of a function
+⦃
+  ⧖:C,name
+  ⧗:C #36# ‹reg› ‹rd› ⧖:C,nd
+  ⧗:C,name,nd #-1#
+  ⥀ ⦃
+    ⧖:C,name,nd,found
+    ⧗:C,name,nd,found ⧗:found #-1# ᛖ ⧗:nd #-1# ᛖ ‹not› ⋎ ⋔
+      ⦃ ⧖:C,name,nd,found ⧗:C ⧗:nd △ ⊞ ‹rd› ⧖:C,r ⧗:C,r ‹rd› ⧖:C,rn ⧗:C,nd ‹rd› ⧖:C,nx
+        ⧗:C,name,nx ⧗:found ⧗:r ⧗:rn ⧗:name ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⊕ ⦄ ⦃ ⦶ ⦄ ⁼
+  ⦄
+  ⧖:C,name,nd,found ⧗:C,found
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹efind› ⸫
+⍝ ‹eresolve› C op: the emit record of the function a call node names
+⦃ ⧖:C,op ⧗:C,op ‹resolve› ‹rd› ‹efind› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eresolve› ⸫
+
+⍝ ‹esub› C from to S: run the ops in their own future-call frame
+⦃
+  ⧖:C,from,to,S
+  ⧗:C ‹epushf›
+  ⧗:from,to,S ‹eblock› ⧖:C,R,st,dead
+  ⧗:C ‹epopf› ⧖:C,q
+  ⧗:C,q ⧗:dead ○ ᛖ ⋔ ⦃ ‹erunf› ⦄ ⦃ ⌁ ⦄ ⁼
+  ⧗:R,st,dead
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹esub› ⸫
+⍝ ‹esubb› C b S: ‹esub› on the ops of block node b
+⦃ ⧖:C,b,S ⧗:C,b ‹brange› ⧖:C,from,to ⧗:C,from,to,S ‹esub› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹esubb› ⸫
+
+⦃
+  ⧖:C,from,to,S
+  ⧗:C ‹lnew0› ⧖:C,strand
+  ⍝ the loop carries [C oi to S strand dead prev]
+  ⧗:C,from,to,S,strand ○ #-1#
+  ⥀ ⦃
+    ⧖:C,oi,to,S,strand,dead,prev
+    ⧗:C,oi,to,S,strand,dead,prev ⧗:oi ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹estep› ⊕ ⦄
+  ⦄
+  ⧖:C,oi,to,S,strand,dead,prev
+  ⧗:C,S,strand,dead
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eblock› ⸫
+
+⍝ ‹estep› C oi to S strand dead prev: one op
+⦃
+  ⧖:C,oi,to,S,strand,dead,prev
+  ⧗:C,oi,S,strand,dead,prev,to ‹ecase› ⧖:C,S2,strand2,dead2,skip
+  ⧗:C,oi ‹nextn› ⧖:C,nx
+  ⧗:C,nx ‹nextn› ⧖:C,nx2
+  ⧗:nx ⧗:nx2 ⧗:skip △ ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:oi2
+  ⧗:oi ⧗:nx ⧗:skip △ ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:prev2
+  ⧗:C,oi2,to,S2,strand2,dead2,prev2
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹estep› ⸫
+
+⍝ ‹ecase› C op S strand dead prev to → C S strand dead skip
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C,op ○ ‹nd› ⧖:C,k
+  ⧗:C,op,S,strand,dead,prev,to,k
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹el_lit› ⦄ ⦃
+  ⍿⁰ #2# ᛖ ⍿¹ #6# ᛖ ⋏ ⋔ ⦃ ⌁ ‹el_call› ⦄ ⦃
+  ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ‹el_op› ⦄ ⦃
+  ⍿⁰ #18# ᛖ ⋔ ⦃ ⌁ ‹el_op› ⦄ ⦃
+  ⍿⁰ #10# #11# ᛦ ⋔ ⦃ ⌁ ‹el_select› ⦄ ⦃
+  ⍿⁰ #14# ᛖ ⋔ ⦃ ⌁ ‹el_loop› ⦄ ⦃
+  ⍿⁰ #17# ᛖ ⋔ ⦃ ⌁ ‹el_handle› ⦄ ⦃
+  ⍿⁰ #8# ᛖ ⋔ ⦃ ⌁ ‹el_array› ⦄ ⦃
+  ⍿⁰ #7# ᛖ ⋔ ⦃ ⌁ ‹el_quote› ⦄ ⦃
+  ⍿⁰ #16# ᛖ ⋔ ⦃ ⌁ ‹el_prayer› ⦄ ⦃
+  ⍿⁰ #15# ᛖ ⋔ ⦃ ⌁ ‹el_post› ⦄ ⦃
+  ⍿⁰ #4# ᛖ ⋔ ⦃ ⌁ ‹el_inv› ⦄ ⦃
+  #3# ᛖ ⋔ ⦃ ‹el_inv› ⦄ ⦃ ‹el_err› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹ecase› ⸫
+
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C,op ‹ndt› ⧖:C,tok
+  ⧗:C,tok ‹eerr› $code generation for $ ⎙̵ ⧗:tok ‹plab› $ arrives in milestone 5$ ⎙̵ ‹die›
+  ⧗:S,strand,dead ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_err› ⸫
+
+⍝ literals
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C,op ‹ndt› ⧖:C,tok
+  ⧗:C,tok ‹tkd› ⧖:C,lk
+  ⧗:C,tok,lk ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ‹elint› ⦄ ⦃ ⍿⁰ #7# ᛖ ⋔ ⦃ ⌁ ‹eltrit› ⦄ ⦃ #6# ᛖ ⋔ ⦃ ‹elreal› ⦄ ⦃ ‹elstr› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⧖:C,e
+  ⧗:C,tok ‹trole› ⧖:C,role
+  ⧗:C,e,role ⧗:role #-1# ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ‹ewrole› ⦄ ⁼ ⧖:C,e2
+  ⧗:C,S,e2 ‹lpush› ⧗:strand,dead ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_lit› ⸫
+⦃
+  ⧖:C,tok
+  ⧗:C,tok #5# ‹tf› ⧖:C,v
+  ⧗:C %%!{#v}%% ⧖:C,vt
+  ⧗:C #11# ‹reg› ⧖:C,t
+  ⧗:C,t,vt,v △ ‹entc›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹elint› ⸫
+⦃
+  ⧖:C,tok
+  ⧗:C,tok ‹tc0› ⧖:C,x
+  ○ ⧗:x #8854# ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼ ⧗:x #8853# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:n
+  ⧗:C %%!{#n}%% ⧖:C,vt
+  ⧗:C #10# ‹reg› ⧖:C,t
+  ⧗:C,t,vt,n ○ ‹entc›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eltrit› ⸫
+⦃
+  ⧖:C,tok
+  ⧗:C,tok #5# ‹tf› ⧖:C,num ⧗:C,tok #6# ‹tf› ⧖:C,den
+  ⧗:C %%fdiv double {#num}.0, {#den}.0%% ‹edef› ⧖:C,rv
+  ⧗:C #12# ‹reg› ⧖:C,t
+  ⧗:C,t,rv #-1# ‹ent›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹elreal› ⸫
+⦃
+  ⧖:C,tok
+  ⧗:C,tok ‹estring› ⧖:C,gn,gl
+  ⧗:C %%call ptr @trith_str_new(ptr {gn}, i64 {gl})%% ‹edef› ⧖:C,sv
+  ⧗:C #14# ‹reg› ⧖:C,t
+  ⧗:C,t,sv #-1# ‹ent›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹elstr› ⸫
+
+⍝ calls (past tense calls run at compile time, §9.2)
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C,op ‹ndt› ⧖:C,tok
+  ⧗:C,op ‹eresolve› ⧖:C,f
+  ⧗:C,tok #2# ‹tmark› ⧖:C,fut ⧗:C,tok #4# ‹tmark› ⧖:C,past
+  ⧗:C,S,f,tok,fut ⧗:past ⋔ ⦃ ⌁ ‹epast› ⦄ ⦃ ⧖:SS,ff,tk,fu ⧗:SS,ff,fu ‹ecall› ⦄ ⁼ ⧖:C,S2
+  ⧗:C,S2,strand,dead ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_call› ⸫
+⍝ ⇜name and ⌁name calls
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C,op ‹ndt› ⧖:C,tok
+  ⧗:C,op ○ ‹nd› ⧖:C,k
+  ⧗:C,tok ‹tname› ⧖:C,nm
+  ⧗:C,nm ⧗:k #4# ᛖ ⋔ ⦃ ⧖:n #8668# ⧗:n ‹spre› ⦄ ∅ ⁼ ‹efind› ⧖:C,f
+  ⧗:C,S,f ⊕ ‹ecall› ⧖:C,S2
+  ⧗:C,S2,strand,dead ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_inv› ⸫
+
+⍝ ops; kind 18 is an op of a generated inverse whose ⊞ and ⊟ swap places
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C,op ‹ndt› ⧖:C,tok
+  ⧗:C,op ○ ‹nd› ⧖:C,k
+  ⧗:C,tok ‹tc0› ⧖:C,x0
+  ⧗:x0 ⧗:k #18# ᛖ ⋔ ⦃ ⍿⁰ #8862# ᛖ ⋔ ⦃ ⌁ #8863# ⦄ ⦃ ⍿⁰ #8863# ᛖ ⋔ ⦃ ⌁ #8862# ⦄ ∅ ⁼ ⦄ ⁼ ⦄ ∅ ⁼ ⧖:x
+  ⧗:C,tok #4# ‹tf› ⧖:C,idx
+  ⧗:C,tok ‹trole› ⧖:C,role
+  ⧗:C,S,strand,dead,tok,x,idx,role,op,to
+  ⍿⁴ #10710# ᛖ ⋔ ⦃ ‹eo_bind› ⦄ ⦃
+  ⍿⁴ #10711# ᛖ ⋔ ⦃ ‹eo_read› ⦄ ⦃
+  ⍿⁴ #9087# ᛖ ⋔ ⦃ ‹eo_pick› ⦄ ⦃
+  ⍿⁴ #10199# ᛖ ⍿⁵ #10198# ᛖ ⋏ ⋔ ⦃ ‹eo_shadow› ⦄ ⦃
+  ⍿⁴ ⧖ @any(10996,8859,8857)@ ⋔ ⦃ ‹eo_psi› ⦄ ⦃
+  ⍿⁴ #8623# ᛖ ⋔ ⦃ ‹eo_fail› ⦄ ⦃ ‹eo_glyph› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_op› ⸫
+
+⍝ the op handlers: C S strand dead tok x idx role op to → C S strand dead
+⦃
+  ⧖:C,S,strand,dead,tok,x,idx,role,op,to
+  ⧗:C,S ‹llen› ⧖:C,n
+  ⧗:C,S ⧗:n △ ⊟ ‹lget› ⧖:C,be
+  ⧗:C,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C,be #7# ‹vf› ⧖:C,sl
+  ⧗:C,be,op,to ⧗:sl #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹eretro› ⦄ ⁼ ⧖:C,be2
+  ⧗:C,strand,be2 ‹lpush› ⧖:C,strand2
+  ⧗:C,S2,strand2,dead
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eo_bind› ⸫
+⦃
+  ⧖:C,S,strand,dead,tok,x,idx,role,op,to
+  ⧗:C,strand ‹llen› ⧖:C,n
+  ⧗:C,strand ⧗:n △ ⊟ ⧗:idx ⊟ ‹lget› ⧖:C,e
+  ⧗:C,e,role ‹ewrole› ⧖:C,e2
+  ⧗:C,S,e2 ‹lpush› ⧗:strand,dead
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eo_read› ⸫
+⦃
+  ⧖:C,S,strand,dead,tok,x,idx,role,op,to
+  ⧗:C,S ‹llen› ⧖:C,n
+  ⧗:n △ ⊟ ⧗:idx ⊟ ⧖:si
+  ⧗:C,S,si ‹lget› ⧖:C,e
+  ⧗:C,e ‹ety› ‹tcopy› ⧖:C,cp
+  ⍝ a quantum value moves to the top
+  ⧗:C,S,si,n ⧗:cp ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⧖:SS,i,nn ⧗:SS ○ ⧗:i ‹lslice› ⧖:a ⧗:SS ⧗:i △ ⊞ ⧗:nn ‹lslice› ⧖:b ⧗:a,b ‹lcat› ⦄ ⁼ ⧖:C,S2
+  ⧗:C,e,role ‹ewrole› ⧖:C,e2
+  ⧗:C,S2,e2 ‹lpush› ⧗:strand,dead
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eo_pick› ⸫
+⦃
+  ⧖:C,S,strand,dead,tok,x,idx,role,op,to
+  ⧗:C,S ‹llen› ⧖:C,n
+  ⧗:C,S ⧗:n △ ⊟ ‹lget› ⧖:C,e
+  ⧗:C,e ‹ety› ⧖:C,et ⧗:C,e ‹ev› ⧖:C,ev
+  ⧗:C,x,et ‹spre› ⧖:C,st
+  ⧗:C,st,ev #-1# ‹ent› ⧖:C,e2
+  ⧗:C,S,e2 ‹lpush› ⧗:strand,dead
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eo_shadow› ⸫
+⦃
+  ⧖:C,S,strand,dead,tok,x,idx,role,op,to
+  ⧗:C ‹efailexit› ⧗:S,strand △
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eo_fail› ⸫
+
+⍝ an operator: unwrap the operands (all but ⌁'s), mark integer literals next to bytes as bytes,
+⍝ fold what is known (§13), lift over superpositions, else emit
+⦃
+  ⧖:C,S,strand,dead,tok,x,idx,role,op,to
+  ⧗:x ‹arity› ⧖:ar0
+  ⧗:ar0 ⧗:ar0 #-1# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:ar
+  ⧗:C,S,ar ‹epop› ⧖:C,S2,vals
+  ⧗:C ‹qnew› ⧖:C,q
+  ⧗:C,vals,q,x ○ ⧗:ar
+  ⥀ ⦃
+    ⧖:C,vals,q,x,i,ar
+    ⧗:C,vals,q,x,i,ar ⧗:i ⧗:ar ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,vals,q,x,i,ar ⧗:C,vals,i ‹lget› ⧖:C,e ⧗:C,e ⧗:x #8961# ᛖ ⋔ ⦃ ⦄ ⦃ ‹eunwrap› ⦄ ⁼ ⧖:C,e2 ⧗:C,q,e2 ‹qadd› ⧗:vals,q,x ⧗:i △ ⊞ ⧗:ar ⊕ ⦄
+  ⦄
+  ⧖:C,vals,q,x,i,ar
+  ⧗:C,q ‹qlist› ⧖:C,uv
+  ⧗:C,uv,ar ‹ehasbyte› ⧖:C,hb
+  ⧗:C,uv,ar,x ⧗:hb ⧗:x #8982# ᛖ ‹not› ⋎ ⋔ ⦃ ‹ebytelits› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C,x,uv,ar ‹efold› ⧖:C,res0
+  ⧗:C,uv,ar ‹eanypsi› ⧖:C,psi
+  ⧗:C,tok,uv,res0 ⧗:psi ⋔ ⦃ ⌁ ‹elift› ⦄ ⦃ ⧖:tk,u,r ⧗:r ⦄ ⁼ ⧖:C,res1
+  ⧗:C,tok,uv,res1 ⧗:res1 #-1# ᛖ ⋔ ⦃ ⌁ ‹eglyph› ⦄ ⦃ ⧖:tk,u,r ⧗:r ⦄ ⁼ ⧖:C,res
+  ⧗:C,S2,res ‹lcat› ⧗:strand,dead
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eo_glyph› ⸫
+⍝ ‹ehasbyte› C uv n: some operand is a 𝔹, ⟗ʃ or ⟖ʃ
+⦃
+  ⧖:C,uv,n
+  ⧗:C,uv ○ ⧗:n ⊕
+  ⥀ ⦃
+    ⧖:C,uv,i,n,has
+    ⧗:C,uv,i,n,has ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,uv,i,n,has ⧗:C,uv,i ‹lget› ‹ety› ⧖:C,t
+        ⧗:C,t #13# ‹tis› ⧖:C,a ⧗:C,t #18# ‹tis› ⧖:C,b ⧗:C,t #19# ‹tis› ⧖:C,c
+        ⧗:C,uv ⧗:i △ ⊞ ⧗:n ⧗:has ⧗:a ⋏ ⧗:b ⋏ ⧗:c ⋏ ⊕ ⦄
+  ⦄
+  ⧖:C,uv,i,n,has ⧗:C,has
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹ehasbyte› ⸫
+⍝ ‹ebytelits› C uv n x: integer literals among the operands become bytes (literals are gluons, §3.2)
+⦃
+  ⧖:C,uv,n,x
+  ⧗:C,uv,x ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,uv,x,i,n
+    ⧗:C,uv,x,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹ebytelit1› ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebytelits› ⸫
+⦃
+  ⧖:C,uv,x,i,n
+  ⧗:C,uv,i ‹lget› ⧖:C,ue
+  ⧗:C,ue ‹ety› #11# ‹tis› ⧖:C,isz
+  ⧗:C,ue #6# ‹vf› ⧖:C,lit
+  ⧗:isz ⧗:lit △ ᛖ ⋎ ⧗:x #9032# ᛖ ⧗:i △ ᛖ ⋎ ‹not› ⋎ ⧖:conv
+  ⧗:C,uv,i,ue ⧗:conv ⋔ ⦃ ‹ebytelit2› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:uv,x ⧗:i △ ⊞ ⧗:n
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹ebytelit1› ⸫
+⦃
+  ⧖:C,uv,i,ue
+  ⧗:C,ue #5# ‹vf› ⧖:C,bc0
+  ⧗:bc0 ⧗:bc0 #127# ≶ ⋔ ∅ ⦃ #256# ⊟ ⦄ ∅ ⧖:bc
+  ⧗:C %%!{#bc}%% ⧖:C,bv
+  ⧗:C,ue #3# ‹vf› ⧖:C,role
+  ⧗:C #13# ‹reg› ⧖:C,t
+  ⧗:C,t,bv #-1# ⧗:role ○ ○ ○ #-1# #-1# #-1# #-1# ‹entx› ⧖:C,be
+  ⧗:C,uv,i,be ‹lset›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebytelit2› ⸫
+⍝ ‹eanypsi› C uv n: some operand is a superposition
+⦃
+  ⧖:C,uv,n
+  ⧗:C,uv ○ ⧗:n ⊕
+  ⥀ ⦃
+    ⧖:C,uv,i,n,has
+    ⧗:C,uv,i,n,has ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,uv,i,n,has ⧗:C,uv,i ‹lget› #7# ‹vf› ⧖:C,sl ⧗:C,uv ⧗:i △ ⊞ ⧗:n ⧗:has ⧗:sl #-1# ᛖ ‹not› ⋏ ⊕ ⦄
+  ⦄
+  ⧖:C,uv,i,n,has ⧗:C,has
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹eanypsi› ⸫
+
+⍝ ---- folding: an operator on values known at compile time (s1's ev_glyph on ℤ and ŧ)
+
+⍝ ‹eknown› C uv n: every operand has a known value
+⦃
+  ⧖:C,uv,n
+  ⧗:C,uv ○ ⧗:n ⦶
+  ⥀ ⦃
+    ⧖:C,uv,i,n,all
+    ⧗:C,uv,i,n,all ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,uv,i,n,all ⧗:C,uv,i ‹lget› #4# ‹vf› ⧖:C,hc ⧗:C,uv ⧗:i △ ⊞ ⧗:n ⧗:all ⧗:hc △ ᛖ ⋎ ⊕ ⦄
+  ⦄
+  ⧖:C,uv,i,n,all ⧗:C,all
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹eknown› ⸫
+
+⍝ ‹efold› C x uv n: the entries the operator gives, or −1 when it cannot be folded
+⦃
+  ⧖:C,x,uv,n
+  ⧗:x ⧖ @any(8862,8863,8864,8856,8860,8861,8822,8911,8910,9863)@ ⧖:foldable
+  ⧗:C,uv,n ‹eknown› ⧖:C,known
+  ⧗:C,x,uv,n ⧗:foldable ⧗:known ⋎ ⋔ ⦃ ‹efold1› ⦄ ⦃ ⌁ ⌁ ⌁ #-1# ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹efold› ⸫
+⦃
+  ⧖:C,x,uv,n
+  ⧗:C,uv ○ ‹lget› ⧖:C,e0
+  ⧗:C,e0 ‹ety› ⧖:C,ty ⧗:C,e0 #5# ‹vf› ⧖:C,a
+  ⧗:C,uv,n ⧗:n △ ≶ ⋔ ⦃ ⌁ ⌁ ○ ⦄ ⦃ ⌁ △ ‹lget› #5# ‹vf› ⦄ ⦃ ⌁ ⌁ ○ ⦄ ⧖:C,b
+  ⧗:C,ty #10# ‹tis› ⧖:C,tr ⧗:C,ty #11# ‹tis› ⧖:C,iz
+  ⧗:C,x,ty,a,b ⧗:tr ⧗:iz ⋏ ⋔ ⦃ ‹evglyph› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ #-1# ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹efold1› ⸫
+
+⍝ ‹eexact› n: n is within the exact range of compile-time evaluation (|n| ≤ 2⁵³)
+⦃ ⧖:n ⧗:n #9007199254740992# ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⧗:n #-9007199254740992# ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⦄ ⟨ℤ ⊸ ŧ⟩ ‹eexact› ⸫
+⍝ ‹emulok› a b: |a·b| ≤ 2⁵³, decided without overflow
+⦃
+  ⧖:a,b
+  ⧗:a ⧗:a ○ ≶ ⋔ ∅ ∅ ⦃ ⊝ ⦄ ⧖:aa ⧗:b ⧗:b ○ ≶ ⋔ ∅ ∅ ⦃ ⊝ ⦄ ⧖:bb
+  ⧗:aa,bb ⧗:aa ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⦶ ⦄ ⦃ ‹emulok1› ⦄ ⁼
+⦄ ⟨ℤ ℤ ⊸ ŧ⟩ ‹emulok› ⸫
+⦃
+  ⧖:aa,bb
+  #9007199254740992# ⧗:aa ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:q0
+  ⧗:q0 ⧗:q0 ⧗:aa ⊠ #9007199254740992# ≶ ⋔ ∅ ⦃ △ ⊟ ⦄ ∅ ⧖:lim
+  ⧗:bb ⧗:lim ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄
+⦄ ⟨ℤ ℤ ⊸ ŧ⟩ ‹emulok1› ⸫
+
+⍝ ‹evglyph› C x ty a b: fold x on ℤ or ŧ values a and b (b unused for one operand)
+⦃
+  ⧖:C,x,ty,a,b
+  ⧗:C,x,ty,a,b ⧗:x
+  ⍿⁰ #8862# ᛖ ⋔ ⦃ ⌁ ‹ev_add› ⦄ ⦃
+  ⍿⁰ #8863# ᛖ ⋔ ⦃ ⌁ ‹ev_sub› ⦄ ⦃
+  ⍿⁰ #8864# ᛖ ⋔ ⦃ ⌁ ‹ev_mul› ⦄ ⦃
+  ⍿⁰ #8856# ᛖ ⍿¹ #8860# ᛖ ⋏ ⋔ ⦃ ⌁ ‹ev_div› ⦄ ⦃
+  ⍿⁰ #8861# ᛖ ⋔ ⦃ ⌁ ‹ev_neg› ⦄ ⦃
+  ⍿⁰ #9863# ᛖ ⋔ ⦃ ⌁ ‹ev_neut› ⦄ ⦃
+  ⍿⁰ #8822# ᛖ ⋔ ⦃ ⌁ ‹ev_cmp› ⦄ ⦃
+  #8911# ᛖ ⋔ ⦃ ‹ev_min› ⦄ ⦃ ‹ev_max› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evglyph› ⸫
+⦃ ⧖:C,x,ty,a,b ⧗:C,ty ⧗:a ⧗:b ⊞ ‹evnum› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev_add› ⸫
+⦃ ⧖:C,x,ty,a,b ⧗:C,ty ⧗:a ⧗:b ⊟ ‹evnum› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev_sub› ⸫
+⦃
+  ⧖:C,x,ty,a,b
+  ⧗:C,ty,a,b ⧗:a ⧗:b ‹emulok› ⋔ ⦃ ⧖:t,p,q ⧗:t ⧗:p ⧗:q ⊠ ‹evnum› ⦄ ⦃ ⌁ ⌁ ⌁ #-1# ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev_mul› ⸫
+⦃ ⧖:C,x,ty,a,b ⧗:C,ty ⧗:a ⊝ ‹evnum› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev_neg› ⸫
+⦃ ⧖:C,x,ty,a,b ⧗:C,ty,a ‹evnum› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev_neut› ⸫
+⦃ ⧖:C,x,ty,a,b ⧗:C #10# ‹reg› ⧖:C,tt ⧗:C,tt ⧗:a ⧗:b ≶ ⋔ ⦃ ○ ⦄ ⦃ △ ⦄ ⦃ #-1# ⦄ ‹evnum› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev_cmp› ⸫
+⦃ ⧖:C,x,ty,a,b ⧗:C #10# ‹reg› ⧖:C,tt ⧗:C,tt ⧗:a ⧗:b ‹min› ‹evnum› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev_min› ⸫
+⦃ ⧖:C,x,ty,a,b ⧗:C #10# ‹reg› ⧖:C,tt ⧗:C,tt ⧗:a ⧗:b ‹max› ‹evnum› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev_max› ⸫
+⍝ ⊘ and ⊜: a failed ◌ for a zero divisor
+⦃
+  ⧖:C,x,ty,a,b
+  ⧗:C #9676# ⧗:ty ‹spre› ⧖:C,ft
+  ⧗:C,ft,x,a,b ⧗:b ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⧖:f #48# ‹etx› ⧖:z #47# ‹etx› ⧖:no ⧗:f,z,no ‹ent› ‹l1› ⦄ ⦃ ‹evdiv1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ev_div› ⸫
+⦃
+  ⧖:C,ft,x,a,b
+  ⧗:a ⧗:b ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:q0
+  ⧗:a ⧗:b ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:r0
+  ⧗:q0 ⧗:r0 ⧗:x #8860# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:q
+  ⧗:C %%!{#q}%% ⧖:C,v
+  ⧗:C #46# ‹etx› ⧖:C,yes
+  ⧗:C,ft,v,yes #-1# △ ⧗:q ○ #-1# #-1# #-1# #-1# ‹entx› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evdiv1› ⸫
+⍝ ‹evnum› C t n: [an entry for the known value n of type t], or −1 when n is not exact
+⦃
+  ⧖:C,t,n
+  ⧗:C,t,n ⧗:n ‹eexact› ⋔ ⦃ ⧖:tt,nn %%!{#nn}%% ⧖:v ⧗:tt,v,nn ○ ‹entc› ‹l1› ⦄ ⦃ ⌁ ⌁ #-1# ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹evnum› ⸫
+
+⍝ ---- ⋔ and ⋔⇋
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C,op ○ ‹nd› ⧖:C,k
+  ⧗:C,S △ ‹epop› ⧖:C,S2,pv
+  ⧗:C,pv ○ ‹lget› ‹eunwrap› ⧖:C,c
+  ⧗:C ‹elabel› ⧖:C,join
+  ⍝ targets and the bodies of the block faces
+  ⧗:C ‹qnew› ⧖:C,bodies
+  ⧗:C ⧗:op #3# ⊞ ⧖:C,f0 ⧗:C,f0 ‹nextn› ⧖:C,f1 ⧗:C,f1 ‹nextn› ⧖:C,f2
+  ⧗:C,f0,join,join,bodies ‹eface› ⧖:C,t0
+  ⧗:C,f1,t0,join,bodies ‹eface› ⧖:C,t1
+  ⧗:C,f2,t1,join,bodies ‹eface› ⧖:C,t2
+  ⧗:C,c,t0,t1,t2 ‹ebranch3› ⧖:C,edges
+  ⧗:C ‹qnew› ⧖:C,ins
+  ⧗:C ‹lnew0› ⧖:C,e0
+  ⧗:C,edges,ins,join,S2,e0 ‹eedgesin› ⧖:C
+  ⧗:C,bodies,ins,join,S2 ‹ebodies› ⧖:C
+  ⧗:C,ins,join ‹ejoin› ⧖:C,S3,strand2,dead2
+  ⧗:C,strand,strand2 ‹lcat› ⧖:C,strand3
+  ⧗:C,op,S3,c,k,dead2 ‹ersel›
+  ⧗:S3,strand3,dead2 ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_select› ⸫
+⍝ ‹eface› C f before join bodies: the target of face node f (before: the previous face's target)
+⦃
+  ⧖:C,f,before,join,bodies
+  ⧗:C,f ○ ‹nd› ⧖:C,fk
+  ⧗:C,f,before,join,bodies,fk
+  ⍿⁰ #12# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⧖:ff,b ⧗:b ⦄ ⦃ #13# ᛖ ⋔ ⦃ ⌁ ⧖:ff,b,j ⧗:j ⦄ ⦃ ‹eface1› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eface› ⸫
+⦃
+  ⧖:C,f,before,join,bodies
+  ⧗:C ‹elabel› ⧖:C,lf
+  ⧗:C ‹len› ⧖:C,r ⧗:C ⧗:lf ⍆̵ ⧗:f ⍆̵ ⧖:C
+  ⧗:C,bodies,r ‹qadd› ⧗:lf
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eface1› ⸫
+⍝ ‹eedgesin› C edges ins join S strand: an incoming edge for every branch straight to the join
+⦃
+  ⧖:C,edges,ins,join,S,strand
+  ⧗:C,edges ‹qlist› ⧖:C,L
+  ⧗:C,L ‹llen› ⧖:C,n
+  ⧗:C,L,ins,join,S,strand ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,L,ins,join,S,strand,i,n
+    ⧗:C,L,ins,join,S,strand,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,ins,join,S,strand,i,n ⧗:C,L,i ‹lget› ⧖:C,ed
+        ⧗:C,ed △ ‹vf› ⧖:C,to ⧗:C,ed ‹rd› ⧖:C,from
+        ⧗:C,ins,from,S,strand ⧗:to ⧗:join ᛖ ⋔ ⦃ ‹eincadd› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+        ⧗:L,ins,join,S,strand ⧗:i △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eedgesin› ⸫
+⍝ ‹ebodies› C bodies ins join S: each block face in its own block, then on to the join
+⦃
+  ⧖:C,bodies,ins,join,S
+  ⧗:C,bodies ‹qlist› ⧖:C,L
+  ⧗:C,L ‹llen› ⧖:C,n
+  ⧗:C,L,ins,join,S ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,L,ins,join,S,i,n
+    ⧗:C,L,ins,join,S,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,ins,join,S,i,n ⧗:C,L,i ‹lget› ⧖:C,bd
+        ⧗:C,bd ‹rd› ⧖:C,lf ⧗:C,bd △ ‹vf› ⧖:C,f
+        ⧗:C,lf ‹estart› ⧗:f,S ‹esubb› ⧖:C,R,rst,rdead
+        ⧗:C,ins,join,R,rst ⧗:rdead ○ ᛖ ⋔ ⦃ ‹etojoin› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+        ⧗:L,ins,join,S ⧗:i △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ebodies› ⸫
+⍝ ‹etojoin› C ins join R rst: a live block ends by branching to the join
+⦃
+  ⧖:C,ins,join,R,rst
+  ⧗:C ‹ecur› ⧖:C,endl
+  ⧗:C,ins,endl,R,rst ‹eincadd›
+  ⧗:join ‹ebr›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹etojoin› ⸫
+
+⍝ ---- ⁇
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C,S △ ‹epop› ⧖:C,S2,pv
+  ⧗:C,pv ○ ‹lget› ⧖:C,fe
+  ⧗:C ‹elabel› ⧖:C,lok ⧗:C ‹elabel› ⧖:C,lfail ⧗:C ‹elabel› ⧖:C,join
+  ⧗:C,fe ‹eok› ⧖:C,fok
+  ⧗:C,fok,lok,lfail ‹ebr2›
+  ‹qnew› ⧖:C,ins
+  ⍝ the ok block sees the value (unless the type is a bare ◌)
+  ⧗:C,fe ‹ety› ⧖:C,fty ⧗:C,fty #15# ‹tis› ⧖:C,bare
+  ⧗:C,fe,fty,S2 ⧗:bare ⋔ ⦃ ⧖:e,t,SS ⧗:SS ⦄ ⦃ ⧖:e,t,SS ⧗:t ‹stail› ⧖:bt ⧗:e ‹ev› ⧖:v ⧗:bt,v #-1# ‹ent› ⧖:ne ⧗:SS,ne ‹lpush› ⦄ ⁼ ⧖:C,okS
+  ⧗:C,lok ‹estart›
+  ⧗:op #3# ⊞ ⧖:okb
+  ⧗:okb,okS ‹esubb› ⧖:C,R1,st1,d1
+  ⧗:C,ins,join,R1,st1 ⧗:d1 ○ ᛖ ⋔ ⦃ ‹etojoin› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:lfail ‹estart›
+  ⧗:okb ‹nextn› ⧖:C,fb
+  ⧗:C,fb,S2 ‹esubb› ⧖:C,R2,st2,d2
+  ⧗:C,ins,join,R2,st2 ⧗:d2 ○ ᛖ ⋔ ⦃ ‹etojoin› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+  ⧗:ins,join ‹ejoin› ⧖:C,S3,strand2,dead2
+  ⧗:C,strand,strand2 ‹lcat› ⧖:C,strand3
+  ⧗:C,S3,strand3,dead2 ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_handle› ⸫
+
+⍝ ---- ⥀: loop-carried values get phis, patched once the latch is known
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C ‹ecur› ⧖:C,pre
+  ⧗:C ‹elabel› ⧖:C,head ⧗:C ‹elabel› ⧖:C,exit ⧗:C ‹elabel› ⧖:C,lfail
+  ⧗:C,head ‹ebr› ⧗:head ‹estart›
+  ‹qnew› ⧖:C,hq ⧗:C ‹qnew› ⧖:C,patches
+  ⧗:C,S ‹llen› ⧖:C,n
+  ⧗:C,S,hq,patches ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,S,hq,patches,j,n
+    ⧗:C,S,hq,patches,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹eloophead› ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⌁ ⧖:C
+  ⧗:C,hq ‹qlist› ⧖:C,HS
+  ⧗:C ⧗:op #3# ⊞ ⧗:HS ‹esubb› ⧖:C,BS,rst,rdead
+  ⧗:C ‹ecur› ⧖:C,latch0
+  ⧗:C,BS,exit,head,lfail,latch0 ⧗:rdead ○ ᛖ ⋔ ⦃ ‹elatch› ⦄ ⦃ ⧖:b,e,h,f,l ⧗:b,l ⦄ ⁼ ⧖:C,BS2,latch
+  ⧗:C,patches,S,BS2,pre,latch,rdead ‹epatch› ⧖:C
+  ⧗:C,lfail,exit,BS2,strand,rst,S ⧗:rdead ○ ᛖ ⋔ ⦃ ‹eloopend› ⦄ ⦃ ⧖:lf,ex,b,st,rs,SS ⧗:SS,st △ ⦄ ⁼
+  ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_loop› ⸫
+⍝ ‹eloophead› C S hq patches j n: the head entry for slot j, with placeholder phi lines
+⦃
+  ⧖:C,S,hq,patches,j,n
+  ⧗:C,S,j ‹lget› ‹ety› ⧖:C,ty
+  ⧗:C,ty ‹evty› ⧖:C,vt
+  ⧗:C,patches,j,vt ⧗:vt #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ #-1# ⦄ ⦃ △ ‹ephslot› ⦄ ⁼ ⧖:C,hv
+  ⧗:C,ty ‹efailty› ⧖:C,f
+  ⧗:C #45# ‹etx› ⧖:C,i1
+  ⧗:C,patches,j,i1 ⧗:f ⋔ ⦃ #2# ‹ephslot› ⦄ ⦃ ⌁ ⌁ ⌁ #-1# ⦄ ⁼ ⧖:C,hok
+  ⧗:C,ty,hv,hok ‹ent› ⧖:C,e ⧗:C,hq,e ‹qadd›
+  ⧗:S,hq,patches ⧗:j △ ⊞ ⧗:n
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ⟩ ‹eloophead› ⸫
+⍝ ‹ephslot› C patches j vt fld: a fresh name and a PHI line to patch
+⦃
+  ⧖:C,patches,j,vt,fld
+  ⧗:C ‹etmp› ⧖:C,name
+  ⧗:C %%  PHI%% ⧖:C,l
+  ⧗:C #28# ‹reg› ⧖:C,q ⧗:C,q,l ‹qadd1› ⧖:C,at
+  ⧗:C ‹len› ⧖:C,p ⧗:C ⧗:at ⍆̵ ⧗:name ⍆̵ ⧗:vt ⍆̵ ⧗:j ⍆̵ ⧗:fld ⍆̵ ⧖:C
+  ⧗:C,patches,p ‹qadd› ⧗:name
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹ephslot› ⸫
+⍝ ‹elatch› C BS exit head lfail latch: the body's trit decides; the edge back to head is the latch
+⦃
+  ⧖:C,BS,exit,head,lfail,latch
+  ⧗:C,BS ‹llen› ⧖:C,n
+  ⧗:C,BS ⧗:n △ ⊟ ‹lget› ⧖:C,te
+  ⧗:C,BS ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,BS2
+  ⧗:C,te,exit,head,lfail ‹ebranch3› ‹qlist› ⧖:C,L
+  ⧗:C,L ‹llen› ⧖:C,ne
+  ⧗:C,L,head,latch ○ ⧗:ne
+  ⥀ ⦃
+    ⧖:C,L,head,latch,i,ne
+    ⧗:C,L,head,latch,i,ne ⧗:i ⧗:ne ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,head,latch,i,ne ⧗:C,L,i ‹lget› ⧖:C,ed ⧗:C,ed △ ‹vf› ⧖:C,eto ⧗:C,ed ‹rd› ⧖:C,efrom
+        ⧗:C,L,head ⧗:latch ⧗:efrom ⧗:eto ⧗:head ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧗:i △ ⊞ ⧗:ne ⊕ ⦄
+  ⦄
+  ⧖:C,L,head,latch,i,ne
+  ⧗:C,BS2,latch
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ⟩ ‹elatch› ⸫
+⍝ ‹epatch› C patches S BS pre latch dead: the phi lines, now that both edges are known
+⦃
+  ⧖:C,patches,S,BS,pre,latch,dead
+  ⧗:C,patches ‹qlist› ⧖:C,L
+  ⧗:C,L ‹llen› ⧖:C,n
+  ⧗:C,L,S,BS,pre,latch,dead ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,L,S,BS,pre,latch,dead,i,n
+    ⧗:C,L,S,BS,pre,latch,dead,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹epatch1› ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹epatch› ⸫
+⦃
+  ⧖:C,L,S,BS,pre,latch,dead,i,n
+  ⧗:C,L,i ‹lget› ⧖:C,pt
+  ⧗:C,pt ○ ‹vf› ⧖:C,at ⧗:C,pt △ ‹vf› ⧖:C,name ⧗:C,pt #2# ‹vf› ⧖:C,vt ⧗:C,pt #3# ‹vf› ⧖:C,j ⧗:C,pt #4# ‹vf› ⧖:C,fld
+  ⧗:C,S,j ‹lget› ⧖:C,e0 ⧗:C,e0,fld ‹vf› ⧖:C,v0
+  ⧗:C,BS,j ‹lget› ⧖:C,e1 ⧗:C,e1,fld ‹vf› ⧖:C,v1
+  ⧗:C,name,vt,v0,pre,v1,latch ⧗:dead ○ ᛖ ⋔
+    ⦃ ⧖:nm,t,a,p,b,l %%  {nm} = phi {t} [ {a}, %{p} ], [ {b}, %{l} ]%% ⦄
+    ⦃ ⧖:nm,t,a,p,b,l %%  {nm} = phi {t} [ {a}, %{p} ]%% ⦄ ⁼ ⧖:C,line
+  ⧗:C ⧗:at △ ⊞ ⧗:line ‹wr›
+  ⧗:L,S,BS,pre,latch,dead ⧗:i △ ⊞ ⧗:n
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹epatch1› ⸫
+⦃
+  ⧖:C,lfail,exit,BS,strand,rst,S
+  ⧗:C,lfail ‹estart› ‹efailexit› ⧗:exit ‹estart›
+  ⧗:strand,rst ‹lcat› ⧖:C,st2
+  ⧗:C,BS,st2 ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eloopend› ⸫
+
+⍝ ---- arrays
+⦃
+  ⧖:C,op,S,strand,dead,prev,to
+  ⧗:C,op #2# ‹nd› ⧖:C,sz
+  ⧗:C ‹lnew0› ⧖:C,e0
+  ⧗:C ⧗:op #3# ⊞ ⧗:op ⧗:sz ⊞ ⧗:e0 ‹esub› ⧖:C,els,rst,rdead
+  ⧗:C,els ‹llen› ⧖:C,ne
+  ⧗:C,els ○ ‹lget› ‹ety› ⧖:C,et
+  ⧗:C,et ‹ellty› ⧖:C,elt ⧗:C,elt ‹esize› ⧖:C,esz
+  ⧗:C %%call ptr @trith_arr_new(i64 {esz}, i64 {#ne})%% ‹edef› ⧖:C,arr
+  ⧗:C,arr ○ ‹efield› ⧖:C,data
+  ⧗:C,els,elt,data ○ ⧗:ne
+  ⥀ ⦃
+    ⧖:C,els,elt,data,q,ne
+    ⧗:C,els,elt,data,q,ne ⧗:q ⧗:ne ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,els,elt,data,q,ne ⧗:C,els,q ‹lget› ‹ev› ⧖:C,ev
+        ⧗:C %%getelementptr inbounds {elt}, ptr {data}, i64 {#q}%% ‹edef› ⧖:C,slot
+        ⧗:C %%store {elt} {ev}, ptr {slot}, !tbaa !6%% ‹eemit›
+        ⧗:els,elt,data ⧗:q △ ⊞ ⧗:ne ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁ ⌁ ⧖:C
+  ⧗:C ‹sbeg› ⧖:C,b ⧗:C,b #10214# ‹scp› ⧗:b,et ‹sapp› ⧗:b #10215# ‹scp› ⧗:b ‹send› ⧖:C,at
+  ⧗:C,at,arr #-1# ‹ent› ⧖:C,e
+  ⧗:C,S,e ‹lpush› ⧗:strand,dead ○
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_array› ⸫
+
+⍝ ---- still to come in s2
+⦃ ⧖:C,op,S,strand,dead,prev,to ⧗:C,op ‹ndt› ⧖:C,tok ⧗:C,tok ‹eerr› $s2: code generation for ⊨ is not written yet$ ⎙̵ ‹die› ⧗:S,strand,dead ○ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_quote› ⸫
+⦃ ⧖:C,op,S,strand,dead,prev,to ⧗:C,op ‹ndt› ⧖:C,tok ⧗:C,tok ‹eerr› $s2: code generation for ⍤ is not written yet$ ⎙̵ ‹die› ⧗:S,strand,dead ○ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_prayer› ⸫
+⦃ ⧖:C,op,S,strand,dead,prev,to ⧗:C,op ‹ndt› ⧖:C,tok ⧗:C,tok ‹eerr› $s2: code generation for ⟜ is not written yet$ ⎙̵ ‹die› ⧗:S,strand,dead ○ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹el_post› ⸫
+⦃ ⧖:C,S,f,tok ⧗:C,tok ‹eerr› $s2: past-tense calls are not written yet$ ⎙̵ ‹die› ⧗:S ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹epast› ⸫
+⦃ ⧖:C,be,op,to ⧗:C,be ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eretro› ⸫
+⦃ ⧖:C,S,strand,dead,tok,x,idx,role,op,to ⧗:C,tok ‹eerr› $s2: superpositions are not written yet$ ⎙̵ ‹die› ⧗:S,strand,dead ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹eo_psi› ⸫
+⦃ ⧖:C,tok,uv ⧗:C,tok ‹eerr› $s2: superpositions are not written yet$ ⎙̵ ‹die› ‹lnew0› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹elift› ⸫
+⦃
+  ⧖:C,op,S,c,k,dead
+  ⧗:C,op ‹ndt› ⧖:C,tok
+  ⧗:C,tok ⧗:k #11# ᛖ ⧗:dead ○ ᛖ ⋎ ⋔ ⦃ ‹eerr› $s2: ⋔⇋ is not written yet$ ⎙̵ ‹die› ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹ersel› ⸫
+
+⍝ ---- functions
+
+⍝ ‹efunction› C r: emit the function with emit record r [name sym ffi f node from to]
+⦃
+  ⧖:C,r
+  ⧗:C,r ‹rd› ⧖:C,name ⧗:C,r △ ‹vf› ⧖:C,sym ⧗:C,r #3# ‹vf› ⧖:C,f
+  ⧗:C,r #4# ‹vf› ⧖:C,node ⧗:C,r #5# ‹vf› ⧖:C,from ⧗:C,r #6# ‹vf› ⧖:C,to
+  ⧗:C,f △ ‹vf› ⧖:C,ins ⧗:C,f #2# ‹vf› ⧖:C,outs
+  ⧗:C,node ‹ndt› ⧖:C,tok
+  ⧗:C,ins,tok ‹eneedall› ⧗:outs,tok ‹eneedall›
+  #26# ○ ‹wr› #27# ○ ‹wr› #31# #-1# ‹wr› ⧖:C
+  ⍝ how a failure leaves this function
+  ⧗:C,outs ‹llen› ⧖:C,no
+  ⧗:C,outs ○ ‹lget› ⧖:C,o0
+  ⧗:C,o0 ‹efailty› ⧖:C,of ⧗:C,o0 #15# ‹tis› ⧖:C,bare
+  ⧗:C,o0,bare ⧗:no △ ᛖ ⧗:of ⋎ ⋔ ⦃ ⋔ ⦃ ⌁ %%ret i1 false%% ⦄ ⦃ ‹ellty› ⧖:st %%ret {st} zeroinitializer%% ⦄ ⁼ ⦄ ⦃ ⌁ ⌁ #-1# ⦄ ⁼ ⧖:C,fret
+  ⧗:C #32# ⧗:fret ‹wr› ⧖:C
+  ⧗:C,ins ‹eparams› ⧖:C,pt
+  ⧗:C,outs ‹eretty› ⧖:C,rt
+  ⧗:C %%%% ‹eraw› ⧖:C
+  ⧗:C %%; {name}%% ‹eraw› ⧖:C
+  ⧗:C %%define internal {rt} {sym}({pt}) {{%% ‹eraw› ⧖:C
+  ⧗:C %%!entry%% ‹estart› ⧖:C
+  ⧗:C,name,ins ‹eargs› ⧖:C,S
+  ⧗:C ‹epushf›
+  ⧗:from,to,S ‹eblock› ⧖:C,FS,rst,dead
+  ⧗:C ‹epopf› ⧖:C,q
+  ⧗:C,q,FS,outs,rt,no ⧗:dead ○ ᛖ ⋔ ⦃ ‹eret› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+  %%}}%% ‹eraw›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹efunction› ⸫
+⦃
+  ⧖:C,L,tok
+  ⧗:C,L ‹llen› ⧖:C,n
+  ⧗:C,L,tok ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,L,tok,i,n
+    ⧗:C,L,tok,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,tok,i,n ⧗:C,L,i ‹lget› ⧖:C,t ⧗:C,t,tok ‹eneed› ⧗:L,tok ⧗:i △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eneedall› ⸫
+⍝ ‹eparams› C ins: "T %a0, U %a1, …"
+⦃
+  ⧖:C,ins
+  ⧗:C ‹qnew› ⧖:C,q
+  ⧗:C,ins ‹llen› ⧖:C,n
+  ⧗:C,ins,q ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,ins,q,i,n
+    ⧗:C,ins,q,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ins,q,i,n ⧗:C,ins,i ‹lget› ‹ellty› ⧖:C,lt ⧗:C %%{lt} %a{#i}%% ⧖:C,p ⧗:C,q,p ‹qadd› ⧗:ins,q ⧗:i △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⧖:q ⌁ ⧗:q ○ ‹qjoin›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eparams› ⸫
+⍝ ‹eargs› C name ins: the entries of the parameters (an antiparticle's own particle is its representation)
+⦃
+  ⧖:C,name,ins
+  ⧗:C,name ‹shead› ⧖:C,h
+  ⧗:C ‹qnew› ⧖:C,q
+  ⧗:C,ins ‹llen› ⧖:C,n
+  ⧗:C,ins,q ○ ⧗:n ⧗:h #8961# ᛖ
+  ⥀ ⦃
+    ⧖:C,ins,q,i,n,anti
+    ⧗:C,ins,q,i,n,anti ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ins,q,i,n,anti ⧗:C %%!%a{#i}%% ⧖:C,pn ⧗:C,ins,i ‹lget› ⧖:C,pty
+        ⧗:C,pty ‹ptfind› ⧖:C,rep
+        ⧗:pty ⧗:rep ⧗:anti ⧗:rep #-1# ᛖ ‹not› ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:pty2
+        ⧗:C,pty2,pn ‹eunpack› ⧖:C,e ⧗:C,q,e ‹qadd›
+        ⧗:ins,q ⧗:i △ ⊞ ⧗:n,anti ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⧖:q ⌁ ⧗:q ‹qlist›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eargs› ⸫
+⍝ ‹eret› C frame FS outs rt no: run the frame's future calls, then return
+⦃
+  ⧖:C,q,FS,outs,rt,no
+  ⧗:C,q ‹erunf›
+  ⧗:FS,outs,rt,no ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ %%ret void%% ‹eemit› ⦄ ⦃ ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹eret1› ⦄ ⦃ ‹eretn› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eret› ⸫
+⦃
+  ⧖:C,FS,outs,rt
+  ⧗:C,FS ‹llen› ⧖:C,nf
+  ⧗:C,FS ⧗:nf ○ ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ⦃ ○ ‹lget› ⦄ ⁼ ⧖:C,e
+  ⧗:C,outs ○ ‹lget› ⧖:C,o
+  ⧗:C,e,o ‹epack› ⧖:C,rv
+  ⧗:C %%ret {rt} {rv}%% ‹eemit›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eret1› ⸫
+⦃
+  ⧖:C,FS,outs,rt,no
+  ⧗:C %%!undef%% ⧖:C,agg0
+  ⧗:C,FS,outs,rt,agg0 ○ ⧗:no
+  ⥀ ⦃
+    ⧖:C,FS,outs,rt,agg,i,n
+    ⧗:C,FS,outs,rt,agg,i,n ⧗:i ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,FS,outs,rt,agg,i,n ⧗:C,outs,i ‹lget› ⧖:C,o ⧗:C,o ‹ellty› ⧖:C,ot ⧗:C,FS,i ‹lget› ⧖:C,e ⧗:C,e,o ‹epack› ⧖:C,pv
+        ⧗:C %%insertvalue {rt} {agg}, {ot} {pv}, {#i}%% ‹edef› ⧖:C,agg2
+        ⧗:C,FS,outs,rt,agg2 ⧗:i △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,FS,outs,rt,agg,i,n
+  ⧗:C %%ret {rt} {agg}%% ‹eemit›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹eretn› ⸫
+
+⍝ ---- the module
+
+⍝ ‹eprintq› C q: print the strings of q, one per line
+⦃
+  ⧖:C,q
+  ⧗:C,q ‹rd› ⧖:C,nd
+  ⧗:C,nd
+  ⥀ ⦃
+    ⧖:C,nd
+    ⧗:C,nd ⧗:nd #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:C,nd ⧗:C ⧗:nd △ ⊞ ‹rd› ‹spr› $\n$ ⎙̵ ⧗:nd ‹rd› ⊕ ⦄ ⁼
+  ⦄
+  ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹eprintq› ⸫
+
+⍝ ‹eregs› C debug: the registers of the code generator
+⦃
+  ⧖:C,debug
+  ⧗:C ‹qnew› ⧖:C,q28 ⧗:C ‹qnew› ⧖:C,q29 ⧗:C ‹qnew› ⧖:C,q35 ⧗:C ‹qnew› ⧖:C,q36
+  ⧗:C #28# ⧗:q28 ‹wr› #29# ⧗:q29 ‹wr› #35# ⧗:q35 ‹wr› #36# ⧗:q36 ‹wr›
+  #31# #-1# ‹wr› #32# #-1# ‹wr› #33# ○ ‹wr› #34# ⧗:debug ‹wr›
+  %%!i8%% ⧖:C,s ⧗:C #41# ⧗:s ‹wr› %%!i64%% ⧖:C,s ⧗:C #42# ⧗:s ‹wr› %%!double%% ⧖:C,s ⧗:C #43# ⧗:s ‹wr›
+  %%!ptr%% ⧖:C,s ⧗:C #44# ⧗:s ‹wr› %%!i1%% ⧖:C,s ⧗:C #45# ⧗:s ‹wr› %%!true%% ⧖:C,s ⧗:C #46# ⧗:s ‹wr›
+  %%!false%% ⧖:C,s ⧗:C #47# ⧗:s ‹wr› %%!0%% ⧖:C,s ⧗:C #48# ⧗:s ‹wr›
+  %%!entry%% ⧖:C,s ⧗:C #30# ⧗:s ‹wr›
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹eregs› ⸫
+
+⍝ ‹efns› C: the emit record of every function, binding and generated inverse
+⦃
+  ⧖:C
+  ⧗:C #24# ‹reg› ⧖:C,from ⧗:C #25# ‹reg› ⧖:C,to
+  ⧗:C,from,to
+  ⥀ ⦃
+    ⧖:C,i,to
+    ⧗:C,i,to ⧗:i ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,i,to ⧗:C,i ‹efn1› ⧗:i ‹nextn› ⧖:C,i2 ⧗:C,i2,to ⊕ ⦄
+  ⦄
+  ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹efns› ⸫
+⦃
+  ⧖:C,i
+  ⧗:C,i ○ ‹nd› ⧖:C,k
+  ⧗:C,i,k ⍿⁰ #40# ᛖ ⋔ ⦃ ⌁ ‹efn40› ⦄ ⦃ #32# ᛖ ⋔ ⦃ ‹efn32› ⦄ ⦃ ⌁ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹efn1› ⸫
+⍝ ‹efnadd› C name sym ffi f node from to
+⦃
+  ⧖:C,name,sym,ffi,f,node,from,to
+  ⧗:C ‹len› ⧖:C,r ⧗:C ⧗:name ⍆̵ ⧗:sym ⍆̵ ⧗:ffi ⍆̵ ⧗:f ⍆̵ ⧗:node ⍆̵ ⧗:from ⍆̵ ⧗:to ⍆̵ ⧖:C
+  ⧗:C #36# ‹reg› ⧖:C,q ⧗:C,q,r ‹qadd›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹efnadd› ⸫
+⦃
+  ⧖:C,i
+  ⧗:C,i #3# ‹nd› ‹tabs› ⧖:C,nt ⧗:C,nt ‹tname› ⧖:C,name
+  ⧗:C,name ‹fnfind› ⧖:C,f
+  ⧗:C,i #5# ‹nd› ⧖:C,nfr
+  ⧗:i #6# ⊞ ⧗:nfr ⊞ ⧖:sig
+  ⧗:C,sig #2# ‹nd› ⧖:C,ssz ⧗:C,i #2# ‹nd› ⧖:C,isz
+  ⧗:sig ⧗:ssz ⊞ ⧖:from ⧗:i ⧗:isz ⊞ ⧖:to
+  ⧗:C %%!@"trith.{name}"%% ⧖:C,sym
+  ⧗:C,name,sym ○ ⧗:f,i,from,to ‹efnadd› ⧖:C
+  ⧗:C,i #4# ‹nd› ⧖:C,rev
+  ⧗:C,name,f,i ⧗:rev △ ᛖ ⋔ ⦃ ‹efninv› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹efn40› ⸫
+⍝ every ⇋ function gets a generated inverse ⇜name (its ops are made when it is emitted)
+⦃
+  ⧖:C,name,f,i
+  ⧗:C #8668# ⧗:name ‹spre› ⧖:C,inm
+  ⧗:C %%!@"trith.{inm}"%% ⧖:C,sym
+  ⧗:C,inm,sym ○ ⧗:f,i #-1# #-1# ‹efnadd›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹efninv› ⸫
+⦃ ⧖:C,i ⧗:C,i ‹ndt› ⧖:C,tok ⧗:C,tok ‹eerr› $s2: FFI bindings are not written yet$ ⎙̵ ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹efn32› ⸫
+
+⍝ ‹efuns› C: emit every function in item order
+⦃
+  ⧖:C
+  ⧗:C #36# ‹reg› ‹rd› ⧖:C,nd
+  ⧗:C,nd
+  ⥀ ⦃
+    ⧖:C,nd
+    ⧗:C,nd ⧗:nd #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:C,nd ⧗:C ⧗:nd △ ⊞ ‹rd› ‹efun1› ⧗:nd ‹rd› ⊕ ⦄ ⁼
+  ⦄
+  ⌁
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹efuns› ⸫
+⦃
+  ⧖:C,r
+  ⧗:C,r #2# ‹vf› ⧖:C,ffi ⧗:C,r #5# ‹vf› ⧖:C,from
+  ○ ⧗:ffi ○ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧗:from #-1# ᛖ ⧗:ffi ○ ᛖ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:k
+  ⧗:C,r,k ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹efunction› ⦄ ⦃ #2# ᛖ ⋔ ⦃ ‹einverse› ⦄ ⦃ ⌁ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹efun1› ⸫
+⦃ ⧖:C,r ⧗:C,r #4# ‹vf› ‹ndt› ⧖:C,tok ⧗:C,tok ‹eerr› $s2: generated inverses are not written yet$ ⎙̵ ‹die› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹einverse› ⸫
+
+⍝ ‹egen› C debug: print the module's LLVM IR
+⦃
+  ⧖:C,debug
+  ⧗:C,debug ‹eregs› ‹efns›
+  %%!ᛟ%% ‹efind› #-1# ᛖ ⋔ ⦃ #-1# ‹eerr› $a program needs an entry point ᛟ ⟨⊸⟩$ ⎙̵ ‹die› ⦄ ∅ ⁼
+  ‹efuns›
+  $; generated by trithc (s1)\n%trith.arr = type { ptr, i64, i64 }\ndeclare ptr @trith_arr_new(i64, i64)\ndeclare ptr @trith_arr_push(ptr, i64)\ndeclare void @trith_arr_free(ptr, i64)\ndeclare void @trith_print_str_ref(ptr)\n$ ⎙̵
+  $declare ptr @trith_str_new(ptr, i64)\ndeclare void @trith_str_free(ptr)\ndeclare void @trith_print_str(ptr)\ndeclare void @trith_print_i64(i64)\ndeclare void @trith_print_f64(double)\n$ ⎙̵
+  $declare void @trith_loop_failed()\ndeclare void @trith_reversal_failed()\ndeclare void @trith_collapse_empty()\ndeclare void @trith_entry_failed()\ndeclare void @llvm.assume(i1)\ndeclare void @llvm.trap()\n$ ⎙̵
+  #29# ‹reg› ‹eprintq› #28# ‹reg› ‹eprintq›
+  $\ndeclare void @trith_set_args(i32, ptr)\ndefine i32 @main(i32 %argc, ptr %argv) {\nentry:\n  call void @trith_set_args(i32 %argc, ptr %argv)\n$ ⎙̵
+  %%!ᛟ%% ‹efind› △ ‹vf› ⧖:C,es
+  ⧗:C %%!ᛟ%% ‹efind› #3# ‹vf› #2# ‹vf› ‹llen› ⧖:C,eo
+  ⧗:C,es ⧗:eo ○ ᛖ ⋔ ⦃ $  call void $ ⎙̵ ‹spr› $()\n  ret i32 0\n$ ⎙̵ ⦄
+    ⦃ $  %r = call i1 $ ⎙̵ ‹spr› $()\n  br i1 %r, label %ok, label %bad\nok:\n  ret i32 0\nbad:\n  call void @trith_entry_failed()\n  ret i32 27\n$ ⎙̵ ⦄ ⁼
+  $}\n!0 = !{!"trith tbaa"}\n!1 = !{!"trith.len", !0, i64 0}\n!2 = !{!"trith.data", !0, i64 0}\n!3 = !{!"trith.elem", !0, i64 0}\n!4 = !{!1, !1, i64 0}\n!5 = !{!2, !2, i64 0}\n!6 = !{!3, !3, i64 0}\n$ ⎙̵
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹egen› ⸫

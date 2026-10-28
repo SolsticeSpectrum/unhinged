@@ -1,5 +1,5 @@
 ⍝ ==== s2 heap: one owned ⟦ℤ⟧ (after a sentinel) holding everything a pass needs
-⍝ Slots 0 … 39 are registers; the arena follows. Nothing in the arena is ever
+⍝ Slots 0 … 63 are registers; the arena follows. Nothing in the arena is ever
 ⍝ freed. Strings are interned [next n cps…] (their slot is their identity);
 ⍝ lists are [n elements…] and are never changed once built, except while being
 ⍝ built, which must not interleave with other allocations.
@@ -36,21 +36,36 @@
 ⦃
   ⧖:C,a,b
   ⧗:C ⧗:a △ ⊞ ‹rd› ⧖:C,na ⧗:C ⧗:b △ ⊞ ‹rd› ⧖:C,nb
-  ⧗:C ⧗:na ⧗:nb ᛖ ⧗:a #2# ⊞ ⧗:b #2# ⊞ ⧗:na
-  ⍝ the loop carries [C acc i j left]
+  ⍝ different lengths leave nothing to compare
+  ⧗:C ⧗:na ⧗:nb ᛖ ⧗:a #2# ⊞ ⧗:b #2# ⊞ ⧗:na ⧗:na ⧗:nb ᛖ ⋔ ∅ ⦃ ⌁ ○ ⦄ ⁼
+  ⍝ the loop carries [C acc i j left]; a mismatch ends it
   ⥀ ⦃
     ⧖:C,acc,i,j,left
     ⧗:C,acc,i,j,left ○ ⧗:left ≶ ⋔ ⦃ ⦶ ⦄ ⁼
       ⦃ ⧖:C,acc,i,j,left ⧗:C,i ‹rd› ⧖:C,x ⧗:C,j ‹rd› ⧖:C,y
-        ⧗:C ⧗:acc ⧗:x ⧗:y ᛖ ⋎ ⧗:i △ ⊞ ⧗:j △ ⊞ ⧗:left △ ⊟ ⊕ ⦄
+        ⧗:C ⧗:acc ⧗:x ⧗:y ᛖ ⋎ ⧗:i △ ⊞ ⧗:j △ ⊞ ⧗:left △ ⊟ ⧗:x ⧗:y ᛖ ⋔ ∅ ⦃ ⌁ ○ ⦄ ⁼ ⊕ ⦄
   ⦄
   ⌁ ⌁ ⌁
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹seq› ⸫
 
+⍝ ‹shash› C e: the bucket slot of the string being built at e (register 3: the 1024 buckets)
+⦃
+  ⧖:C,e
+  ⧗:C ⧗:e △ ⊞ ‹rd› ⧖:C,n
+  ⧗:C ○ ⧗:e #2# ⊞ ⧗:e #2# ⊞ ⧗:n ⊞
+  ⥀ ⦃
+    ⧖:C,h,j,end
+    ⧗:C,h,j,end ⧗:j ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,h,j,end ⧗:C,j ‹rd› ⧖:C,c ⧗:C ⧗:h #31# ⊠ ⧗:c ⊞ #1048575# ⋒ ⧗:j △ ⊞ ⧗:end ⊕ ⦄
+  ⦄
+  ⧖:C,h,j,end ⧗:C #3# ‹rd› ⧖:C,tb ⧗:C ⧗:tb ⧗:h #1023# ⋒ ⊞
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹shash› ⸫
+
 ⍝ ‹send› C e: intern the string built at e
 ⦃
   ⧖:C,e
-  ⧗:C #3# ‹rd› ⧖:C,head
+  ⧗:C,e ‹shash› ⧖:C,b
+  ⧗:C,b ‹rd› ⧖:C,head
   ⧗:C,head,e #-1#
   ⍝ the loop carries [C x e found]
   ⥀ ⦃
@@ -60,9 +75,43 @@
         ⧗:C ⧗:nx ⧗:e ⧗:x ⧗:found ⧗:same ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⊕ ⦄ ⁼
   ⦄
   ⧖:C,x,e,found
-  ⧗:C,e,found ⧗:found #-1# ᛖ
-  ⋔ ⦃ ⧖:C,e,found ⧗:C #3# ‹rd› ⧖:C,head ⧗:C,e,head ‹wr› #3# ⧗:e ‹wr› ⧗:e ⦄ ⦃ ⧖:f ⌁ ⧗:f ⦄ ⁼
+  ⧗:C,e,found,b ⧗:found #-1# ᛖ
+  ⋔ ⦃ ⧖:C,e,found,b ⧗:C,b ‹rd› ⧖:C,head ⧗:C,e,head ‹wr› ⧗:b ⧗:e ‹wr› ⧗:e ⦄ ⦃ ⧖:f,bb ⌁ ⧗:f ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹send› ⸫
+
+⍝ ‹snew› C: room for the 1024 intern buckets, in register 3
+⦃
+  ‹len› ⧖:C,tb ⧗:C #3# ⧗:tb ‹wr› #1024#
+  ⥀ ⦃ ⧖:k ⧗:k ○ ⧗:k ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ⧖:k #-1# ⍆̵ ⧗:k △ ⊟ ⊕ ⦄ ⦄
+  ⌁
+⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹snew› ⸫
+
+⍝ ‹sapl› C e s: append the code points of the literal s
+⦃ ⧖:C,e,s ⧗:s ⟗ ⧗:C,e ‹sapl1› ⧖:C ⌁̵ ⧗:C ⦄ ⟨⟦ℤ⟧ ℤ ʃ ⊸ ⟦ℤ⟧⟩ ‹sapl› ⸫
+⦃
+  ⧖:s,C,e
+  ⧗:s ⍴̱ ⧖:n
+  ⧗:s,C,e ○ ⧗:n
+  ⥀ ⦃
+    ⧖:s,C,e,j,n
+    ⧗:s,C,e,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:s,C,e,j,n ⧗:s ⧗:j ᛑ ⧖:cp,l ⧗:s,C,e,cp ‹scp› ⧗:e ⧗:j ⧗:l ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⌁ ⧖:C ⌁̱ ⧗:C
+⦄ ⟨⟗ʃ ⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹sapl1› ⸫
+
+⍝ ‹sappn› C e n: append n in decimal
+⦃
+  ⧖:C,e,n
+  ⧗:C,e,n ⧗:n ○ ≶ ⋔ ⦃ ⌁ #48# ‹scp› ⦄ ⦃ ‹sappd› ⦄ ⦃ ⧖:e2,n2 ⧗:e2 #45# ‹scp› ⧗:e2 ⧗:n2 ⊝ ‹sappd› ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sappn› ⸫
+⦃
+  ⧖:C,e,n
+  ⧗:n #10# ⊜ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⍿⁰ ○ ≶ ⋔ ∅ ∅ ⦃ #10# ⊞ ⦄ ⧖:r
+  ⧗:n ⧗:r ⊟ #10# ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:q
+  ⧗:C,e,q ⧗:q ○ ≶ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹sappd› ⦄ ⦃ ⌁ ⌁ ⦄
+  ⧗:e ⧗:r #48# ⊞ ‹scp›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹sappd› ⸫
 
 ⍝ ‹spr› C s: print string s
 ⦃
@@ -192,3 +241,57 @@
   ⦄
   ⌁ ⌁ ⧖:C ⌁̱ ⧗:C
 ⦄ ⟨⟗⟦ℤ⟧ ⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cpyin› ⸫
+
+⍝ ---- queues: a header [head tail n] and nodes [next value]; a node's value can be replaced
+
+⦃ ‹len› ⧖:C,q ⧗:C #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ ⧗:q ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qnew› ⸫
+⍝ ‹qadd1› C q v: append v, giving its node
+⦃
+  ⧖:C,q,v
+  ⧗:C ‹len› ⧖:C,nd ⧗:C #-1# ⍆̵ ⧗:v ⍆̵ ⧖:C
+  ⧗:C ⧗:q △ ⊞ ‹rd› ⧖:C,tl
+  ⧗:C,q,tl,nd ⧗:tl #-1# ᛖ ⋔ ⦃ ⧖:qq,t,n ⧗:qq ⧗:n ‹wr› ⦄ ⦃ ⧖:qq,t,n ⧗:t ⧗:n ‹wr› ⦄ ⁼
+  ⧗:q △ ⊞ ⧗:nd ‹wr› ⧗:q #2# ⊞ ‹inc› ⌁ ⧗:nd
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qadd1› ⸫
+⦃ ‹qadd1› ⌁ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹qadd› ⸫
+⍝ ‹qlist› C q: the values of q as a list
+⦃
+  ⧖:C,q
+  ⧗:C ‹lbeg› ⧖:C,L
+  ⧗:C,q ‹rd› ⧖:C,nd
+  ⧗:C,L,nd
+  ⥀ ⦃
+    ⧖:C,L,nd
+    ⧗:C,L,nd ⧗:nd #-1# ᛖ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,L,nd ⧗:C ⧗:nd △ ⊞ ‹rd› ⧖:C,v ⧗:C,L,v ‹ladd› ⧖:C ⧗:C,nd ‹rd› ⧖:C,nx ⧗:C,L,nx ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⧖:C,L ⧗:C,L
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qlist› ⸫
+⍝ ‹qjoin› C q sep: the strings of q joined (sep 0 ", ", 1 a newline, 2 a space), not interned
+⦃
+  ⧖:C,q,sep
+  ⧗:C ‹sbeg› ⧖:C,e
+  ⧗:C,q ‹rd› ⧖:C,nd
+  ⧗:C,e,sep,nd ⦶
+  ⥀ ⦃
+    ⧖:C,e,sep,nd,first
+    ⧗:C,e,sep,nd,first ⧗:nd #-1# ᛖ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,e,sep,nd,first
+        ⧗:C,e,sep ⧗:first ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ $, $ ‹sapl› ⦄ ⦃ △ ᛖ ⋔ ⦃ $\n$ ‹sapl› ⦄ ⦃ $ $ ‹sapl› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⧖:C
+        ⧗:C ⧗:nd △ ⊞ ‹rd› ⧖:C,s ⧗:C,e,s ‹sapp› ⧖:C
+        ⧗:C,nd ‹rd› ⧖:C,nx ⧗:C,e,sep,nx ⊕ ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⌁ ⌁ ⧖:C,e ⧗:C,e
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qjoin› ⸫
+⍝ ‹qhas› C q v: q holds v
+⦃
+  ⧖:C,q,v
+  ⧗:C,q ‹rd› ⧖:C,nd
+  ⧗:C,v,nd ⊕
+  ⥀ ⦃
+    ⧖:C,v,nd,found
+    ⧗:C,v,nd,found ⧗:nd #-1# ᛖ ⧗:found ⋏ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,v,nd,found ⧗:C ⧗:nd △ ⊞ ‹rd› ⧖:C,x ⧗:C,nd ‹rd› ⧖:C,nx ⧗:C,v,nx ⧗:x ⧗:v ᛖ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,v,nd,found ⧗:C,found
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹qhas› ⸫

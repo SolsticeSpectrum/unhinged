@@ -2322,8 +2322,8 @@
 ⍝ ‹cinit› T F st trace: the heap for checking: registers, the common types, the token buffer and the tree
 ⦃
   ⧖:T,F,st,trace
-  ⟦ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ⟧
-  #3# #-1# ‹wr› △ ⧗:trace ‹wr›
+  ⟦ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ⟧
+  ‹snew› △ ⧗:trace ‹wr›
   ‹len› ⧖:C,tb ⧗:T ⧗:C ‹cpyin› #4# ⧗:tb ‹wr› ⧖:C
   ⧗:st ⟗ ⧗:C ‹ccopyst› ⧖:st2,C
   ⧗:st2 ⌁̵

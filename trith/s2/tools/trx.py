@@ -7,6 +7,9 @@
   ⧖:a          bind a moment named a          ⧖:a,b,c  bind [a b c] (c is on top)
   ⧗:a          read moment a as ⧗ⁿ            ⧗:a,b,c  push a, b, c
   ‹word›       a function name, mapped to a unique Runic name
+  %%text {x} {#n}%%   build a string from C on the stack, leaving C and the
+               string (not interned; %%!…%% interns it): {x} appends the
+               string x, {#n} the number n in decimal, {{ and }} are braces
 
 Names follow Trith's own scope rules: each ⦃ starts an empty strand, a ⥀
 exports every moment of its body, and the faces of ⋔ (3) and ⁇ (2) export
@@ -125,6 +128,24 @@ def process(src):
         out_lines.append(''.join(out))
     return '\n'.join(out_lines)
 
+def templates(src):
+    def one(m):
+        intern, body = m.group(1), m.group(2)
+        out = ['‹sbeg› ⧖:_e']
+        for lit, ph in re.findall(r'((?:[^{}]|\{\{|\}\})*)(\{#?\w+\}|$)', body):
+            lit = lit.replace('{{', '{').replace('}}', '}')
+            if lit:
+                if '$' in lit:
+                    raise SystemExit('trx: $ inside a %% template')
+                out.append(f'⧗:_e ${lit}$ ‹sapl›')
+            if ph.startswith('{#'):
+                out.append(f'⧗:_e ⧗:{ph[2:-1]} ‹sappn›')
+            elif ph:
+                out.append(f'⧗:_e ⧗:{ph[1:-1]} ‹sapp›')
+        out.append('⧗:_e ‹send›' if intern else '⧗:_e')
+        return ' '.join(out)
+    return re.sub(r'%%(!?)(.*?)%%', one, src)
+
 def literals(src):
     def anyof(m):
         xs = [int(x) for x in m.group(1).split(',')]
@@ -141,6 +162,7 @@ def literals(src):
 
 PREFIXES = list('ᚡᚣᚤᚥᚧ')  # never used as names on their own
 PREFIXES += [a + b for a in 'ᚡᚣᚤᚥᚧ' for b in 'ᚡᚣᚤᚥᚧ']
+PREFIXES += [a + b + c for a in 'ᚡᚣᚤᚥᚧ' for b in 'ᚡᚣᚤᚥᚧ' for c in 'ᚡᚣᚤᚥᚧ']
 RUNES = [chr(c) for c in range(0x16A0, 0x16EB) if c not in (0x16A1, 0x16A3)]
 NAMES = {}
 def runic(m):
@@ -159,4 +181,4 @@ if __name__ == '__main__':
         line += text.count('\n')
         parts.append(text)
     src = ''.join(parts)
-    sys.stdout.write(literals(process(src)))
+    sys.stdout.write(literals(process(templates(src))))

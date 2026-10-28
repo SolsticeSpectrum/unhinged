@@ -15,6 +15,7 @@
 #include <netdb.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sys/resource.h>
 #include <curl/curl.h>
 #include <sqlite3.h>
 
@@ -1467,7 +1468,24 @@ int uh_cmp(UhValue a, UhValue b) {
 static UhValue g_args;
 static UhEnv *g_env;
 
+/* The tree-walking programs written in UNHINGED (trithc among them) recurse
+   on the native stack, so a deep but legal input could overflow the default
+   8 MiB before reaching their own depth checks. Raise the soft limit and
+   re-exec once so the new limit governs the main thread's stack. */
+static void uh_raise_stack(char **argv) {
+    struct rlimit rl;
+    const rlim_t want = (rlim_t)1 << 30;
+    if (getenv("UH_STACK_RAISED")) { unsetenv("UH_STACK_RAISED"); return; }
+    if (getrlimit(RLIMIT_STACK, &rl) != 0) return;
+    if (rl.rlim_cur == RLIM_INFINITY || rl.rlim_cur >= want) return;
+    rl.rlim_cur = (rl.rlim_max == RLIM_INFINITY || rl.rlim_max > want) ? want : rl.rlim_max;
+    if (setrlimit(RLIMIT_STACK, &rl) != 0) return;
+    setenv("UH_STACK_RAISED", "1", 1);
+    execv("/proc/self/exe", argv);
+}
+
 void uh_set_args(int argc, char **argv) {
+    uh_raise_stack(argv);
     g_args = uh_arr_new();
     if (g_args.tag != UH_ARR || g_args.arr == NULL) {
         return;

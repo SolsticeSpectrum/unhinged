@@ -7,17 +7,20 @@ Takes the Trith files under trith/tests and mutates them at the token level
 (drop, duplicate, swap neighbours, or replace a token with one from the same
 file), rebalances the breaths and mostly keeps mutants that still parse, and
 compares the two --check outputs (traces and errors included) and the two
---emit-llvm outputs. Most mutants fail to check, each at a different point,
+--emit-llvm outputs (without the attributes s2 gives blessed functions, which s1 knows
+nothing of). Most mutants fail to check, each at a different point,
 so every rule gets both its passing and its failing paths exercised. Exits 1
 if any case differs.
 """
 import glob
 import os
 import random
+import re
 import subprocess
 import sys
 
 s2c, trithc, work = sys.argv[1:4]
+BLESSED = re.compile(rb'^(define internal .*\)) nounwind willreturn mustprogress(?: memory\([^)]*\))? \{$', re.M)
 R = random.Random(int(sys.argv[4]) if len(sys.argv) > 4 else 1)
 N = int(sys.argv[5]) if len(sys.argv) > 5 else 300
 
@@ -86,6 +89,7 @@ for k in range(N):
     a, b = run([s2c, p, '--check']), run([trithc, p, '--check'])
     if a == b and b.endswith(b'ok\n'):
         a, b = run([s2c, p, '--emit-llvm']), run([trithc, p, '--emit-llvm'])
+        a = BLESSED.sub(rb'\1 {', a)
     if a != b:
         bad += 1
         if bad <= 5:

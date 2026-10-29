@@ -1,0 +1,5 @@
+fn ᚠ ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+  △  ⊢ [ℤ ℤ]
+  ⊟  ⊢ [ℤ]
+    measure
+trith/s2/tests/check_errors/vow_not_first.trh:1:7: error: a vow ⍤ᚠ ⦃ measure ⦄ is the first op of the body of the function ᚠ it names (A.5.1)

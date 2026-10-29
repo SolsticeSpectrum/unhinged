@@ -1,0 +1,6 @@
+fn ᚠ ⟨ ⊸ ⟩  start []
+  »x«  ⊢ [ʃ]
+  ⎙̵  ⊢ []
+fn ᛟ ⟨ ⊸ ⟩  start []
+  ᚠ  ⊢ []
+trith/s2/tests/check_errors/unspoken.trh:1:1: error: unspoken curse: ᚠ is ⸸ⁱᵃ, but its signature declares ⸸ⁱ (A.4.1)

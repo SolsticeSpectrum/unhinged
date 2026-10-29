@@ -12,7 +12,8 @@
 ⍝ lift: the curses the enclosing ⛨ blocks lift; fn: the record of the function being checked
 ⍝ (−1 outside one); vow: a ⍤⥀ waiting for its ⥀ (−1); depths: the stack depth after each op of
 ⍝ the tree, by node (for the vow prover); confessions: the ⛨ tokens met, as a chain [next tok];
-⍝ proven: the vows the prover proved, as a chain [next node]
+⍝ proven: the vows the prover proved, as a chain [next node]; slots 7 … 13 are the prover's
+⍝ (vows.trhx)
 
 ⦃ ⧖:C,k ⧗:C̵ #62# ‹rd› ⧖:C,b ⧗:C̵ ⧗:b ⧗:k ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹a2› ⸫
 ⦃ ⧖:C,k,v ⧗:C̵ #62# ‹rd› ⧖:C,b ⧗:C̵ ⧗:b ⧗:k ⊞ ⧗:v ‹wr› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹a2w› ⸫
@@ -20,7 +21,7 @@
 ⍝ ‹a2init› C: the block, and a depth slot for every node of the tree
 ⦃
   ⧖:C
-  ⧗:C̵ ‹len› ⧖:C,b ⧗:C̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ⧖:C ⧗:C̵ #62# ⧗:b ‹wr› ⧖:C
+  ⧗:C̵ ‹len› ⧖:C,b ⧗:C̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ ○ ⍆̵ ⧖:C ⧗:C̵ #62# ⧗:b ‹wr› ⧖:C
   ⧗:C̵ #25# ‹rd› ⧖:C,n
   ⧗:C̵ ‹len› ⧖:C,d ⧗:C̵ #3# ⧗:d ‹a2w› ⧖:C
   ⧗:C̵,n ⥀ ⦃ ⧖:C,k ⧗:C̵,k ⧗:k ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:C,k ⧗:C̵ ○ ⍆̵ ⧗:k △ ⊟ ⊕ ⦄ ⦃ ⦶ ⦄ ⦄ ⌁
@@ -206,15 +207,15 @@
 ⍝ if its vow is not proven the function's attributes wait (A.5.3). In a function that cannot
 ⍝ fail, a ⥀ that may exit with ⊖ stops the program, which is worldly.
 ⦃
-  ⧖:C,op,pv
-  ⧗:C̵,pv,op ⧗:pv #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ○ ⦄ ⦃ ‹vprove› ⦄ ⁼ ⧖:C,r
+  ⧖:C,op,pv,S,strand
+  ⧗:C̵,pv,op,S,strand ⧗:pv #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ○ ⦄ ⦃ ‹vprove› ⦄ ⁼ ⧖:C,r
   ⧗:C̵ #2# ‹reg› ⧖:C,cf
   ⧗:pv #-1# ᛖ ⧖:none
   ⧗:C̵ #8# ⧗:none ⋔ ⦃ ⦄ ⦃ ⌁ ○ ⦄ ⁼ ‹curse› ⧖:C
   ⧗:C̵ #2# ⧗:r #2# ⋒ ○ ᛖ ⧗:cf △ ᛖ ‹not› ⋎ ⋔ ⦃ ⦄ ⦃ ⌁ ○ ⦄ ⁼ ‹curse› ⧖:C
   ⧗:C̵ ⧗:none ‹not› ⧗:r △ ⋒ ○ ᛖ ⋎ ⋔ ⦃ ‹hopeful› ⦄ ∅ ⁼
   ⧖:C ⧗:C̵,pv ⧗:r △ ⋒ △ ᛖ ⋔ ⦃ ‹vowok› ⦄ ⦃ ⌁ ⦄ ⁼
-⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹loopcurse› ⸫
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹loopcurse› ⸫
 ⍝ ‹hopeful› C: the function being checked has an unproven vow
 ⦃
   ⧖:C
@@ -236,9 +237,6 @@
 ⦃ ⧖:C,node ⧗:C̵ #6# ‹a2› ⧖:C,hd ⧗:C̵ ‹len› ⧖:C,e ⧗:C̵ ⧗:hd ⍆̵ ⧗:node ⍆̵ ⧖:C ⧗:C̵ #6# ⧗:e ‹a2w› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹vowok› ⸫
 ⦃ ⧖:C,node ⧗:C̵ #6# ‹a2› ⧖:C,hd ⧗:C̵,hd,node ‹confhas› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isproven› ⸫
 
-⍝ stubs until the prover lands: every vow is hopeful
-⦃ ⧖:C,pv,op ⧗:C̵ ○ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vprove› ⸫
-⦃ ⧖:C,f,vw,from,to ⧗:C̵ ○ ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vprovefn› ⸫
 
 ⍝ ---- the curse sets (A.4): recursion, then a fixpoint over the calls, then the declarations
 
@@ -259,7 +257,7 @@
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹fnsdo› ⸫
 ⦃
   ⧖:C,f,code
-  ⧗:C̵,f,code ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹currec1› ⦄ ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ‹curcheck1› ⦄ ⦃ #3# ᛖ ⋔ ⦃ ‹curpr1› ⦄ ⦃ ⌁ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+  ⧗:C̵,f,code ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹currec1› ⦄ ⦃ ⍿⁰ #2# ᛖ ⋔ ⦃ ⌁ ‹curcheck1› ⦄ ⦃ ⍿⁰ #3# ᛖ ⋔ ⦃ ⌁ ‹curpr1› ⦄ ⦃ #4# ᛖ ⋔ ⦃ ‹cscc1› ⦄ ⦃ ⌁ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹fn1› ⸫
 
 ⍝ ‹ischecked› C f: a function whose body was checked (not an FFI binding, not a generic template)
@@ -297,8 +295,48 @@
   ⦄
   ⧖:C,e,g,found ⧗:C̵,found
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹edgeto› ⸫
-⍝ ‹cscc› C: stub until the cycle finder lands
-⦃ ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cscc› ⸫
+⍝ ‹cscc› C: a function that its callees call back is restless. A search from each function's
+⍝ callees (not itself) marks the functions it meets with the function (slot 25), so each is
+⍝ met once per search.
+⦃ #4# ‹fnsdo› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧⟩ ‹cscc› ⸫
+⦃
+  ⧖:C,f
+  ⍝ the functions still to visit, a chain [next g]
+  ⧗:C̵ #-1# ⧗:f,f ‹cpushc› ⧖:C,st
+  ⧗:C̵,f,st ⊕
+  ⥀ ⦃
+    ⧖:C,f,st,found
+    ⧗:C̵,f,st,found ⧗:st #-1# ᛖ ⧗:found ⋏ ⋔ ⦃ ⦶ ⦄ ⦃ ‹cscc2› ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,f,st,found
+  ⧗:C̵,f ⧗:found ⋔ ⦃ #8# ‹curse1› ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹cscc1› ⸫
+⦃
+  ⧖:C,f,st,found
+  ⧗:C̵,st ‹rd› ⧖:C,nx ⧗:C̵ ⧗:st △ ⊞ ‹rd› ⧖:C,g
+  ⧗:C̵,g #25# ‹vf› ⧖:C,mk
+  ⧗:g ⧗:f ᛖ ⧖:hit
+  ⧗:hit ‹not› ⧗:mk ⧗:f ᛖ ‹not› ⋎ ⧖:fresh
+  ⧗:C̵,nx,g,f ⧗:fresh ⋔ ⦃ ⧖:C,s,gg,ff ⧗:C̵ ⧗:gg #25# ⊞ ⧗:ff ‹wr› ⧗:s,gg #-1# ‹cpushc› ⦄ ⦃ ⌁ ⌁ ⦄ ⁼ ⧖:C,st2
+  ⧗:C̵,f,st2 ⧗:found ⧗:hit ⋏
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ŧ⟩ ‹cscc2› ⸫
+⍝ ‹cpushc› C st h skip: st with every function h calls, but skip
+⦃
+  ⧖:C,st,h,skip
+  ⧗:C̵,h #18# ‹vf› ⧖:C,e
+  ⧗:C̵,st,e,skip
+  ⥀ ⦃
+    ⧖:C,st,e,skip
+    ⧗:C̵,st,e,skip ⧗:e #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹cpushc1› ⊕ ⦄ ⁼
+  ⦄
+  ⌁ ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹cpushc› ⸫
+⦃
+  ⧖:C,st,e,skip
+  ⧗:C̵,e ‹rd› ⧖:C,nx ⧗:C̵ ⧗:e △ ⊞ ‹rd› ⧖:C,g
+  ⧗:C̵,st,g ⧗:g ⧗:skip ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖:C,s,gg ⧗:C̵ ‹len› ⧖:C,c ⧗:C̵ ⧗:s ⍆̵ ⧗:gg ⍆̵ ⧗:c ⦄ ⁼ ⧖:C,st2
+  ⧗:C̵,st2,nx,skip
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹cpushc1› ⸫
 
 ⍝ ‹curfix› C: final = own ∪ ᶠ (from the signature) ∪ the curses of every callee, less ᶠ and what
 ⍝ the call site lifted; repeated until nothing changes

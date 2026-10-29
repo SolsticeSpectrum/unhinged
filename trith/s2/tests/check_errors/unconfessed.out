@@ -1,0 +1,8 @@
+fn ᚠ ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+  △  ⊢ [ℤ ℤ]
+  ⊞  ⊢ [ℤ]
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  ᚠ  ⊢ [ℤ]
+  ⌁  ⊢ []
+trith/s2/tests/check_errors/unconfessed.trh:1:1: error: unconfessed: --confess wants every function to declare its curses, and ᚠ is ⸸ (A.4.1)

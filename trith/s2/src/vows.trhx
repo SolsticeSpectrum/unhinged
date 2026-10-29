@@ -1,0 +1,602 @@
+⍝ ==== s2 vow prover (Addendum A.5.1), deliberately weak
+⍝ A vow is proven when its measure is a linear function of the values it sees, and every
+⍝ way round the loop (or to a recursive call) leaves it at least 0 and at least 1 lower. The
+⍝ prover runs the body over symbols: a value is a block [tag c a₀ … a_d−1] meaning
+⍝ c + Σ aᵢ·xᵢ (tag 0), the trit of its sign (tag 1, from ≶), or unknown (tag 2). The
+⍝ symbols are the loop's stack (or the function's inputs) when they are ℤ, then 8 for the
+⍝ ℤ moments of the enclosing block that the loop borrows. ⋔ on a trit splits the run into
+⍝ paths, each with the facts its face implies (a chain [next f] of affine f ≥ 0); anything
+⍝ else the prover does not follow leaves unknowns of the right number, as the checker
+⍝ recorded the depths (‹setdepth›). A fact proves a ≥ 0 when a − λ·f is a constant ≥ 0 for
+⍝ some whole λ ≥ 1. A measure that provably does not fall on a path that can be taken is
+⍝ perjury. Addenda state slots: 7 the stack symbols, 8 the status (0 proven so far, 1
+⍝ unknown, 2 perjury), 9 the function's name (−1 for a ⥀), 10 the vow node, 11 the
+⍝ measure on entry, 12 flags (1: some paths were not followed, 2: a path ends in ↯), 13 the
+⍝ enclosing strand (for its moments' types). A path is [S strand F vague]: vague once it
+⍝ went through something the prover does not follow, so it cannot convict a vow of perjury.
+
+⍝ ---- affine values
+
+⍝ ‹pvd› C: the number of symbols
+⦃ #7# ‹a2› #8# ⊞ ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvd› ⸫
+⍝ ‹afnew› C tag c: c, with every coefficient 0
+⦃
+  ⧖:C,tag,c
+  ⧗:C̵ ‹pvd› ⧖:C,d
+  ⧗:C̵ ‹len› ⧖:C,b
+  ⧗:C̵ ⧗:tag ⍆̵ ⧗:c ⍆̵ ⧗:d
+  ⥀ ⦃ ⧖:C,j ⧗:C̵,j ⧗:j ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:C,j ⧗:C̵ ○ ⍆̵ ⧗:j △ ⊟ ⊕ ⦄ ⦃ ⦶ ⦄ ⦄ ⌁
+  ⧗:b
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹afnew› ⸫
+⦃ ⧖:C ⧗:C̵ #2# ○ ‹afnew› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹afunk› ⸫
+⍝ ‹afvar› C i: the symbol xᵢ
+⦃ ⧖:C,i ⧗:C̵ ○ ○ ‹afnew› ⧖:C,b ⧗:C̵ ⧗:b #2# ⊞ ⧗:i ⊞ △ ‹wr› ⧗:b ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹afvar› ⸫
+⍝ ‹afc› C a: the constant; ‹aftag› C a: the tag
+⦃ ⧖:C,a ⧗:C̵ ⧗:a △ ⊞ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹afc› ⸫
+⦃ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹aftag› ⸫
+⍝ ‹afcomb› C a b s: a + s·b (unknown unless both are affine)
+⦃
+  ⧖:C,a,b,s
+  ⧗:C̵,a ‹aftag› ⧖:C,ta ⧗:C̵,b ‹aftag› ⧖:C,tb
+  ⧗:C̵,a,b,s ⧗:ta ○ ᛖ ⧗:tb ○ ᛖ ⋎ ⋔ ⦃ ‹afcomb1› ⦄ ⦃ ⌁ ⌁ ⌁ ‹afunk› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹afcomb› ⸫
+⦃
+  ⧖:C,a,b,s
+  ⧗:C̵ ‹pvd› ⧖:C,d
+  ⧗:C̵ ‹len› ⧖:C,r ⧗:C̵ ○ ⍆̵ ⧖:C
+  ⧗:C̵,a,b,s,r ○ ⧗:d △ ⊞
+  ⥀ ⦃
+    ⧖:C,a,b,s,r,j,n
+    ⧗:C̵,a,b,s,r,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹afcomb2› ⊕ ⦄
+  ⦄
+  ⌁ ⌁ ⧖:r ⌁ ⌁ ⌁ ⧗:r
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹afcomb1› ⸫
+⦃
+  ⧖:C,a,b,s,r,j,n
+  ⧗:C̵ ⧗:a △ ⊞ ⧗:j ⊞ ‹rd› ⧖:C,x
+  ⧗:C̵ ⧗:b △ ⊞ ⧗:j ⊞ ‹rd› ⧖:C,y
+  ⧗:C̵ ⧗:x ⧗:s ⧗:y ⊠ ⊞ ⍆̵
+  ⧗:a,b,s,r ⧗:j △ ⊞ ⧗:n
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹afcomb2› ⸫
+⍝ ‹afscale› C a n: n·a
+⦃ ⧖:C,a,n ⧗:C̵ ○ ○ ‹afnew› ⧖:C,z ⧗:C̵,z,a,n ‹afcomb› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹afscale› ⸫
+⍝ ‹afsign› C a b: the trit of a − b
+⦃
+  ⧖:C,a,b
+  ⧗:C̵,a,b #-1# ‹afcomb› ⧖:C,g
+  ⧗:C̵,g ‹aftag› ⧖:C,t
+  ⧗:C̵,g ⧗:t ○ ᛖ ⋔ ⦃ ⧖:C,gg ⧗:C̵ ⧗:gg △ ‹wr› ⧗:gg ⦄ ∅ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹afsign› ⸫
+⍝ ‹afg› C t: the value whose sign trit t is, as an affine value
+⦃ ⧖:C,t ⧗:C̵ ⧗:t ○ ‹wr› ⧖:C ⧗:C̵,t △ ‹afscale› ⧖:C,g ⧗:C̵ ⧗:t △ ‹wr› ⧗:g ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹afg› ⸫
+⍝ ‹afisconst› C a: affine with every coefficient 0
+⦃
+  ⧖:C,a
+  ⧗:C̵ ‹pvd› ⧖:C,d
+  ⧗:C̵,a ‹aftag› ⧖:C,t
+  ⧗:C̵,a ○ ⧗:d ○ ⧗:t ᛖ
+  ⥀ ⦃
+    ⧖:C,a,j,d,ok
+    ⧗:C̵,a,j,d,ok ⧗:j ⧗:d ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹afconst1› ⦄
+  ⦄
+  ⧖:C,a,j,d,ok ⧗:C̵,ok
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹afisconst› ⸫
+⦃
+  ⧖:C,a,j,d,ok
+  ⧗:C̵ ⧗:a #2# ⊞ ⧗:j ⊞ ‹rd› ⧖:C,x
+  ⧗:C̵,a ⧗:j △ ⊞ ⧗:d ⧗:ok ⧗:x ○ ᛖ ⋎ ⊕
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ⟩ ‹afconst1› ⸫
+⍝ ‹affirst› C f: the first symbol with a coefficient, or −1
+⦃
+  ⧖:C,f
+  ⧗:C̵ ‹pvd› ⧖:C,d
+  ⧗:C̵,f ○ ⧗:d #-1#
+  ⥀ ⦃
+    ⧖:C,f,j,d,r
+    ⧗:C̵,f,j,d,r ⧗:j ⧗:d ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹affirst1› ⊕ ⦄
+  ⦄
+  ⧖:C,f,j,d,r ⧗:C̵,r
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹affirst› ⸫
+⦃
+  ⧖:C,f,j,d,r
+  ⧗:C̵ ⧗:f #2# ⊞ ⧗:j ⊞ ‹rd› ⧖:C,x
+  ⧗:C̵,f ⧗:j △ ⊞ ⧗:d ⧗:r ⧗:j ⧗:r #-1# ᛖ ⧗:x ○ ᛖ ‹not› ⋎ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ⟩ ‹affirst1› ⸫
+
+⍝ ---- facts
+
+⍝ ‹afgeq› C a F: a ≥ 0 follows from the facts F
+⦃
+  ⧖:C,a,F
+  ⧗:C̵,a ‹aftag› ⧖:C,t
+  ⧗:C̵,a,F ⧗:t ○ ᛖ ⋔ ⦃ ‹afgeq1› ⦄ ⦃ ⌁ ⌁ ⊕ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹afgeq› ⸫
+⦃
+  ⧖:C,a,F
+  ⧗:C̵,a ‹afisconst› ⧖:C,isc
+  ⧗:C̵,a ‹afc› ⧖:C,c
+  ⧗:C̵,a,F ○ ⧗:c ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⧗:isc ⋎ ⋔ ⦃ ⌁ ⌁ ⦶ ⦄ ⦃ ‹afgeqf› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹afgeq1› ⸫
+⦃
+  ⧖:C,a,F
+  ⧗:C̵,a,F ⊕
+  ⥀ ⦃
+    ⧖:C,a,e,found
+    ⧗:C̵,a,e,found ⧗:e #-1# ᛖ ⋔ ⦃ ⦶ ⦄
+      ⦃ ⧖:C,a,e,found ⧗:C̵,e ‹rd› ⧖:C,nx ⧗:C̵ ⧗:e △ ⊞ ‹rd› ⧖:C,f ⧗:C̵,a,f ‹afdom› ⧖:C,ok ⧗:C̵,a,nx ⧗:found ⧗:ok ⋏ ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,a,e,found ⧗:C̵,found
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹afgeqf› ⸫
+⍝ ‹afdom› C a f: a = λ·f + c for a whole λ ≥ 1 and c ≥ 0, so f ≥ 0 gives a ≥ 0
+⦃
+  ⧖:C,a,f
+  ⧗:C̵,f ‹affirst› ⧖:C,i
+  ⧗:C̵,a,f,i ⧗:i #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⊕ ⦄ ⦃ ‹afdom1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹afdom› ⸫
+⦃
+  ⧖:C,a,f,i
+  ⧗:C̵ ⧗:a #2# ⊞ ⧗:i ⊞ ‹rd› ⧖:C,ai
+  ⧗:C̵ ⧗:f #2# ⊞ ⧗:i ⊞ ‹rd› ⧖:C,fi
+  ⧗:ai ⧗:fi ⊘ ⁇ ⦃ ⦄ ⦃ ○ ⦄ ⧖:lam
+  ⧗:C̵,a,f ⧗:lam ⊝ ‹afcomb› ⧖:C,r
+  ⧗:C̵,r ‹afisconst› ⧖:C,isc ⧗:C̵,r ‹afc› ⧖:C,c
+  ⧗:C̵ ⧗:isc ⧗:lam △ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ○ ⧗:c ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋎
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹afdom1› ⸫
+⍝ ‹pvfact› C F a: F and a ≥ 0
+⦃ ⧖:C,F,a ⧗:C̵ ‹len› ⧖:C,e ⧗:C̵ ⧗:F ⍆̵ ⧗:a ⍆̵ ⧗:e ⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvfact› ⸫
+⍝ ‹pvfeasible› C F: the facts can all hold (every constant one does, and at most one is not
+⍝ constant), so a path with them can be taken
+⦃
+  ⧖:C,F
+  ⧗:C̵,F ○ ⦶
+  ⥀ ⦃
+    ⧖:C,e,nv,ok
+    ⧗:C̵,e,nv,ok ⧗:e #-1# ᛖ ⋔ ⦃ ⦶ ⦄ ⦃ ‹pvfeas1› ⊕ ⦄ ⁼
+  ⦄
+  ⧖:C,e,nv,ok ⧗:C̵ ⧗:ok ⧗:nv #2# ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋎
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹pvfeasible› ⸫
+⦃
+  ⧖:C,e,nv,ok
+  ⧗:C̵,e ‹rd› ⧖:C,nx ⧗:C̵ ⧗:e △ ⊞ ‹rd› ⧖:C,f
+  ⧗:C̵,f ‹afisconst› ⧖:C,isc ⧗:C̵,f ‹afc› ⧖:C,c
+  ⧗:C̵,nx ⧗:nv ⧗:isc ⋔ ⦃ ⦄ ⦃ △ ⊞ ⦄ ⁼ ⧗:ok ⧗:isc ‹not› ○ ⧗:c ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋏ ⋎
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ ℤ ŧ⟩ ‹pvfeas1› ⸫
+
+⍝ ---- paths [S strand F vague]
+
+⦃ ⧖:C,S,st,F,v ⧗:C̵ ‹len› ⧖:C,p ⧗:C̵ ⧗:S ⍆̵ ⧗:st ⍆̵ ⧗:F ⍆̵ ⧗:v ⍆̵ ⧗:p ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvmk› ⸫
+⦃ ‹rd› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvS› ⸫
+⦃ △ ‹vf› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvst› ⸫
+⦃ #2# ‹vf› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvF› ⸫
+⦃ #3# ‹vf› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvv› ⸫
+⍝ ‹pvwith› C p S: p with the stack S, as a list of one path
+⦃
+  ⧖:C,p,S
+  ⧗:C̵,p ‹pvst› ⧖:C,st ⧗:C̵,p ‹pvF› ⧖:C,F ⧗:C̵,p ‹pvv› ⧖:C,v
+  ⧗:C̵,S,st,F,v ‹pvmk› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvwith› ⸫
+⍝ ‹pvunks› C S n: S then n unknowns
+⦃
+  ⧖:C,S,n
+  ⧗:C̵,S,n
+  ⥀ ⦃ ⧖:C,S,j ⧗:C̵,S,j ⧗:j ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⧖:C,S,j ⧗:C̵ ‹afunk› ⧖:C,u ⧗:C̵,S,u ‹lpush› ⧖:C,S2 ⧗:C̵,S2 ⧗:j △ ⊟ ⊕ ⦄ ⦃ ⦶ ⦄ ⦄
+  ⌁
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvunks› ⸫
+⍝ ‹pvstop› C: the prover gives up (the vow stays hopeful); no paths go on
+⦃ ⧖:C ⧗:C̵ #8# ‹a2› ⧖:C,s ⧗:C̵ #8# ⧗:s △ ‹max› ‹a2w› #1# ‹pvflag› ‹lnew0› ⦄ ⟨⟦ℤ⟧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvstop› ⸫
+⦃ ⧖:C,b ⧗:C̵ #12# ‹a2› ⧖:C,fl ⧗:C̵ #12# ⧗:fl ⧗:b ⋓ ‹a2w› ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹pvflag› ⸫
+
+⍝ ---- running blocks over paths
+
+⍝ ‹pvblock› C from to L: the paths after the ops from … to−1
+⦃
+  ⧖:C,from,to,L
+  ⧗:C̵,from,to,L
+  ⥀ ⦃
+    ⧖:C,i,to,L
+    ⧗:C̵,i,to,L ⧗:i ⧗:to ≶ ⋔ ⦃ ⦶ ⦄ ⁼ ⦃ ‹pvstep› ⊕ ⦄
+  ⦄
+  ⧖:C,i,to,L ⧗:C̵,L
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvblock› ⸫
+⦃
+  ⧖:C,i,to,L
+  ⧗:C̵,i,L ‹pvmap› ⧖:C,L2
+  ⧗:C̵,i ‹nextn› ⧖:C,nx
+  ⧗:C̵,nx,to,L2
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ⟩ ‹pvstep› ⸫
+⍝ ‹pvmap› C op L: op on every path; past 64 paths the prover gives up
+⦃
+  ⧖:C,op,L
+  ⧗:C̵ ‹lnew0› ⧖:C,R
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,op,L,R ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,op,L,R,j,n
+    ⧗:C̵,op,L,R,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,op,L,R,j,n ⧗:C̵,L,j ‹lget› ⧖:C,p ⧗:C̵,op,p ‹pvop1› ⧖:C,P ⧗:C̵,R,P ‹lcat› ⧖:C,R2 ⧗:C̵,op,L,R2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,op,L,R,j,n
+  ⧗:C̵,R ‹llen› ⧖:C,nr
+  ⧗:C̵,R ⧗:nr #64# ≶ ⋔ ⦃ ⦄ ⦃ ⌁ ‹pvstop› ⦄ ⦃ ⦄
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvmap› ⸫
+⍝ ‹pvblockin› C b p: block node b run on path p; it sees p's moments, and its own end with it
+⦃
+  ⧖:C,b,p
+  ⧗:C̵,p ‹pvst› ⧖:C,st0
+  ⧗:C̵,b ‹brange› ⧖:C,from,to
+  ⧗:C̵,p ‹l1› ⧖:C,L
+  ⧗:C̵,from,to,L ‹pvblock› ⧖:C,R
+  ⧗:C̵ ‹lnew0› ⧖:C,Q
+  ⧗:C̵,R ‹llen› ⧖:C,n
+  ⧗:C̵,R,Q,st0 ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,R,Q,st0,j,n
+    ⧗:C̵,R,Q,st0,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,R,Q,st0,j,n ⧗:C̵,R,j ‹lget› ⧖:C,q ⧗:C̵,q ‹pvS› ⧖:C,S ⧗:C̵,q ‹pvF› ⧖:C,F ⧗:C̵,q ‹pvv› ⧖:C,v
+        ⧗:C̵,S,st0,F,v ‹pvmk› ⧖:C,q2 ⧗:C̵,Q,q2 ‹lpush› ⧖:C,Q2 ⧗:C̵,R,Q2,st0 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,R,Q,st0,j,n ⧗:C̵,Q
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvblockin› ⸫
+
+⍝ ‹pvop1› C op p: the paths after one op
+⦃
+  ⧖:C,op,p
+  ⧗:C̵,op ○ ‹nd› ⧖:C,k
+  ⧗:C̵,op,p,k
+  ⍿⁰ △ ᛖ ⋔ ⦃ ⌁ ‹pv_lit› ⦄ ⦃
+  ⍿⁰ #2# ᛖ ⍿¹ #6# ᛖ ⋏ ⋔ ⦃ ⌁ ‹pv_call› ⦄ ⦃
+  ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ ‹pv_op› ⦄ ⦃
+  ⍿⁰ #10# ᛖ ⋔ ⦃ ⌁ ‹pv_select› ⦄ ⦃
+  ⍿⁰ #24# ᛖ ⋔ ⦃ ⌁ ⧖:C,o,pp ⧗:C̵ ⧗:o #3# ⊞ ⧗:pp ‹pvblockin› ⦄ ⦃
+  ⍿⁰ #25# ᛖ ⍿¹ #16# ᛖ ⋏ ⋔ ⦃ ⌁ ⧖:pp ⌁ ⧗:pp ‹l1› ⦄ ⦃
+  #7# ᛖ ⋔ ⦃ ⌁ ⌁ ‹pvstop› ⦄ ⦃ ‹pv_havoc› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvop1› ⸫
+
+⍝ what the prover does not follow: as many unknowns as the checker found values, and unknown
+⍝ moments; a call of the function itself inside it leaves its vow unproven
+⦃
+  ⧖:C,op,p
+  ⧗:C̵,op ‹pvscan› ⧖:C
+  ⧗:C̵,op ‹getdepth› ⧖:C,d
+  ⧗:C̵,p ‹pvst› ⧖:C,st ⧗:C̵,p ‹pvF› ⧖:C,F
+  ⧗:C̵ ‹lnew0› ⧖:C,e
+  ⧗:C̵,e ⧗:d ‹pvunks› ⧖:C,S
+  ⧗:C̵,st ‹llen› ⧖:C,ns ⧗:C̵ ‹lnew0› ⧖:C,e2 ⧗:C̵,e2 ⧗:ns ‹pvunks› ⧖:C,st2
+  ⧗:C̵,S,st2,F △ ‹pvmk› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pv_havoc› ⸫
+⍝ ‹pvscan› C op: (for a ⍤ᚠ) give up if op holds a call of the function
+⦃
+  ⧖:C,op
+  ⧗:C̵ #9# ‹a2› ⧖:C,nm
+  ⧗:C̵,op,nm ⧗:nm #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⦄ ⦃ ‹pvhascall› ⋔ ⦃ ‹pvstop› ⌁ ⦄ ∅ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹pvscan› ⸫
+⍝ ‹pvhascall› C n nm: node n, or a node inside it, calls nm
+⦃
+  ⧖:C,n,nm
+  ⧗:C̵,n ○ ‹nd› ⧖:C,k
+  ⧗:C̵,n,nm ⧗:k #2# ᛖ ⧗:k #6# ᛖ ⋏ ⋔ ⦃ ‹pviscall› ⦄ ⦃ ⌁ ⌁ ⊕ ⦄ ⁼ ⧖:C,here
+  ⧗:C̵,n ‹nextn› ⧖:C,end
+  ⧗:C̵,nm,end ⧗:n #3# ⊞ ⧗:here
+  ⥀ ⦃
+    ⧖:C,nm,end,i,found
+    ⧗:C̵,nm,end,i,found ⧗:i ⧗:end ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,nm,end,i,found ⧗:C̵,i,nm ‹pvhascall› ⧖:C,f ⧗:C̵,i ‹nextn› ⧖:C,nx ⧗:C̵,nm,end,nx ⧗:found ⧗:f ⋏ ⊕ ⦄
+  ⦄
+  ⧖:C,nm,end,i,found ⧗:C̵,found
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹pvhascall› ⸫
+⍝ ‹pviscall› C op nm: call node op calls nm (not in the past tense, which is no call)
+⦃
+  ⧖:C,op,nm
+  ⧗:C̵,op ‹ndt› ⧖:C,tok ⧗:C̵,tok #4# ‹tmark› ⧖:C,past
+  ⧗:C̵,op ‹resolve› ⧖:C,g
+  ⧗:C̵,g ⧗:g #-1# ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ⦃ #24# ‹vf› ⦄ ⁼ ⧖:C,gn
+  ⧗:C̵ ⧗:gn ⧗:nm ᛖ ⧗:past ‹not› ⋎
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹pviscall› ⸫
+
+⍝ literals: integers and trits are known
+⦃
+  ⧖:C,op,p
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok ‹tkd› ⧖:C,lk
+  ⧗:C̵,tok,lk ⍿⁰ #5# ᛖ ⋔ ⦃ ⌁ #5# ‹tf› ⧖:C,v ⧗:C̵ ○ ⧗:v ‹afnew› ⦄
+    ⦃ #7# ᛖ ⋔ ⦃ ‹tc0› ⧖:C,x ○ ⧗:x #8854# ᛖ ⋔ ⦃ ⌁ #-1# ⦄ ∅ ⁼ ⧗:x #8853# ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:n ⧗:C̵ △ ⧗:n ‹afnew› ⦄
+      ⦃ ⌁ ‹afunk› ⦄ ⁼ ⦄ ⁼ ⧖:C,v
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,S,v ‹lpush› ⧖:C,S2
+  ⧗:C̵,p,S2 ‹pvwith›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pv_lit› ⸫
+
+⍝ calls: unknown results; a call of the function itself must measure less (‹pvoblig›)
+⦃
+  ⧖:C,op,p
+  ⧗:C̵,op ‹resolve› ⧖:C,g
+  ⧗:C̵,op,p,g ⧗:g #-1# ᛖ ⋔ ⦃ ⌁ ‹pv_havoc› ⦄ ⦃ ‹pv_call1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pv_call› ⸫
+⦃
+  ⧖:C,op,p,g
+  ⧗:C̵,g △ ‹vf› ‹llen› ⧖:C,ka
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵ #9# ‹a2› ⧖:C,nm
+  ⧗:C̵,op,nm ⧗:nm #-1# ᛖ ⋔ ⦃ ⌁ ⌁ ⊕ ⦄ ⦃ ‹pviscall› ⦄ ⁼ ⧖:C,self
+  ⧗:C̵,S ⧗:n ⧗:ka ⊟ ⧗:n ‹lslice› ⧖:C,args
+  ⧗:C̵,p ‹pvF› ⧖:C,F
+  ⧗:C̵,p ‹pvv› ⧖:C,v
+  ⧗:C̵,args,F,v ⧗:self ⋔ ⦃ ‹pvoblig› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⧗:C̵,op ‹getdepth› ⧖:C,d
+  ⧗:C̵,S ○ ⧗:n ⧗:ka ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵,S2 ⧗:d ⧗:n ⧗:ka ⊟ ⊟ ‹pvunks› ⧖:C,S3
+  ⧗:C̵,p ‹pvst› ⧖:C,st
+  ⧗:C̵,S3,st,F △ ‹pvmk› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pv_call1› ⸫
+
+⍝ ops: moments, picks, arithmetic and ≶; ↯ ends the path; any other glyph takes its operands
+⍝ and leaves unknowns
+⦃
+  ⧖:C,op,p
+  ⧗:C̵,op ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok ‹tc0› ⧖:C,x ⧗:C̵,tok #4# ‹tf› ⧖:C,idx
+  ⧗:C̵,op,p,x,idx
+  ⍿¹ #10710# ᛖ ⋔ ⦃ ‹pvo_bind› ⦄ ⦃
+  ⍿¹ #10711# ᛖ ⋔ ⦃ ‹pvo_read› ⦄ ⦃
+  ⍿¹ #9087# ᛖ ⋔ ⦃ ‹pvo_pick› ⦄ ⦃
+  ⍿¹ #8623# ᛖ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ #2# ‹pvflag› ‹lnew0› ⦄ ⦃
+  ⍿¹ ⧖ @any(8862,8863,8864,8861,8822)@ ⋔ ⦃ ‹pvo_arith› ⦄ ⦃
+  ‹pvo_glyph› ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pv_op› ⸫
+⦃
+  ⧖:C,op,p,x,idx
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,p ‹pvst› ⧖:C,st ⧗:C̵,p ‹pvF› ⧖:C,F
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,v
+  ⧗:C̵,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵,st,v ‹lpush› ⧖:C,st2 ⧗:C̵,p ‹pvv› ⧖:C,vg
+  ⧗:C̵,S2,st2,F,vg ‹pvmk› ‹l1›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvo_bind› ⸫
+⍝ ⧗ⁿ: a moment of this block, or a symbol for an ℤ moment of the block that encloses the vow
+⦃
+  ⧖:C,op,p,x,idx
+  ⧗:C̵,p ‹pvst› ⧖:C,st ⧗:C̵,st ‹llen› ⧖:C,n
+  ⧗:C̵,st,idx,n ⧗:idx ⧗:n ≶ ⋔ ⦃ ‹pvouter› ⦄ ⁼ ⦃ ⧖:C,s,i,nn ⧗:C̵,s ⧗:nn △ ⊟ ⧗:i ⊟ ‹lget› ⦄ ⧖:C,v
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,S,v ‹lpush› ⧖:C,S2
+  ⧗:C̵,p,S2 ‹pvwith›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvo_read› ⸫
+⦃
+  ⧖:C,st,idx,n
+  ⧗:idx ⧗:n ⊟ ⧖:j
+  ⧗:C̵ #13# ‹a2› ⧖:C,es ⧗:C̵,es ‹llen› ⧖:C,ne
+  ⧗:j #8# ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧖:in8 ⧗:j ⧗:ne ≶ ⋔ ⦃ ⊕ ⦄ ⁼ ⦃ ⦶ ⦄ ⧖:inst
+  ⧗:C̵,es,ne,j ⧗:in8 ⧗:inst ⋎ ⋔ ⦃ ‹pvouter1› ⦄ ⦃ ⌁ ⌁ ⌁ ‹afunk› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvouter› ⸫
+⦃
+  ⧖:C,es,ne,j
+  ⧗:C̵,es ⧗:ne △ ⊟ ⧗:j ⊟ ‹lget› ‹vty› ⧖:C,t
+  ⧗:C̵,t #11# ‹tis› ⧖:C,isz
+  ⧗:C̵ #7# ‹a2› ⧖:C,k
+  ⧗:C̵ ⧗:k ⧗:j ⊞ ⧗:isz ⋔ ⦃ ‹afvar› ⦄ ⦃ ⌁ ‹afunk› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvouter1› ⸫
+⦃
+  ⧖:C,op,p,x,idx
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ⧗:idx ⊟ ‹lget› ⧖:C,v
+  ⧗:C̵,S,v ‹lpush› ⧖:C,S2
+  ⧗:C̵,p,S2 ‹pvwith›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvo_pick› ⸫
+⦃
+  ⧖:C,op,p,x,idx
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,b
+  ⧗:C̵,S ⧗:n #2# ⊟ ○ ‹max› ‹lget› ⧖:C,a
+  ⧗:C̵,a,b ⧗:x
+  ⍿⁰ #8862# ᛖ ⋔ ⦃ ⌁ △ ‹afcomb› #2# ⦄ ⦃
+  ⍿⁰ #8863# ᛖ ⋔ ⦃ ⌁ #-1# ‹afcomb› #2# ⦄ ⦃
+  ⍿⁰ #8864# ᛖ ⋔ ⦃ ⌁ ‹pvmul› #2# ⦄ ⦃
+  #8822# ᛖ ⋔ ⦃ ‹afsign› #2# ⦄ ⦃ ⧖:C,aa,bb ⧗:C̵,bb #-1# ‹afscale› △ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⦄ ⁼ ⧖:C,r,ar
+  ⧗:C̵,S ○ ⧗:n ⧗:ar ⊟ ‹lslice› ⧖:C,S2 ⧗:C̵,S2,r ‹lpush› ⧖:C,S3
+  ⧗:C̵,p,S3 ‹pvwith›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvo_arith› ⸫
+⍝ ‹pvmul› C a b: a·b when one of them is a constant
+⦃
+  ⧖:C,a,b
+  ⧗:C̵,a ‹afisconst› ⧖:C,ca ⧗:C̵,b ‹afisconst› ⧖:C,cb
+  ⧗:C̵,a,b,cb ⧗:ca ⋔ ⦃ ⌁ ⧖:C,aa,bb ⧗:C̵,aa ‹afc› ⧖:C,c ⧗:C̵,bb,c ‹afscale› ⦄
+    ⦃ ⋔ ⦃ ⧖:C,aa,bb ⧗:C̵,bb ‹afc› ⧖:C,c ⧗:C̵,aa,c ‹afscale› ⦄ ⦃ ⌁ ⌁ ‹afunk› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvmul› ⸫
+⦃
+  ⧖:C,op,p,x,idx
+  ⧗:x ‹arity› ⧖:ar
+  ⧗:C̵,op,p,ar ⧗:ar #-1# ᛖ ⋔ ⦃ ⌁ ‹pv_havoc› ⦄ ⦃ ‹pvo_glyph1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvo_glyph› ⸫
+⦃
+  ⧖:C,op,p,ar
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,op ‹getdepth› ⧖:C,d
+  ⧗:d ⧗:n ⧗:ar ⊟ ⊟ ⧖:nu
+  ⍝ an op that can fail, or that the checker saw differently, is not followed
+  ⧗:nu ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:n ⧗:ar ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⧖:ok
+  ⧗:C̵,S ○ ⧗:n ⧗:ar ⊟ ○ ‹max› ‹lslice› ⧖:C,S2
+  ⧗:C̵,S2 ⧗:nu ○ ‹max› ‹pvunks› ⧖:C,S3
+  ⧗:C̵,p ‹pvst› ⧖:C,st ⧗:C̵,p ‹pvF› ⧖:C,F
+  ⧗:C̵,op,p,S3,st,F ⧗:ok ⋔ ⦃ ⧖:C,o,pp,s3,ss,ff ⧗:C̵,s3,ss,ff △ ‹pvmk› ‹l1› ⦄ ⦃ ⌁ ⌁ ⌁ ‹pv_havoc› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvo_glyph1› ⸫
+
+⍝ ⋔ on a trit g: face ○ knows g = 0, face ⊕ g ≥ 1, face ⊖ g ≤ −1 (⁼ is the face before)
+⦃
+  ⧖:C,op,p
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,c
+  ⧗:C̵,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,S2
+  ⧗:C̵,p,S2 ‹pvwith› ○ ‹lget› ⧖:C,p2
+  ⧗:C̵ ⧗:op #3# ⊞ ⧖:C,f0 ⧗:C̵,f0 ‹nextn› ⧖:C,f1 ⧗:C̵,f1 ‹nextn› ⧖:C,f2
+  ⧗:C̵,f1 ○ ‹nd› ⧖:C,k1 ⧗:C̵,f2 ○ ‹nd› ⧖:C,k2
+  ⍝ the face each trit runs
+  ⧗:f1 ⧗:f0 ⧗:k1 #12# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:g1
+  ⧗:f2 ⧗:g1 ⧗:k2 #12# ᛖ ⋔ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⦃ ⌁ ⦄ ⁼ ⧖:g2
+  ⧗:C̵,c ‹aftag› ⧖:C,ct
+  ⧗:C̵,c ⧗:ct △ ᛖ ⋔ ⦃ ‹afg› ⦄ ⦃ ⌁ ‹afunk› ⦄ ⁼ ⧖:C,cg
+  ⧗:C̵,cg ‹afisconst› ⧖:C,cc ⧗:C̵,cg ‹afc› ⧖:C,cv
+  ⍝ which trits can occur: all of them unless c is a known trit
+  ⧗:ct △ ᛖ ‹not› ⧗:cc ‹not› ⋏ ⧖:any
+  ⧗:any ⧗:cv ○ ᛖ ⋏ ⧖:t0 ⧗:any ⧗:cv ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋏ ⧖:t1 ⧗:any ⧗:cv ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⋏ ⧖:t2
+  ⍝ facts only from a trit of a linear value
+  ⧗:ct △ ᛖ ⧗:cc ‹not› ⋎ ⧖:lin
+  ⧗:any ⧗:lin ‹not› ⋎ ⧖:vg
+  ⧗:C̵ ‹lnew0› ⧖:C,R
+  ⧗:C̵,R,p2,cg,lin,vg ○ ⧗:f0 ⧗:t0 ‹pvface› ⧖:C,R
+  ⧗:C̵,R,p2,cg,lin,vg △ ⧗:g1 ⧗:t1 ‹pvface› ⧖:C,R
+  ⧗:C̵,R,p2,cg,lin,vg #2# ⧗:g2 ⧗:t2 ‹pvface›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pv_select› ⸫
+⍝ ‹pvface› C R p c lin vg fi f on: the paths of face f (for trit fi) after R, if it can run
+⦃
+  ⧖:C,R,p,c,lin,vg,fi,f,on
+  ⧗:C̵,R,p,c,lin,vg,fi,f ⧗:on ⋔ ⦃ ‹pvface1› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ ℤ ℤ ŧ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvface› ⸫
+⦃
+  ⧖:C,R,p,c,lin,vg,fi,f
+  ⧗:C̵,p ‹pvF› ⧖:C,F
+  ⍝ ○: c ≥ 0 and −c ≥ 0; ⊕: c − 1 ≥ 0; ⊖: −c − 1 ≥ 0
+  ⧗:C̵ ○ #-1# ‹afnew› ⧖:C,m1
+  ⧗:C̵,c #-1# ‹afscale› ⧖:C,nc
+  ⧗:C̵,F,c,nc,m1,fi ⧗:lin ⋔ ⦃ ‹pvfacts› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C,F2
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,p ‹pvst› ⧖:C,st ⧗:C̵,p ‹pvv› ⧖:C,v0
+  ○ ⧗:v0 △ ᛖ ⧗:vg ⋏ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:v
+  ⧗:C̵,S,st,F2,v ‹pvmk› ⧖:C,q
+  ⧗:C̵,f ○ ‹nd› ⧖:C,fk
+  ⧗:C̵,f,q ⧗:fk #13# ᛖ ⋔ ⦃ ⧖:C,ff,qq ⧗:C̵,qq ‹l1› ⦄ ⦃ ‹pvblockin› ⦄ ⁼ ⧖:C,P
+  ⧗:C̵,R,P ‹lcat›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ŧ ŧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvface1› ⸫
+⦃
+  ⧖:C,F,c,nc,m1,fi
+  ⧗:C̵,F,c,nc,m1 ⧗:fi
+  ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⧖:C,FF,cc,ncc,mm ⧗:C̵,FF,cc ‹pvfact› ⧖:C,F2 ⧗:C̵,F2,ncc ‹pvfact› ⦄ ⦃
+  △ ᛖ ⋔ ⦃ ⧖:C,FF,cc,ncc,mm ⧗:C̵,cc,mm △ ‹afcomb› ⧖:C,g ⧗:C̵,FF,g ‹pvfact› ⦄
+    ⦃ ⧖:C,FF,cc,ncc,mm ⧗:C̵,ncc,mm △ ‹afcomb› ⧖:C,g ⧗:C̵,FF,g ‹pvfact› ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvfacts› ⸫
+
+⍝ ---- the measure and what it must do
+
+⍝ ‹pvmeasure› C vals: the vow's measure on vals (−1 unless it is one affine value)
+⦃
+  ⧖:C,vals
+  ⧗:C̵ #10# ‹a2› ⧖:C,vw
+  ⧗:C̵ ‹lnew0› ⧖:C,st
+  ⧗:C̵,vals,st #-1# ○ ‹pvmk› ⧖:C,p
+  ⧗:C̵ ⧗:vw #3# ⊞ ⧗:p ‹pvblockin› ⧖:C,L
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,L ⧗:n △ ᛖ ⋔ ⦃ ○ ‹lget› ‹pvS› ⧖:C,S ⧗:C̵,S ‹llen› ⧖:C,ns ⧗:C̵,S ⧗:ns △ ᛖ ⋔ ⦃ ○ ‹lget› ⦄ ⦃ ⌁ #-1# ⦄ ⁼ ⦄ ⦃ ⌁ #-1# ⦄ ⁼ ⧖:C,m
+  ⧗:C̵,m ⧗:m #-1# ᛖ ⋔ ⦃ ⦄ ⦃ ⧖:C,mm ⧗:C̵,mm ‹aftag› ⧖:C,t ⧗:C̵ ⧗:mm #-1# ⧗:t ○ ᛖ ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvmeasure› ⸫
+⍝ ‹pvoblig› C vals F vg: on a path with facts F the vow's measure goes from slot 11's to that
+⍝ of vals; it must be at least 0 and at least 1 lower (perjury only on a path that is not vague)
+⦃
+  ⧖:C,vals,F,vg
+  ⧗:C̵,vals ‹pvmeasure› ⧖:C,m
+  ⧗:C̵ #11# ‹a2› ⧖:C,m0
+  ⧗:C̵,m,m0,F,vg ⧗:m #-1# ᛖ ⧗:m0 #-1# ᛖ ⋏ ⋔ ⦃ ⌁ ⌁ ⌁ ⌁ ‹pvstop› ⌁ ⦄ ⦃ ‹pvoblig1› ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pvoblig› ⸫
+⦃
+  ⧖:C,m,m0,F,vg
+  ⧗:C̵,m,F ‹afgeq› ⧖:C,pos
+  ⧗:C̵,m0,m #-1# ‹afcomb› ⧖:C,dd ⧗:C̵ ○ #-1# ‹afnew› ⧖:C,one ⧗:C̵,dd,one △ ‹afcomb› ⧖:C,dec
+  ⧗:C̵,dec,F ‹afgeq› ⧖:C,down
+  ⍝ m − m0 a constant ≥ 0 on a path that can be taken: the vow is false
+  ⧗:C̵,m,m0 #-1# ‹afcomb› ⧖:C,up
+  ⧗:C̵,up,F ‹afgeq› ⧖:C,rises ⧗:C̵,up ‹afisconst› ⧖:C,upc ⧗:C̵,F ‹pvfeasible› ⧖:C,feas
+  ⧗:C̵ #8# ‹a2› ⧖:C,s
+  ⧗:s ⧗:pos ⧗:down ⋎ ⋔ ⦃ ⦄ ⦃ △ ‹max› ⦄ ⁼ ⧗:rises ⧗:upc ⋎ ⧗:feas ⋎ ⧗:vg ○ ᛖ ⋎ ⋔ ⦃ ⌁ #2# ⦄ ∅ ⁼ ⧖:s2
+  ⧗:C̵ #8# ⧗:s2 ‹a2w›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pvoblig1› ⸫
+
+⍝ ‹pvsyms› C ts: a symbol for each ℤ of the types ts, unknown for the rest
+⦃
+  ⧖:C,ts
+  ⧗:C̵ ‹lnew0› ⧖:C,S
+  ⧗:C̵,ts ‹llen› ⧖:C,n
+  ⧗:C̵,ts,S ○ ⧗:n
+  ⥀ ⦃
+    ⧖:C,ts,S,j,n
+    ⧗:C̵,ts,S,j,n ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ts,S,j,n ⧗:C̵,ts,j ‹lget› ⧖:C,t ⧗:C̵,t #11# ‹tis› ⧖:C,isz
+        ⧗:C̵,j ⧗:isz ⋔ ⦃ ‹afvar› ⦄ ⦃ ⌁ ‹afunk› ⦄ ⁼ ⧖:C,v ⧗:C̵,S,v ‹lpush› ⧖:C,S2
+        ⧗:C̵,ts,S2 ⧗:j △ ⊞ ⧗:n ⊕ ⦄
+  ⦄
+  ⧖:C,ts,S,j,n ⧗:C̵,S
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvsyms› ⸫
+⍝ ‹pvstart› C k name vw es: the prover's state for one vow
+⦃
+  ⧖:C,k,name,vw,es
+  ⧗:C̵ #7# ⧗:k ‹a2w› #8# ○ ‹a2w› #9# ⧗:name ‹a2w› #10# ⧗:vw ‹a2w› #11# #-1# ‹a2w› #12# ○ ‹a2w› #13# ⧗:es ‹a2w›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧⟩ ‹pvstart› ⸫
+⍝ ‹pvend› C tok: the status as ‹vprove› reports it (bit 1 proven); perjury stops here
+⦃
+  ⧖:C,tok
+  ⧗:C̵ #8# ‹a2› ⧖:C,s
+  ⧗:C̵ ⧗:s #2# ᛖ ‹not› ⧗:tok #35# ‹cfailunless›
+  ○ ⧗:s ○ ᛖ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹pvend› ⸫
+
+⍝ ‹vprove› C pv op S strand: the vow pv of ⥀ op, entered with stack S in a block with moments
+⍝ strand. Results: bit 1 proven, bit 2 the ⥀ never exits with ⊖.
+⦃
+  ⧖:C,pv,op,S,strand
+  ⧗:C̵,S ‹llen› ⧖:C,k
+  ⧗:C̵,k #-1# ⧗:pv,strand ‹pvstart› ⧖:C
+  ⧗:C̵,S ‹ltypes› ⧖:C,ts ⧗:C̵,ts ‹pvsyms› ⧖:C,HS
+  ⧗:C̵,HS ‹pvmeasure› ⧖:C,mh ⧗:C̵ #11# ⧗:mh ‹a2w› ⧖:C
+  ⧗:C̵ ⧗:mh #-1# ᛖ ⋔ ⦃ ‹pvstop› ⌁ ⦄ ∅ ⁼ ⧖:C
+  ⧗:C̵ ‹lnew0› ⧖:C,st0
+  ⧗:C̵,HS,st0 #-1# ○ ‹pvmk› ‹l1› ⧖:C,L0
+  ⧗:C̵ ⧗:op #3# ⊞ ‹brange› ⧖:C,from,to
+  ⧗:C̵,from,to,L0 ‹pvblock› ⧖:C,L
+  ⧗:C̵,L ‹llen› ⧖:C,n
+  ⧗:C̵,L ○ ⧗:n ⦶
+  ⥀ ⦃
+    ⧖:C,L,j,n,nofail
+    ⧗:C̵,L,j,n,nofail ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,L,j,n,nofail ⧗:C̵,L,j ‹lget› ‹pvloopend› ⧖:C,nf ⧗:C̵,L ⧗:j △ ⊞ ⧗:n ⧗:nofail ⧗:nf ⋎ ⊕ ⦄
+  ⦄
+  ⧖:C,L,j,n,nofail
+  ⧗:C̵,pv ‹ndt› ⧖:C,tok
+  ⧗:C̵,tok ‹pvend› ⧖:C,r
+  ⧗:C̵ #12# ‹a2› ⧖:C,fl
+  ⧗:C̵ ⧗:r ⧗:nofail ⧗:fl ○ ᛖ ⋎ ⋔ ⦃ #2# ⋓ ⦄ ∅ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vprove› ⸫
+⍝ ‹pvloopend› C p: a path round the body; if its trit can be ⊕ the measure must fall. Gives
+⍝ whether it never leaves with ⊖.
+⦃
+  ⧖:C,p
+  ⧗:C̵,p ‹pvS› ⧖:C,S ⧗:C̵,p ‹pvF› ⧖:C,F ⧗:C̵,p ‹pvv› ⧖:C,v
+  ⧗:C̵,S ‹llen› ⧖:C,n
+  ⧗:C̵,S ⧗:n △ ⊟ ‹lget› ⧖:C,t
+  ⧗:C̵,S ○ ⧗:n △ ⊟ ‹lslice› ⧖:C,BS
+  ⍝ the trit is the sign of g: known (tc), or linear (facts), or unknown
+  ⧗:C̵,t ‹aftag› ⧖:C,tt
+  ⧗:C̵,t ⧗:tt △ ᛖ ⋔ ⦃ ‹afg› ⦄ ⦃ ⌁ ‹afunk› ⦄ ⁼ ⧖:C,g
+  ⧗:C̵,g ‹afisconst› ⧖:C,tc ⧗:C̵,g ‹afc› ⧖:C,tv
+  ⧗:tt △ ᛖ ⧖:istrit
+  ⧗:istrit ⧗:tc ⋎ ⧖:known ⧗:istrit ⧗:tc ‹not› ⋎ ⧖:lin
+  ⧗:C̵ ○ #-1# ‹afnew› ⧖:C,m1 ⧗:C̵,g,m1 △ ‹afcomb› ⧖:C,g1
+  ⧗:C̵,F,g1 ‹pvfact› ⧖:C,Fc
+  ⧗:Fc ⧗:F ⧗:lin ⋔ ⦃ ⌁ ⦄ ⦃ ⧖ ⌁ ⧗⁰ ⦄ ⁼ ⧖:Fgo
+  ○ ⧗:v △ ᛖ ⧗:known ⧗:lin ⋏ ‹not› ⋏ ⋔ ⦃ ⌁ △ ⦄ ∅ ⁼ ⧖:vg
+  ⍝ can it go round?
+  ⧗:known ‹not› ⧗:tv ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋏ ⧖:goes
+  ⧗:C̵,BS,Fgo,vg ⧗:goes ⋔ ⦃ ‹pvoblig› ⦄ ⦃ ⌁ ⌁ ⌁ ⦄ ⁼ ⧖:C
+  ⍝ can it leave with ⊖? not when the trit is known ≥ 0 or g ≥ 0 follows
+  ⧗:C̵,g,F ‹afgeq› ⧖:C,gpos
+  ⧗:C̵ ⧗:known ⧗:tv ○ ≶ ⋔ ⦃ ⦶ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⋎ ⧗:lin ⧗:gpos ⋎ ⋏
+⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹pvloopend› ⸫
+
+⍝ ‹vprovefn› C f vw from to: the vow vw of function f, whose body is from … to−1
+⦃
+  ⧖:C,f,vw,from,to
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,ins ‹llen› ⧖:C,k
+  ⧗:C̵,f #24# ‹vf› ⧖:C,name
+  ⧗:C̵ ‹lnew0› ⧖:C,es
+  ⧗:C̵,k,name,vw,es ‹pvstart› ⧖:C
+  ⧗:C̵,ins ‹pvsyms› ⧖:C,HS
+  ⧗:C̵,HS ‹pvmeasure› ⧖:C,mh ⧗:C̵ #11# ⧗:mh ‹a2w› ⧖:C
+  ⧗:C̵ ⧗:mh #-1# ᛖ ⋔ ⦃ ‹pvstop› ⌁ ⦄ ∅ ⁼ ⧖:C
+  ⧗:C̵ ‹lnew0› ⧖:C,st0
+  ⧗:C̵,HS,st0 #-1# ○ ‹pvmk› ‹l1› ⧖:C,L0
+  ⧗:C̵,from,to,L0 ‹pvblock› ⌁ ⧖:C
+  ⧗:C̵,vw ‹ndt› ‹pvend›
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹vprovefn› ⸫

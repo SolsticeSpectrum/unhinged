@@ -5,7 +5,8 @@
 # trith/s2/tests/<suite>/<name>.trh is one test; a directory <suite>/<name>/ is one module
 # made of every .trh file in it, passed in name order (planes, Addendum A.1). The suite
 # chooses the flags; <name>.flags, if present, replaces them. The run suite compiles the
-# module and runs it, recording its exit status.
+# module and runs it, recording its exit status (a .flags of "RUN --debug" adds flags to the
+# compile).
 # BLESS=1 rewrites the .out files instead. Run from the repo root after `make s2`.
 S2C=${S2C:-build/s2c}
 mkdir -p output/s2-golden
@@ -27,10 +28,11 @@ for suite in check check_errors emit run tools; do
         f=$flags
         [ -f "$name.flags" ] && f=$(cat "$name.flags")
         out=output/s2-golden/actual.out
-        if [ "$f" = RUN ]; then
+        if [ "${f%% *}" = RUN ]; then
+            extra=${f#RUN}
             rm -f output/s2-golden/prog
             # shellcheck disable=SC2086
-            if "$S2C" $files -o output/s2-golden/prog > "$out" 2>&1; then
+            if "$S2C" $files $extra -o output/s2-golden/prog > "$out" 2>&1; then
                 output/s2-golden/prog >> "$out" 2>&1
                 echo "exit=$?" >> "$out"
             fi

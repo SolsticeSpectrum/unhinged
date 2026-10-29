@@ -415,7 +415,7 @@
   ⧗:C̵,ins ‹tvars› ⧖:C,tv
   ⧗:C̵ ‹len› ⧖:C,f
   ⧗:C̵ ⧗:name ⍆̵ ⧗:ins ⍆̵ ⧗:outs ⍆̵ ⧗:rev ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:tv ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵
-    ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ ○ ⍆̵ #-1# ⍆̵ ⧗:name ⍆̵ ⧗:f
+    ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ ○ ⍆̵ #-1# ⍆̵ ⧗:name ⍆̵ ○ ⍆̵ ⧗:f
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹fninfo› ⸫
 
 ⍝ ---- type variables (§9.4): a generic function is checked and emitted once per instance
@@ -565,7 +565,7 @@
   ⧗:C̵,f #21# ‹vf› ⧖:C,deco ⧗:C̵,f #23# ‹vf› ⧖:C,ftok ⧗:C̵,f #24# ‹vf› ⧖:C,fnm
   ⧗:C̵ ‹len› ⧖:C,g
   ⧗:C̵ ⧗:key ⍆̵ ⧗:gi ⍆̵ ⧗:go ⍆̵ ○ ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:none ⍆̵ ⧗:it ⍆̵ ⧗:gshp ⍆̵ ⧗:at ⍆̵ ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵
-    ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ⧗:deco ⍆̵ ○ ⍆̵ ⧗:ftok ⍆̵ ⧗:fnm ⍆̵ ⧗:g
+    ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ⧗:deco ⍆̵ ○ ⍆̵ ⧗:ftok ⍆̵ ⧗:fnm ⍆̵ ○ ⍆̵ ⧗:g
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹instrec› ⸫
 ⍝ ‹isgeneric› C f: f has type variables, quotation parameters or rows
 ⦃ ⧖:C,f ⧗:C̵,f #8# ‹vf› ⧖:C,tv ⧗:C̵,tv ‹llen› ⧖:C,n ⧗:C̵,f #12# ‹vf› ⧖:C,qy ⧗:C̵ ⧗:n ○ ≶ ⋔ ⦃ ⊕ ⦄ ⦃ ⦶ ⦄ ⦃ ⊕ ⦄ ⧗:qy △ ᛖ ⋏ ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧ ŧ⟩ ‹isgeneric› ⸫
@@ -1124,7 +1124,7 @@
   ⧗:C̵,f #21# ‹vf› ⧖:C,deco ⧗:C̵,f #23# ‹vf› ⧖:C,ftok ⧗:C̵,f #24# ‹vf› ⧖:C,fnm
   ⧗:C̵ ‹len› ⧖:C,g
   ⧗:C̵ ⧗:key ⍆̵ ⧗:gi ⍆̵ ⧗:go ⍆̵ ○ ⍆̵ ⧗:iev ⍆̵ ⧗:ich ⍆̵ ⧗:oev ⍆̵ ⧗:och ⍆̵ ⧗:none ⍆̵ ⧗:it ⍆̵ ⧗:shp ⍆̵ ⧗:at ⍆̵
-  ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ⧗:deco ⍆̵ ○ ⍆̵ ⧗:ftok ⍆̵ ⧗:fnm ⍆̵ ⧗:g
+  ○ ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ○ ⍆̵ #-1# ⍆̵ ⧗:deco ⍆̵ ○ ⍆̵ ⧗:ftok ⍆̵ ⧗:fnm ⍆̵ ○ ⍆̵ ⧗:g
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qinstrec› ⸫
 ⦃ ⧖:C,g0,rb,r ⧗:C̵,rb ⧗:r ‹rowslot› ‹lget› ⧖:C,rl ⧗:C̵,g0,rl ‹lcat› ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹qrowcat› ⸫
 ⍝ ‹crecord› C op f: call op makes instance f, seen from the function being checked
@@ -1388,6 +1388,7 @@
   ⍿⁰ #32# ᛖ ⋔ ⦃ $an exorcism lifts only ⁱ, ᵘ and ᵃ: failure is lifted by handling it with ⁇, restlessness by a vow (A.4.2)$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #33# ᛖ ⋔ ⦃ $a vow ⍤⥀ ⦃ measure ⦄ goes directly before its ⥀ (A.5.1)$ ⎙̵ ⦄ ∅ ⁼
   ⍿⁰ #34# ᛖ ⋔ ⦃ $a vow ⍤ᚠ ⦃ measure ⦄ is the first op of the body of the function ᚠ it names (A.5.1)$ ⎙̵ ⦄ ∅ ⁼
+  ⍿⁰ #35# ᛖ ⋔ ⦃ $perjury: this vow's measure does not fall on a way round that can be taken (A.5.1)$ ⎙̵ ⦄ ∅ ⁼
   ⌁
 ⦄ ⟨ℤ ⊸⟩ ‹pmsg› ⸫
 
@@ -2647,7 +2648,7 @@
   ⧖:C,op,S,strand,dead,depth,locks,ind,prev,to
   ⧗:C̵ #2# ‹a2› ⧖:C,pv ⧗:C̵ #2# #-1# ‹a2w› ⧖:C
   ⧗:C̵,op,S,strand,dead,depth,locks,ind,prev,to ‹c_loop0› ⧖:C,S2,st2,d2,sk,lb,la
-  ⧗:C̵,op,pv ‹loopcurse› ⧖:C
+  ⧗:C̵,op,pv,S,strand ‹loopcurse› ⧖:C
   ⧗:C̵,S2,st2,d2,sk,lb,la
 ⦄ ⟨⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ ℤ ℤ ℤ ℤ ℤ⟩ ‹c_loop› ⸫
 ⍝ ⥀: the body must have effect ⟨S ⊸ S ŧ⟩; evidentials and charges carried round must reach a fixpoint

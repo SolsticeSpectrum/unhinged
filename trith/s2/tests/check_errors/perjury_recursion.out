@@ -1,0 +1,14 @@
+fn ᚤ ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+    measure
+  ⍤ᚤ  ⊢ [ℤ]
+  ⍿⁰  ⊢ [ℤ ℤ]
+  △○△  ⊢ [ℤ ℤ ℤ]
+  ≶  ⊢ [ℤ ŧ]
+    face ⦶
+    face ⊕
+    face ⊖
+      △  ⊢ [ℤ ℤ]
+      ⊞  ⊢ [ℤ]
+      ᚤ  ⊢ [ℤ]
+  ⋔ (join)  ⊢ [ℤ]
+trith/s2/tests/check_errors/perjury_recursion.trh:2:50: error: perjury: this vow's measure does not fall on a way round that can be taken (A.5.1)

@@ -1,0 +1,13 @@
+fn ᚠ ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+    body
+      △  ⊢ [ℤ ℤ]
+      ⊟  ⊢ [ℤ]
+      ⍿⁰  ⊢ [ℤ ℤ]
+      ○  ⊢ [ℤ ℤ ℤ]
+      ≶  ⊢ [ℤ ŧ]
+  ⥀ (exit)  ⊢ [ℤ]
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  ᚠ  ⊢ [ℤ]
+  ⌁  ⊢ []
+trith/s2/tests/check_errors/fallen.trh:1:3: error: fallen: ᚠ is declared blessed but is ⸸ⁱᵈ (A.5.2)

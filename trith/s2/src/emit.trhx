@@ -1582,7 +1582,8 @@
   ⧗:C̵,outs ‹eretty› ⧖:C,rt
   ⧗:C̵ %%%% ‹eraw› ⧖:C
   ⧗:C̵ %%; {name}%% ‹eraw› ⧖:C
-  ⧗:C̵ %%define internal {rt} {sym}({pt}) {{%% ‹eraw› ⧖:C
+  ⧗:C̵,r,f ‹eattrs› ⧖:C,at
+  ⧗:C̵ %%define internal {rt} {sym}({pt}){at} {{%% ‹eraw› ⧖:C
   ⧗:C̵ %%!entry%% ‹estart› ⧖:C
   ⧗:C̵,name,ins ‹eargs› ⧖:C,S
   ⧗:C̵ ‹epushf›
@@ -1591,6 +1592,37 @@
   ⧗:C̵,q,FS,outs,rt,no ⧗:dead ○ ᛖ ⋔ ⦃ ‹eret› ⦄ ⦃ ⌁ ⌁ ⌁ ⌁ ⌁ ⦄ ⁼
   %%}}%% ‹eraw›
 ⦄ ⟨⟦ℤ⟧ ℤ ⊸ ⟦ℤ⟧⟩ ‹efunction› ⸫
+⍝ ‹eattrs› C r f: what blessing buys (Addendum A.5.3), in release builds only: a blessed
+⍝ function (no ⁱ ᵘ ᵈ) whose vows are all proven is nounwind willreturn mustprogress, and a doubly
+⍝ blessed one reads no memory but its shadows' (none at all without them; none of this when it
+⍝ takes an owned array or string, which it frees)
+⦃
+  ⧖:C,r,f
+  ⧗:C̵ #34# ‹reg› ⧖:C,debug
+  ⧗:C̵,r ‹rd› ⧖:C,rn ⧗:C̵,f ‹rd› ⧖:C,fn
+  ⧗:C̵,f #20# ‹vf› ⧖:C,fin ⧗:C̵,f #22# ‹vf› ⧖:C,hop ⧗:C̵,f #21# ‹vf› ⧖:C,deco
+  ⧗:debug ○ ᛖ ⧗:rn ⧗:fn ᛖ ⋎ ⧗:deco #-1# ᛖ ‹not› ⋎ ⧗:fin #14# ⋒ ○ ᛖ ⋎ ⧗:hop ○ ᛖ ⋎ ⧖:blessed
+  ⧗:C̵,f,fin ⧗:blessed ⋔ ⦃ ‹eattrs1› ⦄ ⦃ ⌁ ⌁ %%%% ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eattrs› ⸫
+⦃
+  ⧖:C,f,fin
+  ⧗:C̵,f △ ‹vf› ⧖:C,ins ⧗:C̵,ins ‹llen› ⧖:C,n
+  ⍝ 0 nothing but values, 1 ⟗ shadows, 2 ⟖ shadows, 3 owned arrays or strings
+  ⧗:C̵,ins ○ ⧗:n ○
+  ⥀ ⦃
+    ⧖:C,ins,j,n,mk
+    ⧗:C̵,ins,j,n,mk ⧗:j ⧗:n ≶ ⋔ ⦃ ⦶ ⦄ ⁼
+      ⦃ ⧖:C,ins,j,n,mk ⧗:C̵,ins,j ‹lget› ⧖:C,t ⧗:C̵,t ‹tclass› ⧖:C,cl ⧗:C̵,t ‹shead› ⧖:C,h
+        ⧗:h #10198# ᛖ ⧖:rw
+        ○ ⧗:rw ⧗:cl △ ᛖ ⋔ ⦃ ⧖:w ⌁ ⧗:w ⋔ ⦃ #2# ⦄ ⦃ △ ⦄ ⁼ ⦄ ⦃ ⌁ ⦄ ⁼ ⧗:cl #3# ᛖ ⋔ ⦃ ⌁ #3# ⦄ ∅ ⁼ ⧖:k
+        ⧗:C̵,ins ⧗:j △ ⊞ ⧗:n ⧗:mk ⧗:k ‹max› ⊕ ⦄
+  ⦄
+  ⧖:C,ins,j,n,mk
+  ⧗:C̵ %% nounwind willreturn mustprogress%% ⧖:C,base
+  ⧗:C̵,base,mk ⧗:fin ○ ᛖ ⧗:mk #3# ᛖ ‹not› ⋎ ⋔
+    ⦃ ⧖:C,b,m ⧗:C̵,b ⧗:m ⍿⁰ ○ ᛖ ⋔ ⦃ ⌁ ⧖:bb %%{bb} memory(none)%% ⦄ ⦃ △ ᛖ ⋔ ⦃ ⧖:bb %%{bb} memory(argmem: read)%% ⦄ ⦃ ⧖:bb %%{bb} memory(argmem: readwrite)%% ⦄ ⁼ ⦄ ⁼ ⦄
+    ⦃ ⌁ ⦄ ⁼
+⦄ ⟨⟦ℤ⟧ ℤ ℤ ⊸ ⟦ℤ⟧ ℤ⟩ ‹eattrs1› ⸫
 ⦃
   ⧖:C,L,tok
   ⧗:C̵,L ‹llen› ⧖:C,n

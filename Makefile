@@ -58,7 +58,7 @@ clean:
 # s2: the compiler rewritten in Trith (spec §17), compiled by s1. The sources
 # in trith/s2/src are authored in logical order with named moments; the
 # committed trith/s2/s2c.trh is generated from them by `make s2-regen`.
-S2_SRC := trith/s2/src/util.trhx trith/s2/src/chars.trhx trith/s2/src/lexer.trhx trith/s2/src/planes.trhx trith/s2/src/parser.trhx trith/s2/src/heap.trhx trith/s2/src/types.trhx trith/s2/src/check.trhx trith/s2/src/emit.trhx trith/s2/src/eval.trhx trith/s2/src/curses.trhx trith/s2/src/main.trhx
+S2_SRC := trith/s2/src/util.trhx trith/s2/src/chars.trhx trith/s2/src/lexer.trhx trith/s2/src/planes.trhx trith/s2/src/parser.trhx trith/s2/src/heap.trhx trith/s2/src/types.trhx trith/s2/src/check.trhx trith/s2/src/emit.trhx trith/s2/src/eval.trhx trith/s2/src/curses.trhx trith/s2/src/vows.trhx trith/s2/src/main.trhx
 s2: trith
 	$(TRITHC) trith/s2/s2c.trh -o build/s2c
 
@@ -74,7 +74,9 @@ s2-golden: s2
 	S2C=build/s2c trith/s2/golden.sh
 
 # s3 is s2 compiled by s2; the fixpoint (spec §17) is that it emits exactly what
-# s2 emits, for its own source and for every test
+# s2 emits, for its own source and for every test. s1 gives no attributes to blessed
+# functions (Addendum A.5.3) and s2 does, so the executable that must reproduce itself is
+# s3: s4, s3 compiled by s3, is the same file
 s3: s2
 	build/s2c trith/s2/s2c.trh -o build/s3c
 
@@ -83,8 +85,9 @@ s2-fixpoint: s3
 	build/s2c trith/s2/s2c.trh --emit-llvm > output/s2.ll
 	build/s3c trith/s2/s2c.trh --emit-llvm > output/s3.ll
 	cmp output/s2.ll output/s3.ll
-	cmp build/s2c build/s3c
-	@echo "fixpoint: s3 emits exactly what s2 emits, and is the same executable"
+	build/s3c trith/s2/s2c.trh -o build/s4c
+	cmp build/s3c build/s4c
+	@echo "fixpoint: s3 emits exactly what s2 emits, and s3 compiled by itself is the same executable"
 	TRITHC=$(TRITHC) S2C=build/s3c trith/s2/test.sh
 
 s2-fuzz: s2

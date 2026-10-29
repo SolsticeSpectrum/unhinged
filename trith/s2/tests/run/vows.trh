@@ -1,0 +1,9 @@
+⍝ countdown: n − 1 each time, round while n − 1 > 0
+⸫ ᚠ ⟨ ℤ ⊸ ℤ ⟩ ⦃ ⦃ ≶ ○ ⍿⁰ ⊟ △ ⦄ ⥀ ⦃ ⦄ ⍤⥀ ⦄
+⍝ count up to a literal bound, measured by the distance left
+⸫ ᚢ ⟨ ℤ ⊸ ℤ ⟩ ⦃ ⦃ ≶ ⍿¹ △○△ ⊞ △ ⦄ ⥀ ⦃ ⊟ ⧗⁰ △○△ ⧖ ⦄ ⍤⥀ ⦄
+⍝ recursion guarded by the face ⊕ of n ≶ 0
+⸫ ᚣ ⟨ ℤ ⊸ ℤ ⟩ ⦃ ⦃ ⦄ ⦃ ᚣ ⊟ △ ⦄ ⦃ ⦄ ⋔ ≶ ○ ⍿⁰ ⦃ ⦄ ⍤ᚣ ⦄
+⍝ the bound carried on the stack: n i, measured by n − i
+⸫ ᚤ ⟨ ℤ ⊸ ℤ ⟩ ⦃ ⌁ ⦃ ≶ ⍿¹ ⍿¹ ⊞ △ ⦄ ⥀ ⦃ ⊟ ⦄ ⍤⥀ ○ ⦄
+⦃ △○△ ᚠ ⎙ ○ ᚢ ⎙ △○△ ᚣ ⎙ △○△ ᚤ ⎙ ⦄ ⟨ ⊸ ⟩ ᛟ ⸫

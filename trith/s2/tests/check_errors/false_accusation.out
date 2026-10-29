@@ -1,0 +1,8 @@
+fn ᚠ ⟨ℤ ⊸ ℤ⟩  start [ℤ]
+  △  ⊢ [ℤ ℤ]
+  ⊞  ⊢ [ℤ]
+fn ᛟ ⟨ ⊸ ⟩  start []
+  △  ⊢ [ℤ]
+  ᚠ  ⊢ [ℤ]
+  ⌁  ⊢ []
+trith/s2/tests/check_errors/false_accusation.trh:1:1: error: false accusation: ᚠ is ⸸, but its signature declares ⸸ⁱ (A.4.1)

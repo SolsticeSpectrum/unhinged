@@ -282,6 +282,16 @@ Curses are **not** part of a function's shape for call by shape (§9.1) or for s
 
 **Precedent.** Koka's row-polymorphic effect types and handlers. Bob Nystrom's "What Color is Your Function?". Rust `unsafe` blocks. Haskell's `IO` and Java's checked exceptions (from memory).
 
+**As built (milestone A2).**
+
+- Inference is a fixpoint over the call graph. A function's set is its own curses, plus each callee's set less what the exorcisms around that call lift; ᶠ comes from the signature alone (an output `◌`). A past-tense call (`ᚠ̈`) runs at compile time, so it is no call of the function's.
+- What acquires a curse: `⎙` and `⎙̵` are ⁱ, and so are `⋔⇋` (a failed exit assertion stops the program) and `⊙⁻`/`⊙⁺`. A ⥀ that may leave with ⊖ in a function that cannot fail stops the program, so it is ⁱ too, unless the vow prover shows the ⥀ never leaves with ⊖. String and array literals and `⍆` are ᵃ. An FFI binding is ⁱ, ᵘ when declared `⎔⸸ᵘ`, and ᵃ when it returns a string or an array. `⌁` on a particle calls its antiparticle, so it takes on that function's curses.
+- ᵈ comes from a ⥀ without a vow, from a function that calls itself without a vow, and from any function in a cycle of calls with others, whatever it vows (the prover only follows a function calling itself).
+- A declared set must equal the inferred one: **unspoken curse** or **false accusation** otherwise. `--confess` makes every function declare one (**unconfessed**). An exorcism names the curses it lifts; a bare `⛨ ⦃ ⦄` is an error (a bare ⛨ prefixes a rite, A.6), and so is `⛨ᶠ` or `⛨ᵈ`.
+- `--curses` prints every function's set, its blessing and its count of hopeful vows. `--confessions` prints every exorcism, `file:line:col ⛨ˣ`, once even when its block is checked more than once.
+- The emitter emits an exorcism's block in place. **An exorcism is also a promise about attributes**: an exorcised function can be blessed (A.5.2), and then LLVM may move, merge or delete its calls. `⛨ⁱ ⦃ ⎙ ⦄` in a pure function can therefore print fewer times than it is called, or not at all, in a release build. Use it only for effects that must not show.
+- Tests: `trith/s2/tests/check/curses`, `check/confessions` and `check_errors/{unspoken,false_accusation,unconfessed,exorcise_restless}`.
+
 ---
 
 ## A.5 Blessings (purity and totality)
@@ -328,6 +338,18 @@ With these attributes LLVM can hoist, deduplicate, speculate and delete calls to
 - Exorcised functions count as blessed, so an exorcism is also a promise that the function is safe to give these attributes. The documentation for `⛨` has to say this plainly.
 
 **Precedent.** Agda's and Idris's totality and termination checkers. LLVM function attributes (`memory`, `willreturn`, `nounwind`). GCC `__attribute__((pure))` and `__attribute__((const))` (from memory). C++ `constexpr`, and D's `pure` (from memory).
+
+**As built (milestone A2).**
+
+- Placement: `⍤⥀` must come directly before its ⥀, and `⍤ᚠ` must be the first op of ᚠ's body and name ᚠ (an instance of a generic function counts as its function). The measure sees copies of classical values and shadows of the rest, and must leave exactly `[ℤ]`.
+- The prover runs the loop's body (or the function's body) over symbols: one for each ℤ the loop carries (or each ℤ input). A value is affine in the symbols, the sign trit of one (from `≶`), or unknown. It follows literals, moments, `⍿`, `⊞ ⊟ ⊝`, `⊠` by a constant, `≶`, exorcisms and `⋔`. At a `⋔` on a known or linear trit the run splits, and each face carries what it implies: g = 0, g ≥ 1 or g ≤ −1. Anything else leaves as many unknowns as the checker counted. A quotation (`⊨`, `⍎`) stops the prover, and so do more than 64 paths.
+- A path round the loop that can continue (its trit can be ⊕, which for a linear g adds the fact g ≥ 1) must leave the measure **at least 0 and at least 1 lower**. For a function, so must every call of itself, measured on the call's inputs. A fact f ≥ 0 proves a ≥ 0 when a − λ·f is a constant ≥ 0 for some whole λ ≥ 1. A call of the function inside something the prover does not follow leaves the vow hopeful.
+- **Perjury** needs certainty: the measure rises or stays the same by a constant, on a path whose facts can hold together, that went through nothing the prover does not follow (no unknown branch, call or unfollowed op). Anything less is hopeful, never perjury.
+- Hopeful vows are allowed (A.9). They lift ᵈ for curses. With `--debug` each one traps (`llvm.trap`) unless its measure is at least 0 and below the last one: at the head of every iteration (the first is compared with the largest ℤ), and on every call of the function, against the measure on entry. A release build erases every vow.
+- Attributes: release builds only. A blessed function (no ⁱ, ᵘ or ᵈ) with no hopeful vows is `nounwind willreturn mustprogress`. A doubly blessed one also gets `memory(none)` when it takes only values, `memory(argmem: read)` with ⟗ shadows, and `memory(argmem: readwrite)` with ⟖ shadows. It gets no `memory` attribute when it takes an owned array or string, which it frees. FFI bindings and generated inverses get none.
+- s1 knows none of this, so `make s2-test` drops these attributes from s2's IR before comparing. The fixpoint is now that s3 (s2 compiled by s2) rebuilds itself byte for byte, since s2's own blessed functions get attributes from s2 and not from s1.
+- Benchmark gate (§17): every program is still within 1.5× of C. s2 gives attributes to 3 of 5 functions in life, 2 of 4 in nbody and 8 of 14 in sha256, none in collatz or fib. The run-to-run noise on the test machine (about ±15%) was larger than any difference between s1's and s2's executables, so there is **no measurable speedup** yet.
+- Tests: `trith/s2/tests/check_errors/{fallen,vow_misplaced,vow_not_first,vow_measure,perjury_loop,perjury_recursion}`, `emit/blessed` and `run/{vows,vow_trap,vow_hopeful,exorcism}`.
 
 ---
 
@@ -383,7 +405,7 @@ s1 is frozen as the bootstrap for `s2c.trh`. **Every feature in this addendum is
 | # | Milestone | Gate |
 |---|---|---|
 | A1 | Planes: fold, headers, plane errors, `--fold`/`--unfold` | golden tests; folding a one-plane file is the identity on every existing test. **Done.** |
-| A2 | Curses, vows, blessings, attributes, `--confess`/`--confessions` | benchmark gate (§17) with no regression; report any speedup from attributes; memcheck and fuzz clean |
+| A2 | Curses, vows, blessings, attributes, `--confess`/`--confessions` | benchmark gate (§17) with no regression; report any speedup from attributes; memcheck and fuzz clean. **Done**; no measurable speedup (A.5, As built). |
 | A3 | Evaluator containers and dreams (`⟪⟫`, `☾`, `--dream`, fuel, `--dream-trace`) | golden tests for nightmare, limbo, fever dream and stratification |
 | A4 | Retire `trx.py` (A.3.6) | dream output token-identical to trx.py; s2 sources are `.trh`; fixpoint holds; compile time at most 2× |
 | A5 | Tesseract: vertices, `⟰⟱`, `⟲`, summons | summon benchmark: a dispatch loop within 1.5× of a C function-pointer table |
@@ -398,7 +420,7 @@ s1 is frozen as the bootstrap for `s2c.trh`. **Every feature in this addendum is
 - Should curses be part of call-by-shape keys when they are *declared*? This draft says no.
 - Should a summon's shape be inferred from the stack instead of written after `⍥`?
 - Should file dreams be allowed per plane, or only per folded module (as this draft says)?
-- Should hopeful vows be allowed at all, or should an unproven vow be an error?
+- ~~Should hopeful vows be allowed at all, or should an unproven vow be an error?~~ Allowed; they trap under `--debug` (A.5, As built).
 - Should exorcism also be allowed to lift ᵈ? This draft says no: only a vow lifts ᵈ.
 
 ---

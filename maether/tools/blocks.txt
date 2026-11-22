@@ -64,3 +64,6 @@ locked_light_hellfire_stone cube stone 0.5 unbreakable light=11
 trapped_light_hellfire_stone cube stone 0.5 light=11
 boss_doorway_light_hellfire_stone cube stone 0.5 unbreakable light=11
 treasure_doorway_light_hellfire_stone cube stone 0.5 unbreakable light=11
+altar machine stone 2.5
+freezer machine stone 2.5
+incubator machine stone 2.5

@@ -14,6 +14,7 @@ public class MAether implements ModInitializer {
 	public void onInitialize() {
 		AetherBlocks.init();
 		if (net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment()) DevCommands.register();
+		com.kestrel.maether.machine.Machines.init();
 		com.kestrel.maether.family.FamilyBlocks.init();
 		com.kestrel.maether.family.PlantBlocks.init();
 		com.kestrel.maether.item.AetherItems.init();

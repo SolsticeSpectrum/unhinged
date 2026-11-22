@@ -289,3 +289,21 @@ for line in open(root / "tools/blocks.txt"):
     elif name == "gravitite_ore": w(f"loot_table/blocks/{name}.json", self_drop(name))  # needs zanite-tier tool; still drops itself
     else: w(f"loot_table/blocks/{name}.json", self_drop(name))
 print("ok")
+
+
+# ---- machine recipes (altar / freezer / incubator) converted to one JSON resource read at runtime
+import glob
+rd = up / "recipe"
+def ing(i): return ("item:" + i["item"]) if "item" in i else ("tag:" + i["tag"])
+M = {"altar": {"recipes": [], "repair": [], "fuel": {}}, "freezer": {"recipes": [], "fuel": {}}, "incubator": {"recipes": [], "fuel": {}}}
+for f in sorted(glob.glob(str(rd / "*.json"))):
+    r = json.load(open(f)); t = r.get("type")
+    if t == "aether:enchanting": M["altar"]["recipes"].append({"in": ing(r["ingredient"]), "out": r["result"]["id"], "n": r["result"].get("count", 1), "time": r.get("cookingtime", 500)})
+    elif t == "aether:repairing": M["altar"]["repair"].append({"in": ing(r["ingredient"]), "time": r.get("repairTime", 600)})
+    elif t == "aether:freezing": M["freezer"]["recipes"].append({"in": ing(r["ingredient"]), "out": r["result"]["id"], "n": r["result"].get("count", 1), "time": r.get("cookingtime", 500)})
+    elif t == "aether:incubation": M["incubator"]["recipes"].append({"in": ing(r["ingredient"]), "entity": r["entity"], "time": r.get("incubationtime", 1000)})
+for m in M:
+    fp = up / f"data_maps/item/{m}_fuel.json"
+    if fp.exists(): M[m]["fuel"] = {k: v["burn_time"] for k, v in json.load(open(fp))["values"].items()}
+mp = root / "src/main/resources/maether/machines.json"; mp.parent.mkdir(parents=True, exist_ok=True); mp.write_text(json.dumps(M, indent=1))
+print("machines", {k: len(v["recipes"]) for k, v in M.items()})

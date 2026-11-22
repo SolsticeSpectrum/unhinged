@@ -76,6 +76,7 @@ public final class AetherBlocks {
 		Block b = switch (kind) {
 			case "cube" -> new AetherBlock.Cube(props, flags.contains("trans") ? BlockModelType.LEAVES : BlockModelType.FULL_BLOCK, BlockModels.first(name));
 			case "leaves" -> new AetherBlock.Cube(props, BlockModelType.LEAVES, BlockModels.first(name));
+			case "machine" -> new com.kestrel.maether.machine.Machines.Block(props, com.kestrel.maether.machine.Machines.Kind.valueOf(name.toUpperCase()), BlockModels.first(name));
 			case "axis" -> new AetherBlock.Axis(props, name);
 			case "facing" -> new AetherBlock.Facing(props, name);
 			case "cloud" -> new AetherBlock.Cloud(props, BlockModels.first(name), Double.parseDouble(flag(flags, "bounce", "0")));

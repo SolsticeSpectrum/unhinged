@@ -1,0 +1,546 @@
+{
+ "altar": {
+  "recipes": [
+   {
+    "in": "tag:aether:accepted_music_discs",
+    "out": "aether:music_disc_aether_tune",
+    "n": 1,
+    "time": 500
+   },
+   {
+    "in": "item:minecraft:music_disc_strad",
+    "out": "aether:music_disc_chinchilla",
+    "n": 1,
+    "time": 500
+   },
+   {
+    "in": "item:aether:blue_berry",
+    "out": "aether:enchanted_berry",
+    "n": 1,
+    "time": 250
+   },
+   {
+    "in": "item:aether:golden_dart",
+    "out": "aether:enchanted_dart",
+    "n": 1,
+    "time": 50
+   },
+   {
+    "in": "item:aether:golden_dart_shooter",
+    "out": "aether:enchanted_dart_shooter",
+    "n": 1,
+    "time": 750
+   },
+   {
+    "in": "item:aether:gravitite_ore",
+    "out": "aether:enchanted_gravitite",
+    "n": 1,
+    "time": 750
+   },
+   {
+    "in": "item:aether:cold_aercloud",
+    "out": "aether:golden_aercloud",
+    "n": 1,
+    "time": 1000
+   },
+   {
+    "in": "item:aether:holystone",
+    "out": "aether:healing_stone",
+    "n": 1,
+    "time": 500
+   },
+   {
+    "in": "item:aether:quicksoil",
+    "out": "aether:quicksoil_glass",
+    "n": 1,
+    "time": 250
+   },
+   {
+    "in": "item:aether:skyroot_poison_bucket",
+    "out": "aether:skyroot_remedy_bucket",
+    "n": 1,
+    "time": 500
+   }
+  ],
+  "repair": [
+   {
+    "in": "item:minecraft:bow",
+    "time": 600
+   },
+   {
+    "in": "item:minecraft:chainmail_boots",
+    "time": 700
+   },
+   {
+    "in": "item:minecraft:chainmail_chestplate",
+    "time": 700
+   },
+   {
+    "in": "item:aether:chainmail_gloves",
+    "time": 700
+   },
+   {
+    "in": "item:minecraft:chainmail_helmet",
+    "time": 700
+   },
+   {
+    "in": "item:minecraft:chainmail_leggings",
+    "time": 700
+   },
+   {
+    "in": "item:minecraft:crossbow",
+    "time": 600
+   },
+   {
+    "in": "item:minecraft:diamond_axe",
+    "time": 1500
+   },
+   {
+    "in": "item:minecraft:diamond_boots",
+    "time": 1500
+   },
+   {
+    "in": "item:minecraft:diamond_chestplate",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:diamond_gloves",
+    "time": 1500
+   },
+   {
+    "in": "item:minecraft:diamond_helmet",
+    "time": 1500
+   },
+   {
+    "in": "item:minecraft:diamond_hoe",
+    "time": 1500
+   },
+   {
+    "in": "item:minecraft:diamond_leggings",
+    "time": 1500
+   },
+   {
+    "in": "item:minecraft:diamond_pickaxe",
+    "time": 1500
+   },
+   {
+    "in": "item:minecraft:diamond_shovel",
+    "time": 1500
+   },
+   {
+    "in": "item:minecraft:diamond_sword",
+    "time": 1500
+   },
+   {
+    "in": "item:minecraft:fishing_rod",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:flint_and_steel",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:golden_axe",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:golden_boots",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:golden_chestplate",
+    "time": 300
+   },
+   {
+    "in": "item:aether:golden_gloves",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:golden_helmet",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:golden_hoe",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:golden_leggings",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:golden_pickaxe",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:golden_shovel",
+    "time": 300
+   },
+   {
+    "in": "item:minecraft:golden_sword",
+    "time": 300
+   },
+   {
+    "in": "item:aether:gravitite_axe",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:gravitite_boots",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:gravitite_chestplate",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:gravitite_gloves",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:gravitite_helmet",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:gravitite_hoe",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:gravitite_leggings",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:gravitite_pickaxe",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:gravitite_shovel",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:gravitite_sword",
+    "time": 1500
+   },
+   {
+    "in": "item:aether:holystone_axe",
+    "time": 500
+   },
+   {
+    "in": "item:aether:holystone_hoe",
+    "time": 500
+   },
+   {
+    "in": "item:aether:holystone_pickaxe",
+    "time": 500
+   },
+   {
+    "in": "item:aether:holystone_shovel",
+    "time": 500
+   },
+   {
+    "in": "item:aether:holystone_sword",
+    "time": 500
+   },
+   {
+    "in": "item:minecraft:iron_axe",
+    "time": 750
+   },
+   {
+    "in": "item:minecraft:iron_boots",
+    "time": 750
+   },
+   {
+    "in": "item:minecraft:iron_chestplate",
+    "time": 750
+   },
+   {
+    "in": "item:aether:iron_gloves",
+    "time": 750
+   },
+   {
+    "in": "item:minecraft:iron_helmet",
+    "time": 750
+   },
+   {
+    "in": "item:minecraft:iron_hoe",
+    "time": 750
+   },
+   {
+    "in": "item:minecraft:iron_leggings",
+    "time": 750
+   },
+   {
+    "in": "item:minecraft:iron_pickaxe",
+    "time": 750
+   },
+   {
+    "in": "item:minecraft:iron_shovel",
+    "time": 750
+   },
+   {
+    "in": "item:minecraft:iron_sword",
+    "time": 750
+   },
+   {
+    "in": "item:minecraft:leather_boots",
+    "time": 250
+   },
+   {
+    "in": "item:minecraft:leather_chestplate",
+    "time": 250
+   },
+   {
+    "in": "item:aether:leather_gloves",
+    "time": 250
+   },
+   {
+    "in": "item:minecraft:leather_helmet",
+    "time": 250
+   },
+   {
+    "in": "item:minecraft:leather_leggings",
+    "time": 250
+   },
+   {
+    "in": "item:minecraft:netherite_axe",
+    "time": 2000
+   },
+   {
+    "in": "item:minecraft:netherite_boots",
+    "time": 2000
+   },
+   {
+    "in": "item:minecraft:netherite_chestplate",
+    "time": 2000
+   },
+   {
+    "in": "item:aether:netherite_gloves",
+    "time": 2000
+   },
+   {
+    "in": "item:minecraft:netherite_helmet",
+    "time": 2000
+   },
+   {
+    "in": "item:minecraft:netherite_hoe",
+    "time": 2000
+   },
+   {
+    "in": "item:minecraft:netherite_leggings",
+    "time": 2000
+   },
+   {
+    "in": "item:minecraft:netherite_pickaxe",
+    "time": 2000
+   },
+   {
+    "in": "item:minecraft:netherite_shovel",
+    "time": 2000
+   },
+   {
+    "in": "item:minecraft:netherite_sword",
+    "time": 2000
+   },
+   {
+    "in": "item:minecraft:shield",
+    "time": 600
+   },
+   {
+    "in": "item:aether:skyroot_axe",
+    "time": 250
+   },
+   {
+    "in": "item:aether:skyroot_hoe",
+    "time": 250
+   },
+   {
+    "in": "item:aether:skyroot_pickaxe",
+    "time": 250
+   },
+   {
+    "in": "item:aether:skyroot_shovel",
+    "time": 250
+   },
+   {
+    "in": "item:aether:skyroot_sword",
+    "time": 250
+   },
+   {
+    "in": "item:minecraft:stone_axe",
+    "time": 500
+   },
+   {
+    "in": "item:minecraft:stone_hoe",
+    "time": 500
+   },
+   {
+    "in": "item:minecraft:stone_pickaxe",
+    "time": 500
+   },
+   {
+    "in": "item:minecraft:stone_shovel",
+    "time": 500
+   },
+   {
+    "in": "item:minecraft:stone_sword",
+    "time": 500
+   },
+   {
+    "in": "item:minecraft:wooden_axe",
+    "time": 250
+   },
+   {
+    "in": "item:minecraft:wooden_hoe",
+    "time": 250
+   },
+   {
+    "in": "item:minecraft:wooden_pickaxe",
+    "time": 250
+   },
+   {
+    "in": "item:minecraft:wooden_shovel",
+    "time": 250
+   },
+   {
+    "in": "item:minecraft:wooden_sword",
+    "time": 250
+   },
+   {
+    "in": "item:aether:zanite_axe",
+    "time": 750
+   },
+   {
+    "in": "item:aether:zanite_boots",
+    "time": 750
+   },
+   {
+    "in": "item:aether:zanite_chestplate",
+    "time": 750
+   },
+   {
+    "in": "item:aether:zanite_gloves",
+    "time": 750
+   },
+   {
+    "in": "item:aether:zanite_helmet",
+    "time": 750
+   },
+   {
+    "in": "item:aether:zanite_hoe",
+    "time": 750
+   },
+   {
+    "in": "item:aether:zanite_leggings",
+    "time": 750
+   },
+   {
+    "in": "item:aether:zanite_pendant",
+    "time": 500
+   },
+   {
+    "in": "item:aether:zanite_pickaxe",
+    "time": 750
+   },
+   {
+    "in": "item:aether:zanite_ring",
+    "time": 500
+   },
+   {
+    "in": "item:aether:zanite_shovel",
+    "time": 750
+   },
+   {
+    "in": "item:aether:zanite_sword",
+    "time": 750
+   }
+  ],
+  "fuel": {
+   "aether:ambrosium_block": 2500,
+   "aether:ambrosium_shard": 250
+  }
+ },
+ "freezer": {
+  "recipes": [
+   {
+    "in": "item:aether:cold_aercloud",
+    "out": "aether:blue_aercloud",
+    "n": 1,
+    "time": 400
+   },
+   {
+    "in": "item:minecraft:packed_ice",
+    "out": "minecraft:blue_ice",
+    "n": 1,
+    "time": 500
+   },
+   {
+    "in": "item:aether:skyroot_leaves",
+    "out": "aether:crystal_leaves",
+    "n": 1,
+    "time": 500
+   },
+   {
+    "in": "item:aether:music_disc_chinchilla",
+    "out": "aether:music_disc_high",
+    "n": 1,
+    "time": 500
+   },
+   {
+    "in": "tag:c:buckets/water",
+    "out": "minecraft:ice",
+    "n": 1,
+    "time": 200
+   },
+   {
+    "in": "tag:aether:freezable_pendants",
+    "out": "aether:ice_pendant",
+    "n": 1,
+    "time": 800
+   },
+   {
+    "in": "tag:aether:freezable_rings",
+    "out": "aether:ice_ring",
+    "n": 1,
+    "time": 800
+   },
+   {
+    "in": "tag:c:buckets/lava",
+    "out": "minecraft:obsidian",
+    "n": 1,
+    "time": 200
+   },
+   {
+    "in": "item:minecraft:ice",
+    "out": "minecraft:packed_ice",
+    "n": 1,
+    "time": 300
+   }
+  ],
+  "fuel": {
+   "aether:icestone": 400,
+   "aether:icestone_slab": 200,
+   "aether:icestone_stairs": 400,
+   "aether:icestone_wall": 400
+  }
+ },
+ "incubator": {
+  "recipes": [
+   {
+    "in": "item:aether:black_moa_egg",
+    "entity": "aether:moa",
+    "time": 1000
+   },
+   {
+    "in": "item:aether:blue_moa_egg",
+    "entity": "aether:moa",
+    "time": 1000
+   },
+   {
+    "in": "item:aether:white_moa_egg",
+    "entity": "aether:moa",
+    "time": 1000
+   }
+  ],
+  "fuel": {
+   "aether:ambrosium_torch": 500
+  }
+ }
+}

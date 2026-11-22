@@ -34,6 +34,8 @@ public final class AetherEntities {
 		FLYING_COW = reg("flying_cow", FlyingCow::new, MobCategory.CREATURE, 0.9F, 1.4F);
 		AERBUNNY = reg("aerbunny", Aerbunny::new, MobCategory.CREATURE, 0.4F, 0.5F);
 		BLUE_SWET = reg("blue_swet", BlueSwet::new, MobCategory.MONSTER, 0.52F, 0.52F);
+		// mark as server-side only, otherwise Fabric registry sync kicks vanilla clients
+		eu.pb4.polymer.core.api.entity.PolymerEntityUtils.registerType(PHYG, FLYING_COW, AERBUNNY, BLUE_SWET);
 		FabricDefaultAttributeRegistry.register(PHYG, Pig.createAttributes());
 		FabricDefaultAttributeRegistry.register(FLYING_COW, Cow.createAttributes());
 		FabricDefaultAttributeRegistry.register(AERBUNNY, Rabbit.createAttributes());

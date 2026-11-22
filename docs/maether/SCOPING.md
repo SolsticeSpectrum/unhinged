@@ -40,6 +40,8 @@ A = Polymer as-is · B = needs Polymer patch · C = creative workaround · D = c
 3. Terrain density needed calibration (`AETHER_NOISE_BIAS=0.15`): converted noise gave ~1.7% solid, now ≈12%.
 4. Registries moved: `EntityType.PIG`→`EntityTypes.PIG`, `Slime`→`monster.cubemob`, `SpawnPlacements.register` is private (access widener).
 
+5. **Polymer block-state budgets (from Polymer docs `polymer-blocks/basics.md`; verify against 0.18.7):** FULL_BLOCK ≈1149, leaf-type ≈52, top/bottom slab 5 each, plants 7, trapdoors 20/orientation. Current use is tiny (≈31 full-block states, 3 leaf states) but Aether has ~15 slab/stair/wall families → **slabs/stairs/walls/doors can't all use pooled states**; use the `factorytools` `BlockStateModelManager` / display-element approach that `mPolymerPatchBundle` uses for these.
+
 ## 4. Approach for (C) items
 - Sky/clouds → dimension_type attributes. Portal → subclass of `NetherPortalBlock`, shown as nether portal. Mobs → vanilla-subclass + `PolymerEntity` (v1: vanilla model). Accessories/GUIs → later behind an interface.
 

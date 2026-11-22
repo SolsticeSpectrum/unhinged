@@ -34,6 +34,9 @@ Bosses, dungeons, armor, accessories, GUIs, Moa/Sheepuff/Aerwhale/Zephyr/Cockatr
 7. Did **not** push Aether assets to the public `unhinged` repo (permission is for Kestrel only); `tools/import_aether_assets.py` re-imports them from the upstream checkout.
 8. Dev-only `/maether` commands (only in dev env).
 
+## From Polymer docs (you sent the link)
+Polymer has per-type block-state limits (slabs only 5, leaves ~52, full blocks ~1149). Fine for now; the cut block families will need the factorytools/display approach from `mPolymerPatchBundle`. Polymer has no vanilla-client test harness I could find (only an in-repo test mod).
+
 ## Open questions
 - Written permission from Aether devs? Who holds it?
 - Create `mAether` yourself or let me? Keep pack required?

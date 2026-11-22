@@ -2,7 +2,7 @@
 
 ## TL;DR
 **No code was written.** Two hard limits hit; stopped per your rules.
-1. **Asset license:** Aether code = LGPL-3.0 (forkable), but **all art/sounds/lang = All Rights Reserved.** Our auto-hosted pack would redistribute them. Not allowed without the Aether Team's permission.
+1. ~~Asset license~~ **RESOLVED (per owner, 2026-11-22):** devs allow assets if non-monetized. Constraints: never sell access to Aether; no Aether-specific cosmetics. Get it in writing. Original note:  Aether code = LGPL-3.0 (forkable), but **all art/sounds/lang = All Rights Reserved.** Our auto-hosted pack would redistribute them. Not allowed without the Aether Team's permission.
 2. **Environment:** I can't build or boot anything here (see Blockers). `Codename-Kestrel/mAether` also doesn't exist, so no repo/PR.
 
 Phase 1 is done: `docs/maether/SCOPING.md` (desk research).

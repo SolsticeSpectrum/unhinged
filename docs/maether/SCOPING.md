@@ -24,6 +24,14 @@ Contributions to assets under `src/main/resources` are also All Rights Reserved 
 - Shipping the **textures, models, sounds, lang, shaders** (36 MB, ~579 PNGs, 73 sounds) in our auto-hosted resource pack. Hosting the pack to players is distribution.
 - Using the Aether branding.
 
+**Permission update (reported by project owner, 2026-11-22):** the Aether devs agreed the assets may be used as long as they are **not monetized**.
+Binding conditions for Kestrel (must be honored in all future work):
+- Never sell access to the Aether dimension/content (no rank, key, crate or paywall gating it).
+- No monetized cosmetics that are Aether-specific (no Aether-themed or Aether-asset-based cosmetics).
+- Non-Aether monetization elsewhere is fine; keep Aether content fully free.
+- Action: get the permission in writing (Discord/email screenshot) and store it in `docs/PERMISSION.md` in mAether. Until then it is an unverified verbal grant.
+- Still no use of Aether branding (logo/team name) per their README.
+
 **Choice:** fork the official repo for code (cheapest, only complete implementation).
 The asset question must be resolved before any Aether-derived art enters the pack (options in PORT_REPORT.md).
 

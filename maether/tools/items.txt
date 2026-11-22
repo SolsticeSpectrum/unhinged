@@ -64,6 +64,7 @@ leather_gloves
 life_shard
 lightning_knife
 lightning_sword
+mimic_spawn_egg
 moa_spawn_egg
 nature_staff
 neptune_boots
@@ -97,6 +98,8 @@ skyroot_pickaxe
 skyroot_shovel
 skyroot_stick
 skyroot_sword
+slider_spawn_egg
+sun_spirit_spawn_egg
 swet_ball
 swet_cape
 valkyrie_axe
@@ -109,7 +112,9 @@ valkyrie_hoe
 valkyrie_lance
 valkyrie_leggings
 valkyrie_pickaxe
+valkyrie_queen_spawn_egg
 valkyrie_shovel
+valkyrie_spawn_egg
 vampire_blade
 victory_medal
 whirlwind_spawn_egg

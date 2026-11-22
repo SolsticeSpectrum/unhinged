@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:entity",
+  "random_sequence": "aether:entities/valkyrie",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether:golden_amber",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

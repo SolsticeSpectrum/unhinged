@@ -256,6 +256,11 @@ drop("aerbunny", "minecraft:rabbit_hide", 0, 1); drop("blue_swet", "aether:swet_
 drop("sheepuff", "minecraft:white_wool", 1, 2); drop("moa", "minecraft:feather", 0, 2); drop("golden_swet", "aether:golden_amber", 0, 2)
 drop("aechor_plant", "aether:aechor_petal", 1, 2); drop("cockatrice", "minecraft:feather", 0, 2); drop("fire_minion", "minecraft:blaze_powder", 0, 1)
 drop("zephyr", "minecraft:snowball", 1, 4); drop("sentry", "aether:carved_stone", 0, 1)
+def drops(entity, items):
+    w(f"loot_table/entities/{entity}.json", {"type": "minecraft:entity", "random_sequence": f"aether:entities/{entity}",
+        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": it, "modifier": [{"type": "minecraft:set_count", "count": n}]}]} for it, n in items]})
+drops("slider", [("aether:bronze_dungeon_key", 1), ("aether:victory_medal", 1)]); drops("valkyrie_queen", [("aether:silver_dungeon_key", 1), ("aether:victory_medal", 2)])
+drops("sun_spirit", [("aether:gold_dungeon_key", 1), ("aether:victory_medal", 3)]); drops("valkyrie", [("aether:golden_amber", 1)]); drops("mimic", [("aether:ambrosium_shard", 2)])
 
 # --- loot tables (26.3 schema), driven by tools/blocks.txt
 def self_drop(name):

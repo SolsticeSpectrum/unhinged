@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "aether:zanite_block"
+  ],
+  "result": {
+    "id": "aether:zanite_gemstone",
+    "count": 9
+  }
+}

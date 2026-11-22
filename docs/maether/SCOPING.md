@@ -1,87 +1,53 @@
 # mAether — Phase 1 scoping (Polymer port of The Aether)
 
-Status: **desk research only.** Nothing here was compiled or booted (see PORT_REPORT.md → Blockers).
-Classification is from reading the source layout of `The-Aether-Team/The-Aether` (branch 1.21.1-develop, v1.5.10), not from running it.
+Status: written first from desk research, then **updated with what the implementation proved** (marked ✔ verified / ✘ not verified).
+Target: Minecraft **26.3**, Fabric loader 0.19.5, Polymer 0.18.7+26.3, Java 25 (same as `kestrel-pack-upload`).
 
-## 1. Source candidates and licenses
-
-| Candidate | Loader / MC | Code license | Asset license | Verdict |
+## 1. Source and license
+| Candidate | Loader / MC | Code | Assets | Verdict |
 |---|---|---|---|---|
-| The-Aether-Team/The-Aether (official) | NeoForge 1.21.1 | **LGPL-3.0** | **All Rights Reserved** (`LICENSE-ASSETS.txt`) | Only real source. Code forkable; assets NOT usable without permission |
-| The-Aether-Team/The-Aether-II | NeoForge | not checked | not checked | Out of scope (different mod) |
-| Existing Fabric ports | — | — | — | **Not surveyed**: my web search was interrupted and not rerun. Open question. |
+| The-Aether-Team/The-Aether (official) | NeoForge 1.21.1, v1.5.10 | LGPL-3.0 | All Rights Reserved | **Chosen** (only complete implementation) |
+| Fabric ports of the Aether | — | — | — | **Not surveyed** (web search was interrupted). Open question |
 
-Facts from the repo: `docs/README.md` says "All assets of The Aether are unlicensed and all rights are reserved",
-code for MC 1.7+ is LGPL-3.0, and anyone wanting to use "unlicensed material" should contact the team (Oz, Aether Discord).
-Fan works/addons/parodies are welcomed, but branding (logo, team name) must not be used.
-Contributions to assets under `src/main/resources` are also All Rights Reserved (`docs/AGREEMENT.md`).
+- Code: LGPL-3.0 allows fork/port/run. We keep LICENSE, add NOTICE with our changes.
+- Assets: All Rights Reserved. **Permission from the Aether devs (relayed by the project owner, verbal): allowed if never monetized.** Binding rules: never sell access to the Aether; no Aether-specific monetized cosmetics; no Aether branding. See `docs/PERMISSION.md`; **get it in writing**.
+- Cost of NeoForge → Fabric: not a port, a rewrite. Upstream is ~800 Java files on NeoForge APIs (+Accessories dep). We rewrote only the server-side core against Fabric+Polymer and **converted data** instead of copying it (see §3).
 
-**What the license allows**
-- Fork, modify, port and run the **code** (LGPL-3.0): keep LICENSE, keep copyright notices, mark changes (NOTICE), publish the modified source if we distribute it.
-- Running it privately on our server is fine for code.
+## 2. Inventory and classification
+A = Polymer as-is · B = needs Polymer patch · C = creative workaround · D = cut from v1
 
-**What it does not allow (as written)**
-- Shipping the **textures, models, sounds, lang, shaders** (36 MB, ~579 PNGs, 73 sounds) in our auto-hosted resource pack. Hosting the pack to players is distribution.
-- Using the Aether branding.
-
-**Permission update (reported by project owner, 2026-11-22):** the Aether devs agreed the assets may be used as long as they are **not monetized**.
-Binding conditions for Kestrel (must be honored in all future work):
-- Never sell access to the Aether dimension/content (no rank, key, crate or paywall gating it).
-- No monetized cosmetics that are Aether-specific (no Aether-themed or Aether-asset-based cosmetics).
-- Non-Aether monetization elsewhere is fine; keep Aether content fully free.
-- Action: get the permission in writing (Discord/email screenshot) and store it in `docs/PERMISSION.md` in mAether. Until then it is an unverified verbal grant.
-- Still no use of Aether branding (logo/team name) per their README.
-
-**Choice:** fork the official repo for code (cheapest, only complete implementation).
-The asset question must be resolved before any Aether-derived art enters the pack (options in PORT_REPORT.md).
-
-## 2. Cost: NeoForge → Fabric + Polymer
-Official mod is ~800 Java files. Roughly: block 76, item 106, entity 71, world 70, inventory 13, **client 168 (dropped server-side)**.
-It depends on NeoForge APIs (registries, capabilities/attachments, events, data maps, config) and the **Accessories** mod (Wisp Forest, LGPL; has Fabric build).
-No Fabric version of Aether is known to me. Estimate for a server-side Fabric/Polymer rewrite of the core (not a mechanical port): **~3–5 weeks one dev** for playable core; **+3–4 weeks** for bosses/dungeons/GUIs.
-Also a ~1.21.1 → 26.3 gap (mappings, registry/codec/component changes) on top of the loader change.
-
-## 3. Inventory and classification
-A = works via Polymer as-is · B = needs Polymer patch · C = creative workaround · D = cut from v1
-
-| Area | Item | Class | Approach |
+| Area | Item | Class | Status |
 |---|---|---|---|
-| Dimension | Aether dimension, sky-island worldgen, 4 structures | A | Datapack/worldgen is server-side. Custom dimension *type* on a vanilla client is fine. Need biome/feature JSON (not in repo as static data → generated by datagen; must run datagen or rewrite) |
-| Dimension | No-sky / cloud-layer rendering, custom sky colour, cloud height | C | Vanilla dimension_type `effects` (use `the_end`/overworld effects); fake cloud layer with block-display/particle clouds or cloud blocks. Custom shader sky: **D** |
-| Dimension | Void-fall → return to overworld, no-fall-damage mechanics | A | Server tick logic |
-| Portal | Glowstone frame + water bucket portal, glowing blue portal blocks | A/C | Portal block as Polymer block on a vanilla nether-portal-like base; ignition via event; client shows vanilla portal overlay (no custom overlay) |
-| Blocks | ~100 simple blocks (skyroot, holystone, aether grass/dirt, ambrosium, zanite, gravitite, quicksoil, icestone, etc.) | A | Polymer blocks with textures in pack. Blockstate budget: reuse note-block/ tripwire states or polymer-blocks `BlockModelType` |
-| Blocks | Quicksoil/ice-like physics, floating gravitite, enchanter, freezer, incubator, altar | A + GUI | Logic server-side; GUIs → section 5 |
-| Blocks | Skyroot leaves colours, golden oak (colored foliage) | C | Pre-tinted textures per variant |
-| Items | Tools, armor tiers (skyroot, holystone, zanite, gravitite, valkyrie), food, bucket variants | A | Polymer items with `item_model` component, texture in pack. Armor trims/equipment models need pack equipment assets |
-| Items | Accessories (gloves, rings, pendants, capes, shields-of-repulsion) | C | Inventory slot via our own accessory container behind interface; visuals: **cape/glove rendering D**, rings/pendants no render |
-| Items | Moa/Phyg/Flying-cow saddles, parachutes, lightning knife, hammer of notch, dart shooters | A/C | Projectiles via vanilla base projectile; most logic server-side |
-| Mobs | Passive: Aerbunny, Phyg, Flying Cow, Sheepuff, Moa, Aerwhale | C | Polymer entity w/ vanilla base (rabbit, pig, cow, sheep, chicken/ostrich-like, ghast-like) + display-entity model only if assets permitted; otherwise base-mob re-skin via name/attributes |
-| Mobs | Hostile: Swet, Zephyr, Cockatrice, Aechor plant, whirlwinds | C | Vanilla bases (slime, ghast, chicken, ...) |
-| Mobs | Mountable/flying mounts (Moa, flying pig) | C | Vanilla mount base (e.g. horse/strider) + custom controls via packets/`RideableEntity` |
-| Bosses | Slider, Valkyrie Queen, Sun Spirit + bronze/silver/gold dungeons | C/D | Boss bars, arenas, dungeon structures: v2. **Dungeons D** for v1 |
-| Progression | Ores → tools, ambrosium, zanite, gravitite, enchanter/freezer recipes, loot, advancements | A | Recipes/loot/advancements are datapack; vanilla client OK |
-| GUIs | Altar, freezer, incubator, accessories, Sun-altar | C | Chest/hopper-type vanilla container screens behind `AetherGui` interface; swap to heads GUI later |
-| Client-only | Custom shaders, custom HUD (hearts, jump bar), perk/cosmetics, config UIs, music manager, particles, animated models | D | Cut: no vanilla-client equivalent |
-| Sounds/music | Custom sounds | C | Needs asset permission; else vanilla sound events |
-| Integration | Accessories dep, JEI/EMI, Patchouli, Curios | D | Cut |
+| Dimension | `aether:the_aether`, islands via noise, holystone/grass/dirt | A | ✔ generates (≈12% solid in y0-95) |
+| Dimension | Sky, fog, clouds | **A** (was C) | ✔ 26.3 `dimension_type.attributes` set sky/fog/cloud colour+height in vanilla data; colours are approximations ✘ (no client look) |
+| Portal | Glowstone frame + water bucket | A/C | ✔ frame detection, lighting, teleport + destination build (pig test); ✘ real bucket click, ✘ return trip; visuals = vanilla purple nether portal |
+| Worldgen | Ores (ambrosium/zanite/gravitite), skyroot trees | A | ✔ natural gen verified (counts in report) |
+| Worldgen | Other biomes, golden oak, crystal islands, lakes, 4 dungeon structures, flowers | D | cut |
+| Blocks | 28 full-cube/log/leaf blocks | A | ✔ registered, models in pack |
+| Blocks | Stairs/slabs/walls/doors/signs/beds, saplings, flowers, bushes, aerclouds (bounce), quicksoil physics, floating gravitite, altars/freezer/incubator, dungeon doors/traps | D/C | cut for v1 |
+| Items | 20 tools (4 tiers) + 4 materials | A | ✔ with recipes; tool stats approximated |
+| Items | Armor, accessories, darts, lightning knife, hammer, shields, parachute, buckets | D | cut |
+| Mobs | Phyg, Flying Cow, Aerbunny (passive), Blue Swet (hostile) | C | ✔ summon + attributes; **vanilla look** (pig/cow/rabbit/slime) |
+| Mobs | Moa, Sheepuff, Aerwhale, Zephyr, Cockatrice, Aechor Plant, whirlwinds | D | cut |
+| Bosses | Slider, Valkyrie Queen, Sun Spirit + dungeons | D | cut |
+| GUIs | Altar, freezer, incubator, accessories | D | cut (planned: thin `AetherGui` interface → sgui, later heads GUI) |
+| Client-only | Shaders, HUD, cosmetics, music manager, config UI, JEI | D | cut |
+| B (Polymer patch) | — | — | **None needed so far.** Only a vanilla access widener (`SpawnPlacements.register`) |
 
-(B = no item identified: nothing in the inventory clearly needs a Polymer patch. Specific patches may be found at implementation time, e.g. dimension_type effects, custom block-state budget. Keep any such patch in `mPolymerPatchBundle`.)
+## 3. Key findings that changed the plan (26.3 vs upstream 1.21.1 data)
+1. **Upstream data JSON is not loadable as-is.** Loot tables, recipes, density functions, noise settings, surface rules, block-state objects, features and dimension types all changed schema (e.g. `conditions`→`condition`, `argument1`→`left`, `surface_rule`→registry `material_rule`, `{"Name"}`→`{"id"}`, `effects`→`attributes`). Old loot JSON was *silently half-ignored* (WARN "unreachable entry"). → `tools/gen_data.py` regenerates/converts into 26.3 format. **Any re-port to a newer MC must re-run/adjust it.**
+2. **26.x drives behavior from block tags.** Custom blocks must join `blocks_motion_no_leaves`, `leaves`, `logs`, `mineable/*`, `animals_spawnable_on`, `dirt` … Without the heightmap tag, `OCEAN_FLOOR*`/`MOTION_BLOCKING` heightmaps were 0 and **vanilla ores/trees placement silently produced nothing**.
+3. Terrain density needed calibration (`AETHER_NOISE_BIAS=0.15`): converted noise gave ~1.7% solid, now ≈12%.
+4. Registries moved: `EntityType.PIG`→`EntityTypes.PIG`, `Slime`→`monster.cubemob`, `SpawnPlacements.register` is private (access widener).
 
-## 4. Chosen approach for (C) items
-- **Sky/clouds:** pick a vanilla dimension_type `effects` ID that gives no sun/void horizon; add a decorative cloud layer server-side with display entities in a ring around players (cheap, chunk-light).
-- **Mobs:** one `PolymerEntity`/virtual-entity wrapper per mob; **vanilla base entity + (optional) item-display model** only if assets licensed.
-- **Mounts:** vanilla rideable base, control logic via `PlayerInput` handling.
-- **Accessories:** minimal slot container (`AccessoryStore`) behind an interface; no visuals in v1.
-- **GUIs:** `AetherGui` interface with sgui-backed implementation, replaceable by heads GUI.
-- **Portal:** Polymer block, no custom overlay.
+## 4. Approach for (C) items
+- Sky/clouds → dimension_type attributes. Portal → subclass of `NetherPortalBlock`, shown as nether portal. Mobs → vanilla-subclass + `PolymerEntity` (v1: vanilla model). Accessories/GUIs → later behind an interface.
 
-## 5. Effort (rough, one dev, after the license + build blockers are cleared)
+## 5. Effort (one dev, remaining)
 | Milestone | Estimate |
 |---|---|
-| Project builds, boots, dimension + portal | 3–5 days |
-| Core blocks/items/tools/armor | 1–1.5 weeks |
-| Passive + basic hostile mobs | 1 week |
-| Progression loop (ores→gear→enchanter, loot) | 1 week |
-| Accessories + GUIs | 1 week |
-| Bosses + dungeons | 3–4 weeks |
+| Real-client verification (join, portal, break/place), fixes | 2–4 days |
+| Block families (stairs/slabs/doors…), saplings, aerclouds, leaves decay | 1–1.5 weeks |
+| Remaining mobs w/ custom models (display-entity models), Moa mount | 1–2 weeks |
+| Armor, accessories (slot container), GUIs via sgui | 1–1.5 weeks |
+| Dungeons + 3 bosses | 3–4 weeks |

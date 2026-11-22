@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "aether:skyroot_stick",
+    "X": "#aether:gravitite_tool_materials"
+  },
+  "pattern": [
+    "XX",
+    "X#",
+    " #"
+  ],
+  "result": {
+    "id": "aether:gravitite_axe"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "aether:the_aether",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "aether:skylands",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "aether:skyroot_meadow"
+    }
+  }
+}

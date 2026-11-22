@@ -1,0 +1,21 @@
+{
+  "values": [
+    "aether:holystone",
+    "aether:mossy_holystone",
+    "aether:holystone_bricks",
+    "aether:aether_grass_block",
+    "aether:ambrosium_ore",
+    "aether:zanite_ore",
+    "aether:gravitite_ore",
+    "aether:icestone",
+    "aether:ambrosium_block",
+    "aether:zanite_block",
+    "aether:enchanted_gravitite",
+    "aether:carved_stone",
+    "aether:sentry_stone",
+    "aether:angelic_stone",
+    "aether:hellfire_stone",
+    "aether:light_angelic_stone",
+    "aether:light_hellfire_stone"
+  ]
+}

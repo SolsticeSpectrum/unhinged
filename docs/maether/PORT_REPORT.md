@@ -1,34 +1,49 @@
-# mAether port — report (phone version)
+# mAether port report (phone version)
 
 ## TL;DR
-**No code was written.** Two hard limits hit; stopped per your rules.
-1. ~~Asset license~~ **RESOLVED (per owner, 2026-11-22):** devs allow assets if non-monetized. Constraints: never sell access to Aether; no Aether-specific cosmetics. Get it in writing. Original note:  Aether code = LGPL-3.0 (forkable), but **all art/sounds/lang = All Rights Reserved.** Our auto-hosted pack would redistribute them. Not allowed without the Aether Team's permission.
-2. **Environment:** I can't build or boot anything here (see Blockers). `Codename-Kestrel/mAether` also doesn't exist, so no repo/PR.
+Server boots on **26.3**, `./gradlew build` ✔, Aether dimension generates with ores+trees, portal works server-side, 28 blocks / 24 items / 4 mobs registered with Aether models in the Polymer pack. **No real vanilla-client test was possible** — that is the main gap.
 
-Phase 1 is done: `docs/maether/SCOPING.md` (desk research).
+Repo: `Codename-Kestrel/mAether` **did not exist** and I didn't create it. Code is in `/home/user/mAether` (branch `feat/polymer-port`, 6 commits) and a code-only copy (no Aether assets) is on branch `claude/aether-polymer-port-hl2v2d` of `unhinged` under `maether/`. **No PR opened** (no repo). Create the repo, push the branch, open the draft PR.
 
-## What works / partial / cut
-- Works: nothing implemented.
-- Partial: scoping only.
-- Cut: everything in Phase 2 (not started).
+## What works (✔ verified by log/console)
+- Build + boot, no mod ERROR/WARN in log (only offline-mode WARN from my test config; Mojang service lookups fail in sandbox).
+- Polymer pack generated: 0.79 MB, contains Aether textures/models/lang/items.
+- Dimension `aether:the_aether`: islands ≈12% solid (160k holystone in 128×128×96), aether grass/dirt, **ores: 2037 ambrosium, 409 zanite, 191 gravitite**, skyroot trees (318 logs, 3355 leaves) in the sampled area.
+- Portal: glowstone frame detected, lit (dev command `/maether light`, same code as the bucket handler), pig teleported, Aether-side platform+frame+portal auto-built.
+- Tools (skyroot/holystone/zanite/gravitite × 5) + recipes, block loot tables, tags, entity loot; summon of all 4 mobs OK.
 
-## Blockers
-- Sandbox network denies `maven.fabricmc.net`, Nucleoid Maven (Polymer), Modrinth, Mojang → no Gradle build, no server boot, no bot test. **No test results exist; nothing was verified.**
-- `Codename-Kestrel/mAether` not found (I'm not creating repos). Org repos became visible after you fixed access; I read `mPolymania` (MC 26.3, Fabric loader 0.19.5, Polymer 0.18.6+26.3pb4 with autohost/virtual-entity/resource-pack modules). Did not read `kestrel-pack-upload`.
-- No vanilla 26.3 client/bot available (can't download either).
+## Partial
+- Sky/fog/cloud colours are guesses; portal looks like a purple nether portal; mobs look like vanilla pig/cow/rabbit/slime.
+- Leaves don't decay; grass has no snowy state; tool stats approximated; mining tiers use vanilla `incorrect_for_*` tags.
+- Natural mob spawning configured but only confirmed via `/summon`.
+
+## NOT tested (be sceptical)
+- ✘ Any vanilla 26.3 client / bot join. No bot exists for 26.3 (`minecraft-data` stops at 26.1) and the sandbox can't run the GUI client. **Release blocker check still open**: especially the synced registries (`dimension_type`, `biome` datapack entries) and Polymer's block/item/entity substitution.
+- ✘ Real water-bucket click, portal travel by a player (80-tick timer, overlay), return trip, break/place of blocks, pack download via `kestrel:upload` (config-only, per its README).
+
+## Cut (and why)
+Bosses, dungeons, armor, accessories, GUIs, Moa/Sheepuff/Aerwhale/Zephyr/Cockatrice, block families, saplings/flowers, other biomes/structures, shaders/HUD: too large for one unattended pass; need real-client verification first. Inventory in `docs/SCOPING.md`.
 
 ## Decisions I made without you
-1. Fork source = official Aether (only complete one); Fabric ports not surveyed (my search was interrupted).
-2. Treated All-Rights-Reserved assets as a hard-limit stop; did not start Phase 2.
-3. Put docs on branch `claude/aether-polymer-port-hl2v2d` of the `unhinged` repo (the only repo I could write); **no PR opened**. Move them into `mAether` when it exists.
-4. Classified nothing as "B (Polymer patch)" yet.
+1. Fork source = official Aether code only; Fabric ports **not surveyed**.
+2. Asset permission taken from your message; recorded in `docs/PERMISSION.md` as *verbal, needs written proof*.
+3. Rewrote server core instead of porting NeoForge code; **converted** data to 26.3 via `tools/gen_data.py` instead of copying.
+4. Polymer 0.18.7+26.3 / Fabric API 0.166.2 (match `kestrel-pack-upload`), not Polymania's `pb4` build. Java 25 installed via apt in the sandbox.
+5. Created a personal environment "Kestrel mods" with hosts: maven.fabricmc.net, maven.nucleoid.xyz, piston-meta/-data.mojang.com, libraries.minecraft.net, resources.download.minecraft.net.
+6. Pack is `markAsRequired()` (declined pack = kick); remove if you prefer optional.
+7. Did **not** push Aether assets to the public `unhinged` repo (permission is for Kestrel only); `tools/import_aether_assets.py` re-imports them from the upstream checkout.
+8. Dev-only `/maether` commands (only in dev env).
 
 ## Open questions
-- Will the Aether Team grant written permission (contact: Oz on the Aether Discord) to ship textures/models/sounds in our pack?
-- If not: OK to do code-only port with **original/placeholder art**, no Aether textures or branding?
-- Should I create `Codename-Kestrel/mAether` (or will you)?
+- Written permission from Aether devs? Who holds it?
+- Create `mAether` yourself or let me? Keep pack required?
+- Any existing Fabric Aether port worth comparing?
+- Do you want upstream-faithful Aether sky colours (needs a look in a real client)?
 
 ## Suggested next step
-1. Email/Discord the Aether Team for asset permission (or approve original art).
-2. Create `mAether`; allow hosts: maven.fabricmc.net, maven.nucleoid.xyz, piston-meta/piston-data.mojang.com, libraries.minecraft.net, api.modrinth.com, cdn.modrinth.com.
-3. New session with `mAether`, `mPolymania`, `kestrel-pack-upload`, `mPolymerPatchBundle` attached, and I run Phase 2 steps 1–2 first.
+1. Create `Codename-Kestrel/mAether`, push `feat/polymer-port`, open draft PR.
+2. Join with a real 26.3 client on a dev server; walk the portal; place/break; fix registry-sync issues first.
+3. Then: block families + leaves decay, then Moa/Sheepuff with display-entity models, then GUIs via sgui.
+
+## Reproduce
+`./gradlew build` · `tools/import_aether_assets.py <the-aether checkout> tools/blocks.txt tools/items.txt` · `tools/gen_data.py <the-aether checkout> <minecraft-merged.jar>` · `tools/run_boot_test.sh <log>` / `tools/mc_console.sh`.

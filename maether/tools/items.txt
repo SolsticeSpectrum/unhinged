@@ -1,0 +1,25 @@
+# plain items (generated/handheld model comes from upstream models/item/<name>.json)
+ambrosium_shard
+zanite_gemstone
+skyroot_stick
+golden_amber
+skyroot_pickaxe
+skyroot_axe
+skyroot_shovel
+skyroot_sword
+skyroot_hoe
+holystone_pickaxe
+holystone_axe
+holystone_shovel
+holystone_sword
+holystone_hoe
+zanite_pickaxe
+zanite_axe
+zanite_shovel
+zanite_sword
+zanite_hoe
+gravitite_pickaxe
+gravitite_axe
+gravitite_shovel
+gravitite_sword
+gravitite_hoe

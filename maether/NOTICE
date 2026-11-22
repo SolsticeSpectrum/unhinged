@@ -1,0 +1,9 @@
+mAether — server-side Polymer port of The Aether (Kestrel)
+
+Based on The Aether (https://github.com/The-Aether-Team/The-Aether), (c) The Aether Team, 1.21.1-develop / v1.5.10.
+Original code: LGPL-3.0 (see LICENSE). Original assets (textures, models, sounds, lang): All Rights Reserved
+(see LICENSE-ASSETS.txt), used by Project Kestrel with permission of the Aether devs for NON-COMMERCIAL use only.
+See docs/PERMISSION.md for the conditions. Do not use Aether branding (logo, team name).
+
+Changes by Project Kestrel: re-implemented as a Fabric, server-side mod using Polymer so that vanilla clients can join;
+world data converted from the 1.21.1 format to Minecraft 26.3 (tools/gen_data.py); block/item registry rewritten.

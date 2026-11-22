@@ -1,0 +1,80 @@
+{
+  "default_block": "aether:holystone",
+  "default_fluid": "minecraft:air",
+  "disable_mob_generation": false,
+  "legacy_random_source": false,
+  "material_rule": "aether:the_aether",
+  "noise": {
+    "height": 128,
+    "min_y": 0
+  },
+  "noise_router": {
+    "chunk_surface_level": 0.0,
+    "continents": 0.0,
+    "depth": 0.0,
+    "erosion": 0.0,
+    "final_density": {
+      "type": "minecraft:squeeze",
+      "input": {
+        "type": "minecraft:interpolated",
+        "input": {
+          "type": "minecraft:blend_density",
+          "input": {
+            "type": "minecraft:add",
+            "left": -0.05,
+            "right": {
+              "type": "minecraft:add",
+              "left": -0.1,
+              "right": {
+                "type": "minecraft:mul",
+                "left": {
+                  "type": "minecraft:gradient",
+                  "axis": "y",
+                  "from_coordinate": 8,
+                  "to_coordinate": 40,
+                  "from_value": 0.0,
+                  "to_value": 1.0
+                },
+                "right": {
+                  "type": "minecraft:add",
+                  "left": 0.1,
+                  "right": {
+                    "type": "minecraft:add",
+                    "left": -0.2,
+                    "right": {
+                      "type": "minecraft:mul",
+                      "left": {
+                        "type": "minecraft:gradient",
+                        "axis": "y",
+                        "from_coordinate": 56,
+                        "to_coordinate": 128,
+                        "from_value": 1.0,
+                        "to_value": 0.0
+                      },
+                      "right": {
+                        "type": "minecraft:add",
+                        "left": 0.2,
+                        "right": {
+                          "type": "minecraft:add",
+                          "left": 0.01999999999999999,
+                          "right": "aether:base_3d_noise_aether"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "cell_size_xz": 8,
+        "cell_size_y": 4
+      }
+    },
+    "ridges": 0.0,
+    "temperature": 0.0,
+    "vegetation": 0.0
+  },
+  "sea_level": -64,
+  "spawn_target": []
+}

@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "maether",
+	"version": "${version}",
+	"name": "mAether",
+	"description": "Server-side Polymer port of The Aether for vanilla clients (Kestrel).",
+	"authors": ["Kestrel (port)", "The Aether Team (original)"],
+	"contact": { "sources": "https://github.com/Codename-Kestrel/mAether" },
+	"license": "LGPL-3.0-only",
+	"environment": "server",
+	"accessWidener": "maether.accesswidener",
+	"entrypoints": { "main": ["com.kestrel.maether.MAether"] },
+	"depends": {
+		"fabricloader": ">=0.19.0",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*",
+		"polymer-core": "*"
+	}
+}

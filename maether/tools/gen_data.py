@@ -312,3 +312,17 @@ for m in M:
     if fp.exists(): M[m]["fuel"] = {k: v["burn_time"] for k, v in json.load(open(fp))["values"].items()}
 mp = root / "src/main/resources/maether/machines.json"; mp.parent.mkdir(parents=True, exist_ok=True); mp.write_text(json.dumps(M, indent=1))
 print("machines", {k: len(v["recipes"]) for k, v in M.items()})
+
+
+# ---- dungeons: room templates + structure / structure_set / biome tag
+import shutil
+tpl_src = pathlib.Path(sys.argv[1]) / "src/main/resources/data/aether/structure"
+if not tpl_src.exists(): tpl_src = pathlib.Path(sys.argv[1]) / "src/generated/resources/data/aether/structure"
+for d in ("bronze_dungeon", "silver_dungeon", "gold_dungeon"):
+    if (tpl_src / d).exists(): shutil.copytree(tpl_src / d, out / "structure" / d, dirs_exist_ok=True)
+w("tags/worldgen/biome/has_dungeon.json", {"values": ["aether:skyroot_meadow", "aether:skyroot_grove", "aether:skyroot_woodland", "aether:skyroot_forest"]})
+for name, step, spacing, sep, salt in (("bronze", "underground_structures", 14, 6, 1109), ("silver", "underground_structures", 22, 8, 2209), ("gold", "surface_structures", 26, 9, 3309)):
+    w(f"worldgen/structure/{name}_dungeon.json", {"type": "aether:dungeon", "dungeon": name, "biomes": "#aether:has_dungeon", "step": step,
+        "spawn_overrides": {}, "terrain_adaptation": "none"})
+    w(f"worldgen/structure_set/{name}_dungeon.json", {"structures": [{"structure": f"aether:{name}_dungeon", "weight": 1}],
+        "placement": {"type": "minecraft:random_spread", "spacing": spacing, "separation": sep, "salt": salt}})

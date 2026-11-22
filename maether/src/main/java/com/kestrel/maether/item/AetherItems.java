@@ -80,6 +80,16 @@ public final class AetherItems {
 		item(set + "_boots", Items.IRON_BOOTS, new Item.Properties().humanoidArmor(m, ArmorType.BOOTS), null, null);
 	}
 
+	/** one spawn egg per registered Aether mob (call after the entities exist) */
+	public static void eggs() {
+		for (var e : com.kestrel.maether.entity.AetherEntities.ALL.entrySet()) {
+			String name = e.getKey() + "_spawn_egg";
+			put(name, new PolySpawnEgg(new Item.Properties().spawnEgg(e.getValue()).setId(ResourceKey.create(Registries.ITEM, id(name))), id(name)));
+		}
+		for (String m : new String[]{"blue_moa_egg", "white_moa_egg", "black_moa_egg"})
+			put(m, new PolySpawnEgg(new Item.Properties().spawnEgg(com.kestrel.maether.entity.AetherEntities.ALL.get("moa")).setId(ResourceKey.create(Registries.ITEM, id(m))), id(m)));
+	}
+
 	private static void heal(LivingEntity e, float amount) { e.heal(amount); }
 
 	public static void init() {

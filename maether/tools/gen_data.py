@@ -63,7 +63,7 @@ w("worldgen/noise_settings/skylands.json", {
     "material_rule": "aether:the_aether",
     "noise": {"height": ns["noise"]["height"], "min_y": ns["noise"]["min_y"]},
     "noise_router": {"chunk_surface_level": 0.0, "continents": 0.0, "depth": 0.0, "erosion": 0.0,
-                     "final_density": final, "ridges": 0.0, "temperature": 0.0, "vegetation": 0.0},
+                     "final_density": final, "ridges": 0.0, "temperature": {"type": "minecraft:noise", "noise": "minecraft:temperature", "xz_scale": 0.25, "y_scale": 0.0}, "vegetation": 0.0},
     "sea_level": ns["sea_level"], "spawn_target": []})
 
 # --- dimension type: vanilla overworld shape + Aether sky (attributes replace the old client "effects")
@@ -78,11 +78,18 @@ a["minecraft:gameplay/respawn_anchor_works"] = False
 a["minecraft:gameplay/nether_portal_spawns_piglin"] = False
 w("dimension_type/the_aether.json", dt)
 
-# --- biome: vanilla plains skeleton, no carvers/features yet, only passive vanilla fallbacks (custom mobs come later)
-b = vanilla("worldgen/biome/plains.json")
-b["carvers"] = []
-b["features"] = [[] for _ in b["features"]]
-w("tags/block/ore_replaceables.json", {"values": ["aether:holystone", "aether:mossy_holystone"]})
+# --- biomes (4 temperature bands), extra features
+def tree_feature(name, log, leaves, base, ra, rad, h):
+    w(f"worldgen/feature/{name}.json", {"type": "minecraft:tree",
+        "below_trunk_provider": {"id": "aether:aether_dirt"}, "decorators": [], "ignore_vines": True,
+        "foliage_placer": {"type": "minecraft:blob_foliage_placer", "height": h, "offset": 0, "radius": rad},
+        "foliage_provider": {"id": leaves},
+        "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": base, "height_rand_a": ra, "height_rand_b": 0},
+        "trunk_provider": {"id": log, "properties": {"axis": "y"}},
+        "minimum_size": {"type": "minecraft:two_layers_feature_size"}})
+tree_feature("skyroot_tree", "aether:skyroot_log", "aether:skyroot_leaves", 4, 2, 2, 3)
+tree_feature("golden_oak_tree", "aether:golden_oak_log", "aether:golden_oak_leaves", 6, 3, 3, 4)
+tree_feature("crystal_tree", "aether:skyroot_log", "aether:crystal_leaves", 5, 2, 3, 3)
 def ore(name, block, size, count, ymax, target=None):
     w(f"worldgen/feature/{name}.json", {"type": "minecraft:ore", "discard_chance_on_air_exposure": 0.0, "size": size,
         "targets": [{"state": block, "target": target or {"predicate_type": "minecraft:block_match", "block": "aether:holystone"}}]})
@@ -90,39 +97,58 @@ def ore(name, block, size, count, ymax, target=None):
         {"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
         {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": 0}, "max_inclusive": {"absolute": ymax}}},
         {"type": "minecraft:biome"}]})
-ore("ore_ambrosium", "aether:ambrosium_ore", 16, 20, 127, None)
-ore("ore_zanite", "aether:zanite_ore", 8, 15, 127, None)
+ore("ore_ambrosium", "aether:ambrosium_ore", 16, 20, 127)
+ore("ore_zanite", "aether:zanite_ore", 8, 15, 127)
 ore("ore_gravitite", "aether:gravitite_ore", 6, 8, 127)
-w("worldgen/feature/skyroot_tree.json", {"type": "minecraft:tree",
-    "below_trunk_provider": {"id": "aether:aether_dirt"},
-    "decorators": [], "ignore_vines": True,
-    "foliage_placer": {"type": "minecraft:blob_foliage_placer", "height": 3, "offset": 0, "radius": 2},
-    "foliage_provider": {"id": "aether:skyroot_leaves"},
-    "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": 4, "height_rand_a": 2, "height_rand_b": 0},
-    "trunk_provider": {"id": "aether:skyroot_log", "properties": {"axis": "y"}},
-    "minimum_size": {"type": "minecraft:two_layers_feature_size"}})
-w("worldgen/placed_feature/skyroot_trees.json", {"feature": "aether:skyroot_tree", "placement": [
-    {"type": "minecraft:count", "count": 2}, {"type": "minecraft:in_square"},
-    {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"},
-    {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_blocks", "blocks": "aether:aether_grass_block", "offset": [0, -1, 0]}},
-    {"type": "minecraft:biome"}]})
-b["features"][6] = ["aether:ore_ambrosium", "aether:ore_zanite", "aether:ore_gravitite"]
-b["features"][9] = ["aether:skyroot_trees"]
-spawns = b["attributes"]["minecraft:gameplay/natural_mob_spawns"]["argument"]["spawns_by_category"]
-spawns.clear()
-spawns["creature"] = [{"type": "aether:phyg", "count": 4, "weight": 10}, {"type": "aether:flying_cow", "count": 4, "weight": 10},
-                      {"type": "aether:aerbunny", "count": 3, "weight": 10}, {"type": "aether:sheepuff", "count": 4, "weight": 10},
-                      {"type": "aether:moa", "count": 3, "weight": 10}, {"type": "aether:whirlwind", "count": 1, "weight": 2}]
-spawns["monster"] = [{"type": "aether:blue_swet", "count": 4, "weight": 20}, {"type": "aether:golden_swet", "count": 2, "weight": 5},
-                     {"type": "aether:cockatrice", "count": 2, "weight": 10}, {"type": "aether:aechor_plant", "count": 2, "weight": 12},
-                     {"type": "aether:zephyr", "count": 1, "weight": 3}, {"type": "aether:evil_whirlwind", "count": 1, "weight": 3}]
-spawns["ambient"] = [{"type": "aether:aerwhale", "count": 1, "weight": 4}]
-w("worldgen/biome/skyroot_meadow.json", b)
+ore("ore_icestone", "aether:icestone", 10, 6, 127)
+ore("ore_quicksoil", "aether:quicksoil", 14, 4, 127)
+def placed_tree(name, feat, count, rarity=None):
+    pl = ([{"type": "minecraft:rarity_filter", "chance": rarity}] if rarity else []) + [{"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_blocks", "blocks": "aether:aether_grass_block", "offset": [0, -1, 0]}},
+        {"type": "minecraft:biome"}]
+    w(f"worldgen/placed_feature/{name}.json", {"feature": f"aether:{feat}", "placement": pl})
+for n, c in (("sparse", 1), ("normal", 3), ("dense", 6), ("thick", 10)): placed_tree(f"skyroot_trees_{n}", "skyroot_tree", c)
+placed_tree("golden_oak_trees", "golden_oak_tree", 1, 4); placed_tree("crystal_trees", "crystal_tree", 1, 12)
+w("worldgen/feature/flower_patch.json", {"type": "minecraft:simple_block", "to_place": {"type": "minecraft:weighted", "entries": [{"data": "aether:purple_flower", "weight": 1}, {"data": "aether:white_flower", "weight": 1}]}})
+w("worldgen/feature/berry_bush.json", {"type": "minecraft:simple_block", "to_place": {"id": "aether:berry_bush"}})
+def scatter(name, feat, count, rarity, extra_pl=None):
+    off = {"type": "minecraft:trapezoid", "max": 6, "min": -6, "plateau": 0}
+    pl = ([{"type": "minecraft:rarity_filter", "chance": rarity}] if rarity else []) + [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"},
+        {"type": "minecraft:count", "count": count}, {"type": "minecraft:offset", "x": off, "y": {"type": "minecraft:trapezoid", "max": 2, "min": -2, "plateau": 0}, "z": off},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [{"type": "minecraft:matching_blocks", "blocks": "minecraft:air"},
+            {"type": "minecraft:matching_blocks", "blocks": "aether:aether_grass_block", "offset": [0, -1, 0]}]}}]
+    w(f"worldgen/placed_feature/{name}.json", {"feature": feat, "placement": pl})
+scatter("flowers", "aether:flower_patch", 24, 3); scatter("berry_bushes", "aether:berry_bush", 6, 8); scatter("grass", "minecraft:tall_grass", 40, 2)
+# floating cloud puffs
+for cl in ("cold_aercloud", "blue_aercloud", "golden_aercloud"):
+    w(f"worldgen/feature/{cl}_puff.json", {"type": "minecraft:simple_block", "to_place": {"id": f"aether:{cl}"}})
+    off = {"type": "minecraft:trapezoid", "max": 7, "min": -7, "plateau": 0}
+    w(f"worldgen/placed_feature/{cl}_puffs.json", {"feature": f"aether:{cl}_puff", "placement": [{"type": "minecraft:rarity_filter", "chance": {"cold_aercloud": 2, "blue_aercloud": 6, "golden_aercloud": 24}[cl]},
+        {"type": "minecraft:in_square"}, {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": 110}, "max_inclusive": {"absolute": 200}}},
+        {"type": "minecraft:biome"}, {"type": "minecraft:count", "count": 90}, {"type": "minecraft:offset", "x": off, "y": {"type": "minecraft:trapezoid", "max": 2, "min": -2, "plateau": 0}, "z": off},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_blocks", "blocks": "minecraft:air"}}]})
 
-w("dimension/the_aether.json", {
-    "type": "aether:the_aether",
-    "generator": {"type": "minecraft:noise", "settings": "aether:skylands",
-                  "biome_source": {"type": "minecraft:fixed", "biome": "aether:skyroot_meadow"}}})
+base = vanilla("worldgen/biome/plains.json")
+BIOMES = {"skyroot_meadow": ("sparse", [], -1.0, -0.25), "skyroot_grove": ("normal", ["aether:berry_bushes"], -0.25, 0.0),
+          "skyroot_woodland": ("dense", ["aether:golden_oak_trees"], 0.0, 0.25), "skyroot_forest": ("thick", ["aether:golden_oak_trees", "aether:crystal_trees"], 0.25, 1.0)}
+entries = []
+for name, (dens, extra, lo, hi) in BIOMES.items():
+    b = copy.deepcopy(base); b["carvers"] = []; b["features"] = [[] for _ in b["features"]]
+    sp = b["attributes"]["minecraft:gameplay/natural_mob_spawns"]["argument"]["spawns_by_category"]; sp.clear()
+    sp["creature"] = [{"type": "aether:phyg", "count": 4, "weight": 10}, {"type": "aether:flying_cow", "count": 4, "weight": 10}, {"type": "aether:aerbunny", "count": 3, "weight": 10},
+                      {"type": "aether:sheepuff", "count": 4, "weight": 10}, {"type": "aether:moa", "count": 3, "weight": 10}, {"type": "aether:whirlwind", "count": 1, "weight": 2}]
+    sp["monster"] = [{"type": "aether:blue_swet", "count": 4, "weight": 20}, {"type": "aether:golden_swet", "count": 2, "weight": 5}, {"type": "aether:cockatrice", "count": 2, "weight": 10},
+                     {"type": "aether:aechor_plant", "count": 2, "weight": 12}, {"type": "aether:zephyr", "count": 1, "weight": 3}, {"type": "aether:evil_whirlwind", "count": 1, "weight": 3}]
+    sp["ambient"] = [{"type": "aether:aerwhale", "count": 1, "weight": 4}]
+    b["features"][1] = ["aether:cold_aercloud_puffs", "aether:blue_aercloud_puffs", "aether:golden_aercloud_puffs"]
+    b["features"][6] = ["aether:ore_ambrosium", "aether:ore_zanite", "aether:ore_gravitite", "aether:ore_icestone", "aether:ore_quicksoil"]
+    b["features"][9] = [f"aether:skyroot_trees_{dens}", "aether:flowers", "aether:grass"] + extra
+    w(f"worldgen/biome/{name}.json", b)
+    entries.append({"biome": f"aether:{name}", "parameters": {"temperature": [lo, hi], "humidity": [-1.0, 1.0], "continentalness": [-1.0, 1.0],
+                    "erosion": [-1.0, 1.0], "depth": [-1.0, 1.0], "weirdness": [-1.0, 1.0], "offset": 0.0}})
+w("dimension/the_aether.json", {"type": "aether:the_aether", "generator": {"type": "minecraft:noise", "settings": "aether:skylands",
+    "biome_source": {"type": "minecraft:multi_noise", "biomes": entries}}})
 
 # --- block tags: 26.x drives heightmaps / tool mining / spawning from tags, so our blocks must join the vanilla tags
 blocks = [l.split() for l in open(root / "tools/blocks.txt") if l.strip() and not l.startswith("#")]
@@ -203,6 +229,21 @@ for name, kind, mat, hard, base in fams:
         w(f"recipe/{name}.json", {"type": "minecraft:crafting_shaped", "category": "redstone", "key": {"#": stick, "W": ing}, "pattern": ["#W#", "#W#"], "result": res})
     elif kind == "button":
         w(f"recipe/{name}.json", {"type": "minecraft:crafting_shapeless", "category": "redstone", "ingredients": [ing], "result": res})
+
+# --- plants / torch loot + tags
+def self_drop(name):
+    return {"type": "minecraft:block", "random_sequence": f"aether:blocks/{name}",
+            "pools": [{"rolls": 1, "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": f"aether:{name}"}]}]}
+for n in ("purple_flower", "white_flower", "skyroot_sapling", "golden_oak_sapling", "ambrosium_torch"):
+    w(f"loot_table/blocks/{n}.json", self_drop(n))
+w("loot_table/blocks/ambrosium_wall_torch.json", self_drop("ambrosium_torch"))
+drop_b = lambda n, item, lo, hi: w(f"loot_table/blocks/{n}.json", {"type": "minecraft:block", "random_sequence": f"aether:blocks/{n}", "pools": [{"rolls": 1, "entries": [
+    {"type": "minecraft:item", "name": item, "modifier": [{"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": lo, "max": hi}}]}]}]})
+drop_b("berry_bush", "aether:blue_berry", 1, 3); drop_b("berry_bush_stem", "aether:skyroot_stick", 0, 1)
+tag("saplings", ["aether:skyroot_sapling", "aether:golden_oak_sapling"])
+tag("small_flowers", ["aether:purple_flower", "aether:white_flower"]); tag("flowers", ["aether:purple_flower", "aether:white_flower"])
+tag("replaceable_by_trees", leaves + ["aether:purple_flower", "aether:white_flower"])
+tag("mineable/pickaxe", stone + [f"aether:{n}" for n, k, m, h, b in fams if m != "wood" and k not in ("button",)] )
 
 # --- entity loot (26.3 schema)
 def drop(entity, item, lo, hi):

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "type": "minecraft:weighted",
+    "entries": [
+      {
+        "data": "aether:purple_flower",
+        "weight": 1
+      },
+      {
+        "data": "aether:white_flower",
+        "weight": 1
+      }
+    ]
+  }
+}

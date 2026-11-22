@@ -88,7 +88,11 @@
   },
   "features": [
     [],
-    [],
+    [
+      "aether:cold_aercloud_puffs",
+      "aether:blue_aercloud_puffs",
+      "aether:golden_aercloud_puffs"
+    ],
     [],
     [],
     [],
@@ -96,12 +100,16 @@
     [
       "aether:ore_ambrosium",
       "aether:ore_zanite",
-      "aether:ore_gravitite"
+      "aether:ore_gravitite",
+      "aether:ore_icestone",
+      "aether:ore_quicksoil"
     ],
     [],
     [],
     [
-      "aether:skyroot_trees"
+      "aether:skyroot_trees_sparse",
+      "aether:flowers",
+      "aether:grass"
     ],
     []
   ],

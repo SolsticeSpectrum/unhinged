@@ -1,9 +1,13 @@
 {
-  "feature": "aether:skyroot_tree",
+  "feature": "aether:golden_oak_tree",
   "placement": [
     {
+      "type": "minecraft:rarity_filter",
+      "chance": 4
+    },
+    {
       "type": "minecraft:count",
-      "count": 2
+      "count": 1
     },
     {
       "type": "minecraft:in_square"

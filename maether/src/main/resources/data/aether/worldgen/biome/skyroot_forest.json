@@ -1,0 +1,120 @@
+{
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawn_costs": {},
+        "spawns_by_category": {
+          "creature": [
+            {
+              "type": "aether:phyg",
+              "count": 4,
+              "weight": 10
+            },
+            {
+              "type": "aether:flying_cow",
+              "count": 4,
+              "weight": 10
+            },
+            {
+              "type": "aether:aerbunny",
+              "count": 3,
+              "weight": 10
+            },
+            {
+              "type": "aether:sheepuff",
+              "count": 4,
+              "weight": 10
+            },
+            {
+              "type": "aether:moa",
+              "count": 3,
+              "weight": 10
+            },
+            {
+              "type": "aether:whirlwind",
+              "count": 1,
+              "weight": 2
+            }
+          ],
+          "monster": [
+            {
+              "type": "aether:blue_swet",
+              "count": 4,
+              "weight": 20
+            },
+            {
+              "type": "aether:golden_swet",
+              "count": 2,
+              "weight": 5
+            },
+            {
+              "type": "aether:cockatrice",
+              "count": 2,
+              "weight": 10
+            },
+            {
+              "type": "aether:aechor_plant",
+              "count": 2,
+              "weight": 12
+            },
+            {
+              "type": "aether:zephyr",
+              "count": 1,
+              "weight": 3
+            },
+            {
+              "type": "aether:evil_whirlwind",
+              "count": 1,
+              "weight": 3
+            }
+          ],
+          "ambient": [
+            {
+              "type": "aether:aerwhale",
+              "count": 1,
+              "weight": 4
+            }
+          ]
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/sky_color": "#78a7ff"
+  },
+  "carvers": [],
+  "downfall": 0.4,
+  "effects": {
+    "water_color": "#3f76e4"
+  },
+  "features": [
+    [],
+    [
+      "aether:cold_aercloud_puffs",
+      "aether:blue_aercloud_puffs",
+      "aether:golden_aercloud_puffs"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [
+      "aether:ore_ambrosium",
+      "aether:ore_zanite",
+      "aether:ore_gravitite",
+      "aether:ore_icestone",
+      "aether:ore_quicksoil"
+    ],
+    [],
+    [],
+    [
+      "aether:skyroot_trees_thick",
+      "aether:flowers",
+      "aether:grass",
+      "aether:golden_oak_trees",
+      "aether:crystal_trees"
+    ],
+    []
+  ],
+  "has_precipitation": true,
+  "temperature": 0.8
+}

@@ -91,3 +91,16 @@ for sets in ("zanite", "gravitite", "valkyrie", "neptune", "phoenix", "obsidian"
     (dst_a/"equipment").mkdir(exist_ok=True)
     (dst_a/"equipment"/f"{sets}.json").write_text(json.dumps({"layers": layers}))
 print("armor sets done")
+
+
+# ---- spawn egg tints (colors are hard-coded in upstream Java)
+java = (src/"main/java/com/aetherteam/aether/item/AetherItems.java").read_text()
+for name, c1, c2 in re.findall(r'register\("(\w+_spawn_egg)",\s*\(\) -> new DeferredSpawnEggItem\(\w+\.\w+, (0x\w+), (0x\w+)', java):
+    (dst_a/"items"/f"{name}.json").write_text(json.dumps({"model": {"type": "minecraft:model", "model": f"aether:item/{name}",
+        "tints": [{"type": "minecraft:constant", "value": int(c1, 16)}, {"type": "minecraft:constant", "value": int(c2, 16)}]}}))
+
+
+# ---- plant/torch blockstates (display-model blocks need their blockstate in the pack)
+for n in ("purple_flower", "white_flower", "skyroot_sapling", "golden_oak_sapling", "berry_bush", "berry_bush_stem", "ambrosium_torch", "ambrosium_wall_torch"):
+    (dst_a/"blockstates"/f"{n}.json").write_text((gen_a/"blockstates"/f"{n}.json").read_text())
+    (dst_a/"items"/f"{n}.json").write_text(json.dumps({"model": {"type": "minecraft:model", "model": f"aether:item/{n}"}}))

@@ -15,10 +15,12 @@ public class MAether implements ModInitializer {
 		AetherBlocks.init();
 		if (net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment()) DevCommands.register();
 		com.kestrel.maether.family.FamilyBlocks.init();
+		com.kestrel.maether.family.PlantBlocks.init();
 		com.kestrel.maether.item.AetherItems.init();
 		com.kestrel.maether.acc.Accessories.init();
 		com.kestrel.maether.item.ArmorEffects.init();
 		com.kestrel.maether.entity.AetherEntities.init();
+		com.kestrel.maether.item.AetherItems.eggs();
 		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			var stack = player.getItemInHand(hand);
 			if (level.isClientSide() || !stack.is(net.minecraft.world.item.Items.WATER_BUCKET)) return net.minecraft.world.InteractionResult.PASS;

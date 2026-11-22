@@ -72,7 +72,12 @@
       }
     },
     "ridges": 0.0,
-    "temperature": 0.0,
+    "temperature": {
+      "type": "minecraft:noise",
+      "noise": "minecraft:temperature",
+      "xz_scale": 0.25,
+      "y_scale": 0.0
+    },
     "vegetation": 0.0
   },
   "sea_level": -64,

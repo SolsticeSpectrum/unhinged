@@ -110,9 +110,13 @@ b["features"][6] = ["aether:ore_ambrosium", "aether:ore_zanite", "aether:ore_gra
 b["features"][9] = ["aether:skyroot_trees"]
 spawns = b["attributes"]["minecraft:gameplay/natural_mob_spawns"]["argument"]["spawns_by_category"]
 spawns.clear()
-spawns["creature"] = [{"type": "aether:phyg", "count": 4, "weight": 10}, {"type": "aether:flying_cow", "count": 4, "weight": 8},
-                      {"type": "aether:aerbunny", "count": 3, "weight": 10}, {"type": "minecraft:sheep", "count": 4, "weight": 12}]
-spawns["monster"] = [{"type": "aether:blue_swet", "count": 4, "weight": 20}]
+spawns["creature"] = [{"type": "aether:phyg", "count": 4, "weight": 10}, {"type": "aether:flying_cow", "count": 4, "weight": 10},
+                      {"type": "aether:aerbunny", "count": 3, "weight": 10}, {"type": "aether:sheepuff", "count": 4, "weight": 10},
+                      {"type": "aether:moa", "count": 3, "weight": 10}, {"type": "aether:whirlwind", "count": 1, "weight": 2}]
+spawns["monster"] = [{"type": "aether:blue_swet", "count": 4, "weight": 20}, {"type": "aether:golden_swet", "count": 2, "weight": 5},
+                     {"type": "aether:cockatrice", "count": 2, "weight": 10}, {"type": "aether:aechor_plant", "count": 2, "weight": 12},
+                     {"type": "aether:zephyr", "count": 1, "weight": 3}, {"type": "aether:evil_whirlwind", "count": 1, "weight": 3}]
+spawns["ambient"] = [{"type": "aether:aerwhale", "count": 1, "weight": 4}]
 w("worldgen/biome/skyroot_meadow.json", b)
 
 w("dimension/the_aether.json", {
@@ -207,7 +211,10 @@ def drop(entity, item, lo, hi):
                    "modifier": [{"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": lo, "max": hi}},
                                 {"type": "minecraft:enchanted_count_increase", "enchantment": "minecraft:looting", "count": {"type": "minecraft:uniform", "min": 0.0, "max": 1.0}}]}]}]})
 drop("phyg", "minecraft:porkchop", 1, 3); drop("flying_cow", "minecraft:beef", 1, 3)
-drop("aerbunny", "minecraft:rabbit_hide", 0, 1); drop("blue_swet", "minecraft:slime_ball", 0, 2)
+drop("aerbunny", "minecraft:rabbit_hide", 0, 1); drop("blue_swet", "aether:swet_ball", 0, 2)
+drop("sheepuff", "minecraft:white_wool", 1, 2); drop("moa", "minecraft:feather", 0, 2); drop("golden_swet", "aether:golden_amber", 0, 2)
+drop("aechor_plant", "aether:aechor_petal", 1, 2); drop("cockatrice", "minecraft:feather", 0, 2); drop("fire_minion", "minecraft:blaze_powder", 0, 1)
+drop("zephyr", "minecraft:snowball", 1, 4); drop("sentry", "aether:carved_stone", 0, 1)
 
 # --- loot tables (26.3 schema), driven by tools/blocks.txt
 def self_drop(name):

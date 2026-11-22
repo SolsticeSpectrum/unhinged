@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:slime_ball",
+          "name": "aether:swet_ball",
           "modifier": [
             {
               "type": "minecraft:set_count",

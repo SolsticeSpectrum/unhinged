@@ -13,7 +13,7 @@
             {
               "type": "aether:flying_cow",
               "count": 4,
-              "weight": 8
+              "weight": 10
             },
             {
               "type": "aether:aerbunny",
@@ -21,9 +21,19 @@
               "weight": 10
             },
             {
-              "type": "minecraft:sheep",
+              "type": "aether:sheepuff",
               "count": 4,
-              "weight": 12
+              "weight": 10
+            },
+            {
+              "type": "aether:moa",
+              "count": 3,
+              "weight": 10
+            },
+            {
+              "type": "aether:whirlwind",
+              "count": 1,
+              "weight": 2
             }
           ],
           "monster": [
@@ -31,6 +41,38 @@
               "type": "aether:blue_swet",
               "count": 4,
               "weight": 20
+            },
+            {
+              "type": "aether:golden_swet",
+              "count": 2,
+              "weight": 5
+            },
+            {
+              "type": "aether:cockatrice",
+              "count": 2,
+              "weight": 10
+            },
+            {
+              "type": "aether:aechor_plant",
+              "count": 2,
+              "weight": 12
+            },
+            {
+              "type": "aether:zephyr",
+              "count": 1,
+              "weight": 3
+            },
+            {
+              "type": "aether:evil_whirlwind",
+              "count": 1,
+              "weight": 3
+            }
+          ],
+          "ambient": [
+            {
+              "type": "aether:aerwhale",
+              "count": 1,
+              "weight": 4
             }
           ]
         }

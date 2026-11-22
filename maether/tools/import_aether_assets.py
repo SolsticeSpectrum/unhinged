@@ -75,3 +75,19 @@ if len(sys.argv) > 5:
         b = n.split()[0]
         (dst_a/"blockstates"/f"{b}.json").write_text((gen_a/"blockstates"/f"{b}.json").read_text())
     print("families", len(fams))
+
+
+# ---- armor: 1.21.1 layer textures -> 26.x equipment assets
+arm = src/"main/resources/assets/aether/textures/models/armor"
+for sets in ("zanite", "gravitite", "valkyrie", "neptune", "phoenix", "obsidian", "sentry"):
+    l1, l2 = arm/f"{sets}_layer_1.png", arm/f"{sets}_layer_2.png"
+    layers = {}
+    if l1.exists():
+        d = dst_a/"textures/entity/equipment/humanoid"; d.mkdir(parents=True, exist_ok=True); shutil.copy(l1, d/f"{sets}.png")
+        layers["humanoid"] = [{"texture": f"aether:{sets}"}]
+    if l2.exists():
+        d = dst_a/"textures/entity/equipment/humanoid_leggings"; d.mkdir(parents=True, exist_ok=True); shutil.copy(l2, d/f"{sets}.png")
+        layers["humanoid_leggings"] = [{"texture": f"aether:{sets}"}]
+    (dst_a/"equipment").mkdir(exist_ok=True)
+    (dst_a/"equipment"/f"{sets}.json").write_text(json.dumps({"layers": layers}))
+print("armor sets done")

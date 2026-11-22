@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "aether:holystone"
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "id": "aether:holystone_slab",
+    "count": 6
+  }
+}

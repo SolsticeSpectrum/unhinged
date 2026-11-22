@@ -122,22 +122,23 @@ w("dimension/the_aether.json", {
 
 # --- block tags: 26.x drives heightmaps / tool mining / spawning from tags, so our blocks must join the vanilla tags
 blocks = [l.split() for l in open(root / "tools/blocks.txt") if l.strip() and not l.startswith("#")]
-cubes = [f"aether:{n}" for n, k in blocks if k != "leaves"]
-leaves = [f"aether:{n}" for n, k in blocks if k == "leaves"]
-logs = [f"aether:{n}" for n, k in blocks if k == "log"]
+unbreakable = {l[0] for l in blocks if "unbreakable" in l}
+cubes = [f"aether:{b[0]}" for b in blocks if b[1] != "leaves"]
+leaves = [f"aether:{b[0]}" for b in blocks if b[1] == "leaves"]
+logs = [f"aether:{n[0]}" for n in blocks if n[0].endswith(("_log", "_wood"))]
 def tag(name, values): w_tag = out.parent / "minecraft/tags/block" / f"{name}.json"; w_tag.parent.mkdir(parents=True, exist_ok=True); w_tag.write_text(json.dumps({"values": values}, indent=2) + "\n")
 tag("blocks_motion_no_leaves", cubes)          # heightmaps (OCEAN_FLOOR/MOTION_BLOCKING) and ore/tree placement
 tag("leaves", leaves)
 tag("logs", logs); tag("logs_that_burn", logs)
-stone = [f"aether:{n}" for n, k in blocks if k == "cube" and any(t in n for t in ("stone", "ore", "bricks", "block", "gravitite"))]
+stone = [f"aether:{b[0]}" for b in blocks if b[2] == "stone" and b[0] not in unbreakable]
 tag("mineable/pickaxe", stone)
-tag("mineable/axe", logs + ["aether:skyroot_planks"])
-tag("mineable/shovel", ["aether:aether_dirt", "aether:aether_grass_block", "aether:quicksoil"])
+tag("mineable/axe", logs + ["aether:skyroot_planks", "aether:skyroot_bookshelf"])
+tag("mineable/shovel", ["aether:aether_dirt", "aether:aether_grass_block", "aether:enchanted_aether_grass_block", "aether:quicksoil"])
 tag("mineable/hoe", leaves)
 tag("needs_stone_tool", ["aether:zanite_ore", "aether:zanite_block"])
 tag("needs_iron_tool", ["aether:gravitite_ore", "aether:enchanted_gravitite"])
-tag("dirt", ["aether:aether_dirt", "aether:aether_grass_block"])
-tag("animals_spawnable_on", ["aether:aether_grass_block"])
+tag("dirt", ["aether:aether_dirt", "aether:aether_grass_block", "aether:enchanted_aether_grass_block"])
+tag("animals_spawnable_on", ["aether:aether_grass_block", "aether:enchanted_aether_grass_block"])
 tag("replaceable_by_trees", leaves)
 
 # --- item tags + recipes (26.3 schema)
@@ -160,6 +161,44 @@ for blk, gem in (("zanite_block", "zanite_gemstone"), ("ambrosium_block", "ambro
         "pattern": ["###", "###", "###"], "result": {"id": f"aether:{blk}"}})
     w(f"recipe/{gem}_from_{blk}.json", {"type": "minecraft:crafting_shapeless", "category": "misc",
         "ingredients": [f"aether:{blk}"], "result": {"id": f"aether:{gem}", "count": 9}})
+
+# --- block families: tags, loot, recipes
+fams = [l.split() for l in open(root / "tools/families.txt") if l.strip() and not l.startswith("#")]
+KIND_TAG = {"stairs": "stairs", "slab": "slabs", "wall": "walls", "fence": "fences", "gate": "fence_gates", "button": "buttons",
+            "plate": "pressure_plates", "door": "doors", "trapdoor": "trapdoors"}
+by_tag = {}
+for name, kind, mat, hard, base in fams:
+    by_tag.setdefault(KIND_TAG[kind], []).append(f"aether:{name}")
+    if mat == "wood": by_tag.setdefault("wooden_" + KIND_TAG[kind], []).append(f"aether:{name}")
+for t, v in by_tag.items(): tag(t, v)
+tag("mineable/pickaxe", stone + [f"aether:{n}" for n, k, m, h, b in fams if m != "wood" and k not in ("button",)] )
+tag("mineable/axe", logs + ["aether:skyroot_planks"] + [f"aether:{n}" for n, k, m, h, b in fams if m == "wood"])
+tag("blocks_motion_no_leaves", cubes + [f"aether:{n}" for n, k, m, h, b in fams if k not in ("button", "plate")])
+for name, kind, mat, hard, base in fams:
+    item = {"type": "minecraft:item", "name": f"aether:{name}"}
+    surv = {"type": "minecraft:survives_explosion"}
+    if kind == "slab":
+        item["modifier"] = [{"type": "minecraft:set_count", "count": 2, "condition": {"type": "minecraft:match_block", "blocks": f"aether:{name}", "state": {"type": "double"}}}, {"type": "minecraft:explosion_decay"}]
+        pool = {"rolls": 1, "entries": [item]}
+    elif kind == "door":
+        item["condition"] = {"type": "minecraft:match_block", "blocks": f"aether:{name}", "state": {"half": "lower"}}
+        pool = {"rolls": 1, "condition": surv, "entries": [item]}
+    else:
+        pool = {"rolls": 1, "condition": surv, "entries": [item]}
+    w(f"loot_table/blocks/{name}.json", {"type": "minecraft:block", "random_sequence": f"aether:blocks/{name}", "pools": [pool]})
+    ing = f"aether:{base}"; res = {"id": f"aether:{name}"}
+    stick = "aether:skyroot_stick"
+    rec = {"stairs": (["#  ", "## ", "###"], 4), "slab": (["###"], 6), "wall": (["###", "###"], 6), "plate": (["##"], 1),
+           "door": (["##", "##", "##"], 3), "trapdoor": (["###", "###"], 2)}
+    if kind in rec:
+        pat, n = rec[kind]; res["count"] = n
+        w(f"recipe/{name}.json", {"type": "minecraft:crafting_shaped", "category": "building", "key": {"#": ing}, "pattern": pat, "result": res})
+    elif kind == "fence":
+        w(f"recipe/{name}.json", {"type": "minecraft:crafting_shaped", "category": "misc", "key": {"#": stick, "W": ing}, "pattern": ["W#W", "W#W"], "result": {**res, "count": 3}})
+    elif kind == "gate":
+        w(f"recipe/{name}.json", {"type": "minecraft:crafting_shaped", "category": "redstone", "key": {"#": stick, "W": ing}, "pattern": ["#W#", "#W#"], "result": res})
+    elif kind == "button":
+        w(f"recipe/{name}.json", {"type": "minecraft:crafting_shapeless", "category": "redstone", "ingredients": [ing], "result": res})
 
 # --- entity loot (26.3 schema)
 def drop(entity, item, lo, hi):
@@ -195,9 +234,10 @@ for line in open(root / "tools/blocks.txt"):
     line = line.strip()
     if not line or line.startswith("#"): continue
     name, kind = line.split()[:2]
+    if name in unbreakable: continue
     if name in ORE: w(f"loot_table/blocks/{name}.json", ore_drop(name, ORE[name]))
     elif kind == "leaves": w(f"loot_table/blocks/{name}.json", leaves_drop(name))
-    elif name == "aether_grass_block": o = self_drop("aether_dirt"); w(f"loot_table/blocks/{name}.json", o)
+    elif name in ("aether_grass_block", "enchanted_aether_grass_block"): o = self_drop("aether_dirt"); w(f"loot_table/blocks/{name}.json", o)
     elif name == "gravitite_ore": w(f"loot_table/blocks/{name}.json", self_drop(name))  # needs zanite-tier tool; still drops itself
     else: w(f"loot_table/blocks/{name}.json", self_drop(name))
 print("ok")

@@ -14,6 +14,7 @@ public class MAether implements ModInitializer {
 	public void onInitialize() {
 		AetherBlocks.init();
 		if (net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment()) DevCommands.register();
+		com.kestrel.maether.family.FamilyBlocks.init();
 		com.kestrel.maether.item.AetherItems.init();
 		com.kestrel.maether.entity.AetherEntities.init();
 		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> {

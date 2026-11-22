@@ -1,6 +1,10 @@
 {
   "values": [
     "aether:skyroot_log",
-    "aether:golden_oak_log"
+    "aether:golden_oak_log",
+    "aether:stripped_skyroot_log",
+    "aether:skyroot_wood",
+    "aether:golden_oak_wood",
+    "aether:stripped_skyroot_wood"
   ]
 }

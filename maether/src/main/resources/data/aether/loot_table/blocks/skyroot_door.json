@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "aether:blocks/skyroot_door",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether:skyroot_door",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "aether:skyroot_door",
+            "state": {
+              "half": "lower"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

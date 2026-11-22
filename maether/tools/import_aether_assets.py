@@ -28,3 +28,50 @@ for n in names + items:
     base = n.split()[0]
     (dst_a/"items"/f"{base}.json").write_text(json.dumps(
         {"model": {"type": "minecraft:model", "model": f"aether:item/{base}"}}))
+
+
+# ---- block families (stairs/slab/...): blockstates + pre-expanded models (display models must cover the hitbox block underneath)
+import zipfile
+if len(sys.argv) > 5:
+    fams = [l.split() for l in open(sys.argv[4]) if l.strip() and not l.startswith("#")]
+    vjar = zipfile.ZipFile(sys.argv[5])
+    E = 0.08
+    (dst_a/"blockstates").mkdir(parents=True, exist_ok=True)
+    done = set()
+    def expand_els(m):
+        for el in m.get("elements", []):
+            el["from"] = [v - E for v in el["from"]]; el["to"] = [v + E for v in el["to"]]
+        return m
+    def tpl(ref):
+        """vanilla parent -> expanded copy under aether:block/_t/..."""
+        name = ref.split(":")[-1]
+        if name.startswith("builtin/"): return ref
+        out = dst_a/"models"/f"{name.replace('block/', 'block/_t/', 1)}.json"
+        if out not in done:
+            done.add(out)
+            m = json.loads(vjar.read(f"assets/minecraft/models/{name}.json"))
+            if "parent" in m: m["parent"] = tpl(m["parent"])
+            out.parent.mkdir(parents=True, exist_ok=True); out.write_text(json.dumps(expand_els(m)))
+        return "aether:" + name.replace("block/", "block/_t/", 1)
+    def fix(modelid):
+        path = dst_a/"models"/(modelid.split(":")[-1] + ".json")
+        if path in done: return
+        done.add(path)
+        m = json.loads(path.read_text())
+        par = m.get("parent", "")
+        if par.startswith("minecraft:") or (par and ":" not in par): m["parent"] = tpl(par if ":" in par else "minecraft:" + par)
+        elif par.startswith("aether:"): fix(par)
+        path.write_text(json.dumps(expand_els(m)))
+    for name, *_ in fams:
+        bs = json.loads((gen_a/"blockstates"/f"{name}.json").read_text())
+        (dst_a/"blockstates"/f"{name}.json").write_text(json.dumps(bs))
+        refs = []
+        for v in bs.get("variants", {}).values(): refs += v if isinstance(v, list) else [v]
+        for part in bs.get("multipart", []):
+            a = part["apply"]; refs += a if isinstance(a, list) else [a]
+        for r in refs: fix(r["model"])
+        (dst_a/"items"/f"{name}.json").write_text(json.dumps({"model": {"type": "minecraft:model", "model": f"aether:item/{name}"}}))
+    for n in names:
+        b = n.split()[0]
+        (dst_a/"blockstates"/f"{b}.json").write_text((gen_a/"blockstates"/f"{b}.json").read_text())
+    print("families", len(fams))

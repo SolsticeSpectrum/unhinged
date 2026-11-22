@@ -2,6 +2,18 @@
   "values": [
     "aether:skyroot_log",
     "aether:golden_oak_log",
-    "aether:skyroot_planks"
+    "aether:stripped_skyroot_log",
+    "aether:skyroot_wood",
+    "aether:golden_oak_wood",
+    "aether:stripped_skyroot_wood",
+    "aether:skyroot_planks",
+    "aether:skyroot_slab",
+    "aether:skyroot_stairs",
+    "aether:skyroot_fence",
+    "aether:skyroot_fence_gate",
+    "aether:skyroot_button",
+    "aether:skyroot_pressure_plate",
+    "aether:skyroot_door",
+    "aether:skyroot_trapdoor"
   ]
 }

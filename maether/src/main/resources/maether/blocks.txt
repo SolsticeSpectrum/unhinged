@@ -1,0 +1,66 @@
+# name kind mat hardness [flags]   kinds: cube leaves axis facing cloud   flags: unbreakable light=N friction=F bounce=B trans
+holystone cube stone 0.5
+mossy_holystone cube stone 0.5
+holystone_bricks cube stone 1.5
+aether_dirt cube dirt 0.5
+aether_grass_block cube grass 0.6
+enchanted_aether_grass_block cube grass 0.6
+quicksoil cube sand 0.5 friction=1.0
+ambrosium_ore cube stone 3
+zanite_ore cube stone 3
+gravitite_ore cube stone 5
+icestone cube stone 3
+ambrosium_block cube stone 3
+zanite_block cube stone 3
+enchanted_gravitite cube stone 5
+skyroot_planks cube wood 2.0
+skyroot_bookshelf cube wood 1.5
+skyroot_log axis wood 2.0
+golden_oak_log axis wood 2.0
+stripped_skyroot_log axis wood 2.0
+skyroot_wood axis wood 2.0
+golden_oak_wood axis wood 2.0
+stripped_skyroot_wood axis wood 2.0
+skyroot_leaves leaves leaves 0.2
+golden_oak_leaves leaves leaves 0.2
+crystal_leaves leaves leaves 0.2
+crystal_fruit_leaves leaves leaves 0.2
+holiday_leaves leaves leaves 0.2
+decorated_holiday_leaves leaves leaves 0.2
+cold_aercloud cloud cloud 0.2 bounce=0.6
+blue_aercloud cloud cloud 0.2 bounce=1.15
+golden_aercloud cloud cloud 0.2 bounce=1.9
+aerogel cube glass 1.0 trans
+quicksoil_glass cube glass 0.2 trans friction=1.0
+pillar axis stone 0.5
+pillar_top facing stone 0.5
+carved_stone cube stone 0.5
+locked_carved_stone cube stone 0.5 unbreakable
+trapped_carved_stone cube stone 0.5
+boss_doorway_carved_stone cube stone 0.5 unbreakable
+treasure_doorway_carved_stone cube stone 0.5 unbreakable
+sentry_stone cube stone 0.5 light=11
+locked_sentry_stone cube stone 0.5 unbreakable light=11
+trapped_sentry_stone cube stone 0.5 light=11
+boss_doorway_sentry_stone cube stone 0.5 unbreakable light=11
+treasure_doorway_sentry_stone cube stone 0.5 unbreakable light=11
+angelic_stone cube stone 0.5
+locked_angelic_stone cube stone 0.5 unbreakable
+trapped_angelic_stone cube stone 0.5
+boss_doorway_angelic_stone cube stone 0.5 unbreakable
+treasure_doorway_angelic_stone cube stone 0.5 unbreakable
+light_angelic_stone cube stone 0.5 light=11
+locked_light_angelic_stone cube stone 0.5 unbreakable light=11
+trapped_light_angelic_stone cube stone 0.5 light=11
+boss_doorway_light_angelic_stone cube stone 0.5 unbreakable light=11
+treasure_doorway_light_angelic_stone cube stone 0.5 unbreakable light=11
+hellfire_stone cube stone 0.5
+locked_hellfire_stone cube stone 0.5 unbreakable
+trapped_hellfire_stone cube stone 0.5
+boss_doorway_hellfire_stone cube stone 0.5 unbreakable
+treasure_doorway_hellfire_stone cube stone 0.5 unbreakable
+light_hellfire_stone cube stone 0.5 light=11
+locked_light_hellfire_stone cube stone 0.5 unbreakable light=11
+trapped_light_hellfire_stone cube stone 0.5 light=11
+boss_doorway_light_hellfire_stone cube stone 0.5 unbreakable light=11
+treasure_doorway_light_hellfire_stone cube stone 0.5 unbreakable light=11

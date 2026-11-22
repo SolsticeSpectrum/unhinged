@@ -25,70 +25,65 @@ public final class AetherBlocks {
 
 	private static Identifier id(String name) { return Identifier.fromNamespaceAndPath(NS, name); }
 
-	private static BlockBehaviour.Properties props(String name, BlockBehaviour.Properties p) {
-		return p.setId(ResourceKey.create(Registries.BLOCK, id(name)));
-	}
-
-	private static <B extends Block> B reg(String name, Function<BlockBehaviour.Properties, B> factory, BlockBehaviour.Properties p) {
-		B block = Registry.register(BuiltInRegistries.BLOCK, id(name), factory.apply(props(name, p)));
-		Item.Properties ip = new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id(name))).useBlockDescriptionPrefix();
-		Registry.register(BuiltInRegistries.ITEM, id(name), new AetherBlockItem(block, ip, id(name)));
-		ALL.put(name, block);
-		return block;
-	}
-
-	private static void cube(String name, BlockBehaviour.Properties p) {
-		reg(name, bp -> new AetherBlock(bp, BlockModelType.FULL_BLOCK, id("block/" + name)), p);
-	}
-
-	private static void leaves(String name) {
-		reg(name, bp -> new AetherBlock(bp, BlockModelType.LEAVES, id("block/" + name)),
-			BlockBehaviour.Properties.of().strength(0.2F).sound(SoundType.GRASS).noOcclusion());
-	}
-
-	private static void log(String name) {
-		reg(name, bp -> new AetherLogBlock(bp, id("block/" + name), id("block/" + name + "_horizontal")),
-			BlockBehaviour.Properties.of().strength(2.0F).sound(SoundType.WOOD));
-	}
-
-	private static BlockBehaviour.Properties stone(float hardness) {
-		return BlockBehaviour.Properties.of().strength(hardness, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE);
-	}
-
-	private static BlockBehaviour.Properties soft(SoundType s) {
-		return BlockBehaviour.Properties.of().strength(0.5F).sound(s);
+	private static BlockBehaviour.Properties base(String mat, float h) {
+		var p = BlockBehaviour.Properties.of();
+		return switch (mat) {
+			case "stone" -> p.strength(h, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE);
+			case "obsidian" -> p.strength(h, 1200.0F).requiresCorrectToolForDrops().sound(SoundType.STONE);
+			case "dirt" -> p.strength(h).sound(SoundType.GRAVEL);
+			case "grass" -> p.strength(h).sound(SoundType.GRASS);
+			case "sand" -> p.strength(h).sound(SoundType.SAND);
+			case "wood" -> p.strength(h, 3.0F).sound(SoundType.WOOD).ignitedByLava();
+			case "cloud" -> p.strength(h).sound(SoundType.WOOL);
+			case "glass" -> p.strength(h).sound(SoundType.GLASS).noOcclusion();
+			case "ice" -> p.strength(h).sound(SoundType.GLASS).friction(0.98F).noOcclusion();
+			case "leaves" -> p.strength(h).sound(SoundType.GRASS).noOcclusion();
+			default -> throw new IllegalArgumentException(mat);
+		};
 	}
 
 	public static void init() {
 		PORTAL = Registry.register(BuiltInRegistries.BLOCK, id("aether_portal"), new com.kestrel.maether.portal.AetherPortalBlock(
-			props("aether_portal", BlockBehaviour.Properties.of().noCollision().strength(-1.0F).sound(SoundType.GLASS).lightLevel(s -> 11).noLootTable())));
-		cube("holystone", stone(0.5F));
-		cube("mossy_holystone", stone(0.5F));
-		cube("holystone_bricks", stone(1.5F));
-		cube("aether_dirt", soft(SoundType.GRAVEL));
-		cube("aether_grass_block", soft(SoundType.GRASS));
-		cube("quicksoil", soft(SoundType.SAND));
-		cube("ambrosium_ore", stone(3.0F));
-		cube("zanite_ore", stone(3.0F));
-		cube("gravitite_ore", stone(5.0F));
-		cube("icestone", stone(3.0F));
-		cube("ambrosium_block", stone(3.0F));
-		cube("zanite_block", stone(3.0F));
-		cube("enchanted_gravitite", stone(5.0F));
-		cube("skyroot_planks", BlockBehaviour.Properties.of().strength(2.0F, 3.0F).sound(SoundType.WOOD));
-		cube("carved_stone", stone(0.5F));
-		cube("sentry_stone", stone(0.5F));
-		cube("angelic_stone", stone(0.5F));
-		cube("hellfire_stone", stone(0.5F));
-		cube("light_angelic_stone", stone(0.5F));
-		cube("light_hellfire_stone", stone(0.5F));
-		log("skyroot_log");
-		log("golden_oak_log");
-		leaves("skyroot_leaves");
-		leaves("golden_oak_leaves");
-		leaves("crystal_leaves");
-		cube("cold_aercloud", soft(SoundType.WOOL));
-		cube("blue_aercloud", soft(SoundType.WOOL));
-		cube("golden_aercloud", soft(SoundType.WOOL));
+			BlockBehaviour.Properties.of().noCollision().strength(-1.0F).sound(SoundType.GLASS).lightLevel(s -> 11).noLootTable()
+				.setId(ResourceKey.create(Registries.BLOCK, id("aether_portal")))));
+		try (var in = AetherBlocks.class.getResourceAsStream("/maether/blocks.txt");
+			 var r = new java.io.BufferedReader(new java.io.InputStreamReader(in))) {
+			String line;
+			while ((line = r.readLine()) != null) {
+				line = line.trim();
+				if (line.isEmpty() || line.startsWith("#")) continue;
+				String[] t = line.split("\\s+");
+				register(t[0], t[1], t[2], Float.parseFloat(t[3]), java.util.Set.of(java.util.Arrays.copyOfRange(t, 4, t.length)));
+			}
+		} catch (java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static String flag(java.util.Set<String> flags, String key, String def) {
+		for (String f : flags) if (f.startsWith(key + "=")) return f.substring(key.length() + 1);
+		return def;
+	}
+
+	private static void register(String name, String kind, String mat, float h, java.util.Set<String> flags) {
+		var p = base(mat, h);
+		if (flags.contains("unbreakable")) p = p.strength(-1.0F, 3600000.0F).noLootTable();
+		String light = flag(flags, "light", null);
+		if (light != null) { int l = Integer.parseInt(light); p = p.lightLevel(s -> l); }
+		String fr = flag(flags, "friction", null);
+		if (fr != null) p = p.friction(Float.parseFloat(fr));
+		final var props = p.setId(ResourceKey.create(Registries.BLOCK, id(name)));
+		Block b = switch (kind) {
+			case "cube" -> new AetherBlock.Cube(props, flags.contains("trans") ? BlockModelType.LEAVES : BlockModelType.FULL_BLOCK, BlockModels.first(name));
+			case "leaves" -> new AetherBlock.Cube(props, BlockModelType.LEAVES, BlockModels.first(name));
+			case "axis" -> new AetherBlock.Axis(props, name);
+			case "facing" -> new AetherBlock.Facing(props, name);
+			case "cloud" -> new AetherBlock.Cloud(props, BlockModels.first(name), Double.parseDouble(flag(flags, "bounce", "0")));
+			default -> throw new IllegalArgumentException(kind + " for " + name);
+		};
+		Registry.register(BuiltInRegistries.BLOCK, id(name), b);
+		Item.Properties ip = new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id(name))).useBlockDescriptionPrefix();
+		Registry.register(BuiltInRegistries.ITEM, id(name), new AetherBlockItem(b, ip, id(name)));
+		ALL.put(name, b);
 	}
 }

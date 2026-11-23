@@ -32,6 +32,9 @@ import java.util.Map;
 
 /** Darts + shooters, bow, skyroot buckets, and right-click block conversions (swet ball, ambrosium). */
 public final class Extras {
+	private static final java.util.List<Object[]> EXPIRE = new java.util.concurrent.CopyOnWriteArrayList<>();
+	private static final Map<String, String> STRIP = Map.of("skyroot_log", "stripped_skyroot_log", "skyroot_wood", "stripped_skyroot_wood");
+
 	private Extras() {}
 
 	private static Item get(String n) { return AetherItems.ALL.get(n); }
@@ -143,8 +146,53 @@ public final class Extras {
 		AetherItems.put("phoenix_bow", new PolyBow(new Item.Properties().durability(500).setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, bow)), bow));
 		buckets();
 
+		// cloud staff: a short-lived cloud platform under you (the original summons cloud minions you can stand on)
+		AetherItems.item("cloud_staff", Items.STICK, new Item.Properties().stacksTo(1).durability(60), (level, p, hand, stack) -> {
+			if (!(level instanceof ServerLevel sl)) return InteractionResult.PASS;
+			Block cloud = com.kestrel.maether.block.AetherBlocks.ALL.get("cold_aercloud");
+			BlockPos base = p.blockPosition().below();
+			for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+				BlockPos q = base.offset(dx, 0, dz);
+				if (sl.getBlockState(q).isAir()) { sl.setBlock(q, cloud.defaultBlockState(), 3); EXPIRE.add(new Object[]{sl, q, sl.getServer().getTickCount() + 160}); }
+			}
+			stack.hurtAndBreak(1, p, hand == InteractionHand.MAIN_HAND ? net.minecraft.world.entity.EquipmentSlot.MAINHAND : net.minecraft.world.entity.EquipmentSlot.OFFHAND);
+			p.getCooldowns().addCooldown(stack, 40);
+			return InteractionResult.SUCCESS;
+		}, null);
+		AetherItems.item("nature_staff", Items.STICK, new Item.Properties().stacksTo(1).durability(100), (level, p, hand, stack) -> InteractionResult.PASS, null);
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+			EXPIRE.removeIf(e -> {
+				if (server.getTickCount() < (int) e[2]) return false;
+				ServerLevel l = (ServerLevel) e[0]; BlockPos q = (BlockPos) e[1];
+				if (l.getBlockState(q).is(com.kestrel.maether.block.AetherBlocks.ALL.get("cold_aercloud"))) l.setBlock(q, Blocks.AIR.defaultBlockState(), 3);
+				return true;
+			});
+		});
+
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			ItemStack held = player.getItemInHand(hand);
+			if (!level.isClientSide() && !held.isEmpty()) {
+				BlockPos pos = hit.getBlockPos();
+				String block = BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()).getPath();
+				if (held.is(net.minecraft.tags.ItemTags.AXES) && STRIP.containsKey(block)) {          // axe: strip skyroot logs/wood
+					Block to = com.kestrel.maether.block.AetherBlocks.ALL.get(STRIP.get(block));
+					level.setBlock(pos, to.withPropertiesOf(level.getBlockState(pos)), 11);
+					level.playSound(null, pos, SoundEvents.AXE_STRIP.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
+					held.hurtAndBreak(1, player, hand == InteractionHand.MAIN_HAND ? net.minecraft.world.entity.EquipmentSlot.MAINHAND : net.minecraft.world.entity.EquipmentSlot.OFFHAND);
+					return InteractionResult.SUCCESS;
+				}
+				if (held.is(net.minecraft.tags.ItemTags.SHOVELS) && (block.equals("aether_grass_block") || block.equals("enchanted_aether_grass_block")) && level.getBlockState(pos.above()).isAir()) {
+					level.setBlock(pos, com.kestrel.maether.block.AetherBlocks.ALL.get("aether_dirt_path").defaultBlockState(), 11);
+					level.playSound(null, pos, SoundEvents.SHOVEL_FLATTEN.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
+					held.hurtAndBreak(1, player, hand == InteractionHand.MAIN_HAND ? net.minecraft.world.entity.EquipmentSlot.MAINHAND : net.minecraft.world.entity.EquipmentSlot.OFFHAND);
+					return InteractionResult.SUCCESS;
+				}
+				if (held.getItem() == AetherItems.ALL.get("nature_staff") && level instanceof ServerLevel sl
+					&& net.minecraft.world.item.BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), sl, pos)) {   // nature staff: infinite bone meal
+					held.hurtAndBreak(1, player, hand == InteractionHand.MAIN_HAND ? net.minecraft.world.entity.EquipmentSlot.MAINHAND : net.minecraft.world.entity.EquipmentSlot.OFFHAND);
+					return InteractionResult.SUCCESS;
+				}
+			}
 			if (level.isClientSide() || held.isEmpty()) return InteractionResult.PASS;
 			String item = BuiltInRegistries.ITEM.getKey(held.getItem()).toString();
 			BlockPos pos = hit.getBlockPos();

@@ -64,6 +64,18 @@ public final class AetherBlock {
 		@Override public BlockState getPolymerBlockState(BlockState s, PacketContext c) { return visuals.get(s.getValue(FACING)); }
 	}
 
+	/** Enchanted gravitite: rises while powered (the original floats up as a floating-block entity). */
+	public static class Rising extends Cube {
+		public Rising(Properties p, PolymerBlockModel model) { super(p, BlockModelType.FULL_BLOCK, model); }
+		@Override protected void onPlace(BlockState s, Level l, BlockPos p, BlockState old, boolean moved) { if (!l.isClientSide()) l.scheduleTick(p, this, 2); }
+		@Override protected void neighborChanged(BlockState s, Level l, BlockPos p, Block b, net.minecraft.world.level.redstone.Orientation o, boolean m) { if (!l.isClientSide()) l.scheduleTick(p, this, 2); }
+		@Override protected void tick(BlockState s, net.minecraft.server.level.ServerLevel l, BlockPos p, net.minecraft.util.RandomSource r) {
+			if (!l.hasNeighborSignal(p)) return;
+			BlockPos up = p.above();
+			if (l.isEmptyBlock(up) && up.getY() < l.getMaxY()) { l.setBlock(up, s, 3); l.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3); }
+		}
+	}
+
 	/** Cloud blocks: soft landing and launch. bounce &lt;= 0 means plain soft landing. */
 	public static class Cloud extends Cube {
 		private final double bounce;

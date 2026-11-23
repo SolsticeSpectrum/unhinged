@@ -12,7 +12,7 @@ gravitite_ore cube stone 5
 icestone cube stone 3
 ambrosium_block cube stone 3
 zanite_block cube stone 3
-enchanted_gravitite cube stone 5
+enchanted_gravitite rising stone 5
 skyroot_planks cube wood 2.0
 skyroot_bookshelf cube wood 1.5
 skyroot_log axis wood 2.0

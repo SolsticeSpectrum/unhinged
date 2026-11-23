@@ -20,6 +20,7 @@ public class MAether implements ModInitializer {
 		com.kestrel.maether.family.PlantBlocks.init();
 		com.kestrel.maether.item.AetherItems.init();
 		com.kestrel.maether.acc.Accessories.init();
+		com.kestrel.maether.item.Extras.init();
 		com.kestrel.maether.item.ArmorEffects.init();
 		com.kestrel.maether.entity.AetherEntities.init();
 		com.kestrel.maether.item.AetherItems.eggs();
@@ -32,6 +33,13 @@ public class MAether implements ModInitializer {
 			if (!com.kestrel.maether.portal.AetherPortals.tryLight(level, inside)) return net.minecraft.world.InteractionResult.PASS;
 			if (!player.isCreative()) player.setItemInHand(hand, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BUCKET));
 			return net.minecraft.world.InteractionResult.SUCCESS;
+		});
+		// players standing still inside a portal never trigger entityInside (no movement packets): poll instead
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+			for (var p : server.getPlayerList().getPlayers()) {
+				var st = p.level().getBlockState(p.blockPosition());
+				if (st.is(com.kestrel.maether.block.AetherBlocks.PORTAL)) p.setAsInsidePortal((net.minecraft.world.level.block.Portal) st.getBlock(), p.blockPosition());
+			}
 		});
 		PolymerResourcePackUtils.addModAssets(ID);
 		PolymerResourcePackUtils.markAsRequired();

@@ -78,6 +78,7 @@ public final class AetherBlocks {
 			case "leaves" -> new AetherBlock.Cube(props, BlockModelType.LEAVES, BlockModels.first(name));
 			case "machine" -> new com.kestrel.maether.machine.Machines.Block(props, com.kestrel.maether.machine.Machines.Kind.valueOf(name.toUpperCase()), BlockModels.first(name));
 			case "chest" -> new TreasureChest(props, BlockModels.first(name));
+			case "rising" -> new AetherBlock.Rising(props, BlockModels.first(name));
 			case "axis" -> new AetherBlock.Axis(props, name);
 			case "facing" -> new AetherBlock.Facing(props, name);
 			case "cloud" -> new AetherBlock.Cloud(props, BlockModels.first(name), Double.parseDouble(flag(flags, "bounce", "0")));

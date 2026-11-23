@@ -44,6 +44,31 @@ public final class Dungeons {
 		public Room(StructureTemplateManager m, Identifier template, BlockPos pos) { super(ROOM, 0, m, template, template.toString(), settings(), pos); }
 		public Room(StructureTemplateManager m, CompoundTag tag) { super(ROOM, tag, m, id -> settings()); }
 		@Override protected void handleDataMarker(String s, BlockPos p, net.minecraft.world.level.ServerLevelAccessor l, RandomSource r, BoundingBox b) {}
+
+		/** after the room is stamped, add a guard or two appropriate for the tier */
+		@Override public void postProcess(WorldGenLevel level, StructureManager sm, ChunkGenerator gen, RandomSource r, BoundingBox chunk, ChunkPos cp, BlockPos pivot) {
+			super.postProcess(level, sm, gen, r, chunk, cp, pivot);
+			String n = this.templateName;
+			if (n.contains("boss_room") || r.nextInt(3) != 0) return;
+			String mob = n.contains("bronze") ? "sentry" : (n.contains("silver") && r.nextBoolean() ? "mimic" : "valkyrie");
+			var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.fromNamespaceAndPath("aether", mob)).orElse(null);
+			if (type == null) return;
+			BoundingBox b = this.boundingBox;
+			int x0 = Math.max(b.minX(), chunk.minX()), x1 = Math.min(b.maxX(), chunk.maxX()), z0 = Math.max(b.minZ(), chunk.minZ()), z1 = Math.min(b.maxZ(), chunk.maxZ());
+			if (x0 > x1 || z0 > z1) return;
+			for (int tries = 0; tries < 24; tries++) {
+				BlockPos p = new BlockPos(x0 + r.nextInt(x1 - x0 + 1), b.minY() + 1 + r.nextInt(Math.max(1, b.getYSpan() - 2)), z0 + r.nextInt(z1 - z0 + 1));
+				if (level.isEmptyBlock(p) && level.isEmptyBlock(p.above()) && !level.isEmptyBlock(p.below())) {
+					var e = type.create(level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
+					if (e instanceof net.minecraft.world.entity.Mob mobE) {
+						mobE.snapTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, r.nextFloat() * 360F, 0F);
+						mobE.setPersistenceRequired();
+						level.addFreshEntity(mobE);
+					}
+					return;
+				}
+			}
+		}
 	}
 
 	/** An air box (tunnel / shaft). */
@@ -100,10 +125,13 @@ public final class Dungeons {
 		}
 
 		private void silver(StructurePiecesBuilder b, StructureTemplateManager m, BlockPos o, int top) {
-			b.addPiece(new Room(m, t("silver_dungeon/skeleton"), o));                               // 32x27x26
-			b.addPiece(new Room(m, t("silver_dungeon/boss_room"), o.offset(36, 0, 0)));            // 22x17x26
-			carve(b, o.getX() + 30, o.getY() + 2, o.getZ() + 10, o.getX() + 37, o.getY() + 5, o.getZ() + 13);
-			carve(b, o.getX() + 15, o.getY() + 26, o.getZ() + 12, o.getX() + 17, top + 2, o.getZ() + 14);
+			// the silver pieces are open-ended along Z: rear (open +Z) -> skeleton -> skeleton (open both ends) -> sealed boss room
+			b.addPiece(new Room(m, t("silver_dungeon/rear"), o));                                   // 32x30x31
+			b.addPiece(new Room(m, t("silver_dungeon/skeleton"), o.offset(0, 0, 31)));             // 32x27x26
+			b.addPiece(new Room(m, t("silver_dungeon/skeleton"), o.offset(0, 0, 57)));
+			b.addPiece(new Room(m, t("silver_dungeon/boss_room"), o.offset(5, 0, 83)));            // 22x17x26
+			carve(b, o.getX() + 14, o.getY() + 2, o.getZ() + 81, o.getX() + 17, o.getY() + 5, o.getZ() + 86); // door into the boss room
+			carve(b, o.getX() + 15, o.getY() + 26, o.getZ() + 43, o.getX() + 17, top + 2, o.getZ() + 45);      // shaft to the surface
 		}
 
 		private void gold(StructurePiecesBuilder b, StructureTemplateManager m, BlockPos o) {

@@ -7,6 +7,7 @@ SLOG=$1; CLOG=$2
 O="execute in minecraft:overworld run"; A="execute in aether:the_aether run"
 (
   while ! grep -aq "Done (" "$SLOG" 2>/dev/null; do sleep 1; done
+  sleep 25
   (cd tools && node raw_client.js > "$CLOG" 2>&1 &)
   while ! grep -aq "RawBot joined the game" "$SLOG" 2>/dev/null; do sleep 0.5; done
   for c in "gamemode creative RawBot" \
@@ -24,4 +25,4 @@ O="execute in minecraft:overworld run"; A="execute in aether:the_aether run"
   echo "data get entity RawBot Dimension"; sleep 1.2
   echo "data get entity RawBot Pos"; sleep 1.2
   echo stop
-) | timeout 240 ./gradlew runServer --no-daemon > "$SLOG" 2>&1
+) | timeout 420 ./gradlew runServer --no-daemon > "$SLOG" 2>&1

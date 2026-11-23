@@ -38,6 +38,14 @@ final class DevCommands {
 					c.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
 					return 1;
 				}))
+				.then(Commands.literal("states").executes(c -> {
+					var sb = new StringBuilder();
+					for (var t : new eu.pb4.polymer.blocks.api.BlockModelType[]{eu.pb4.polymer.blocks.api.BlockModelType.FULL_BLOCK, eu.pb4.polymer.blocks.api.BlockModelType.LEAVES,
+						eu.pb4.polymer.blocks.api.BlockModelType.PLANT, eu.pb4.polymer.blocks.api.BlockModelType.BIOME_COLORED_LEAVES})
+						sb.append(t.name()).append(" left=").append(eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils.getBlocksLeft(t)).append("; ");
+					c.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+					return 1;
+				}))
 				.then(Commands.literal("dump").executes(c -> {
 					var sb = new StringBuilder();
 					for (var k : net.minecraft.core.registries.BuiltInRegistries.BLOCK.keySet()) if (k.getNamespace().equals("aether")) sb.append("block ").append(k.getPath()).append('\n');

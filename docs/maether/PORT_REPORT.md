@@ -21,6 +21,11 @@ Server-side Fabric + Polymer port of The Aether for vanilla **26.3** clients. Bu
 **Verified (server log / raw protocol client):** clean boot (115 blocks, 261 items, 22 entity types); world **save + reload** (dungeon, boss, block entity, mobs persist, no errors); 1,564-file pack hosted by Polymer autohost and downloaded; registry sync + play for a vanilla-protocol client (no kick); portal both directions; void return; ore/tree/flower/cloud/dungeon counts; all mobs/bosses summon; loot, recipes, tags, advancements load.
 **NOT verified (be sceptical):** anything a real client renders (display-entity models, armor/equipment assets, spawn egg tints, sky colours, tool/weapon item models); GUI clicking; machine processing; boss fights; accessory/armor effects; bucket/dart/bow behaviour; dungeon layouts (rooms are placed at guessed offsets and joined by carved tunnels, may look wrong); client decoding of our `dimension_type`/`biome` JSON.
 
+## Polymania compatibility (tested)
+Booted with Polymania's server mods (79/86 load on 26.3 today; the rest are 26.2-era, see `docs/POLYMANIA.md`): no registry/mixin/namespace clash with mAether,
+pack merges (32 MB), Polymer budget fine (FULL_BLOCK 655 left, mAether ~95; LEAVES 93 left), vanilla-protocol client joins and uses the portal.
+One Polymania mod (`blahaj`) kicks vanilla clients by itself; others (cinderscapes, chalk, jsonpatcher, explorify) are 26.2-only.
+
 ## Not ported
 Signs/hanging signs, beds, potted plants, present, quicksoil glass pane, aerogel stairs/wall (no upstream blockstates), music discs (+ all custom sounds/music), 7 extra bucket types (fish, powder snow, etc.), portal-frame item, floating-block / crystal / minion / projectile helper entities, custom mob models (all mobs look like their vanilla base), shaders/HUD, Accessories cape rendering.
 

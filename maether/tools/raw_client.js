@@ -4,7 +4,7 @@ const PROTO = 777
 const vi = n => { const b = []; do { let t = n & 0x7f; n >>>= 7; if (n) t |= 0x80; b.push(t) } while (n); return Buffer.from(b) }
 const str = s => { const b = Buffer.from(s, 'utf8'); return Buffer.concat([vi(b.length), b]) }
 const readVi = (buf, o) => { let r = 0, s = 0, b; do { if (o >= buf.length) return null; b = buf[o++]; r |= (b & 0x7f) << s; s += 7 } while (b & 0x80); return [r, o] }
-let state = 'login', compression = -1, acc = Buffer.alloc(0), t0 = Date.now(), playPackets = 0, joined = false
+let pos = null, state = 'login', compression = -1, acc = Buffer.alloc(0), t0 = Date.now(), playPackets = 0, joined = false
 const log = (...a) => console.log(((Date.now() - t0) / 1000).toFixed(1) + 's', ...a)
 const sock = net.connect(25565, '127.0.0.1')
 const send = (id, payload = Buffer.alloc(0)) => {
@@ -41,8 +41,15 @@ function handle(id, data) {
     else log('config packet', id, data.length, data.subarray(0,40).toString('hex'), JSON.stringify(data.subarray(0,40).toString('latin1').replace(/[^ -~]/g,'.')))
   } else {
     playPackets++
+    if (id === 45) { send(28, data.subarray(0, 8)); return }                       // keep_alive -> keep_alive
+    if (id === 73) {                                                                 // player_position: ack + remember position
+      const [tid, o] = readVi(data, 0); pos = [data.readDoubleBE(o), data.readDoubleBE(o + 8), data.readDoubleBE(o + 16)]
+      log('tp-packet hex', data.subarray(0, 12).toString('hex'), 'tid', tid, 'sent', vi(tid).toString('hex')); { const yr = data.readFloatBE(o + 48), xr = data.readFloatBE(o + 52); const b = Buffer.alloc(32); b.writeDoubleBE(pos[0], 0); b.writeDoubleBE(pos[1], 8); b.writeDoubleBE(pos[2], 16); b.writeFloatBE(yr, 24); b.writeFloatBE(xr, 28); send(0, Buffer.concat([vi(tid), b])) }
+      log('teleported to', pos.map(v => v.toFixed(1)).join(',')); return }
+    if (id === 84) log('respawn (dimension change)')
     if (playPackets <= 3 || id === 0x1d || id === 0x1c) log('play packet', id, data.length)
-    if (!joined && playPackets === 1) { joined = true; log('FIRST PLAY PACKET (login) received') }
+    if (!joined && playPackets === 1) { joined = true; log('FIRST PLAY PACKET (login) received'); send(44);   // player_loaded
+      }
   }
 }
 sock.on('data', d => {
@@ -58,4 +65,4 @@ sock.on('data', d => {
 })
 sock.on('close', () => { log('SOCKET CLOSED; play packets received:', playPackets); process.exit(playPackets > 0 ? 0 : 3) })
 sock.on('error', e => log('socket error', e.message))
-setTimeout(() => { log('STILL CONNECTED after 27s; play packets:', playPackets); sock.destroy() }, 27000)
+setTimeout(() => { log('STILL CONNECTED after 55s; play packets:', playPackets); sock.destroy() }, 55000)

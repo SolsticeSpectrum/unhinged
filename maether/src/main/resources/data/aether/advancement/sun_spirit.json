@@ -1,0 +1,34 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "aether:sun_spirit"
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:gold_dungeon_key"
+    },
+    "title": {
+      "text": "Gold Dungeon"
+    },
+    "description": {
+      "text": "Defeat the Sun Spirit"
+    },
+    "frame": "challenge"
+  },
+  "parent": "aether:valkyrie_queen"
+}

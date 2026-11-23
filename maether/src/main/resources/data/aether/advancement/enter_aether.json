@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "aether:the_aether"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:aether_grass_block"
+    },
+    "title": {
+      "text": "The Aether"
+    },
+    "description": {
+      "text": "Step through a glowstone portal into the sky"
+    },
+    "frame": "task",
+    "background": "minecraft:gui/advancements/backgrounds/stone",
+    "show_toast": false,
+    "announce_to_chat": false
+  }
+}

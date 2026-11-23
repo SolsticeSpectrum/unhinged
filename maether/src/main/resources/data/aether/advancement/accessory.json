@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:iron_ring"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:iron_ring"
+    },
+    "title": {
+      "text": "Accessorized"
+    },
+    "description": {
+      "text": "Find a ring, then use /accessories"
+    },
+    "frame": "task"
+  },
+  "parent": "aether:enter_aether"
+}

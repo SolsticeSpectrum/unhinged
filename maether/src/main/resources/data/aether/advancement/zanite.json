@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:zanite_gemstone"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:zanite_gemstone"
+    },
+    "title": {
+      "text": "Zanite"
+    },
+    "description": {
+      "text": "Mine zanite ore"
+    },
+    "frame": "task"
+  },
+  "parent": "aether:holystone_tools"
+}

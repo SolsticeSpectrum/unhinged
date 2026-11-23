@@ -1,0 +1,34 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "aether:valkyrie_queen"
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:silver_dungeon_key"
+    },
+    "title": {
+      "text": "Silver Dungeon"
+    },
+    "description": {
+      "text": "Defeat the Valkyrie Queen"
+    },
+    "frame": "challenge"
+  },
+  "parent": "aether:slider"
+}

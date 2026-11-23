@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:gravitite_ore"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:enchanted_gravitite"
+    },
+    "title": {
+      "text": "Heavier Than Air"
+    },
+    "description": {
+      "text": "Mine gravitite ore with a zanite pickaxe"
+    },
+    "frame": "task"
+  },
+  "parent": "aether:zanite_tools"
+}

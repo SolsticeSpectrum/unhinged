@@ -63,6 +63,11 @@
     "aether:freezer",
     "aether:incubator",
     "aether:treasure_chest",
+    "aether:sun_altar",
+    "aether:frosted_ice",
+    "aether:unstable_obsidian",
+    "aether:aether_dirt_path",
+    "aether:aether_farmland",
     "aether:holystone_slab",
     "aether:holystone_stairs",
     "aether:holystone_wall",
@@ -89,6 +94,7 @@
     "aether:skyroot_fence",
     "aether:skyroot_fence_gate",
     "aether:skyroot_door",
-    "aether:skyroot_trapdoor"
+    "aether:skyroot_trapdoor",
+    "aether:aerogel_slab"
   ]
 }

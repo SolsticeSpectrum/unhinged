@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:ambrosium_shard"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:ambrosium_shard"
+    },
+    "title": {
+      "text": "Glowing Rock"
+    },
+    "description": {
+      "text": "Mine ambrosium ore"
+    },
+    "frame": "task"
+  },
+  "parent": "aether:enter_aether"
+}

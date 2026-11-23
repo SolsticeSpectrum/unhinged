@@ -30,3 +30,4 @@ skyroot_button button wood 2.0 skyroot_planks
 skyroot_pressure_plate plate wood 2.0 skyroot_planks
 skyroot_door door wood 2.0 skyroot_planks
 skyroot_trapdoor trapdoor wood 2.0 skyroot_planks
+aerogel_slab slab glass 1.0 aerogel

@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:altar"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:altar"
+    },
+    "title": {
+      "text": "Enchanting"
+    },
+    "description": {
+      "text": "Obtain an altar"
+    },
+    "frame": "task"
+  },
+  "parent": "aether:ambrosium"
+}

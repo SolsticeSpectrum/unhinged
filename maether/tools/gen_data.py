@@ -326,3 +326,28 @@ for name, step, spacing, sep, salt in (("bronze", "underground_structures", 14, 
         "spawn_overrides": {}, "terrain_adaptation": "none"})
     w(f"worldgen/structure_set/{name}_dungeon.json", {"structures": [{"structure": f"aether:{name}_dungeon", "weight": 1}],
         "placement": {"type": "minecraft:random_spread", "spacing": spacing, "separation": sep, "salt": salt}})
+
+
+# ---- advancements (progression); literal text so vanilla clients need no lang entries
+def adv(name, parent, icon, title, desc, trigger, frame="task", background=None):
+    d = {"criteria": {"c": trigger}, "requirements": [["c"]],
+         "display": {"icon": {"id": icon}, "title": {"text": title}, "description": {"text": desc}, "frame": frame,
+                     **({"background": background, "show_toast": False, "announce_to_chat": False} if background else {})}}
+    if parent: d["parent"] = f"aether:{parent}"
+    w(f"advancement/{name}.json", d)
+have = lambda item: {"trigger": "minecraft:inventory_changed", "conditions": {"items": [{"items": item}]}}
+killed = lambda ent: {"trigger": "minecraft:player_killed_entity", "conditions": {"entity": {"type": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:entity_type": ent}}}}
+adv("enter_aether", None, "aether:aether_grass_block", "The Aether", "Step through a glowstone portal into the sky", {"trigger": "minecraft:changed_dimension", "conditions": {"to": "aether:the_aether"}}, background="minecraft:gui/advancements/backgrounds/stone")
+adv("ambrosium", "enter_aether", "aether:ambrosium_shard", "Glowing Rock", "Mine ambrosium ore", have("aether:ambrosium_shard"))
+adv("skyroot_tools", "enter_aether", "aether:skyroot_pickaxe", "Sky Tools", "Craft a skyroot pickaxe", have("aether:skyroot_pickaxe"))
+adv("holystone_tools", "skyroot_tools", "aether:holystone_pickaxe", "Holy Ground", "Craft a holystone pickaxe", have("aether:holystone_pickaxe"))
+adv("zanite", "holystone_tools", "aether:zanite_gemstone", "Zanite", "Mine zanite ore", have("aether:zanite_gemstone"))
+adv("zanite_tools", "zanite", "aether:zanite_pickaxe", "Pure Power", "Craft a zanite pickaxe", have("aether:zanite_pickaxe"))
+adv("gravitite", "zanite_tools", "aether:enchanted_gravitite", "Heavier Than Air", "Mine gravitite ore with a zanite pickaxe", have("aether:gravitite_ore"))
+adv("altar", "ambrosium", "aether:altar", "Enchanting", "Obtain an altar", have("aether:altar"))
+adv("berries", "enter_aether", "aether:blue_berry", "Blue Harvest", "Pick a blue berry", have("aether:blue_berry"))
+adv("accessory", "enter_aether", "aether:iron_ring", "Accessorized", "Find a ring, then use /accessories", have("aether:iron_ring"))
+adv("slider", "zanite_tools", "aether:bronze_dungeon_key", "Bronze Dungeon", "Defeat the Slider", killed("aether:slider"), "challenge")
+adv("valkyrie_queen", "slider", "aether:silver_dungeon_key", "Silver Dungeon", "Defeat the Valkyrie Queen", killed("aether:valkyrie_queen"), "challenge")
+adv("sun_spirit", "valkyrie_queen", "aether:gold_dungeon_key", "Gold Dungeon", "Defeat the Sun Spirit", killed("aether:sun_spirit"), "challenge")
+adv("victory", "sun_spirit", "aether:victory_medal", "Victory", "Collect a victory medal", have("aether:victory_medal"), "goal")

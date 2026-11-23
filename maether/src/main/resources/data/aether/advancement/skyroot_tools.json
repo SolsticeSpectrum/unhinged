@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:skyroot_pickaxe"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:skyroot_pickaxe"
+    },
+    "title": {
+      "text": "Sky Tools"
+    },
+    "description": {
+      "text": "Craft a skyroot pickaxe"
+    },
+    "frame": "task"
+  },
+  "parent": "aether:enter_aether"
+}

@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:zanite_pickaxe"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:zanite_pickaxe"
+    },
+    "title": {
+      "text": "Pure Power"
+    },
+    "description": {
+      "text": "Craft a zanite pickaxe"
+    },
+    "frame": "task"
+  },
+  "parent": "aether:zanite"
+}

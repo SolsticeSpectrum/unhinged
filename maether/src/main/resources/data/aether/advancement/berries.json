@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:blue_berry"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:blue_berry"
+    },
+    "title": {
+      "text": "Blue Harvest"
+    },
+    "description": {
+      "text": "Pick a blue berry"
+    },
+    "frame": "task"
+  },
+  "parent": "aether:enter_aether"
+}

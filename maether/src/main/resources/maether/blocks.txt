@@ -68,3 +68,8 @@ altar machine stone 2.5
 freezer machine stone 2.5
 incubator machine stone 2.5
 treasure_chest chest stone 3.0 unbreakable
+sun_altar cube stone 3.0
+frosted_ice cube ice 0.5 trans
+unstable_obsidian cube obsidian 50.0
+aether_dirt_path cube dirt 0.65
+aether_farmland cube dirt 0.6

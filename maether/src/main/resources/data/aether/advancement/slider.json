@@ -1,0 +1,34 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "aether:slider"
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:bronze_dungeon_key"
+    },
+    "title": {
+      "text": "Bronze Dungeon"
+    },
+    "description": {
+      "text": "Defeat the Slider"
+    },
+    "frame": "challenge"
+  },
+  "parent": "aether:zanite_tools"
+}

@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:holystone_pickaxe"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:holystone_pickaxe"
+    },
+    "title": {
+      "text": "Holy Ground"
+    },
+    "description": {
+      "text": "Craft a holystone pickaxe"
+    },
+    "frame": "task"
+  },
+  "parent": "aether:skyroot_tools"
+}

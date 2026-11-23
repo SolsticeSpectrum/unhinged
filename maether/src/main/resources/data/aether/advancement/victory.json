@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "aether:victory_medal"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "c"
+    ]
+  ],
+  "display": {
+    "icon": {
+      "id": "aether:victory_medal"
+    },
+    "title": {
+      "text": "Victory"
+    },
+    "description": {
+      "text": "Collect a victory medal"
+    },
+    "frame": "goal"
+  },
+  "parent": "aether:sun_spirit"
+}

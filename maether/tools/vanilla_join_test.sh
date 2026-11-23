@@ -16,9 +16,12 @@ O="execute in minecraft:overworld run"; A="execute in aether:the_aether run"
     "$O fill 160 70 170 163 74 170 minecraft:glowstone" "$O fill 161 71 170 162 73 170 minecraft:air" "$O maether light 161 71 170" \
     "$O tp RawBot 161.5 71 170.5"; do echo "$c"; sleep 0.9; done
   sleep 6
-  echo "execute as RawBot if dimension aether:the_aether run say IN-AETHER-1"; sleep 1
-  echo "execute as RawBot at @s run tp RawBot ~ ~ ~-1"; sleep 8
-  echo "execute as RawBot if dimension minecraft:overworld run say IN-OVERWORLD-2"; sleep 1
-  echo "execute as RawBot if dimension aether:the_aether run say IN-AETHER-2"; sleep 1
+  echo "data get entity RawBot Dimension"; sleep 1.2
+  echo "execute as RawBot at @s run tp RawBot ~ ~ ~-1"; sleep 6
+  echo "data get entity RawBot Dimension"; sleep 1.2
+  echo "execute in aether:the_aether run tp RawBot 10 100 10"; sleep 2
+  echo "execute in aether:the_aether run tp RawBot 10 -40 10"; sleep 4
+  echo "data get entity RawBot Dimension"; sleep 1.2
+  echo "data get entity RawBot Pos"; sleep 1.2
   echo stop
 ) | timeout 240 ./gradlew runServer --no-daemon > "$SLOG" 2>&1

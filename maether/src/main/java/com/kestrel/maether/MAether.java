@@ -38,11 +38,23 @@ public class MAether implements ModInitializer {
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (var p : server.getPlayerList().getPlayers()) {
 				var st = p.level().getBlockState(p.blockPosition());
+				// falling out of the Aether drops you back into the overworld sky, with a parachute-ish soft landing
+				if (p.level().dimension() == com.kestrel.maether.portal.AetherPortals.AETHER && p.getY() < -16) {
+					var ow = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
+					if (ow != null) {
+						p.teleport(new net.minecraft.world.level.portal.TeleportTransition(ow, new net.minecraft.world.phys.Vec3(p.getX(), ow.getMaxY() - 8, p.getZ()),
+							net.minecraft.world.phys.Vec3.ZERO, p.getYRot(), p.getXRot(), net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING));
+						p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 1200, 0));
+					}
+				}
 				if (st.is(com.kestrel.maether.block.AetherBlocks.PORTAL)) p.setAsInsidePortal((net.minecraft.world.level.block.Portal) st.getBlock(), p.blockPosition());
 			}
 		});
 		PolymerResourcePackUtils.addModAssets(ID);
 		PolymerResourcePackUtils.markAsRequired();
-		LOGGER.info("mAether initialised ({} blocks)", AetherBlocks.ALL.size());
+		long b = net.minecraft.core.registries.BuiltInRegistries.BLOCK.keySet().stream().filter(k -> k.getNamespace().equals("aether")).count();
+		long i = net.minecraft.core.registries.BuiltInRegistries.ITEM.keySet().stream().filter(k -> k.getNamespace().equals("aether")).count();
+		long e = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.keySet().stream().filter(k -> k.getNamespace().equals("aether")).count();
+		LOGGER.info("mAether initialised: {} blocks, {} items, {} entity types", b, i, e);
 	}
 }

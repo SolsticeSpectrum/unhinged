@@ -95,7 +95,7 @@ public final class AetherItems {
 	public static void init() {
 		// plain materials / misc
 		for (String n : new String[]{"zanite_gemstone", "skyroot_stick", "golden_amber", "swet_ball", "aechor_petal",
-			"victory_medal", "bronze_dungeon_key", "silver_dungeon_key", "gold_dungeon_key", "book_of_lore", "life_shard", "nature_staff", "cloud_staff"}) plain(n);
+			"victory_medal", "bronze_dungeon_key", "silver_dungeon_key", "gold_dungeon_key", "book_of_lore", "nature_staff", "cloud_staff"}) plain(n);
 
 		// ---- tools by tier
 		tools("skyroot", BlockTags.INCORRECT_FOR_WOODEN_TOOL, 59, 2.0F, 0.0F, 15);

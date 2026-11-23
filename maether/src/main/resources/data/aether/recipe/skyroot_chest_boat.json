@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "aether:skyroot_boat",
+    "minecraft:chest"
+  ],
+  "result": {
+    "id": "aether:skyroot_chest_boat"
+  }
+}

@@ -10,7 +10,7 @@ for t in ("skyroot", "holystone", "zanite", "gravitite"):
 for s in ("zanite", "gravitite", "valkyrie", "neptune", "phoenix", "obsidian"):
     for k in ("helmet", "chestplate", "leggings", "boots"): names.add(f"{s}_{k}")
 names.add("sentry_boots")
-names |= {"golden_dart","poison_dart","enchanted_dart","golden_dart_shooter","poison_dart_shooter","enchanted_dart_shooter","skyroot_bucket","skyroot_water_bucket","skyroot_milk_bucket","phoenix_bow"}
+names |= {"life_shard","skyroot_boat","skyroot_chest_boat","golden_dart","poison_dart","enchanted_dart","golden_dart_shooter","poison_dart_shooter","enchanted_dart_shooter","skyroot_bucket","skyroot_water_bucket","skyroot_milk_bucket","phoenix_bow"}
 ent = (root/"src/main/java/com/kestrel/maether/entity/AetherEntities.java").read_text()
 for n in re.findall(r'mob\("([a-z_]+)"', ent): names.add(n + "_spawn_egg")
 names |= {"blue_moa_egg", "white_moa_egg", "black_moa_egg"}

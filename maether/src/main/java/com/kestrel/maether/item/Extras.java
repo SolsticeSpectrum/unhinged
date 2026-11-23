@@ -110,7 +110,31 @@ public final class Extras {
 	private static final Map<String, String> SWET = Map.of("aether:aether_dirt", "aether:aether_grass_block", "minecraft:dirt", "minecraft:grass_block",
 		"minecraft:grass_block", "minecraft:podzol", "minecraft:netherrack", "minecraft:crimson_nylium");
 
+	public static net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer> LIFE;
+
+	/** applies the permanent life-shard hearts (+2 max health each, up to 10 shards) */
+	public static void applyLife(net.minecraft.server.level.ServerPlayer p) {
+		int n = p.getAttachedOrElse(LIFE, 0);
+		var inst = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+		if (inst == null) return;
+		Identifier mid = Identifier.fromNamespaceAndPath("aether", "life_shards");
+		if (n <= 0) inst.removeModifier(mid);
+		else inst.addOrReplacePermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(mid, n * 2.0, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+	}
+
 	public static void init() {
+		LIFE = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(Identifier.fromNamespaceAndPath("aether", "life_shards"), b -> b.persistent(com.mojang.serialization.Codec.INT).copyOnDeath());
+		AetherItems.item("life_shard", Items.PAPER, new Item.Properties(), (level, p, hand, stack) -> {
+			if (!(p instanceof net.minecraft.server.level.ServerPlayer sp)) return InteractionResult.PASS;
+			int n = sp.getAttachedOrElse(LIFE, 0);
+			if (n >= 10) return InteractionResult.PASS;
+			sp.setAttached(LIFE, n + 1); applyLife(sp); sp.heal(2.0F);
+			if (!sp.isCreative()) stack.shrink(1);
+			return InteractionResult.SUCCESS;
+		}, null);
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (server.getTickCount() % 40 == 0) for (var pl : server.getPlayerList().getPlayers()) applyLife(pl);
+		});
 		dart("golden_dart"); dart("poison_dart"); dart("enchanted_dart");
 		shooter("golden_dart_shooter", "golden_dart", 2.0F, null);
 		shooter("poison_dart_shooter", "poison_dart", 2.0F, new MobEffectInstance(MobEffects.POISON, 100, 0));

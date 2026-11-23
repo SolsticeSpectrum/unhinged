@@ -23,6 +23,7 @@ public class MAether implements ModInitializer {
 		com.kestrel.maether.item.Extras.init();
 		com.kestrel.maether.item.ArmorEffects.init();
 		com.kestrel.maether.entity.AetherEntities.init();
+		com.kestrel.maether.entity.Boats.init();
 		com.kestrel.maether.item.AetherItems.eggs();
 		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			var stack = player.getItemInHand(hand);

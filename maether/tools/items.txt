@@ -100,7 +100,9 @@ sheepuff_spawn_egg
 shield_of_repulsion
 silver_dungeon_key
 skyroot_axe
+skyroot_boat
 skyroot_bucket
+skyroot_chest_boat
 skyroot_hoe
 skyroot_milk_bucket
 skyroot_pickaxe

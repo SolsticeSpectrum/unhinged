@@ -245,6 +245,9 @@ tag("small_flowers", ["aether:purple_flower", "aether:white_flower"]); tag("flow
 tag("replaceable_by_trees", leaves + ["aether:purple_flower", "aether:white_flower"])
 tag("mineable/pickaxe", stone + [f"aether:{n}" for n, k, m, h, b in fams if m != "wood" and k not in ("button",)] )
 
+w("recipe/skyroot_boat.json", {"type": "minecraft:crafting_shaped", "category": "misc", "key": {"#": "aether:skyroot_planks"}, "pattern": ["# #", "###"], "result": {"id": "aether:skyroot_boat"}})
+w("recipe/skyroot_chest_boat.json", {"type": "minecraft:crafting_shapeless", "category": "misc", "ingredients": ["aether:skyroot_boat", "minecraft:chest"], "result": {"id": "aether:skyroot_chest_boat"}})
+
 # --- entity loot (26.3 schema)
 def drop(entity, item, lo, hi):
     w(f"loot_table/entities/{entity}.json", {"type": "minecraft:entity", "random_sequence": f"aether:entities/{entity}",

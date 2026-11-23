@@ -1,56 +1,49 @@
 # mAether port report (phone version)
 
 ## TL;DR
-Server boots on **26.3**, `./gradlew build` ✔, Aether dimension generates with ores+trees, portal works server-side, 28 blocks / 24 items / 4 mobs registered with Aether models in the Polymer pack. **Vanilla-protocol join test now done with a raw 26.3 client (see below); a real rendering client was still not possible.**
+Server-side Fabric + Polymer port of The Aether for vanilla **26.3** clients. Builds, boots clean (no mod ERROR/WARN), and a raw 26.3-protocol client joins, downloads the pack, changes dimension through the portal both ways and falls back out of the sky. **Not seen by a real rendering client**, so visuals are unverified.
 
-Repo: `Codename-Kestrel/mAether` **did not exist** and I didn't create it. Code is in `/home/user/mAether` (branch `feat/polymer-port`, 6 commits) and a code-only copy (no Aether assets) is on branch `claude/aether-polymer-port-hl2v2d` of `unhinged` under `maether/`. **No PR opened** (no repo). Create the repo, push the branch, open the draft PR.
+**Repo:** `Codename-Kestrel/mAether` still doesn't exist (I can't create it). Code is in `/home/user/mAether` (`feat/polymer-port`) and a code-only copy (no Aether assets) is on `claude/aether-polymer-port-hl2v2d` of `unhinged` under `maether/`. **No PR opened.**
 
-## What works (✔ verified by log/console)
-- Build + boot, no mod ERROR/WARN in log (only offline-mode WARN from my test config; Mojang service lookups fail in sandbox).
-- Polymer pack generated: 0.79 MB, contains Aether textures/models/lang/items.
-- Dimension `aether:the_aether`: islands ≈12% solid (160k holystone in 128×128×96), aether grass/dirt, **ores: 2037 ambrosium, 409 zanite, 191 gravitite**, skyroot trees (318 logs, 3355 leaves) in the sampled area.
-- Portal: glowstone frame detected, lit (dev command `/maether light`, same code as the bucket handler), pig teleported, Aether-side platform+frame+portal auto-built.
-- Tools (skyroot/holystone/zanite/gravitite × 5) + recipes, block loot tables, tags, entity loot; summon of all 4 mobs OK.
+## What's in (all log/console verified unless noted)
+| Area | Status |
+|---|---|
+| Dimension `aether:the_aether` | 4 temperature-banded biomes, floating islands (~12% solid), sky/fog/cloud colours via dimension_type attributes, aerclouds (cold/blue/golden) as floating puffs |
+| Worldgen | ores (ambrosium/zanite/gravitite/icestone/quicksoil), skyroot / golden oak / crystal trees, flowers, berry bushes, tall grass, **3 dungeons** (bronze/silver/gold, upstream room templates + carved connectors) |
+| Portal | glowstone frame + water bucket, destination auto-built, **round trip verified with a ticking raw client**, falling below y=-16 returns you to the overworld sky (verified) |
+| Blocks | **115 / 131** upstream: cubes, logs/wood, leaves, clouds (bounce), glass, pillars, dungeon blocks, 32 stairs/slabs/walls/fences/gates/buttons/plates/doors/trapdoors (hitbox block + display model), saplings (grow into trees), flowers, berry bush, ambrosium torch, treasure chest, altar/freezer/incubator, rising gravitite |
+| Items | **147 / 165** upstream: 4 tool tiers + valkyrie set, special weapons (flaming, lightning, holy, vampire, pig slayer, hammer, lightning knife), 6 armor sets + sentry boots with set bonuses, foods, healing items, parachutes, darts + shooters, phoenix bow, skyroot buckets (water/milk), keys/medals, 21 accessories, spawn eggs |
+| Mobs | **all 20** upstream mobs (phyg, flying cow, aerbunny, sheepuff, moa (rideable horse base), aerwhale, zephyr, swets, cockatrice, aechor plant, whirlwinds, sentry, fire minion, valkyrie, mimic) + **3 bosses** (Slider, Valkyrie Queen, Sun Spirit: boss bars, attacks, open doorways + drop keys on death) |
+| Progression | 14 advancements, dungeon keys -> treasure chest tiers, altar/freezer/incubator recipes converted from upstream, swet-ball / ambrosium block conversions |
+| GUIs | sgui behind plain classes: `/accessories` (8 slots), altar / freezer / incubator screens |
 
-## Partial
-- Sky/fog/cloud colours are guesses; portal looks like a purple nether portal; mobs look like vanilla pig/cow/rabbit/slime.
-- Leaves don't decay; grass has no snowy state; tool stats approximated; mining tiers use vanilla `incorrect_for_*` tags.
-- Natural mob spawning configured but only confirmed via `/summon`.
+## Verified vs not
+**Verified (server log / raw protocol client):** clean boot; 1,564-file pack hosted by Polymer autohost and downloaded; registry sync + play for a vanilla-protocol client (no kick); portal both directions; void return; ore/tree/flower/cloud/dungeon counts; all mobs/bosses summon; loot, recipes, tags, advancements load.
+**NOT verified (be sceptical):** anything a real client renders (display-entity models, armor/equipment assets, spawn egg tints, sky colours, tool/weapon item models); GUI clicking; machine processing; boss fights; accessory/armor effects; bucket/dart/bow behaviour; dungeon layouts (rooms are placed at guessed offsets and joined by carved tunnels, may look wrong); client decoding of our `dimension_type`/`biome` JSON.
 
-## Join test (added after you suggested mineflayer)
-mineflayer/minecraft-protocol only support up to 26.1 (26.3 = protocol 777), so I wrote a minimal raw client (`tools/raw_client.js`, driver `tools/vanilla_join_test.sh`). ✔ **Found and fixed a real release blocker:** Fabric registry sync kicked vanilla clients ("requires Fabric Loader and Fabric API… namespace `aether`") because the 4 entity types were not registered with `PolymerEntityUtils.registerType`. After the fix the client: logs in, answers config pings, requests registries with *no known packs* (full registry data incl. our dimension type/biome, 32 packets), downloads the pack from Polymer autohost (825 KB, HTTP 200), reaches play, receives ~2.5-3.7k play packets, survives teleports `overworld ↔ aether:the_aether`, server-side block edits, and is never disconnected by the server (only by my client's own timer).
-Caveats: ids found empirically (26.3 config ids differ from 26.1); the client does **not decode** registry NBT or render, so it cannot prove a real client accepts our `dimension_type`/`biome` JSON; no keep-alive replies (scenario < 30 s); no movement packets, so a **player walking into the portal is still untested** (the check only runs when a player moves; a pig did go through).
-
-## NOT tested (be sceptical)
-- ✘ A real (decoding/rendering) 26.3 client: client-side decoding of our `dimension_type`/`biome`, how blocks/items/mobs actually look, resource pack apply. Next: a real client on a dev server, or extend the raw client with Minecraft's own codecs.
-- ✘ Real water-bucket click, portal travel by a walking player (80-tick timer, overlay), return trip, client-side break/place packets, pack download via `kestrel:upload` (config-only, per its README).
-
-## Cut (and why)
-Bosses, dungeons, armor, accessories, GUIs, Moa/Sheepuff/Aerwhale/Zephyr/Cockatrice, block families, saplings/flowers, other biomes/structures, shaders/HUD: too large for one unattended pass; need real-client verification first. Inventory in `docs/SCOPING.md`.
+## Not ported
+Signs/hanging signs, beds, potted plants, present, quicksoil glass pane, aerogel stairs/wall (no upstream blockstates), skyroot boats, music discs (+ all custom sounds/music), 7 extra bucket types, portal-frame item, cloud/nature staff behaviours, life shard (item only), floating-block / crystal / minion / projectile helper entities, custom mob models (all mobs look like their vanilla base), shaders/HUD, Accessories cape rendering.
 
 ## Decisions I made without you
-1. Fork source = official Aether code only; Fabric ports **not surveyed**.
-2. Asset permission taken from your message; recorded in `docs/PERMISSION.md` as *verbal, needs written proof*.
-3. Rewrote server core instead of porting NeoForge code; **converted** data to 26.3 via `tools/gen_data.py` instead of copying.
-4. Polymer 0.18.7+26.3 / Fabric API 0.166.2 (match `kestrel-pack-upload`), not Polymania's `pb4` build. Java 25 installed via apt in the sandbox.
-5. Created a personal environment "Kestrel mods" with hosts: maven.fabricmc.net, maven.nucleoid.xyz, piston-meta/-data.mojang.com, libraries.minecraft.net, resources.download.minecraft.net.
-6. Pack is `markAsRequired()` (declined pack = kick); remove if you prefer optional.
-7. Did **not** push Aether assets to the public `unhinged` repo (permission is for Kestrel only); `tools/import_aether_assets.py` re-imports them from the upstream checkout.
-8. Dev-only `/maether` commands (only in dev env).
-
-## From Polymer docs (you sent the link)
-Polymer has per-type block-state limits (slabs only 5, leaves ~52, full blocks ~1149). Fine for now; the cut block families will need the factorytools/display approach from `mPolymerPatchBundle`. Polymer has no vanilla-client test harness I could find (only an in-repo test mod).
+1. Rewrote the server core instead of porting NeoForge code; **upstream data is converted, not copied** (`tools/gen_data.py`) because 26.3 changed loot/recipe/worldgen/blockstate JSON.
+2. Aether assets are used under the verbal non-commercial permission (`docs/PERMISSION.md`); never push assets to a public repo (snapshot script excludes them).
+3. Block families follow `mPolymerPatchBundle` (vanilla hitbox + factorytools display models, 0.08 expansion done at import time).
+4. Mobs use vanilla bases (Polymer entities); bosses: Slider is an invisible slime + cube display; others vanilla bases.
+5. Dungeons: custom structure type placing upstream templates at fixed offsets (their own assembly code isn't portable).
+6. Pack is `markAsRequired()`. Polymer 0.18.7 / Fabric API 0.166.2 (match `kestrel-pack-upload`).
+7. Created personal env "Kestrel mods" (hosts: fabricmc, nucleoid, mojang libs); installed JDK 25 via apt.
+8. `/maether` dev commands exist only in a dev environment.
 
 ## Open questions
-- Written permission from Aether devs? Who holds it?
-- Create `mAether` yourself or let me? Keep pack required?
-- Any existing Fabric Aether port worth comparing?
-- Do you want upstream-faithful Aether sky colours (needs a look in a real client)?
+- Written permission from the Aether devs? Remember: never sell Aether access, no Aether-specific monetized cosmetics.
+- Create `mAether` yourself or let me? Keep the pack required?
+- Want custom mob models (display-entity rigs) or are vanilla look-alikes OK for now?
+- Music discs / sounds: worth the pack size?
 
-## Suggested next step
-1. Create `Codename-Kestrel/mAether`, push `feat/polymer-port`, open draft PR.
-2. Join with a real 26.3 client on a dev server; walk the portal; place/break; fix registry-sync issues first.
-3. Then: block families + leaves decay, then Moa/Sheepuff with display-entity models, then GUIs via sgui.
+## Suggested next steps
+1. Create repo, push `feat/polymer-port`, open draft PR.
+2. Join with a **real** client on a dev server: check skies, models, armor, GUIs, dungeon layouts; fix.
+3. Then boats, signs, music, mob models.
 
-## Reproduce
-`./gradlew build` · `tools/import_aether_assets.py <the-aether checkout> tools/blocks.txt tools/items.txt` · `tools/gen_data.py <the-aether checkout> <minecraft-merged.jar>` · `tools/run_boot_test.sh <log>` / `tools/mc_console.sh`.
+## Reproduce / test
+`./gradlew build` · `tools/import_aether_assets.py ...` · `tools/gen_data.py <upstream> <minecraft-merged.jar>` · `tools/vanilla_join_test.sh <server.log> <client.log>` (raw 26.3 client scenario) · `tools/mc_console.sh` for console probes · `tools/snapshot.sh` (code-only backup push).

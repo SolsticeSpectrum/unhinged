@@ -38,6 +38,15 @@ final class DevCommands {
 					c.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
 					return 1;
 				}))
+				.then(Commands.literal("dump").executes(c -> {
+					var sb = new StringBuilder();
+					for (var k : net.minecraft.core.registries.BuiltInRegistries.BLOCK.keySet()) if (k.getNamespace().equals("aether")) sb.append("block ").append(k.getPath()).append('\n');
+					for (var k : net.minecraft.core.registries.BuiltInRegistries.ITEM.keySet()) if (k.getNamespace().equals("aether")) sb.append("item ").append(k.getPath()).append('\n');
+					for (var k : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.keySet()) if (k.getNamespace().equals("aether")) sb.append("entity ").append(k.getPath()).append('\n');
+					try { java.nio.file.Files.writeString(java.nio.file.Path.of("aether_registry.txt"), sb.toString()); } catch (java.io.IOException e) { throw new RuntimeException(e); }
+					c.getSource().sendSuccess(() -> Component.literal("dumped"), false);
+					return 1;
+				}))
 				.then(Commands.literal("light")
 					.then(Commands.argument("x", IntegerArgumentType.integer())
 						.then(Commands.argument("y", IntegerArgumentType.integer())
